@@ -18,6 +18,10 @@ open class OgomoviesProvider : MainAPI() { // all providers must be an instance 
 
     override val mainPage = mainPageOf(
         "$mainUrl/ogomovies/page/" to "Home",
+        "$mainUrl/genre/hindi-web-series/page/" to "Web Series",
+        "$mainUrl/genre/watch-tamil-movies/page/" to "Tamil Movies",
+        "$mainUrl/genre/gomovies-malayalam/page/" to "Malayalam Movies",
+        "$mainUrl/genre/hollywood/page/" to "Hollywood Movies",
     )
 
     override suspend fun getMainPage(
@@ -62,6 +66,7 @@ open class OgomoviesProvider : MainAPI() { // all providers must be an instance 
         val document = app.get(url).document
         val title = document.selectFirst("div.detail-mod > h3") ?. text() ?: ""
         val posterUrl = document.selectFirst("meta[property=og:image]") ?. attr("content") ?: document.selectFirst("div.sheader noscript img") ?. attr("src")
+        val plot = document.selectFirst("div.desc") ?. text() ?: ""
         val seasonPattern = Regex("s[0-9]{2}")
         val tvType = if(url.contains("season", ignoreCase = true) || 
                         url.contains("series", ignoreCase = true) ||
@@ -79,17 +84,19 @@ open class OgomoviesProvider : MainAPI() { // all providers must be an instance 
             val episodesList = mutableListOf<Episode>()
             listDoc.select("div.content-pt > p > a").mapNotNull {
                 val href = it.attr("href").substringAfterLast("link=")
-                val epInfo = it.nextElementSibling() ?. text() ?: ""
+                val epInfo = it.selectFirst("button") ?. text() ?: ""
                 val episodes = Episode(href, "${epInfo}")
                 episodesList.add(episodes)
             }
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodesList) {
                 this.posterUrl = posterUrl
+                this.plot = plot
             }
         }
         else {
             return newMovieLoadResponse(title, url, TvType.Movie, url) {
                 this.posterUrl = posterUrl
+                this.plot = plot
             }   
         }
     }
