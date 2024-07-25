@@ -6,7 +6,7 @@ import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 
 open class OgomoviesProvider : MainAPI() { // all providers must be an instance of MainAPI
-    override var mainUrl = "https://0gomovies.movie/ogomovies"
+    override var mainUrl = "https://0gomovies.movie"
     override var name = "0gomovies"
     override val hasMainPage = true
     override var lang = "hi"
@@ -17,7 +17,7 @@ open class OgomoviesProvider : MainAPI() { // all providers must be an instance 
     )
 
     override val mainPage = mainPageOf(
-        "$mainUrl/page/" to "Home",
+        "$mainUrl/ogomovies/page/" to "Home",
     )
 
     override suspend fun getMainPage(
@@ -45,7 +45,7 @@ open class OgomoviesProvider : MainAPI() { // all providers must be an instance 
         val searchResponse = mutableListOf<SearchResponse>()
 
         for (i in 1..3) {
-            val document = app.get("$mainUrl/page/$i/?s=$query").document
+            val document = app.get("$mainUrl/search-query/$query/page/$i").document
 
             val results = document.select("div.ml-item").mapNotNull { it.toSearchResult() }
 
@@ -62,9 +62,32 @@ open class OgomoviesProvider : MainAPI() { // all providers must be an instance 
         val document = app.get(url).document
         val title = document.selectFirst("div.detail-mod > h3") ?. text() ?: ""
         val posterUrl = document.selectFirst("meta[property=og:image]") ?. attr("content") ?: document.selectFirst("div.sheader noscript img") ?. attr("src")
-     
-        return newMovieLoadResponse(title, url, TvType.Movie, url) {
-            this.posterUrl = posterUrl
+        val infoDiv = document.selectFirst("div.mvici-left")
+        val type = infoDiv ?. selectFirst("p") ?. text() ?: ""
+        val tvType = if(type.contains("series", ignoreCase = true)){            
+            TvType.TvSeries
+        } else {
+            TvType.Movie
+        }
+
+        if(tvType == TvType.TvSeries) {
+            val headers = mapOf("Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
+            val doc = app.get("${data}/watching/", headers = headers).document
+            val episodes = doc.select("div.content-pt > p > a").mapNotNull {
+                val href = it.attr("href")
+                val epInfo = it.nextElementSibling() ?. text() ?: ""
+                val epDoc = app.get(href).document
+                val source = epDoc ?. selectFirst("div.video-container > iframe") ?. attr("src") ?: ""
+                Episode(source, "${epInfo}")
+            }
+            return TvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
+                this.posterUrl = posterUrl
+            }
+        }
+        else {
+            return newMovieLoadResponse(title, url, TvType.Movie, url) {
+                this.posterUrl = posterUrl
+            }   
         }
     }
 
@@ -74,10 +97,15 @@ open class OgomoviesProvider : MainAPI() { // all providers must be an instance 
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        var headers = mapOf("Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
-        val document = app.get("${data}/watching/", headers = headers).document
-        val link = document.selectFirst("li.episode-item").attr("data-drive").toString()
-        loadExtractor(link, subtitleCallback, callback)
+        if(data.contains("ogomovies")) {
+            val headers = mapOf("Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
+            val document = app.get("${data}/watching/", headers = headers).document
+            val link = document.selectFirst("li.episode-item").attr("data-drive").toString()
+            loadExtractor(link, subtitleCallback, callback)
+        }
+        else {
+            loadExtractor(data, subtitleCallback, callback)
+        }
         return true   
     }
 }
