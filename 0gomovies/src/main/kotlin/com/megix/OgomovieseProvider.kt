@@ -72,15 +72,17 @@ open class OgomoviesProvider : MainAPI() { // all providers must be an instance 
 
         if(tvType == TvType.TvSeries) {
             val headers = mapOf("Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
-            val doc = app.get("${data}/watching/", headers = headers).document
-            val episodes = doc.select("div.content-pt > p > a").mapNotNull {
+            val doc = app.get("${url}/watching/", headers = headers).document
+            val episodesList = mutableListOf<Episode>()
+            doc.select("div.content-pt > p > a").mapNotNull {
                 val href = it.attr("href")
                 val epInfo = it.nextElementSibling() ?. text() ?: ""
                 val epDoc = app.get(href).document
                 val source = epDoc ?. selectFirst("div.video-container > iframe") ?. attr("src") ?: ""
-                Episode(source, "${epInfo}")
+                val episodes = Episode(source, "${epInfo}")
+                episodesList.add(episodes)
             }
-            return TvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
+            return newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodesList) {
                 this.posterUrl = posterUrl
             }
         }
