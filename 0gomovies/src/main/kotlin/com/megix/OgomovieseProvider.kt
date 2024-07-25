@@ -62,7 +62,10 @@ open class OgomoviesProvider : MainAPI() { // all providers must be an instance 
         val document = app.get(url).document
         val title = document.selectFirst("div.detail-mod > h3") ?. text() ?: ""
         val posterUrl = document.selectFirst("meta[property=og:image]") ?. attr("content") ?: document.selectFirst("div.sheader noscript img") ?. attr("src")
-        val tvType = if(url.contains("season", ignoreCase = true) || url.contains("series", ignoreCase = true) ){            
+        val seasonPattern = Regex("s[0-9]{2}")
+        val tvType = if(url.contains("season", ignoreCase = true) || 
+                        url.contains("series", ignoreCase = true) ||
+                        seasonPattern.containsMatchIn(url) ){            
             TvType.TvSeries
         } else {
             TvType.Movie
@@ -71,15 +74,13 @@ open class OgomoviesProvider : MainAPI() { // all providers must be an instance 
         if(tvType == TvType.TvSeries) {
             val headers = mapOf("Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
             val doc = app.get("${url}/watching/", headers = headers).document
-            val listLink = doc.selectFirst("ul#servers-list > li").attr("data-drive")
+            val listLink = doc.selectFirst("li.episode-item").attr("data-drive").toString()
             val listDoc = app.get(listLink).document
             val episodesList = mutableListOf<Episode>()
             listDoc.select("div.content-pt > p > a").mapNotNull {
-                val href = it.attr("href")
+                val href = it.attr("href").substringAfterLast("link=")
                 val epInfo = it.nextElementSibling() ?. text() ?: ""
-                val epDoc = app.get(href).document
-                val source = epDoc ?. selectFirst("div.video-container > iframe") ?. attr("src") ?: ""
-                val episodes = Episode(source, "${epInfo}")
+                val episodes = Episode(href, "${epInfo}")
                 episodesList.add(episodes)
             }
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodesList) {
