@@ -4,7 +4,6 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
-import org.json.JSONObject
 
 open class OgomoviesProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://0gomovies.movie/ogomovies"
@@ -78,33 +77,7 @@ open class OgomoviesProvider : MainAPI() { // all providers must be an instance 
         var headers = mapOf("Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
         val document = app.get("${data}/watching/", headers = headers).document
         val link = document.selectFirst("li.episode-item").attr("data-drive").toString()
-<<<<<<< HEAD
-        loadExtractor(data, subtitleCallback, callback)
-=======
-        val doc = app.get(link).document
-        val scriptTag = doc.selectFirst("script:containsData(playerjsSubtitle)").toString()
-        val matchResult = Regex("""FirePlayer\|([^|]*)\|""").find(scriptTag)
-        val dataId = matchResult ?. groups ?. get(1) ?. value
-        headers = mapOf("X-Requested-With" to "XMLHttpRequest")
-        val response = app.post(
-            "https://cdn.asumanaksoy.com/player/index.php?data=${dataId}&do=getVideo", 
-            headers = headers
-        ).text 
-        val jsonObject = JSONObject(response)
-
-        val securedLink = jsonObject.getString("securedLink")
-        
-        callback.invoke(
-            ExtractorLink(
-                this.name,
-                this.name,
-                securedLink,
-                referer = "",
-                quality = Qualities.Unknown.value
-            )
-        )
-        //loadExtractor(data, subtitleCallback, callback)
->>>>>>> 90e3987be0761ce7dcfc479e7b8acfc967488738
+        loadExtractor(link, subtitleCallback, callback)
         return true   
     }
 }

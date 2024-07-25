@@ -2,6 +2,7 @@ package com.megix
 
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
+import org.json.JSONObject
 
 open class Asumanaksoy: ExtractorApi() {
     override val name: String = "Asumanaksoy"
@@ -14,7 +15,7 @@ open class Asumanaksoy: ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val doc = app.get(link).document
+        val doc = app.get(url).document
         val scriptTag = doc.selectFirst("script:containsData(playerjsSubtitle)").toString()
         val matchResult = Regex("""FirePlayer\|([^|]*)\|""").find(scriptTag)
         val dataId = matchResult ?. groups ?. get(1) ?. value
