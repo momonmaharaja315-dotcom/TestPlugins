@@ -120,9 +120,12 @@ class UHDmoviesProvider : MainAPI() { // all providers must be an instance of Ma
             val episodes = mutableListOf<Episode>()
 
             val pTags = doc.select("p:has(a:contains(Episode))")
-
+            val seasonList = mutableListOf<Pair<String, Int>>()
             var season = 1
             pTags.mapNotNull { pTag ->
+                val prevPtag = pTag.previousElementSibling()
+                val details = prevPtag ?. text() ?: "Unknown"
+                seasonList.add("$details" to season)
                 val aTags = pTag.select("a:contains(Episode)")
                 aTags.mapNotNull { aTag ->
                     val aTagText = aTag.text()
@@ -132,6 +135,7 @@ class UHDmoviesProvider : MainAPI() { // all providers must be an instance of Ma
                             data = link,
                             name = aTagText,
                             season = season,
+                            epiode = aTags.indexOf(aTag) + 1
                         )
                     )
                 }
@@ -141,6 +145,7 @@ class UHDmoviesProvider : MainAPI() { // all providers must be an instance of Ma
                 this.posterUrl = poster ?. trim()
                 this.year = year
                 this.tags = tags
+                this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
             }
         } else {
             val iframeRegex = Regex("""\[.*]""")
