@@ -121,6 +121,7 @@ class UHDmoviesProvider : MainAPI() { // all providers must be an instance of Ma
 
             val pTags = doc.select("p:has(a:contains(Episode))")
 
+            var season = 1
             pTags.mapNotNull { pTag ->
                 val aTags = pTag.select("a:contains(Episode)")
                 aTags.mapNotNull { aTag ->
@@ -130,9 +131,11 @@ class UHDmoviesProvider : MainAPI() { // all providers must be an instance of Ma
                         Episode(
                             data = link,
                             name = aTagText,
+                            season = season,
                         )
                     )
                 }
+                season++
             }
             newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
                 this.posterUrl = poster ?. trim()
