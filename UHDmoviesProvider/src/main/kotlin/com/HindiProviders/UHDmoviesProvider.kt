@@ -124,19 +124,31 @@ class UHDmoviesProvider : MainAPI() { // all providers must be an instance of Ma
             var season = 1
             pTags.mapNotNull { pTag ->
                 val prevPtag = pTag.previousElementSibling()
-                val details = prevPtag ?. text() ?: "Unknown"
-                seasonList.add("$details" to season)
+                val details = prevPtag ?. text() ?: ""
+                val realSeasonRegex =
+                val realSeason = Regex("""(?:Season |S)(\d+)""").find(details) ?. groupValues
+                    ?. get(1) ?: ""
+                val qualityRegex = """(1080p|720p|480p|2160p|4K|[0-9]*0p)""".toRegex(RegexOption.IGNORE_CASE)
+                val quality = qualityRegex.find(details) ?. groupValues ?. get(1) ?: ""
+                if(realSeason.isNotEmpty() && quality.isNotEmpty()) {
+                    val sizeRegex = Regex("""\d+(?:\.\d+)?\s*(?:MB|GB)\b""")
+                    val size = sizeRegex.find(details) ?. value ?: ""
+                    seasonList.add("S$realSeason $quality $size" to seasonNum)
+                }
+                else {
+                    seasonList.add("$details" to season)
+                }
                 val aTags = pTag.select("a:contains(Episode)")
                 aTags.mapNotNull { aTag ->
                     val aTagText = aTag.text()
                     val link = aTag.attr("href")
                     episodes.add(
-                        Episode(
+                        newEpisode(link) {
                             data = link,
                             name = aTagText,
                             season = season,
-                            epiode = aTags.indexOf(aTag) + 1
-                        )
+                            episode = aTags.indexOf(aTag) + 1
+                        }
                     )
                 }
                 season++
