@@ -125,7 +125,6 @@ class UHDmoviesProvider : MainAPI() { // all providers must be an instance of Ma
             pTags.mapNotNull { pTag ->
                 val prevPtag = pTag.previousElementSibling()
                 val details = prevPtag ?. text() ?: ""
-                val realSeasonRegex =
                 val realSeason = Regex("""(?:Season |S)(\d+)""").find(details) ?. groupValues
                     ?. get(1) ?: ""
                 val qualityRegex = """(1080p|720p|480p|2160p|4K|[0-9]*0p)""".toRegex(RegexOption.IGNORE_CASE)
@@ -133,7 +132,7 @@ class UHDmoviesProvider : MainAPI() { // all providers must be an instance of Ma
                 if(realSeason.isNotEmpty() && quality.isNotEmpty()) {
                     val sizeRegex = Regex("""\d+(?:\.\d+)?\s*(?:MB|GB)\b""")
                     val size = sizeRegex.find(details) ?. value ?: ""
-                    seasonList.add("S$realSeason $quality $size" to seasonNum)
+                    seasonList.add("S$realSeason $quality $size" to season)
                 }
                 else {
                     seasonList.add("$details" to season)
@@ -144,9 +143,8 @@ class UHDmoviesProvider : MainAPI() { // all providers must be an instance of Ma
                     val link = aTag.attr("href")
                     episodes.add(
                         newEpisode(link) {
-                            data = link,
-                            name = aTagText,
-                            season = season,
+                            name = aTagText
+                            season = season
                             episode = aTags.indexOf(aTag) + 1
                         }
                     )
