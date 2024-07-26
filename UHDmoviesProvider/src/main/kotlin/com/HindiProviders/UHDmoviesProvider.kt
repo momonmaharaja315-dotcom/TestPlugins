@@ -142,11 +142,12 @@ class UHDmoviesProvider : MainAPI() { // all providers must be an instance of Ma
                     val aTagText = aTag.text()
                     val link = aTag.attr("href")
                     episodes.add(
-                        newEpisode(link) {
-                            name = aTagText
-                            season = season
+                        Episode(
+                            data = link,
+                            name = aTagText,
+                            season = season,
                             episode = aTags.indexOf(aTag) + 1
-                        }
+                        )
                     )
                 }
                 season++
