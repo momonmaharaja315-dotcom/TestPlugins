@@ -129,7 +129,7 @@ class UHDmoviesProvider : MainAPI() { // all providers must be an instance of Ma
                     episodes.add(
                         Episode(
                             data = link,
-                            name = atagText,
+                            name = aTagText,
                         )
                     )
                 }
