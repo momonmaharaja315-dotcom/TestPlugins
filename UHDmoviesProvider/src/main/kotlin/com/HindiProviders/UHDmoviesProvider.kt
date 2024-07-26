@@ -115,41 +115,43 @@ class UHDmoviesProvider : MainAPI() { // all providers must be an instance of Ma
         val tags = doc.select("div.entry-category > a.gridlove-cat").map { it.text() }
         val tvTags = doc.selectFirst("h1.entry-title")?.text() ?:""
         val type = if (tvTags.contains("Season")) TvType.TvSeries else TvType.Movie
-        val iframeRegex = Regex("""\[.*]""")
-        val iframe = doc.select("""div.entry-content > p""").mapNotNull{ it }.filter{
-            iframeRegex.find(it.toString()) != null
-        }
-        //Log.d("iframe", iframe.toString())
-        val data = iframe.map {
-            UHDLinks(
-                it.text(),
-                doc.select("div.entry-content > p > span > span > a").attr("href")
-            )
-        }
-        val episodes = mutableListOf<Episode>()
-        doc.select("p a.maxbutton").forEach { me ->
-            //Log.d("Phsher Next ",me.nextElementSibling().toString())
-            val episode=me.select("span").text().substringAfter("Episode").toIntOrNull()
-            //Log.d("Phisher Next ",tedata)
-            episodes.add(
-                Episode(
-                    data = me.attr("href"),
-                    name = me.select("span").text(),
-                    posterUrl = poster,
-                    episode = episode
-                )
-            )
-        }
 
         return if (type == TvType.TvSeries) {
+            val episodes = mutableListOf<Episode>()
+
+            val pTags = doc.select("p:has(a:contains(Episode))")
+
+            pTags.mapNotNull { pTag ->
+                val aTags = pTag.select("a:contains(Episode)")
+                aTags.mapNotNull { aTag ->
+                    val aTagText = aTag.text()
+                    val link = aTag.attr("href")
+                    episodes.add(
+                        Episode(
+                            data = link,
+                            name = atagText,
+                        )
+                    )
+                }
+            }
             newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
-                this.posterUrl = poster?.trim()
+                this.posterUrl = poster ?. trim()
                 this.year = year
                 this.tags = tags
             }
         } else {
+            val iframeRegex = Regex("""\[.*]""")
+            val iframe = doc.select("""div.entry-content > p""").mapNotNull{ it }.filter{
+                iframeRegex.find(it.toString()) != null
+            }
+            val data = iframe.map {
+                UHDLinks(
+                    it.text(),
+                    doc.select("div.entry-content > p > span > span > a").attr("href")
+                )
+            }
             newMovieLoadResponse(title, url, TvType.Movie, data) {
-                this.posterUrl = poster?.trim()
+                this.posterUrl = poster ?. trim()
                 this.year = year
                 this.tags = tags
             }
