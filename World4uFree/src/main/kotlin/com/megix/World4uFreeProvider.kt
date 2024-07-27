@@ -127,7 +127,7 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
 
                     if (link.isNotEmpty() && !title.contains("zip", ignoreCase = true)) {
                         episodes.add(
-                            Episode(link){
+                            newEpisode(link){
                                 name = "$title"
                                 season = seasonNum
                                 episode = elements.indexOf(element) + 1
