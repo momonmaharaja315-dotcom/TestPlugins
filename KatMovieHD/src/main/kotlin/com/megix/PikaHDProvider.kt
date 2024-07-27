@@ -6,7 +6,6 @@ import org.jsoup.nodes.Element
 import org.jsoup.Jsoup
 import com.lagradost.cloudstream3.network.CloudflareKiller
 
-
 class PikaHDProvider : KatMovieHDProvider() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://pikahd.com"
     override var name = "PikaHD"
@@ -29,8 +28,8 @@ class PikaHDProvider : KatMovieHDProvider() { // all providers must be an instan
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
-        val title = document.selectFirst("meta[property=og:title]") ?. attr("content") ?: "" 
-        val posterUrl = fixUrlNull(document.selectFirst("meta[property=og:image]") ?. attr("content"))
+        val title = document.selectFirst("meta[property=og:title]")?.attr("content") ?: "" 
+        val posterUrl = fixUrlNull(document.selectFirst("meta[property=og:image]")?.attr("content"))
 
         val tvType = if (
             title.contains("Episode", ignoreCase = true) || 
@@ -58,7 +57,7 @@ class PikaHDProvider : KatMovieHDProvider() { // all providers must be an instan
                 }
                 tvSeriesEpisodes.addAll(episodesList)
                 return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
-                    this.posterUrl = posterUrl
+                    posterUrl = posterUrl
                 }
             }
             else {
@@ -67,27 +66,27 @@ class PikaHDProvider : KatMovieHDProvider() { // all providers must be an instan
                 var seasonNum = 1
                 val seasonList = mutableListOf<Pair<String, Int>>()
                 aTags.apmap {
-                    val emText = it.selectFirst("em") ?. text() ?: ""
-                    val quality = Regex("(\\d{3,4})[pP]").find(emText ?: "") ?. groupValues ?. getOrNull(1) ?: "Unknown"
+                    val emText = it.selectFirst("em")?.text() ?: ""
+                    val quality = Regex("(\\d{3,4})[pP]").find(emText ?: "") ?.groupValues ?.getOrNull(1) ?: "Unknown"
                     seasonList.add("$quality" to seasonNum)
-                    val link = it . attr("href")
+                    val link = it.attr("href")
                     val episodeDocument = app.get(link).document
                     val kmhdPackRegex = Regex("""My_[a-zA-Z0-9]+""")
-                    var kmhdLinks = kmhdPackRegex.findAll(episodeDocument.html()).mapNotNull { it.value }.toList()
+                    val kmhdLinks = kmhdPackRegex.findAll(episodeDocument.html()).mapNotNull { it.value }.toList()
                     val episodes = kmhdLinks.mapNotNull { kmhdLink ->
-                        newEpisode("https://links.kmhd.net/file/${kmhdLink}") {
-                            name = "E${kmhdLinks.indexOf(kmhdLink) + 1} ${quality}"
+                        newEpisode("https://links.kmhd.net/file/$kmhdLink") {
+                            name = "E${kmhdLinks.indexOf(kmhdLink) + 1} $quality"
                             season = seasonNum
                             episode = kmhdLinks.indexOf(kmhdLink) + 1
-                        {
+                        }
                     }
                     tvSeriesEpisodes.addAll(episodes)
                     seasonNum++
                 }
 
                 return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
-                    this.posterUrl = posterUrl
-                    this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
+                    posterUrl = posterUrl
+                    seasonNames = seasonList.map { (name, int) -> SeasonData(int, name) }
                 }
             }
         }
@@ -98,7 +97,7 @@ class PikaHDProvider : KatMovieHDProvider() { // all providers must be an instan
                 hTagString = hTag.toString()
             }
             return newMovieLoadResponse(title, url, TvType.Movie, hTagString) {
-                this.posterUrl = posterUrl
+                posterUrl = posterUrl
             }
         }   
     }
