@@ -76,7 +76,7 @@ class Porn11 : MainAPI() {
         val document = app.get(url).document
 
         val title       = document.selectFirst("meta[property=og:title]")?.attr("content")?.trim().toString()
-        val iframe      = fixUrl(document.selectFirst("iframe")?.attr("src"))
+        val iframe      = fixUrl(document.selectFirst("iframe")?.attr("src").toString())
         val iframeDoc   = app.get(iframe).document
         val poster      = fixUrlNull(iframeDoc.selectFirst("video")?.attr("poster").toString())
         val description = document.selectFirst("meta[property=og:description]")?.attr("content")?.trim()

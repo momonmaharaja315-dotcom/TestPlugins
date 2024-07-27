@@ -81,7 +81,7 @@ class Xtapes : MainAPI() {
         val document = app.get(url).document
 
         val title       = document.selectFirst("meta[property=og:title]")?.attr("content")?.trim().toString()
-        val iframe      = fixUrl(document.selectFirst("#video-code iframe")?.attr("src"))
+        val iframe      = document.selectFirst("#video-code iframe")?.attr("src").toString()
         val iframeDoc   = app.get(iframe).document
         val poster      = fixUrlNull(iframeDoc.selectFirst("div#vplayer > img")?.attr("src"))
         val description = document.selectFirst("meta[property=og:description]")?.attr("content")?.trim()
