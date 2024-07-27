@@ -159,10 +159,10 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                         vcloudLinks = fastDlRegex.findAll(document2.html()).mapNotNull { it.value }.toList()
                     }
                     val episodes = vcloudLinks.mapNotNull { vcloudlink ->
-                        newEpisode(vcloudlink){
-                            name = "S${realSeason} E${vcloudLinks.indexOf(vcloudlink) + 1} ${quality}",
-                            season = seasonNum,
-                            episode = vcloudLinks.indexOf(vcloudlink) + 1,
+                        newEpisode(vcloudlink) {
+                            name = "S${realSeason} E${vcloudLinks.indexOf(vcloudlink) + 1} ${quality}"
+                            season = seasonNum
+                            episode = vcloudLinks.indexOf(vcloudlink) + 1
                         }
                     }
 
