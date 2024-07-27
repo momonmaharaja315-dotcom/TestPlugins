@@ -75,11 +75,11 @@ class PikaHDProvider : KatMovieHDProvider() { // all providers must be an instan
                     val kmhdPackRegex = Regex("""My_[a-zA-Z0-9]+""")
                     var kmhdLinks = kmhdPackRegex.findAll(episodeDocument.html()).mapNotNull { it.value }.toList()
                     val episodes = kmhdLinks.mapNotNull { kmhdLink ->
-                        newEpisode("https://links.kmhd.net/file/${kmhdLink}")
+                        newEpisode("https://links.kmhd.net/file/${kmhdLink}") {
                             name = "E${kmhdLinks.indexOf(kmhdLink) + 1} ${quality}"
                             season = seasonNum
                             episode = kmhdLinks.indexOf(kmhdLink) + 1
-                        )
+                        {
                     }
                     tvSeriesEpisodes.addAll(episodes)
                     seasonNum++
@@ -89,7 +89,6 @@ class PikaHDProvider : KatMovieHDProvider() { // all providers must be an instan
                     this.posterUrl = posterUrl
                     this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
                 }
-            
             }
         }
         else {

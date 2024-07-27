@@ -84,7 +84,7 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
                 val title = lastSpan ?. text()?: ""
                 seasonList.add("$title" to mutableSeasonNum.value)
                 val episodes = innerFTags.apmap { tag ->
-                    newEpisode(tag.attr("href"))
+                    newEpisode(tag.attr("href")) {
                         name = tag.text()?: ""
                         season = mutableSeasonNum.value
                         episode = innerFTags.indexOf(tag) + 1
@@ -147,5 +147,4 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
         }
         return true
     }
-
 }
