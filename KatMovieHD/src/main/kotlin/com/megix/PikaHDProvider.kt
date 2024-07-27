@@ -57,7 +57,7 @@ class PikaHDProvider : KatMovieHDProvider() { // all providers must be an instan
                 }
                 tvSeriesEpisodes.addAll(episodesList)
                 return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
-                    posterUrl = posterUrl
+                    this.posterUrl = posterUrl
                 }
             }
             else {
