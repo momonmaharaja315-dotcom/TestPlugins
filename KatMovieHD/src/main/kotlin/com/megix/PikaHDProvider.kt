@@ -85,7 +85,7 @@ class PikaHDProvider : KatMovieHDProvider() { // all providers must be an instan
                 }
 
                 return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
-                    posterUrl = posterUrl
+                    this.posterUrl = posterUrl
                     seasonNames = seasonList.map { (name, int) -> SeasonData(int, name) }
                 }
             }
@@ -97,7 +97,7 @@ class PikaHDProvider : KatMovieHDProvider() { // all providers must be an instan
                 hTagString = hTag.toString()
             }
             return newMovieLoadResponse(title, url, TvType.Movie, hTagString) {
-                posterUrl = posterUrl
+                this.posterUrl = posterUrl
             }
         }   
     }
