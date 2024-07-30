@@ -63,21 +63,38 @@ class WLinkFast : ExtractorApi() {
             url,
             requestBody = formBody,
             cookies = cookies
-        ).text
-
-        val jsonObject = JSONObject(response)
-        val link = jsonObject.getString("download")
-
-        callback.invoke (
-            ExtractorLink (
-                this.name,
-                this.name,
-                link,
-                referer = "",
-                quality = getIndexQuality(quality),
-            )
         )
+        val contentType = response.headers["content-type"].toString()
+        val jsonResponse = response.text
+        val jsonObject = JSONObject(jsonResponse)
+        val link = jsonObject.getString("download")
         
+        if(contentType.contains("video")) {
+            callback.invoke (
+                ExtractorLink (
+                    this.name,
+                    this.name,
+                    link,
+                    referer = "",
+                    quality = getIndexQuality(quality),
+                )
+            )
+        }
+        else {
+            val reResponse = app.get(link).document
+            val reLink = "https://www.mediafire.com" + reResponse.selectFirst("a#continue-btn").attr("href").toString()
+            val doc = app.get(reLink).document
+            val downloadLink = doc.selectFirst("a.input.popsok").attr("href")
+            callback.invoke (
+                ExtractorLink (
+                    this.name,
+                    this.name,
+                    downloadLink,
+                    referer = "",
+                    quality = getIndexQuality(quality),
+                )
+            )
+        }
     }
     private fun getIndexQuality(str: String?): Int {
         return Regex("(\\d{3,4})[pP]").find(str ?: "") ?. groupValues ?. getOrNull(1) ?. toIntOrNull()
