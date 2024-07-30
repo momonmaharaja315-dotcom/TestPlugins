@@ -3,6 +3,9 @@ package com.megix
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 import org.json.JSONObject
 import java.net.URI
 
@@ -64,10 +67,17 @@ class WLinkFast : ExtractorApi() {
             requestBody = formBody,
             cookies = cookies
         )
-        val contentType = response.headers["content-type"].toString()
+        
         val jsonResponse = response.text
         val jsonObject = JSONObject(jsonResponse)
         val link = jsonObject.getString("download")
+        val requireRepairRequest = Request.Builder()
+            .url(link)
+            .head()
+            .build()
+
+        val requireRepairResponse: Response = client.newCall(requireRepairRequest).execute()
+        val contentType = requireRepairResponse.header("Content-Type")
         
         if(contentType.contains("video")) {
             callback.invoke (
