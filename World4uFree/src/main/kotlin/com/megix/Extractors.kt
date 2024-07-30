@@ -42,6 +42,7 @@ class WLinkFast : ExtractorApi() {
     override val name: String = "WLinkFast"
     override val mainUrl: String = "https://wlinkfast.store"
     override val requiresReferer = false
+    private val client = OkHttpClient()
 
     override suspend fun getUrl(
         url: String,
@@ -77,9 +78,9 @@ class WLinkFast : ExtractorApi() {
             .build()
 
         val requireRepairResponse: Response = client.newCall(requireRepairRequest).execute()
-        val contentType = requireRepairResponse.header("Content-Type")
+        val contentType = requireRepairResponse.header("Content-Type").toString()
         
-        if(contentType.contains("video")) {
+        if(contentType != null && contentType.contains("video")) {
             callback.invoke (
                 ExtractorLink (
                     this.name,
