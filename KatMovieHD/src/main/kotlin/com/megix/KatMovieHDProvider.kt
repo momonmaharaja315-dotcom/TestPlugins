@@ -219,44 +219,35 @@ open class KatMovieHDProvider : MainAPI() { // all providers must be an instance
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        if(data.contains("href")) {
             val regex = Regex("""<a href="([^"]+)">""")
             val links = regex.findAll(data).map { it.groupValues[1] }.toList()
-            links.amap {
-                val response = app.get(it)
-                val redirectUrl = response.headers["redirectUrl"].toString()
+            links.apmap {
+                val doc = app.get(it).document
+                val userid = doc.selectFirst("[name=userid]")?.attr("value") ?: ""
                 callback.invoke(
                     ExtractorLink (
                         this.name,
                         this.name,
-                        redirectUrl,
+                        userid,
                         referer = "",
                         quality = Qualities.Unknown.value,
                     )   
                 )
+                //loadExtractor(it, subtitleCallback, callback)
             }
-        // val res = app.get(redirectUrl)
-        // val cookiesSSID = res.cookies["PHPSESSID"].toString()
-        // val doc = res.document
-        // val userid = doc.selectFirst("[name=userid]")?.attr("value") ?: ""
-
-        // if(data.contains("href")) {
-        //     val regex = Regex("""<a href="([^"]+)">""")
-        //     val links = regex.findAll(data).map { it.groupValues[1] }.toList()
-        //     links.apmap {
-        //         loadExtractor(it, subtitleCallback, callback)
-        //     }
-        // }
-        // else if(data.contains("kmhd.net/file") || data.contains("gdflix")) {
-        //     loadExtractor(data, subtitleCallback, callback)
-        // }
-        // else {
-        //     val document = app.get(data).document
-        //     val aTags = document.select("h2 > a")
-        //     aTags.apmap {
-        //         val link = it.attr("href")
-        //         loadExtractor(link, subtitleCallback, callback)
-        //     }
-        // }
+        }
+        else if(data.contains("kmhd.net/file") || data.contains("gdflix")) {
+            loadExtractor(data, subtitleCallback, callback)
+        }
+        else {
+            val document = app.get(data).document
+            val aTags = document.select("h2 > a")
+            aTags.apmap {
+                val link = it.attr("href")
+                loadExtractor(link, subtitleCallback, callback)
+            }
+        }
         return true       
     }
 }
