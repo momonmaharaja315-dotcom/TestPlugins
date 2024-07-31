@@ -138,6 +138,33 @@ open class KatMovieHDProvider : MainAPI() { // all providers must be an instance
         }
         return episodesList
     }
+
+    // private suspend fun bypass(url: String): String {
+    //     val response = app.get(url)
+    //     val redirectUrl = response.headers["redirectUrl"].toString()
+    //     val res = app.get(redirectUrl)
+    //     val cookiesSSID = res.cookies["PHPSESSID"].toString()
+    //     val doc = res.document
+    //     val userid = doc.selectFirst("[name=userid]")?.attr("value") ?: ""
+        
+    //     //val actionUrl = doc.selectFirst("form")?.attr("action") ?: ""
+    //     //val formData = mutableMapOf<String, String>()
+    //     //formData["_wp_http_referer"] = doc.selectFirst("[name=_wp_http_referer]")?.attr("value") ?: ""
+    //     //formData["_wpnonce"] = doc.selectFirst("#_wpnonce")?.attr("value") ?: ""
+    //     //formData["lemmein"] = doc.selectFirst("[name=lemmein]")?.attr("value") ?: ""
+    //     //formData["post_location"] = doc.selectFirst("[name=post_location]")?.attr("value") ?: ""
+    //     //formData["sltoken"] = doc.selectFirst("[name=sltoken]")?.attr("value") ?: ""
+    //    // formData["userid"] = doc.selectFirst("[name=userid]")?.attr("value") ?: ""
+        
+    //     // val document = app.submitForm(actionUrl, formData, cookies = mapOf("PHPSESSID" to cookiesSSID))
+    //     // val newActionUrl = document.selectFirst("form")?.attr("action") ?: ""
+    //     // val newFormData = mutableMapOf<String, String>()
+    //     // newFormData["_wp_http_referer"] = document.selectFirst("[name=_wp_http_referer]")?.attr("value") ?: ""
+    //     // newFormData["_wpnonce"] = document.selectFirst("#_wpnonce")?.attr("value") ?: ""
+    //     // newFormData["sltoken"] = document.selectFirst("[name=sltoken]")?.attr("value") ?: ""
+    //     // newFormData["userid"] = document.selectFirst("[name=userid]")?.attr("value") ?: ""
+
+    // }
  
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
@@ -192,24 +219,39 @@ open class KatMovieHDProvider : MainAPI() { // all providers must be an instance
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        if(data.contains("href")) {
-            val regex = Regex("""<a href="([^"]+)">""")
-            val links = regex.findAll(data).map { it.groupValues[1] }.toList()
-            links.apmap {
-                loadExtractor(it, subtitleCallback, callback)
-            }
-        }
-        else if(data.contains("kmhd.net/file") || data.contains("gdflix")) {
-            loadExtractor(data, subtitleCallback, callback)
-        }
-        else {
-            val document = app.get(data).document
-            val aTags = document.select("h2 > a")
-            aTags.apmap {
-                val link = it.attr("href")
-                loadExtractor(link, subtitleCallback, callback)
-            }
-        }
+        val response = app.get(data)
+        val redirectUrl = response.headers["redirectUrl"].toString()
+        val res = app.get(redirectUrl)
+        val cookiesSSID = res.cookies["PHPSESSID"].toString()
+        val doc = res.document
+        val userid = doc.selectFirst("[name=userid]")?.attr("value") ?: ""
+        callback.invoke(
+            ExtractorLink (
+                this.name,
+                this.name,
+                userid,
+                referer = "",
+                quality = Qualities.Unknown.value,
+            )
+        )
+        // if(data.contains("href")) {
+        //     val regex = Regex("""<a href="([^"]+)">""")
+        //     val links = regex.findAll(data).map { it.groupValues[1] }.toList()
+        //     links.apmap {
+        //         loadExtractor(it, subtitleCallback, callback)
+        //     }
+        // }
+        // else if(data.contains("kmhd.net/file") || data.contains("gdflix")) {
+        //     loadExtractor(data, subtitleCallback, callback)
+        // }
+        // else {
+        //     val document = app.get(data).document
+        //     val aTags = document.select("h2 > a")
+        //     aTags.apmap {
+        //         val link = it.attr("href")
+        //         loadExtractor(link, subtitleCallback, callback)
+        //     }
+        // }
         return true       
     }
 }
