@@ -219,21 +219,26 @@ open class KatMovieHDProvider : MainAPI() { // all providers must be an instance
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        val response = app.get(data)
-        val redirectUrl = response.headers["redirectUrl"].toString()
+            val regex = Regex("""<a href="([^"]+)">""")
+            val links = regex.findAll(data).map { it.groupValues[1] }.toList()
+            links.amap {
+                val response = app.get(it)
+                val redirectUrl = response.headers["redirectUrl"].toString()
+                callback.invoke(
+                    ExtractorLink (
+                        this.name,
+                        this.name,
+                        redirectUrl,
+                        referer = "",
+                        quality = Qualities.Unknown.value,
+                    )   
+                )
+            }
         // val res = app.get(redirectUrl)
         // val cookiesSSID = res.cookies["PHPSESSID"].toString()
         // val doc = res.document
         // val userid = doc.selectFirst("[name=userid]")?.attr("value") ?: ""
-        callback.invoke(
-            ExtractorLink (
-                this.name,
-                this.name,
-                redirectUrl,
-                referer = "",
-                quality = Qualities.Unknown.value,
-            )
-        )
+
         // if(data.contains("href")) {
         //     val regex = Regex("""<a href="([^"]+)">""")
         //     val links = regex.findAll(data).map { it.groupValues[1] }.toList()
