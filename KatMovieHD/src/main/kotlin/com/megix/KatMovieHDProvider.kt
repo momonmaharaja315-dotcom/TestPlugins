@@ -221,15 +221,15 @@ open class KatMovieHDProvider : MainAPI() { // all providers must be an instance
     ): Boolean {
         val response = app.get(data)
         val redirectUrl = response.headers["redirectUrl"].toString()
-        val res = app.get(redirectUrl)
-        val cookiesSSID = res.cookies["PHPSESSID"].toString()
-        val doc = res.document
-        val userid = doc.selectFirst("[name=userid]")?.attr("value") ?: ""
+        // val res = app.get(redirectUrl)
+        // val cookiesSSID = res.cookies["PHPSESSID"].toString()
+        // val doc = res.document
+        // val userid = doc.selectFirst("[name=userid]")?.attr("value") ?: ""
         callback.invoke(
             ExtractorLink (
                 this.name,
                 this.name,
-                userid,
+                redirectUrl,
                 referer = "",
                 quality = Qualities.Unknown.value,
             )
