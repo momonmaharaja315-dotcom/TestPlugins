@@ -205,7 +205,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        if (data.contains("vcloud.lol") || data.contains("fastdl")) {
+        if (data.startsWith("https://")) {
             var url = data
             if (data.contains("vcloud.lol/api")) {
                 val document = app.get(data).document
