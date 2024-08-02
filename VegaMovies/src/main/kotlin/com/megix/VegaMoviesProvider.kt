@@ -187,7 +187,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             val aTags = document.select("p > a")
             val data = aTags.mapNotNull { aTag ->
                 val doc = app.get(aTag.attr("href")).document
-                val url = doc.selectFirst("p > a:contains(V-Cloud)")?.attr("href")
+                val url = doc.selectFirst("p > a:contains(V-Cloud)").attr("href")
                 VegaLinks(url)
             }
 
@@ -216,7 +216,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             return true
         } else {
             val sources = parseJson<List<VegaLinks>>(data)
-            sources.forEach {
+            sources.apmap {
                 val link = it.sourceLink
                 loadExtractor(link, subtitleCallback, callback)
             }
