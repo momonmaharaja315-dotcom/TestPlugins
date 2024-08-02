@@ -214,7 +214,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             loadExtractor(url, subtitleCallback, callback)
             return true
         } else {
-            val sources = parseJson<ArrayList<UHDLinks>>(data)
+            val sources = parseJson<ArrayList<VegaLinks>>(data)
             sources.apmap {
                 val link = it.sourceLink
                 loadExtractor(link, subtitleCallback, callback)
