@@ -186,8 +186,8 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             val aTags = document.select("p > a")
             val data = aTags.mapNotNull { aTag ->
                 val doc = app.get(aTag.attr("href")).document
-                val url = doc.selectFirst("p > a").attr("href")
-                VegaLinks(url)
+                val url = doc.selectFirst("p > a:contains(V-Cloud)").attr("href").toString()
+                VegaLinks(url ?: "")
             }
 
             return newMovieLoadResponse(trimTitle, url, TvType.Movie, data) {
