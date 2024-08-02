@@ -191,7 +191,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 VegaLinks(url)
             }
 
-            return newMovieLoadResponse(trimTitle, url, TvType.Movie, url) {
+            return newMovieLoadResponse(trimTitle, url, TvType.Movie, data) {
                 this.posterUrl = posterUrl
                 this.plot = plot
                 this.rating = rating
