@@ -192,7 +192,8 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 val episode = Episode(
                     data = source,
                     name = "Play",
-                    season = seasonNum
+                    season = seasonNum,
+                    episode = 1
                 )
 
                 tvSeriesEpisodes.add(episode)
