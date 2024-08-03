@@ -186,12 +186,15 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 val link = it.selectFirst("a").attr("href") ?: ""
                 val details = it.previousElementSibling().text() ?: "Unknown"
                 seasonList.add("$details" to seasonNum)
-                tvSeriesEpisodes.add (
-                    newEpisode(link) {
-                        name = "Play"
-                        season = seasonNum
-                    }
-                )
+                val doc = app.get(link).document
+                val source = doc.selectFirst("a:contains(V-Cloud)")
+                
+                val episode = newEpisode(source) {
+                    name = "Play"
+                    season = seasonNum
+                }
+                
+                tvSeriesEpisodes.add(episode)
                 seasonNum++
             }
             return newTvSeriesLoadResponse(trimTitle, url, TvType.TvSeries, tvSeriesEpisodes) {
