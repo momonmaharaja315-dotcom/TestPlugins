@@ -183,14 +183,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 this.seasonNames = seasonList.map { (name, int) -> SeasonData(int, name) }
             }
         } else {
-            val aTags = document.select("p > a")
-            val data = aTags.mapNotNull { aTag ->
-                val doc = app.get(aTag.attr("href")).document
-                val url = doc.selectFirst("p > a:contains(V-Cloud)").attr("href").toString()
-                VegaLinks(url ?: "")
-            }
-
-            return newMovieLoadResponse(trimTitle, url, TvType.Movie, data) {
+            return newMovieLoadResponse(trimTitle, url, TvType.Movie, url) {
                 this.posterUrl = posterUrl
                 this.plot = plot
                 this.rating = rating
@@ -204,20 +197,21 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        if (data.startsWith("https://")) {
+        if (data.contains("vcloud")) {
             var url = data
             if (data.contains("vcloud.lol/api")) {
                 val document = app.get(data).document
                 url = document.selectFirst("h4 > a")?.attr("href") ?: return false
             }
-
             loadExtractor(url, subtitleCallback, callback)
             return true
         } else {
-            val sources = parseJson<ArrayList<VegaLinks>>(data)
-            sources.apmap {
-                val link = it.sourceLink
-                loadExtractor(link, subtitleCallback, callback)
+            val document = app.get(data).document
+            val links = document.select("p > a").apmap {
+                val link = it.attr("href")
+                val doc = app.get(link).document
+                val source = doc.selectFirst("p > a:contains(V-Cloud)").attr("href")
+                loadExtractor(source, subtitleCallback, callback)                
             }
             return true
         }
