@@ -17,7 +17,7 @@ class Anitime : MainAPI() {
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
-        val document = app.get("$mainUrl/${request.data}$page").document
+        val document = app.get(request.data + page).document
         val home = document.select("div.grid > div.bg-gradient-to-t").mapNotNull { it.toSearchResult() }
 
         return newHomePageResponse (
