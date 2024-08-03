@@ -22,7 +22,7 @@ class VCloud : ExtractorApi() {
         val size = document.selectFirst("i#size") ?. text()
         val div = document.selectFirst("div.card-body")
         val header = document.selectFirst("div.card-header") ?. text()
-        div.select("a").amap {
+        div.select("a").mapNotNull {
             val link = it.attr("href")
             val text = it.text()
             if (link.contains("pixeldra")) {
