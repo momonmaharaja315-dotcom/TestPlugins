@@ -177,7 +177,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 this.seasonNames = seasonList.map { (name, int) -> SeasonData(int, name) }
             }
         } else {
-            val pTags = document.selectFirst("p:has(a:has(button))")
+            val pTags = document.select("p:has(a:has(button))")
             val tvSeriesEpisodes = mutableListOf<Episode>()
             var seasonNum = 1
             val seasonList = mutableListOf<Pair<String, Int>>()
