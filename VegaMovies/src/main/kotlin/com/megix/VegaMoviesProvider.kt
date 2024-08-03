@@ -75,10 +75,6 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
         return searchResponse
     }
 
-    data class VegaLinks(
-        @JsonProperty("sourceLink") val sourceLink: String
-    )
-
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
         val title = document.selectFirst("meta[property=og:title]")?.attr("content")
