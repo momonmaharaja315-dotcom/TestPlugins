@@ -182,9 +182,9 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             var seasonNum = 1
             val seasonList = mutableListOf<Pair<String, Int>>()
 
-            pTags.forEach {
-                val link = it.selectFirst("a").attr("href") ?: ""
-                val details = it.previousElementSibling().text() ?: "Unknown"
+            pTags.forEach { pTag ->
+                val link = pTag.selectFirst("a")?.attr("href") ?: ""
+                val details = pTag.previousElementSibling().text() ?: "Unknown"
                 seasonList.add("$details" to seasonNum)
                 val doc = app.get(link).document
                 val source = doc.selectFirst("a:contains(V-Cloud)").attr("href") ?: ""
