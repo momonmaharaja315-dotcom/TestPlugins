@@ -201,9 +201,9 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             return true
         } else {
             val document = app.get(data).document
-            val aTags = document.select("p > a")
+            val aTags = document.select("p > a").reversed()
 
-            aTags.mapNotNull { aTag ->
+            aTags.amap { aTag ->
                 val link = aTag.attr("href")
                 val document2 = app.get(link).document
                 val serverLinks = document2.select("p > a")
