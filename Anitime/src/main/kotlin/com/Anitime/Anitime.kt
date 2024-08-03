@@ -18,7 +18,7 @@ class Anitime : MainAPI() {
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         val document = app.get("$mainUrl/${request.data}$page").document
-        val home     = document.select("div.grid > div.bg-gradient-to-t").mapNotNull { it.toSearchResult() }
+        val home = document.select("div.grid > div.bg-gradient-to-t").mapNotNull { it.toSearchResult() }
 
         return newHomePageResponse (
             list = HomePageList (
@@ -64,7 +64,7 @@ class Anitime : MainAPI() {
         val document = app.get(url).document
         val title = document.selectFirst("h2").text().toString()
         val href = document.selectFirst("a:contains(Watch)").attr("href").toString()
-        var poster = document.select("img.rounded-sm").attr("src").toString()
+        var poster = document.selectFirst("img.rounded-sm").attr("src").toString()
 
         newMovieLoadResponse(title, url, TvType.Movie, href) {
             this.posterUrl = poster
