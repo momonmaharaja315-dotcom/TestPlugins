@@ -199,19 +199,19 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
     ): Boolean {
         if (data.contains("vcloud")) {
             var url = data
-            if (data.contains("vcloud.lol/api")) {
-                val document = app.get(data).document
-                url = document.selectFirst("h4 > a")?.attr("href") ?: return false
+            if (url.contains("vcloud.lol/api")) {
+                val document = app.get(url).document
+                url = document.selectFirst("h4 > a").attr("href")
             }
             loadExtractor(url, subtitleCallback, callback)
             return true
         } else {
             val document = app.get(data).document
-            val links = document.select("p > a").apmap {
-                val link = it.attr("href")
+            val links = document.select("p > a").map { it.attr("href") }
+            links.amap { link->
                 val doc = app.get(link).document
                 val source = doc.selectFirst("p > a:contains(V-Cloud)").attr("href")
-                loadExtractor(source, subtitleCallback, callback)                
+                loadExtractor(source, subtitleCallback, callback)
             }
             return true
         }
