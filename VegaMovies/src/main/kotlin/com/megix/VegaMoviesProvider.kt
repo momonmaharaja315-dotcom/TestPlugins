@@ -189,7 +189,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 val doc = app.get(link).document
                 val source = doc.selectFirst("a:contains(V-Cloud)").attr("href") ?: ""
                 
-                val episode = Episode(source) {
+                val episode = newEpisode(source) {
                     name = "Play"
                     season = seasonNum
                 }
