@@ -182,7 +182,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             var seasonNum = 1
             val seasonList = mutableListOf<Pair<String, Int>>()
 
-            val episode = pTags.forEach {
+            val episode = pTags.amap {
                 val link = it.selectFirst("a").attr("href") ?: ""
                 val details = it.previousElementSibling().text() ?: "Unknown"
                 seasonList.add("$details" to seasonNum)
