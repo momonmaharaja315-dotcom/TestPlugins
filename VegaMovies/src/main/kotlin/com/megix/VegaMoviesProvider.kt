@@ -207,8 +207,8 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             return true
         } else {
             val document = app.get(data).document
-            val links = document.select("p > a").map { it.attr("href") }
-            links.amap { link->
+            val links = document.select("p > a").map { it.attr("href") }.reversed()
+            links.mapNotNull { link->
                 val doc = app.get(link).document
                 val source = doc.selectFirst("p > a:contains(V-Cloud)").attr("href")
                 loadExtractor(source, subtitleCallback, callback)
