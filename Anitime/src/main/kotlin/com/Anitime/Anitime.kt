@@ -60,7 +60,7 @@ class Anitime : MainAPI() {
         return searchResponse
     }
 
-    override suspend fun load(url: String): LoadResponse {
+    override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
         val title = document.selectFirst("h2").text().toString()
         val href = document.selectFirst("a:contains(Watch)").attr("href").toString()
