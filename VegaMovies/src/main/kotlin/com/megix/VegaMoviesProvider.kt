@@ -5,8 +5,6 @@ import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import com.lagradost.cloudstream3.network.CloudflareKiller
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 
 open class VegaMoviesProvider : MainAPI() { // all providers must be an instance of MainAPI
 
@@ -208,10 +206,11 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
         } else {
             val document = app.get(data).document
             val links = document.select("p > a").map { it.attr("href") }.reversed()
-            links.mapNotNull { link->
+            links.forEach { link->
                 val doc = app.get(link).document
-                val source = doc.selectFirst("p > a:contains(V-Cloud)").attr("href")
-                loadExtractor(source, subtitleCallback, callback)
+                doc.select("p > a").mapNotNull {
+                    loadExtractor(it.attr("href"), subtitleCallback, callback)
+                }
             }
             return true
         }
