@@ -134,14 +134,14 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                     tag.select("a")
                 }
 
-                var unilink = aTags?.find {
+                var unilink = aTags ?. find {
                     it.text().contains("V-Cloud", ignoreCase = true) ||
                     it.text().contains("Episode", ignoreCase = true) ||
                     it.text().contains("Download", ignoreCase = true)
                 }
 
                 if (unilink == null) {
-                    unilink = aTags?.find {
+                    unilink = aTags ?. find {
                         it.text().contains("G-Direct", ignoreCase = true)
                     }
                 }
@@ -177,10 +177,28 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 this.seasonNames = seasonList.map { (name, int) -> SeasonData(int, name) }
             }
         } else {
-            return newMovieLoadResponse(trimTitle, url, TvType.Movie, url) {
+            val pTags = document.selectFirst("p:has(a:has(button))")
+            val tvSeriesEpisodes = mutableListOf<Episode>()
+            var seasonNum = 1
+            val seasonList = mutableListOf<Pair<String, Int>>()
+
+            val episode = pTags.forEach {
+                val link = it.selectFirst("a").attr("href") ?: ""
+                val details = it.previousElementSibling().text() ?: "Unknown"
+                seasonList.add("$details" to seasonNum)
+                tvSeriesEpisodes.add (
+                    newEpisode(link) {
+                        name = "Play"
+                        season = seasonNum
+                    }
+                )
+                seasonNum++
+            }
+            return newTvSeriesLoadResponse(trimTitle, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl
                 this.plot = plot
                 this.rating = rating
+                this.seasonNames = seasonList.map { (name, int) -> SeasonData(int, name) }
             }
         }
     }
@@ -191,30 +209,12 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        if (data.contains("vcloud")) {
-            var url = data
-            if (url.contains("vcloud.lol/api")) {
-                val document = app.get(url).document
-                url = document.selectFirst("h4 > a").attr("href")
-            }
-            loadExtractor(url, subtitleCallback, callback)
-            return true
-        } else {
-            val document = app.get(data).document
-            val aTags = document.select("p > a").reversed()
-
-            aTags.amap { aTag ->
-                val link = aTag.attr("href")
-                val document2 = app.get(link).document
-                val serverLinks = document2.select("p > a")
-                serverLinks.amap {
-                    val url = it.attr("href")
-                    if(url.contains("vcloud")) {
-                        loadExtractor(url, subtitleCallback, callback) 
-                    } 
-                }
-            }
-            return true
+        var url = data
+        if (url.contains("vcloud.lol/api")) {
+            val document = app.get(url).document
+            url = document.selectFirst("h4 > a").attr("href")
         }
+        loadExtractor(url, subtitleCallback, callback)
+        return true
     }
 }
