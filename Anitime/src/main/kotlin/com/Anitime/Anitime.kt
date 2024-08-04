@@ -67,7 +67,7 @@ class Anitime : MainAPI() {
         val tvSeriesEpisodes = mutableListOf<Episode>()
         var seasonNum = 1
         val seasonList = mutableListOf<Pair<String, Int>>()
-        var i = 1
+
         doc.select("div.item").mapNotNull {
             val link = fixUrl(it.selectFirst("a").attr("href").toString())
             val text = it.text() ?: ""
@@ -83,15 +83,13 @@ class Anitime : MainAPI() {
                     newEpisode(source){
                         name = "Episode $epText"
                         season = seasonNum
-                        episode = i
+                        episode = epText.toIntOrNull()
                     }
                 )
-                i++
             }
             seasonNum++
-            i = 1
         }
-        return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
+        return newAnimeLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = poster
                 this.plot = plot
                 this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
