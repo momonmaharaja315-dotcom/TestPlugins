@@ -8,6 +8,6 @@ import android.content.Context
 class AnitimeProvider: Plugin() {
     override fun load(context: Context) {
         registerMainAPI(Anitime())
-        //registerExtractorAPI(Vtbe())
+        registerExtractorAPI(Boosterx())
     }
 }

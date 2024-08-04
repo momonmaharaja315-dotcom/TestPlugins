@@ -82,15 +82,16 @@ class Anitime : MainAPI() {
             val source = doc1.selectFirst("iframe").attr("src").toString()
             val doc2 = app.get(source).document
             val epLink = doc2.selectFirst("iframe").attr("src").toString()
-            callback.invoke (
-                ExtractorLink (
-                    this.name,
-                    text,
-                    epLink,
-                    referer = "",
-                    quality = Qualities.Unknown.value
-                )
-            )
+            loadExtractor(epLink, subtitleCallback, callback)
+            // callback.invoke (
+            //     ExtractorLink (
+            //         this.name,
+            //         text,
+            //         epLink,
+            //         referer = "",
+            //         quality = Qualities.Unknown.value
+            //     )
+            // )
         }
         return true
     }
