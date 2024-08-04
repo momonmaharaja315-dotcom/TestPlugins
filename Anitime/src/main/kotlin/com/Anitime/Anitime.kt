@@ -78,13 +78,15 @@ class Anitime : MainAPI() {
         doc.select("div.item").mapNotNull {
             val link = fixUrl(it.selectFirst("a").attr("href").toString())
             val text = it.text() ?: ""
-            val docs = app.get(link).document
-            val source = docs.selectFirst("iframe").attr("src").toString()
+            val doc1 = app.get(link).document
+            val source = doc1.selectFirst("iframe").attr("src").toString()
+            val doc2 = app.get(source).document
+            val epLink = doc2.selectFirst("iframe").attr("src").toString()
             callback.invoke (
                 ExtractorLink (
                     this.name,
                     text,
-                    source,
+                    epLink,
                     referer = "",
                     quality = Qualities.Unknown.value
                 )
