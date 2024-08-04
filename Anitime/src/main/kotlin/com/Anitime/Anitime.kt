@@ -63,7 +63,7 @@ class Anitime : MainAPI() {
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
         val title = document.selectFirst("h2").text().toString()
-        val href = document.selectFirst("a:contains(Watch)").attr("href").toString()
+        //val href = document.selectFirst("a:contains(Watch)").attr("href").toString()
         var poster = document.selectFirst("img.rounded-sm").attr("src").toString()
 
         return newMovieLoadResponse(title, url, TvType.Movie, url) {
@@ -74,15 +74,20 @@ class Anitime : MainAPI() {
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
         val document = app.get(data).document
         val url = fixUrl(document.selectFirst("div.flex > a.flex").attr("href").toString())
-        callback.invoke (
-            ExtractorLink (
-                this.name,
-                this.name,
-                url,
-                referer = "",
-                quality = Qualities.Unknown.value
+        val doc = app.get(url).document
+        doc.select("div.item").mapNotNull {
+            val link = fixUrl(it.selectFirst("a").attr("href").toString())
+            val text = it.text() ?: ""
+            callback.invoke (
+                ExtractorLink (
+                    this.name,
+                    text,
+                    link,
+                    referer = "",
+                    quality = Qualities.Unknown.value
+                )
             )
-        )
+        }
         return true
     }
 }
