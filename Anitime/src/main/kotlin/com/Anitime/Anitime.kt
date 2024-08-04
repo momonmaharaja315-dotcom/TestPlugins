@@ -39,6 +39,15 @@ class Anitime : MainAPI() {
         }
     }
 
+    private fun Element.toSearchResult2(): SearchResponse {
+        val title = this.selectFirst("img").attr("alt").toString()
+        val href = fixUrl(this.selectFirst("a").attr("href"))
+        val posterUrl = fixUrlNull(this.selectFirst("img").attr("src").toString())
+        return newMovieSearchResponse(title, href, TvType.Movie) {
+            this.posterUrl = posterUrl
+        }
+    }
+
 
     override suspend fun search(query: String): List<SearchResponse> {
         val searchResponse = mutableListOf<SearchResponse>()
@@ -46,7 +55,7 @@ class Anitime : MainAPI() {
         for (i in 1..3) {
             val document = app.get("${mainUrl}/index.php/search/page/${i}/?keyword=${query}").document
 
-            val results = document.select("div.grid > div.bg-gradient-to-t").mapNotNull { it.toSearchResult() }
+            val results = document.select("div.col-span-1").mapNotNull { it.toSearchResult2() }
 
             if (!searchResponse.containsAll(results)) {
                 searchResponse.addAll(results)
@@ -64,6 +73,7 @@ class Anitime : MainAPI() {
         val document = app.get(url).document
         val title = document.selectFirst("h2").text().toString()
         var poster = document.selectFirst("img.rounded-sm").attr("src").toString()
+        val plot = document.selectFirst("div.leading-6:matches((?i)(Overview))").text().toString()
         val allUrl = fixUrl(document.selectFirst("div.flex > a.flex").attr("href").toString())
         val doc = app.get(allUrl).document
         val tvSeriesEpisodes = mutableListOf<Episode>()
@@ -95,18 +105,20 @@ class Anitime : MainAPI() {
         }
         return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = poster
+                this.plot = plot
                 this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
         }
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
         val document = app.get(data).document
+        
         if(data.contains("gogoanime")) {
             val source = document.selectFirst("media-player").attr("src").toString()
             callback.invoke (
                 ExtractorLink (
-                    this.name,
-                    this.name,
+                    "Vipanicdn",
+                    "Vipanicdn",
                     source,
                     referer = "",
                     quality = Qualities.Unknown.value,
@@ -118,15 +130,6 @@ class Anitime : MainAPI() {
             val source = document.selectFirst("iframe").attr("src").toString()
             loadExtractor(source, subtitleCallback, callback)
         }
-            // callback.invoke (
-            //     ExtractorLink (
-            //         this.name,
-            //         text,
-            //         epLink,
-            //         referer = "",
-            //         quality = Qualities.Unknown.value
-            //     )
-            // )
         return true
     }
 }
