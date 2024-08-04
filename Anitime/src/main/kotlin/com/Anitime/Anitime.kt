@@ -66,7 +66,7 @@ class Anitime : MainAPI() {
         val href = document.selectFirst("a:contains(Watch)").attr("href").toString()
         var poster = document.selectFirst("img.rounded-sm").attr("src").toString()
 
-        return newMovieLoadResponse(title, url, TvType.Movie, href) {
+        return newMovieLoadResponse(title, url, TvType.Movie, url) {
             this.posterUrl = poster
         }
     }
