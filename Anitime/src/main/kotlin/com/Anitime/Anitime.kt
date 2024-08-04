@@ -69,14 +69,15 @@ class Anitime : MainAPI() {
         val tvSeriesEpisodes = mutableListOf<Episode>()
         var seasonNum = 1
         val seasonList = mutableListOf<Pair<String, Int>>()
+        var i = 1
         doc.select("div.item").mapNotNull {
             val link = fixUrl(it.selectFirst("a").attr("href").toString())
             val text = it.text() ?: ""
-            seasonList.add("type $text" to seasonNum)
+            seasonList.add("$text" to seasonNum)
             val doc1 = app.get(link).document
             doc1.select("div#episodes-content button").mapNotNull {
                 val onclickValue = it.attr("onclick")
-                val epText = it.attr("title") ?: "1"
+                val epText = it.attr("id") ?: ""
                 val regex = Regex("'(https?://[^']+)'")
                 val matchResult = regex.find(onclickValue)
                 val source = matchResult ?. groups ?. get(1) ?. value
@@ -84,10 +85,13 @@ class Anitime : MainAPI() {
                     newEpisode(source){
                         name = "$epText"
                         season = seasonNum
+                        episode = i
                     }
                 )
+                i++
             }
             seasonNum++
+            i = 0
         }
         return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = poster
