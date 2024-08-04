@@ -83,7 +83,7 @@ class Anitime : MainAPI() {
                 val source = matchResult ?. groups ?. get(1) ?. value
                 tvSeriesEpisodes.add(
                     newEpisode(source){
-                        name = "$epText"
+                        name = "Episode $epText"
                         season = seasonNum
                         episode = i
                     }
@@ -91,7 +91,7 @@ class Anitime : MainAPI() {
                 i++
             }
             seasonNum++
-            i = 0
+            i = 1
         }
         return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = poster
@@ -101,8 +101,27 @@ class Anitime : MainAPI() {
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
         val document = app.get(data).document
-        val source = document.selectFirst("iframe").attr("src").toString()
-        loadExtractor(source, subtitleCallback, callback)
+        if(data.contains("ryuk.to")) {
+            val script = document.selectFirst("script:containsData(sources)")
+            val scriptContent = script.data()
+            val regex = Regex("\"file\":\\s*\"(https?://[^\"]+)\"")
+            val matchResult = regex.find(scriptContent)
+            val url = matchResult ?. groups ?. get(1) ?. value
+            callback.invoke (
+                ExtractorLink (
+                    this.name,
+                    this.name,
+                    url,
+                    referer = "",
+                    quality = Qualities.Unknown.value,
+                    isM3u8 = true
+                )
+            )
+        }
+        else {
+            val source = document.selectFirst("iframe").attr("src").toString()
+            loadExtractor(source, subtitleCallback, callback)
+        }
             // callback.invoke (
             //     ExtractorLink (
             //         this.name,
