@@ -76,7 +76,7 @@ class Anitime : MainAPI() {
             doc1.select("div#episodes-content button").mapNotNull {
                 val onclickValue = it.attr("onclick")
                 val epText = it.attr("title") ?: ""
-                val regex = Regex("'(https?:\/\/[^']+)'")
+                val regex = Regex("'(https?://[^']+)'")
                 val matchResult = regex.find(onclickValue)
                 val source = matchResult ?. groups ?. get(1) ?. value
                 tvSeriesEpisodes.add(
@@ -106,7 +106,6 @@ class Anitime : MainAPI() {
             //         quality = Qualities.Unknown.value
             //     )
             // )
-        }
         return true
     }
 }
