@@ -17,7 +17,7 @@ class Anitime : MainAPI() {
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
-        val document = app.get(request.data + page).document
+        val document = app.get(request.data).document
         val home = document.select("div.grid > div.bg-gradient-to-t").mapNotNull { it.toSearchResult() }
 
         return newHomePageResponse (
@@ -44,7 +44,7 @@ class Anitime : MainAPI() {
         val searchResponse = mutableListOf<SearchResponse>()
 
         for (i in 1..3) {
-            val document = app.get("${mainUrl}/page/$i/?s=$query").document
+            val document = app.get("${mainUrl}/search/page/${i}/?keyword=${query}").document
 
             val results = document.select("div.grid > div.bg-gradient-to-t").mapNotNull { it.toSearchResult() }
 
