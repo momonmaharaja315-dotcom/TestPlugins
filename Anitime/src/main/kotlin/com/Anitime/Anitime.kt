@@ -44,7 +44,7 @@ class Anitime : MainAPI() {
         val searchResponse = mutableListOf<SearchResponse>()
 
         for (i in 1..3) {
-            val document = app.get("${mainUrl}/search/page/${i}/?keyword=${query}").document
+            val document = app.get("${mainUrl}/index.php/search/page/${i}/?keyword=${query}").document
 
             val results = document.select("div.grid > div.bg-gradient-to-t").mapNotNull { it.toSearchResult() }
 
@@ -72,7 +72,17 @@ class Anitime : MainAPI() {
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
-    
+        val document = app.get(data).document
+        val url = fixUrlNull(document.selectFirst("div.flex > a.flex").attr("href"))
+        callback.invoke (
+            ExtractorLink (
+                this.name,
+                this.name,
+                url,
+                referer = "",
+                quality = Qualities.Unknown.value
+            )
+        )
         return true
     }
 }
