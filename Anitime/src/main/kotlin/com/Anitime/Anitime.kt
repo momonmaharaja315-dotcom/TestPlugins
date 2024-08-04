@@ -40,9 +40,9 @@ class Anitime : MainAPI() {
     }
 
     private fun Element.toSearchResult2(): SearchResponse {
-        val title = this.selectFirst("img").attr("alt").toString()
-        val href = fixUrl(this.selectFirst("a").attr("href"))
-        val posterUrl = fixUrlNull(this.selectFirst("img").attr("src").toString())
+        val title = this.selectFirst("div > div > img").attr("alt").toString()
+        val href = fixUrl(this.selectFirst("div > div > a").attr("href"))
+        val posterUrl = fixUrlNull(this.selectFirst("div > div > img").attr("src").toString())
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
         }
@@ -51,21 +51,9 @@ class Anitime : MainAPI() {
 
     override suspend fun search(query: String): List<SearchResponse> {
         val searchResponse = mutableListOf<SearchResponse>()
-
-        for (i in 1..3) {
-            val document = app.get("${mainUrl}/index.php/search/page/${i}/?keyword=${query}").document
-
-            val results = document.select("div.col-span-1").mapNotNull { it.toSearchResult2() }
-
-            if (!searchResponse.containsAll(results)) {
-                searchResponse.addAll(results)
-            } else {
-                break
-            }
-
-            if (results.isEmpty()) break
-        }
-
+        val document = app.get("${mainUrl}/index.php/search/?keyword=${query}").document
+        val results = document.select("div.col-span-1").mapNotNull { it.toSearchResult2() }
+        searchResponse.addAll(results)
         return searchResponse
     }
 
