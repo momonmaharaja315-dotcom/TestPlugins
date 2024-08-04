@@ -90,10 +90,9 @@ class Anitime : MainAPI() {
             ep = 1
             seasonNum++
         }
-        return newAnimeLoadResponse(title, url, TvType.Anime) {
+        return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = poster
                 this.plot = plot
-                tvSeriesEpisodes
                 this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
         }
     }
