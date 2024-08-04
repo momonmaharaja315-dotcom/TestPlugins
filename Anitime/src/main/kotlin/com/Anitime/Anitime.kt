@@ -106,7 +106,7 @@ class Anitime : MainAPI() {
             val scriptContent = script.data()
             val regex = Regex("\"file\":\\s*\"(https?://[^\"]+)\"")
             val matchResult = regex.find(scriptContent)
-            val url = matchResult ?. groups ?. get(1) ?. value
+            val url = matchResult ?. groups ?. get(1) ?. value .toString()
             callback.invoke (
                 ExtractorLink (
                     this.name,
