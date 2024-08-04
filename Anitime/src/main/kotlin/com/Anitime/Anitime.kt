@@ -63,26 +63,40 @@ class Anitime : MainAPI() {
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
         val title = document.selectFirst("h2").text().toString()
-        //val href = document.selectFirst("a:contains(Watch)").attr("href").toString()
         var poster = document.selectFirst("img.rounded-sm").attr("src").toString()
-
-        return newMovieLoadResponse(title, url, TvType.Movie, url) {
-            this.posterUrl = poster
+        val allUrl = fixUrl(document.selectFirst("div.flex > a.flex").attr("href").toString())
+        val doc = app.get(allUrl).document
+        val tvSeriesEpisodes = mutableListOf<Episode>()
+        var seasonNum = 1
+        val seasonList = mutableListOf<Pair<String, Int>>()
+        doc.select("div.item").mapNotNull {
+            val link = fixUrl(it.selectFirst("a").attr("href").toString())
+            val text = it.text() ?: ""
+            val doc1 = app.get(link).document
+            doc1.select("div#episodes-content button").mapNotNull {
+                val onclickValue = it.attr("onclick")
+                val epText = it.attr("title") ?: ""
+                val regex = Regex("'(https?:\/\/[^']+)'")
+                val matchResult = regex.find(onclickValue)
+                val source = matchResult ?. groups ?. get(1) ?. value
+                tvSeriesEpisodes.add(
+                    newEpisode(source){
+                        name = "$epText"
+                        season = seasonNum
+                    }
+                )
+            }
+            seasonNum++
+        }
+        return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
+                this.posterUrl = poster
         }
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
         val document = app.get(data).document
-        val url = fixUrl(document.selectFirst("div.flex > a.flex").attr("href").toString())
-        val doc = app.get(url).document
-        doc.select("div.item").mapNotNull {
-            val link = fixUrl(it.selectFirst("a").attr("href").toString())
-            val text = it.text() ?: ""
-            val doc1 = app.get(link).document
-            val source = doc1.selectFirst("iframe").attr("src").toString()
-            val doc2 = app.get(source).document
-            val epLink = doc2.selectFirst("iframe").attr("src").toString()
-            loadExtractor(epLink, subtitleCallback, callback)
+        val source = document.selectFirst("iframe").attr("src").toString()
+        loadExtractor(source, subtitleCallback, callback)
             // callback.invoke (
             //     ExtractorLink (
             //         this.name,
