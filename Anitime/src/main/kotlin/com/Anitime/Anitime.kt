@@ -101,17 +101,13 @@ class Anitime : MainAPI() {
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
         val document = app.get(data).document
-        if(data.contains("ryuk.to")) {
-            val script = document.selectFirst("script:containsData(sources)")
-            val scriptContent = script.data()
-            val regex = Regex("\"file\":\\s*\"(https?://[^\"]+)\"")
-            val matchResult = regex.find(scriptContent)
-            val url = matchResult ?. groups ?. get(1) ?. value .toString()
+        if(data.contains("gogoanime")) {
+            val source = document.selectFirst("media-player").attr("src").toString()
             callback.invoke (
                 ExtractorLink (
                     this.name,
                     this.name,
-                    url,
+                    source,
                     referer = "",
                     quality = Qualities.Unknown.value,
                     isM3u8 = true
