@@ -78,11 +78,13 @@ class Anitime : MainAPI() {
         doc.select("div.item").mapNotNull {
             val link = fixUrl(it.selectFirst("a").attr("href").toString())
             val text = it.text() ?: ""
+            val docs = app.get(link).document
+            val source = docs.selectFirst("iframe#ani-time").attr("src").toString()
             callback.invoke (
                 ExtractorLink (
                     this.name,
                     text,
-                    link,
+                    source,
                     referer = "",
                     quality = Qualities.Unknown.value
                 )
