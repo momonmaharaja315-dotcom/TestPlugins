@@ -72,7 +72,7 @@ class Anitime : MainAPI() {
         doc.select("div.item").mapNotNull {
             val link = fixUrl(it.selectFirst("a").attr("href").toString())
             val text = it.text() ?: ""
-            seasonList.add("S$realSeason $quality $size" to seasonNum)
+            seasonList.add("type $text" to seasonNum)
             val doc1 = app.get(link).document
             doc1.select("div#episodes-content button").mapNotNull {
                 val onclickValue = it.attr("onclick")
