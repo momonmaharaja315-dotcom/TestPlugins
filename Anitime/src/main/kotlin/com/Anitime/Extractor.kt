@@ -25,33 +25,23 @@ class AbyssCdn : ExtractorApi() {
         val qPrefix = "whw"
         val document = app.get(url).document
         val responseText = document.toString()
+        val base64Pattern = Pattern.compile("""PLAYER\(atob\("(.*?)"""")
+        val matcher = base64Pattern.matcher(responseText)
+        val decodedJson = String(Base64.getDecoder().decode(matcher.group(1)))
+        val jsonObject = JSONObject(decodedJson)
+
+        val domain = jsonObject.getString("domain")
+        val vidId = jsonObject.getString("id")
+        val sources = jsonObject.getJSONArray("sources")
+        val link = "https://$domain/$qPrefix$vidId"
         callback.invoke (
             ExtractorLink (
                 this.name,
                 this.name,
-                responseText,
+                link,
                 referer = url,
                 Qualities.Unknown.value
             )
         )
-
-        // val base64Pattern = Pattern.compile("PLAYER\\(atob\\(\"(.*?)\"")
-        // val matcher = base64Pattern.matcher(responseText)
-        // val decodedJson = String(Base64.getDecoder().decode(matcher.group(1)))
-        // val jsonObject = JSONObject(decodedJson)
-
-        // val domain = jsonObject.getString("domain")
-        // val vidId = jsonObject.getString("id")
-        // val sources = jsonObject.getJSONArray("sources")
-        // val link = "https://$domain/$qPrefix$vidId"
-        // callback.invoke (
-        //     ExtractorLink (
-        //         this.name,
-        //         this.name,
-        //         link,
-        //         referer = url,
-        //         Qualities.Unknown.value
-        //     )
-        // )
     }
 }
