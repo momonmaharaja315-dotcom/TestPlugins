@@ -36,6 +36,9 @@ class AbyssCdn : ExtractorApi() {
         val link = "https://$domain/$qPrefix$vidId"
         val headers = mapOf(
             "User-Agent" to "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.186 Mobile Safari/537.36",
+            "Accept-Encoding" to "gzip, deflate",
+            "Accept" to "*/*",
+            "Connection" to "keep-alive",
             "Referer" to "$url"
         )
 
