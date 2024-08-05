@@ -3,6 +3,8 @@ package com.Anitime
 import org.jsoup.nodes.Element
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
+import okhttp3.Interceptor
+import okhttp3.Response
 
 class Anitime : MainAPI() {
     override var mainUrl = "https://anitime.aniwow.in"
@@ -121,5 +123,13 @@ class Anitime : MainAPI() {
             loadExtractor(source, subtitleCallback, callback)
         }
         return true
+    }
+
+    override fun getVideoInterceptor(extractorLink: ExtractorLink): Interceptor {
+        return object : Interceptor {
+            override fun intercept(chain: Interceptor.Chain): Response {
+                return chain.proceed(chain.request().newBuilder().removeHeader("referer").build())
+            }
+        }
     }
 }

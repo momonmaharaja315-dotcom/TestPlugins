@@ -46,7 +46,7 @@ class AbyssCdn : ExtractorApi() {
                 this.name,
                 this.name,
                 link,
-                referer = "https://abysscdn.com/",
+                referer = url,
                 Qualities.Unknown.value,
                 headers = headers
             )
