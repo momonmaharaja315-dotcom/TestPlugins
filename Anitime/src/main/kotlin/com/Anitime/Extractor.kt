@@ -2,9 +2,8 @@ package com.Anitime
 import com.lagradost.cloudstream3.extractors.Chillx
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
-import java.util.Base64
+import com.lagradost.cloudstream3.base64Decode
 import org.json.JSONObject
-import java.util.regex.Pattern
 
 class Boosterx : Chillx() {
     override val name = "Boosterx"
@@ -25,10 +24,10 @@ class AbyssCdn : ExtractorApi() {
         val qPrefix = "whw"
         val document = app.get(url).document
         val responseText = document.toString()
+        val base64Pattern = Regex("PLAYER\\(atob\\(\"(.*?)\"\\)")
+        val base64Value = base64Pattern.find(responseText)?.groups?.get(1)?.value ?: ""
+        val text = base64Value.toString()
 
-        val base64Pattern = Pattern.compile("""PLAYER\(atob\(\"(.*?)\"\)""")
-        val matcher = base64Pattern.matcher(responseText)
-        val text = matcher.group(1).toString()
         callback.invoke (
             ExtractorLink (
                 this.name,
@@ -38,7 +37,7 @@ class AbyssCdn : ExtractorApi() {
                 Qualities.Unknown.value
             )
         )
-        // val decodedJson = String(Base64.getDecoder().decode(matcher.group(1)))
+        // val decodedJson = base64Decode(base64Value)
         // val jsonObject = JSONObject(decodedJson)
 
         // val domain = jsonObject.getString("domain")
