@@ -44,6 +44,7 @@ class AbyssCdn : ExtractorApi() {
                 this.name,
                 this.name,
                 link,
+                referer = url,
                 headers = headers,
                 Qualities.Unknown.value
             )
