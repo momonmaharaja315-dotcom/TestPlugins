@@ -117,8 +117,19 @@ class Anitime : MainAPI() {
             var source = document.selectFirst("iframe").attr("src").toString()
             if(source.contains("short.ink")) {
                 source = source.replace("short.ink/", "abysscdn.com/?v=")
+                callback.invoke (
+                    ExtractorLink (
+                        "Abysscdn",
+                        "Abysscdn",
+                        source,
+                        referer = "",
+                        quality = Qualities.Unknown.value
+                    )
+                )
             }
-            loadExtractor(source, subtitleCallback, callback)
+            else {
+                loadExtractor(source, subtitleCallback, callback)
+            }
         }
         return true
     }
