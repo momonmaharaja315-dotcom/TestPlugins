@@ -1,5 +1,7 @@
 package com.Anitime
 import com.lagradost.cloudstream3.extractors.Chillx
+import com.lagradost.cloudstream3.*
+import com.lagradost.cloudstream3.utils.*
 import java.util.Base64
 import org.json.JSONObject
 import java.util.regex.Pattern
@@ -37,7 +39,7 @@ class AbyssCdn : ExtractorApi() {
                 this.name,
                 this.name,
                 link,
-                referer = "",
+                referer = url,
                 Qualities.Unknown.value
             )
         )
