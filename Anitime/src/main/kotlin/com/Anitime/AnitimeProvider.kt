@@ -9,5 +9,6 @@ class AnitimeProvider: Plugin() {
     override fun load(context: Context) {
         registerMainAPI(Anitime())
         registerExtractorAPI(Boosterx())
+        registerExtractorAPI(AbyssCdn())
     }
 }
