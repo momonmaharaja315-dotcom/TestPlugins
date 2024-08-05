@@ -13,7 +13,7 @@ class Boosterx : Chillx() {
 class AbyssCdn : ExtractorApi() {
     override val name: String = "AbyssCdn"
     override val mainUrl: String = "https://abysscdn.com"
-    override val requiresReferer = false
+    override val requiresReferer = true
 
     override suspend fun getUrl(
         url: String,
@@ -39,7 +39,6 @@ class AbyssCdn : ExtractorApi() {
             "Accept-Encoding" to "gzip, deflate",
             "Accept" to "*/*",
             "Connection" to "keep-alive",
-            "Referer" to "$url"
         )
 
         callback.invoke (
@@ -47,7 +46,7 @@ class AbyssCdn : ExtractorApi() {
                 this.name,
                 this.name,
                 link,
-                referer = url,
+                referer = "https://abysscdn.com/",
                 Qualities.Unknown.value,
                 headers = headers
             )
