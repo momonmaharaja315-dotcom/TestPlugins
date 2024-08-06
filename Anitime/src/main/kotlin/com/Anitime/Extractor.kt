@@ -21,7 +21,6 @@ class AbyssCdn : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val qPrefix = "whw"
         val document = app.get(url).document
         
         val responseText = document.toString()
@@ -32,12 +31,28 @@ class AbyssCdn : ExtractorApi() {
 
         val domain = jsonObject.getString("domain")
         val vidId = jsonObject.getString("id")
-        val sources = jsonObject.getJSONArray("sources")
-        val link = "https://$domain/$qPrefix$vidId"
+        val videoUrls = mapOf(
+            "360p" to "https://$domain/$vidId",
+            "720p" to "https://$domain/www$vidId",
+            "1080p" to "https://$domain/whw$vidId"
+        )
         val headers = mapOf(
             "Referer" to "$mainUrl",
             "Sec-Fetch-Mode" to "cors"
         )
+
+        for ((quality, link) in videoUrls) {
+            callback.invoke (
+                ExtractorLink (
+                    this.name,
+                    this.name,
+                    link,
+                    referer = mainUrl,
+                    getQualityFromString(quality),
+                    headers = headers
+                )
+            )
+        }
 
         callback.invoke (
             ExtractorLink (

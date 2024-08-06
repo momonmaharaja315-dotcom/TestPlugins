@@ -3,23 +3,24 @@ package com.Anitime
 import org.jsoup.nodes.Element
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
-// import okhttp3.Interceptor
-// import okhttp3.Response
 
 class Anitime : MainAPI() {
     override var mainUrl = "https://anitime.aniwow.in"
     override var name = "Anitime"
     override val hasMainPage = true
-    override var lang = "en"
+    override var lang = "hi"
     override val hasDownloadSupport = true
     override val supportedTypes = setOf(TvType.Movie,TvType.Anime)
 
     override val mainPage = mainPageOf(
-        "$mainUrl" to "Home",
+        "$mainUrl/" to "Home",
+        "$mainUrl/index.php/anime_attribute/hindi-dub/" to "Hindi Dub",
+        "$mainUrl/index.php/anime_attribute/hindi/" to "Hindi Sub",
+        "$mainUrl/index.php/genre/nostalgic/" to "Nostalgic Animes",
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
-        val document = app.get(request.data).document
+        val document = app.get(request.data + "page/" + page).document
         val home = document.select("div.grid > div.bg-gradient-to-t").mapNotNull { it.toSearchResult() }
 
         return newHomePageResponse (
@@ -124,12 +125,4 @@ class Anitime : MainAPI() {
         }
         return true
     }
-
-    // override fun getVideoInterceptor(extractorLink: ExtractorLink): Interceptor {
-    //     return object : Interceptor {
-    //         override fun intercept(chain: Interceptor.Chain): Response {
-    //             return chain.proceed(chain.request().newBuilder().removeHeader("referer").build())
-    //         }
-    //     }
-    // }
 }
