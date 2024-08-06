@@ -48,21 +48,10 @@ class AbyssCdn : ExtractorApi() {
                     this.name,
                     link,
                     referer = mainUrl,
-                    getQualityFromString(quality),
+                    getQualityFromName(quality),
                     headers = headers
                 )
             )
         }
-
-        callback.invoke (
-            ExtractorLink (
-                this.name,
-                this.name,
-                link,
-                referer = mainUrl,
-                Qualities.Unknown.value,
-                headers = headers
-            )
-        )
     }
 }
