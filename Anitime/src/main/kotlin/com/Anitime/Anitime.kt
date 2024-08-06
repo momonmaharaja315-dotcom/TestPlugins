@@ -95,13 +95,15 @@ class Anitime : MainAPI() {
                 val regex = Regex("'(https?://[^']+)'")
                 val matchResult = regex.find(onclickValue)
                 val source = matchResult ?. groups ?. get(1) ?. value
-                tvSeriesEpisodes.add(
-                    newEpisode(source){
-                        name = "Episode $ep"
-                        season = seasonNum
-                        episode = ep
-                    }
-                )
+                if(source != null) {
+                    tvSeriesEpisodes.add(
+                        newEpisode(source){
+                            name = "Episode $ep"
+                            season = seasonNum
+                            episode = ep
+                        }
+                    )
+                }
                 ep++
             }
             ep = 1
