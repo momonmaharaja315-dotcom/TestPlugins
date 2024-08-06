@@ -92,7 +92,7 @@ class Anitime : MainAPI() {
             val doc1 = app.get(link).document
             doc1.select("div#episodes-content button").mapNotNull {
                 val onclickValue = it.attr("onclick")
-                val regex = Regex("'(https?://[^']+)'")
+                val regex = Regex("'(https?:\/\/[^']+)'")
                 val matchResult = regex.find(onclickValue)
                 val source = matchResult ?. groups ?. get(1) ?. value
                 if(source != null) {
@@ -131,6 +131,10 @@ class Anitime : MainAPI() {
                     isM3u8 = true
                 )
             )
+        }
+        else if(data.contains("short.ink")) {
+            val source = source.replace("short.ink/", "abysscdn.com/?v=")
+            loadExtractor(source, subtitleCallback, callback)
         }
         else {
             var source = document.selectFirst("iframe").attr("src").toString()
