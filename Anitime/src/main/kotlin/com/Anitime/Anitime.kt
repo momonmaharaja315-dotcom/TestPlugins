@@ -20,17 +20,31 @@ class Anitime : MainAPI() {
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
-        val document = app.get(request.data + "page/" + page).document
-        val home = document.select("div.grid > div.bg-gradient-to-t").mapNotNull { it.toSearchResult() }
-
-        return newHomePageResponse (
-            list = HomePageList (
-                name = request.name,
-                list = home,
-                isHorizontalImages = false
-            ),
-            hasNext = true
-        )
+        if(request.name == "Home") {
+            val document = app.get(request.data).document
+            val home = document.select("div.grid > div.bg-gradient-to-t").mapNotNull { it.toSearchResult() }
+            return newHomePageResponse (
+                list = HomePageList (
+                    name = request.name,
+                    list = home,
+                    isHorizontalImages = false
+                ),
+                hasNext = false
+            )
+        }
+        else {
+            val document = app.get(request.data + "page/" + page).document
+            val home = document.select("div.col-span-1").mapNotNull { it.toSearchResult2() }
+            return newHomePageResponse (
+                list = HomePageList (
+                    name = request.name,
+                    list = home,
+                    isHorizontalImages = false
+                ),
+                hasNext = true
+            )
+        }
+       
     }
 
     private fun Element.toSearchResult(): SearchResponse {
