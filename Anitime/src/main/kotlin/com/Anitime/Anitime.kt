@@ -3,6 +3,8 @@ package com.Anitime
 import org.jsoup.nodes.Element
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
+import com.lagradost.cloudstream3.LoadResponse.Companion.addAniListId
+import com.lagradost.cloudstream3.syncproviders.SyncIdName
 
 class Anitime : MainAPI() {
     override var mainUrl = "https://anitime.aniwow.in"
