@@ -3,8 +3,6 @@ package com.Anitime
 import org.jsoup.nodes.Element
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
-import com.lagradost.cloudstream3.LoadResponse.Companion.addAniListId
-import com.lagradost.cloudstream3.syncproviders.SyncIdName
 
 class Anitime : MainAPI() {
     override var mainUrl = "https://anitime.aniwow.in"
@@ -13,9 +11,6 @@ class Anitime : MainAPI() {
     override var lang = "hi"
     override val hasDownloadSupport = true
     override val supportedTypes = setOf(TvType.Movie,TvType.Anime)
-    override val supportedSyncNames = setOf(
-        SyncIdName.Anilist
-    )
 
     override val mainPage = mainPageOf(
         "$mainUrl/" to "Home",
@@ -114,12 +109,10 @@ class Anitime : MainAPI() {
             ep = 1
             seasonNum++
         }
-        val anilistId = 2278
-        return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
+        return newTvSeriesLoadResponse(title, url, TvType.Anime, tvSeriesEpisodes) {
                 this.posterUrl = poster
                 this.plot = plot
                 this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
-                addAniListId(anilistId)
         }
     }
 
