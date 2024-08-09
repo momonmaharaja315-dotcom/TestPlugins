@@ -20,5 +20,5 @@ cloudstream {
         "Movie",
     )
 
-    iconUrl = "http://cinemaluxe.world/wp-content/uploads/2024/07/fresh-logo-dark-theme-.webp"
+    iconUrl = "https://moviesmod.band/wp-content/uploads/2022/12/moviesmodnew-Custom.png"
 }

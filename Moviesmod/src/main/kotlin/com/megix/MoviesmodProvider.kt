@@ -7,7 +7,7 @@ import org.jsoup.select.Elements
 import com.lagradost.cloudstream3.base64Decode
 import java.net.URI
 import org.jsoup.nodes.Document
-import com.lagradost.cloudstream3.network.CloudflareKiller
+//import com.lagradost.cloudstream3.network.CloudflareKiller
 
 class MoviesmodProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://moviesmod.band"
@@ -15,7 +15,7 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
     override val hasMainPage = true
     override var lang = "hi"
     override val hasDownloadSupport = true
-    private val cfInterceptor = CloudflareKiller()
+    //private val cfInterceptor = CloudflareKiller()
     override val supportedTypes = setOf(
         TvType.Movie,
         TvType.TvSeries
@@ -29,7 +29,7 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
         page: Int,
         request: MainPageRequest
     ): HomePageResponse {
-        val document = app.get(request.data + page, interceptor = cfInterceptor).document
+        val document = app.get(request.data + page).document
         val home = document.select("div.post-cards > article").mapNotNull {
             it.toSearchResult()
         }
@@ -50,7 +50,7 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
         val searchResponse = mutableListOf<SearchResponse>()
 
         for (i in 1..3) {
-            val document = app.get("$mainUrl/search/$query/page/$i", interceptor = cfInterceptor).document
+            val document = app.get("$mainUrl/search/$query/page/$i").document
 
             val results = document.select("div.post-cards > article").mapNotNull { it.toSearchResult() }
 
@@ -122,44 +122,49 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
-        val title = document.selectFirst("meta[property=og:title]").attr("content")
+        val title = document.selectFirst("meta[property=og:title]").attr("content").replace("Download ", "")
         val posterUrl = document.selectFirst("meta[property=og:image]").attr("content")
         val description = document.selectFirst("div.imdbwp__teaser").text()
 
-        val tvSeriesEpisodes = mutableListOf<Episode>()
-        var seasonNum = 1
-        val seasonList = mutableListOf<Pair<String, Int>>()
-        val buttons = document.select("a.maxbutton-episode-links,.maxbutton-g-drive,.maxbutton-af-download")
+        //val tvSeriesEpisodes = mutableListOf<Episode>()
+        //var seasonNum = 1
+        //val seasonList = mutableListOf<Pair<String, Int>>()
+        //val buttons = document.select("a.maxbutton-episode-links,.maxbutton-g-drive,.maxbutton-af-download")
 
-        buttons.mapNotNull {
-            var link = it.attr("href")
+        // buttons.mapNotNull {
+        //     var link = it.attr("href")
 
-            if(link.contains("url=")) {
-                val base64Value = link.substringAfter("url=")
-                link = base64Decode(base64Value)
-            }
+        //     if(link.contains("url=")) {
+        //         val base64Value = link.substringAfter("url=")
+        //         link = base64Decode(base64Value)
+        //     }
 
-            val doc = app.get(link).document
-            val hTags = doc.select("h3,h4")
+        //     val doc = app.get(link).document
+        //     val hTags = doc.select("h3,h4")
 
-            hTags.mapNotNull {
-                val title = it.text()
-                var epUrl = it.selectFirst("a").attr("href")
-                if(epUrl.contains("unblockedgames")) {
-                    epUrl = bypass(epUrl)
-                }
-                tvSeriesEpisodes.add (
-                    newEpisode(epUrl) {
-                        name = title
-                        season = seasonNum
-                    }
-                )
-            }
-            seasonNum++
-        }
-        return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
+        //     hTags.mapNotNull {
+        //         val title = it.text()
+        //         var epUrl = it.selectFirst("a").attr("href")
+        //         if(epUrl.contains("unblockedgames")) {
+        //             epUrl = bypass(epUrl)
+        //         }
+        //         tvSeriesEpisodes.add (
+        //             newEpisode(epUrl) {
+        //                 name = title
+        //                 season = seasonNum
+        //             }
+        //         )
+        //     }
+        //     seasonNum++
+        // }
+        // return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
+        //     this.posterUrl = posterUrl
+        //     //this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
+        //     this.plot = description
+        // }
+
+        return newMovieLoadResponse(title, url, TvType.Movie, url) {
             this.posterUrl = posterUrl
-            //this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
             this.plot = description
         }
     }
