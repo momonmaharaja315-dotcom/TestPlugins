@@ -148,7 +148,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
 
                         if (episodeString.isNotEmpty()) {
                             episodes.add(
-                                newEpisode(episodeString, fix = false){
+                                newEpisode(episodeString, false){
                                     name = "$title"
                                     season = seasonNum
                                     episode = elements.indexOf(element) + 1
@@ -173,7 +173,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                     val text = pTag.text() ?: ""
                     val nextTag = pTag.nextElementSibling()
                     val nextTagString = nextTag ?. toString() ?: ""
-                    val episodes = newEpisode(nextTagString, fix = false) {
+                    val episodes = newEpisode(nextTagString, false) {
                         name = text
                     }
                     episodesList.add(episodes)
