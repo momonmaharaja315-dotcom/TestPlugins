@@ -148,11 +148,11 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
 
                         if (episodeString.isNotEmpty()) {
                             episodes.add(
-                                newEpisode(episodeString, false){
+                                newEpisode(episodeString,initializer = {
                                     name = "$title"
                                     season = seasonNum
                                     episode = elements.indexOf(element) + 1
-                                }
+                                }, fix = false)
                             )
                         }
                     }
@@ -173,9 +173,9 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                     val text = pTag.text() ?: ""
                     val nextTag = pTag.nextElementSibling()
                     val nextTagString = nextTag ?. toString() ?: ""
-                    val episodes = newEpisode(nextTagString, false) {
+                    val episodes = newEpisode(nextTagString, initializer = {
                         name = text
-                    }
+                    }, fix = false)
                     episodesList.add(episodes)
                 }
                 return newTvSeriesLoadResponse(trimTitle, url, TvType.TvSeries, episodesList) {
