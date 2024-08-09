@@ -4,6 +4,7 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
+import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
 
 class MoviesDriveProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://moviesdrive.website"
@@ -90,6 +91,8 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
 
         val posterUrl = document.selectFirst("img[decoding=\"async\"]") ?. attr("src") ?: ""
         val seasonRegex = """(?i)season\s*\d+""".toRegex()
+        val imdbId = document.selectFirst("a:contains(IMDb)") ?. attr("href")
+
         val tvType = if (
             title ?. contains("Episode", ignoreCase = true) ?: false || 
             seasonRegex.containsMatchIn(title ?: "") || 
@@ -145,7 +148,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
 
                         if (episodeString.isNotEmpty()) {
                             episodes.add(
-                                newEpisode(episodeString){
+                                newEpisode(episodeString, fix = false){
                                     name = "$title"
                                     season = seasonNum
                                     episode = elements.indexOf(element) + 1
@@ -160,6 +163,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                     this.posterUrl = posterUrl
                     this.plot = plot
                     this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
+                    addImdbUrl(imdbId)
                 }
             }
             else {
@@ -169,7 +173,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                     val text = pTag.text() ?: ""
                     val nextTag = pTag.nextElementSibling()
                     val nextTagString = nextTag ?. toString() ?: ""
-                    val episodes = newEpisode(nextTagString) {
+                    val episodes = newEpisode(nextTagString, fix = false) {
                         name = text
                     }
                     episodesList.add(episodes)
@@ -177,6 +181,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                 return newTvSeriesLoadResponse(trimTitle, url, TvType.TvSeries, episodesList) {
                     this.posterUrl = posterUrl
                     this.plot = plot
+                    addImdbUrl(imdbId)
                 }
             }
 
@@ -185,6 +190,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
             return newMovieLoadResponse(trimTitle, url, TvType.Movie, url) {
                 this.posterUrl = posterUrl
                 this.plot = plot
+                addImdbUrl(imdbId)
             }
         }
     }
