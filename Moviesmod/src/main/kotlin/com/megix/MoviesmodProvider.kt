@@ -94,8 +94,6 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
             return this.select("form#landing input").associate { it.attr("name") to it.attr("value") }
         }
 
-
-
         val host = getBaseUrl(url)
         var res = app.get(url).document
         var formUrl = res.getFormUrl()
@@ -144,7 +142,7 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
             hTags.mapNotNull {
                 val title = it.text()
                 var epUrl = it.selectFirst("a").attr("href")
-                if(unblockedLink.contains("unblockedgames")) {
+                if(epUrl.contains("unblockedgames")) {
                     epUrl = bypass(epUrl)
                 }
                 tvSeriesEpisodes.add (
