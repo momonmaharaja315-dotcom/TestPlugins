@@ -1,10 +1,10 @@
-version = 4
+version = 1
 
 cloudstream {
     language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = ""
+    description = "Includes Topmovies"
      authors = listOf("megix")
 
     /**
@@ -20,5 +20,5 @@ cloudstream {
         "Movie",
     )
 
-    iconUrl = "https://i.imgur.com/9bGkGMi.png"
+    iconUrl = "http://cinemaluxe.world/wp-content/uploads/2024/07/fresh-logo-dark-theme-.webp"
 }
