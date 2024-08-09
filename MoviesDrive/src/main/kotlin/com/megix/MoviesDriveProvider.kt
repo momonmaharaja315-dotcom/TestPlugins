@@ -120,7 +120,10 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                     val episodeLink = button.attr("href") ?: ""
 
                     val doc = app.get(episodeLink).document
-                    var elements = doc.select("span:matches((?i)(Ep)), a:matches((?i)(HubCloud))")
+                    var elements = doc.select("span:matches((?i)(Ep))")
+                    if(elements.isEmpty()) {
+                        elements = doc.select("a:matches((?i)(HubCloud))")
+                    }
                     val episodes = mutableListOf<Episode>()
                     
                     elements.forEach { element ->
@@ -142,12 +145,11 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
 
                         if (episodeString.isNotEmpty()) {
                             episodes.add(
-                                Episode(
-                                    name = "$title",
-                                    data = episodeString,
-                                    season = seasonNum,
+                                newEpisode(episodeString){
+                                    name = "$title"
+                                    season = seasonNum
                                     episode = elements.indexOf(element) + 1
-                                )
+                                }
                             )
                         }
                     }
@@ -167,10 +169,9 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                     val text = pTag.text() ?: ""
                     val nextTag = pTag.nextElementSibling()
                     val nextTagString = nextTag ?. toString() ?: ""
-                    val episodes = Episode(
-                        name = text,
-                        data = nextTagString,
-                    )
+                    val episodes = newEpisode(nextTagString) {
+                        name = text
+                    }
                     episodesList.add(episodes)
                 }
                 return newTvSeriesLoadResponse(trimTitle, url, TvType.TvSeries, episodesList) {
