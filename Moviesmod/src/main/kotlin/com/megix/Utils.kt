@@ -68,13 +68,13 @@ class Driveseed : ExtractorApi() {
     override val mainUrl: String = "https://driveseed.org"
     override val requiresReferer = false
 
-    private suspend fun resumeBot(url : String) {
+    private suspend fun resumeBot(url : String): String? {
         val resumeBotResponse = app.get(url)
         val resumeBotDoc = resumeBotResponse.document.toString()
         val ssid = resumeBotResponse.cookies["PHPSESSID"]
         val resumeBotToken = Regex("formData\\.append\\('token', '([a-f0-9]+)'\\)").find(resumeBotDoc)?.groups?.get(1)?.value
         val resumeBotPath = Regex("fetch\\('/download\\?id=([a-zA-Z0-9/\\+]+)'").find(resumeBotDoc)?.groups?.get(1)?.value
-        val resumeBotBaseUrl = resumeBotUrl.split("/download")[0]
+        val resumeBotBaseUrl = url.split("/download")[0]
         val requestBody = FormBody.Builder()
             .addEncoded("token", "$resumeBotToken")
             .build()
@@ -87,20 +87,11 @@ class Driveseed : ExtractorApi() {
                 "Sec-Fetch-Site" to "same-origin"
             ),
             cookies = mapOf("PHPSESSID" to "$ssid"),
-            referer = resumeBotUrl
+            referer = url
         ).text
         val jsonObject = JSONObject(jsonResponse)
         val link = jsonObject.getString("url")
-
-        callback.invoke(
-            ExtractorLink(
-                "ResumeBot",
-                "ResumeBot",
-                link,
-                "",
-                Qualities.Unknown.value
-            )
-        )
+        return link ?: null
     }
 
     override suspend fun getUrl(
@@ -111,6 +102,17 @@ class Driveseed : ExtractorApi() {
     ) {
         val document = app.get(url).document
         val resumeBotUrl = document.selectFirst("a.btn.btn-light").attr("href")
-        resumeBot(resumeBotUrl)
+        val resumeLink = resumeBot(resumeBotUrl)
+        if (resumeLink != null) {
+            callback.invoke(
+                ExtractorLink(
+                    "ResumeBot",
+                    "ResumeBot",
+                    resumeLink,
+                    "",
+                    Qualities.Unknown.value
+                )
+            )
+        }
     }
 }
