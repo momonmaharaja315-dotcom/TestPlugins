@@ -91,9 +91,9 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
                 hTags.mapNotNull {
                     val title = it.text()
                     var epUrl = it.selectFirst("a").attr("href")
-                    // if(epUrl.contains("unblockedgames")) {
-                    //     epUrl = bypass(epUrl)
-                    // }
+                    if(epUrl.contains("unblockedgames")) {
+                        epUrl = bypass(epUrl)
+                    }
                     tvSeriesEpisodes.add(
                         newEpisode(epUrl) {
                             name = title
@@ -144,7 +144,16 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         if(data.contains("driveseed")) {
-            loadExtractor(data, subtitleCallback, callback)
+            callback.invoke(
+                ExtractorLink (
+                    this.name,
+                    this.name,
+                    data,
+                    "",
+                    Qualities.Unknown.value
+                )
+            )
+            //loadExtractor(data, subtitleCallback, callback)
             return true
         }
         val document = app.get(data).document
