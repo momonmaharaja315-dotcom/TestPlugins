@@ -143,7 +143,7 @@ open class TopmoviesProvider : MainAPI() { // all providers must be an instance 
                 }
 
                 val doc = app.get(link).document
-                val url = doc.selectFirst("a.maxbutton-1").attr("href")
+                val url = doc.selectFirst("a.maxbutton-fast-server-gdrive").attr("href")
                 val driveLink = bypass(url).toString()
                 loadExtractor(driveLink, subtitleCallback, callback)
             }

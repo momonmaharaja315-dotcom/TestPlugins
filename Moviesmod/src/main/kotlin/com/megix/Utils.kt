@@ -120,6 +120,27 @@ class Driveseed : ExtractorApi() {
         return link ?: null
     }
 
+    private suspend fun instantLink(url: String): String? {
+        val token = url.split("=").getOrNull(1) ?: ""
+        val videoSeedUrl = url.split("/").take(3).joinToString("/") + "/api"
+        val downloadlink = app.post(
+            url = videoSeedUrl,
+            requestBody = mapOf(
+                "keys" to token
+            ),
+            headers = mapOf(
+                "x-token" to "$videoSeedUrl",
+            )
+        )
+
+        val finaldownloadlink =
+            downloadlink.toString().substringAfter("url\":\"")
+                .substringBefore("\",\"name")
+                .replace("\\/", "/")
+
+        return finaldownloadlink ?: null
+    }
+
     override suspend fun getUrl(
         url: String,
         referer: String?,
@@ -164,6 +185,20 @@ class Driveseed : ExtractorApi() {
                     "CF Type1",
                     "CF Type1",
                     cfType1,
+                    "",
+                    getIndexQuality(quality)
+                )
+            )
+        }
+
+        val instantUrl = document.select("a.btn-danger").attr("href")
+        val instant = instantLink(instantUrl)
+        if (instant != null) {
+            callback.invoke(
+                ExtractorLink(
+                    "Instant",
+                    "Instant(Download)",
+                    instant,
                     "",
                     getIndexQuality(quality)
                 )
