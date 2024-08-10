@@ -16,8 +16,9 @@ class Driveseed : ExtractorApi() {
     ) {
         val document = app.get(url).document
         val resumeBotUrl = document.selectFirst("a.btn.btn-light").attr("href")
-        val resumeBotDoc = app.get(resumeBotUrl).document
-        val ssid = resumeBotDoc.cookies["PHPSESSID"]
+        val resumeBotResponse = app.get(resumeBotUrl)
+        val resumeBotDoc = resumeBotResponse.document.toString()
+        val ssid = resumeBotResponse.cookies["PHPSESSID"]
         val resumeBotToken = Regex("formData\\.append\\('token', '([a-f0-9]+)'\\)").find(resumeBotDoc)?.groups?.get(1)?.value
         val resumeBotPath = Regex("fetch\\('/download\\?id=([a-zA-Z0-9/\\+]+)'").find(resumeBotDoc)?.groups?.get(1)?.value
         val resumeBotBaseUrl = resumeBotUrl.split("/download")[0]
@@ -29,7 +30,7 @@ class Driveseed : ExtractorApi() {
             requestBody = requestBody,
             headers = mapOf(
                 "Accept" to "*/*",
-                "Origin" to baseIframe,
+                "Origin" to "$resumeBotBaseUrl",
                 "Sec-Fetch-Site" to "same-origin"
             ),
             cookies = mapOf("PHPSESSID" to "$ssid"),
