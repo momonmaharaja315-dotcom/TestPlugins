@@ -82,6 +82,33 @@ class Driveseed : ExtractorApi() {
         return link ?: null
     }
 
+    private suspend fun instantLink(url: String): String? {
+        val token = url.substringAfter("https://video-seed.xyz/?url=")
+        val downloadlink = app.post(
+            url = "https://video-seed.xyz/api",
+            data = mapOf(
+                "keys" to token
+            ),
+            referer = url,
+            headers = mapOf(
+                "x-token" to "video-seed.xyz",
+                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"
+            )
+        )
+        val link =
+            downloadlink.toString().substringAfter("url\":\"")
+                .substringBefore("\",\"name")
+                .replace("\\/", "/")
+
+        return link ?: null
+    }
+
+    private suspend fun resumeCloudLink(url: String): String? {
+        val document = app.get(url).document
+        val link = document.selectFirst("a.btn-success").attr("href")
+        return link ?: null
+    }
+
     private suspend fun resumeBot(url : String): String? {
         val resumeBotResponse = app.get(url)
         val resumeBotDoc = resumeBotResponse.document.toString()
@@ -115,8 +142,22 @@ class Driveseed : ExtractorApi() {
         callback: (ExtractorLink) -> Unit
     ) {
         val document = app.get(url).document
-        val resumeBotUrl = document.selectFirst("a.btn.btn-light").attr("href")
+        val resumeCloudUrl = url.replace("file", "zfile")
+        val resumeCloud = resumeCloudLink(resumeCloudUrl)
 
+        if (resumeCloud != null) {
+            callback.invoke(
+                ExtractorLink(
+                    "ResumeCloud",
+                    "ResumeCloud",
+                    resumeCloud,
+                    "",
+                    Qualities.Unknown.value
+                )
+            )
+        }
+
+        val resumeBotUrl = document.selectFirst("a.btn.btn-light").attr("href")
         val resumeLink = resumeBot(resumeBotUrl)
         if (resumeLink != null) {
             callback.invoke(
@@ -149,6 +190,20 @@ class Driveseed : ExtractorApi() {
                     "CF Type2",
                     "CF Type2",
                     cfType2,
+                    "",
+                    Qualities.Unknown.value
+                )
+            )
+        }
+
+        val instant = instantLink(document.selectFirst("a.btn-danger").attr("href"))
+
+        if(instant != null){
+            callback.invoke(
+                ExtractorLink(
+                    "Instant",
+                    "Instant",
+                    instant,
                     "",
                     Qualities.Unknown.value
                 )
