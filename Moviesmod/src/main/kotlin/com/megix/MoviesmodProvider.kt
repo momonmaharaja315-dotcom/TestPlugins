@@ -182,13 +182,16 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
                  val base64Value = link.substringAfter("url=")
                  link = base64Decode(base64Value)
             }
+
             val doc = app.get(link).document
             val url = doc.selectFirst("a.maxbutton-1").attr("href")
+            val source = bypass(url)
+
             callback.invoke(
                 ExtractorLink(
                     this.name,
                     this.name,
-                    url,
+                    source,
                     referer = "",
                     Qualities.Unknown.value
                 )
