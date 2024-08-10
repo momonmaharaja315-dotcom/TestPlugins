@@ -183,19 +183,9 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
 
             val doc = app.get(link).document
             val url = doc.selectFirst("a.maxbutton-1").attr("href")
-            val source = bypass(url).toString()
-
-            callback.invoke(
-                ExtractorLink(
-                    this.name,
-                    this.name,
-                    source,
-                    referer = "",
-                    Qualities.Unknown.value
-                )
-            )
+            val driveLink = bypass(url).toString()
+            loadExtractor(driveLink, subtitleCallback, callback)
         }
-        //loadExtractor(data, subtitleCallback, callback)
 
         return true
     }

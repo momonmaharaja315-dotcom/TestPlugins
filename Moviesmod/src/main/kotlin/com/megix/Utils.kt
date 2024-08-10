@@ -1,0 +1,50 @@
+package com.megix
+import com.lagradost.cloudstream3.*
+import com.lagradost.cloudstream3.utils.*
+import okhttp3.FormBody
+
+class Driveseed : ExtractorApi() {
+    override val name: String = "Driveseed"
+    override val mainUrl: String = "https://driveseed.org"
+    override val requiresReferer = false
+
+    override suspend fun getUrl(
+        url: String,
+        referer: String?,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val document = app.get(url).document
+        val resumeBotUrl = document.selectFirst("a.btn.btn-light").attr("href")
+        val resumeBotDoc = app.get(resumeBotUrl).document
+        val ssid = resumeBotDoc.cookies["PHPSESSID"]
+        val resumeBotToken = Regex("formData\\.append\\('token', '([a-f0-9]+)'\\)").find(resumeBotDoc)?.groups?.get(1)?.value
+        val resumeBotPath = Regex("fetch\\('/download\\?id=([a-zA-Z0-9/\\+]+)'").find(resumeBotDoc)?.groups?.get(1)?.value
+        val resumeBotBaseUrl = resumeBotUrl.split("/download")[0]
+        val requestBody = FormBody.Builder()
+            .addEncoded("token", "$resumeBotToken")
+            .build()
+
+        val requestBodyResponse = app.post(resumeBotBaseUrl + "/download?id=" + resumeBotPath,
+            requestBody = requestBody,
+            headers = mapOf(
+                "Accept" to "*/*",
+                "Origin" to baseIframe,
+                "Sec-Fetch-Site" to "same-origin"
+            ),
+            cookies = mapOf("PHPSESSID" to "$ssid"),
+            referer = resumeBotUrl
+        ).text
+
+        callback.invoke(
+            ExtractorLink(
+                this.name,
+                this.name,
+                requestBodyResponse,
+                "",
+                Qualities.Unknown.value
+            )
+        )
+
+    }
+}
