@@ -143,32 +143,6 @@ class Driveseed : ExtractorApi() {
             )
         }
 
-        val cfType1 = CFType1(url)
-        if (cfType1 != null) {
-            callback.invoke(
-                ExtractorLink(
-                    "CF Type1",
-                    "CF Type1",
-                    cfType1,
-                    "",
-                    getIndexQuality(quality)
-                )
-            )
-        }
-
-        val cfType2 = CFType2(url)
-        if (cfType2 != null) {
-            callback.invoke(
-                ExtractorLink(
-                    "CF Type2",
-                    "CF Type2",
-                    cfType2,
-                    "",
-                    getIndexQuality(quality)
-                )
-            )
-        }
-
         val resumeCloudUrl = document.selectFirst("a.btn-warning").attr("href")
         val resumeCloud = resumeCloudLink(resumeCloudUrl)
         if (resumeCloud != null) {
@@ -182,5 +156,31 @@ class Driveseed : ExtractorApi() {
                 )
             )
         }
+
+        val cfType1 = CFType1(url)
+        if (cfType1 != null) {
+            callback.invoke(
+                ExtractorLink(
+                    "CF Type1",
+                    "CF Type1",
+                    cfType1,
+                    "",
+                    getIndexQuality(quality)
+                )
+            )
+        }
+
+        // val cfType2 = CFType2(url)
+        // if (cfType2 != null) {
+        //     callback.invoke(
+        //         ExtractorLink(
+        //             "CF Type2",
+        //             "CF Type2",
+        //             cfType2,
+        //             "",
+        //             getIndexQuality(quality)
+        //         )
+        //     )
+        // }
     }
 }
