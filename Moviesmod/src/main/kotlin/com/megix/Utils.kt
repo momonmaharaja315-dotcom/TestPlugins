@@ -2,6 +2,7 @@ package com.megix
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import okhttp3.FormBody
+import org.json.JSONObject
 
 class Driveseed : ExtractorApi() {
     override val name: String = "Driveseed"
@@ -26,7 +27,7 @@ class Driveseed : ExtractorApi() {
             .addEncoded("token", "$resumeBotToken")
             .build()
 
-        val requestBodyResponse = app.post(resumeBotBaseUrl + "/download?id=" + resumeBotPath,
+        val jsonResponse = app.post(resumeBotBaseUrl + "/download?id=" + resumeBotPath,
             requestBody = requestBody,
             headers = mapOf(
                 "Accept" to "*/*",
@@ -36,12 +37,14 @@ class Driveseed : ExtractorApi() {
             cookies = mapOf("PHPSESSID" to "$ssid"),
             referer = resumeBotUrl
         ).text
+        val jsonObject = JSONObject(jsonResponse)
+        val link = jsonObject.getString("url")
 
         callback.invoke(
             ExtractorLink(
-                this.name,
-                this.name,
-                requestBodyResponse,
+                "ResumeBot",
+                "ResumeBot",
+                link,
                 "",
                 Qualities.Unknown.value
             )
