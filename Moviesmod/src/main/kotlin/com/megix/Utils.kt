@@ -88,7 +88,7 @@ class Driveseed : ExtractorApi() {
     }
 
     private suspend fun resumeCloudLink(url: String): String? {
-        val resumeCloudUrl = url.replace("file", "zfile")
+        val resumeCloudUrl = "https://driveseed.org" + url
         val document = app.get(resumeCloudUrl).document
         val link = document.selectFirst("a.btn-success").attr("href")
         return link ?: null
@@ -129,7 +129,8 @@ class Driveseed : ExtractorApi() {
         val document = app.get(url).document
         val quality = document.selectFirst("li.list-group-item:contains(Name)").text()
 
-        val resumeCloud = resumeCloudLink(url)
+        val resumeCloudUrl = document.selectFirst("a.btn-warning").attr("href")
+        val resumeCloud = resumeCloudLink(resumeCloudUrl)
         if (resumeCloud != null) {
             callback.invoke(
                 ExtractorLink(
