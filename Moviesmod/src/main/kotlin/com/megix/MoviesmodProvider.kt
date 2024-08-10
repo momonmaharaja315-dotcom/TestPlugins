@@ -7,7 +7,6 @@ import org.jsoup.select.Elements
 import com.lagradost.cloudstream3.base64Decode
 import java.net.URI
 import org.jsoup.nodes.Document
-//import com.lagradost.cloudstream3.network.CloudflareKiller
 
 class MoviesmodProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://moviesmod.band"
@@ -15,7 +14,6 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
     override val hasMainPage = true
     override var lang = "hi"
     override val hasDownloadSupport = true
-    //private val cfInterceptor = CloudflareKiller()
     override val supportedTypes = setOf(
         TvType.Movie,
         TvType.TvSeries
@@ -185,7 +183,7 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
 
             val doc = app.get(link).document
             val url = doc.selectFirst("a.maxbutton-1").attr("href")
-            val source = bypass(url)
+            val source = bypass(url).toString()
 
             callback.invoke(
                 ExtractorLink(
