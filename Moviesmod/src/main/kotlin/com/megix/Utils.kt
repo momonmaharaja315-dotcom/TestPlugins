@@ -123,21 +123,22 @@ class Driveseed : ExtractorApi() {
     private suspend fun instantLink(url: String): String? {
         val token = url.split("=").getOrNull(1) ?: ""
         val videoSeedUrl = url.split("/").take(3).joinToString("/") + "/api"
-        val requestBody = FormBody.Builder().add("keys", "$token").build()
-        val downloadlink = app.post(
-            url = videoSeedUrl,
-            requestBody = requestBody,
-            headers = mapOf(
-                "x-token" to "$videoSeedUrl",
-            )
-        )
+        return videoSeedUrl ?: null
+        // val requestBody = FormBody.Builder().add("keys", "$token").build()
+        // val downloadlink = app.post(
+        //     url = videoSeedUrl,
+        //     requestBody = requestBody,
+        //     headers = mapOf(
+        //         "x-token" to "$videoSeedUrl",
+        //     )
+        // )
 
-        val finaldownloadlink =
-            downloadlink.toString().substringAfter("url\":\"")
-                .substringBefore("\",\"name")
-                .replace("\\/", "/")
+        // val finaldownloadlink =
+        //     downloadlink.toString().substringAfter("url\":\"")
+        //         .substringBefore("\",\"name")
+        //         .replace("\\/", "/")
 
-        return finaldownloadlink ?: null
+        // return finaldownloadlink ?: null
     }
 
     override suspend fun getUrl(
