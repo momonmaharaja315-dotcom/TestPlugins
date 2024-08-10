@@ -113,26 +113,6 @@ class Driveseed : ExtractorApi() {
         return link ?: null
     }
 
-    private suspend fun instantLink(url: String): String? {
-        val token = url.split("=").getOrNull(1) ?: ""
-        val videoSeedUrl = url.split("/").take(3).joinToString("/") + "/api"
-        val requestBody = FormBody.Builder().add("keys", "$token").build()
-        val downloadlink = app.post(
-            url = videoSeedUrl,
-            requestBody = requestBody,
-            headers = mapOf(
-                "x-token" to "$videoSeedUrl",
-            )
-        )
-
-        val finaldownloadlink =
-            downloadlink.toString().substringAfter("url\":\"")
-                .substringBefore("\",\"name")
-                .replace("\\/", "/")
-
-        return finaldownloadlink ?: null
-    }
-
     override suspend fun getUrl(
         url: String,
         referer: String?,
@@ -140,44 +120,49 @@ class Driveseed : ExtractorApi() {
         callback: (ExtractorLink) -> Unit
     ) {
         val document = app.get(url).document
-        val source: MutableList<String> = mutableListOf()
         val quality = document.selectFirst("li.list-group-item:contains(Name)").text()
 
         val resumeBotUrl = document.selectFirst("a.btn.btn-light").attr("href")
         val resumeLink = resumeBot(resumeBotUrl)
         if (resumeLink != null) {
-            source.add(resumeLink)
+            callback.invoke(
+                ExtractorLink(
+                    "ResumeBot",
+                    "ResumeBot(VLC)",
+                    resumeLink,
+                    "",
+                    getIndexQuality(quality)
+                )
+            )
         }
 
         val resumeCloudUrl = document.selectFirst("a.btn-warning").attr("href")
         val resumeCloud = resumeCloudLink(resumeCloudUrl)
         if (resumeCloud != null) {
-            source.add(resumeCloud)
-        }
-
-        val cfType1 = CFType1(url)
-        if (cfType1 != null) {
-                cfType1.forEach {
-                source.add(it)
-            }
-        }
-
-        val instantUrl = document.select("a.btn-danger").attr("href")
-        val instant = instantLink(instantUrl)
-        if (instant != null) {
-            source.add(instant)
-        }
-
-        source.forEach {
             callback.invoke(
                 ExtractorLink(
-                    "Driveseed",
-                    "Driveseed",
-                    it,
+                    "ResumeCloud",
+                    "ResumeCloud",
+                    resumeCloud,
                     "",
                     getIndexQuality(quality)
                 )
             )
+        }
+
+        val cfType1 = CFType1(url)
+        if (cfType1 != null) {
+            cfType1.forEach {
+                callback.invoke(
+                    ExtractorLink(
+                        "CF Type1",
+                        "CF Type1",
+                        it,
+                        "",
+                        getIndexQuality(quality)
+                    )
+                )
+            }
         }
     }
 }

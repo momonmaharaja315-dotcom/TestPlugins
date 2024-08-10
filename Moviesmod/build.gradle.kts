@@ -4,7 +4,7 @@ cloudstream {
     language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "Includes Topmovies"
+    description = ""
      authors = listOf("megix")
 
     /**

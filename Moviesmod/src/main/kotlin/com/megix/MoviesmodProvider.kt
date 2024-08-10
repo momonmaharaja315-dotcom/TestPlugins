@@ -8,7 +8,7 @@ import com.lagradost.cloudstream3.base64Decode
 import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
 import com.lagradost.cloudstream3.network.CloudflareKiller
 
-open class MoviesmodProvider : MainAPI() { // all providers must be an instance of MainAPI
+class MoviesmodProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://moviesmod.band"
     override var name = "Moviesmod"
     override val hasMainPage = true
