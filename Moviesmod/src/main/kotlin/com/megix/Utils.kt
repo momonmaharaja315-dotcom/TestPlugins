@@ -169,20 +169,18 @@ class Driveseed : ExtractorApi() {
             )
         }
 
-        val resumeCloudUrl = document.selectFirst("a.btn-warning").attr("href") ?: "empty"
-        if(resumeCloudUrl != "empty") {
-            val resumeCloud = resumeCloudLink(resumeCloudUrl)
-            if (resumeCloud != null) {
-                callback.invoke(
-                    ExtractorLink(
-                        "ResumeCloud",
-                        "ResumeCloud",
-                        resumeCloud,
-                        "",
-                        getIndexQuality(quality)
-                    )
+        val resumeCloudUrl = document.selectFirst("a.btn-warning").attr("href")
+        val resumeCloud = resumeCloudLink(resumeCloudUrl)
+        if (resumeCloud != null) {
+            callback.invoke(
+                ExtractorLink(
+                    "ResumeCloud",
+                    "ResumeCloud",
+                    resumeCloud,
+                    "",
+                    getIndexQuality(quality)
                 )
-            }
+            )
         }
     }
 }
