@@ -14,9 +14,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
     override val hasMainPage = true
     override var lang = "hi"
     override val hasDownloadSupport = true
-
     private val cfInterceptor = CloudflareKiller()
-
     override val supportedTypes = setOf(
         TvType.Movie,
         TvType.TvSeries
@@ -86,7 +84,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             ?.trim()
             ?.toRatingInt()
 
-        val imdbUrl = aTagRating.attr("href")
+        val imdbUrl = aTagRating?.attr("href").toString()
 
         val tvType = if (url.contains("season") ||
             (title?.contains("(Season") ?: false) ||
@@ -157,7 +155,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 }
             }
 
-            return newTvSeriesLoadResponse(trimTitle, url, TvType.TvSeries, tvSeriesEpisodes) {
+            return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl
                 this.plot = plot
                 this.rating = rating
