@@ -5,8 +5,6 @@ import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import com.lagradost.cloudstream3.base64Decode
-import java.net.URI
-import org.jsoup.nodes.Document
 
 class MoviesmodProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://moviesmod.band"
@@ -35,7 +33,7 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
-        val title = this.selectFirst("a").attr("title")
+        val title = this.selectFirst("a").attr("title").replace("Download ", "")
         val href = this.selectFirst("a").attr("href")
         val posterUrl = this.selectFirst("a > div > img").attr("src")
     
@@ -61,62 +59,6 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
         return searchResponse
     }
 
-    fun fixUrl(url: String, domain: String): String {
-        if (url.startsWith("http")) {
-            return url
-        }
-        if (url.isEmpty()) {
-            return ""
-        }
-
-        val startsWithNoHttp = url.startsWith("//")
-        if (startsWithNoHttp) {
-            return "https:$url"
-        } else {
-            if (url.startsWith('/')) {
-                return domain + url
-            }
-            return "$domain/$url"
-        }
-    }
-
-    fun getBaseUrl(url: String): String {
-        return URI(url).let {
-            "${it.scheme}://${it.host}"
-        }
-    }
-
-    suspend fun bypass(url: String): String? {
-        fun Document.getFormUrl(): String {
-            return this.select("form#landing").attr("action")
-        }
-
-        fun Document.getFormData(): Map<String, String> {
-            return this.select("form#landing input").associate { it.attr("name") to it.attr("value") }
-        }
-
-        val host = getBaseUrl(url)
-        var res = app.get(url).document
-        var formUrl = res.getFormUrl()
-        var formData = res.getFormData()
-
-        res = app.post(formUrl, data = formData).document
-        formUrl = res.getFormUrl()
-        formData = res.getFormData()
-
-        res = app.post(formUrl, data = formData).document
-        val skToken = res.selectFirst("script:containsData(?go=)")?.data()?.substringAfter("?go=")
-            ?.substringBefore("\"") ?: return null
-        val driveUrl = app.get(
-            "$host?go=$skToken", cookies = mapOf(
-                skToken to "${formData["_wp_http2"]}"
-            )
-        ).document.selectFirst("meta[http-equiv=refresh]")?.attr("content")?.substringAfter("url=")
-        val path = app.get(driveUrl ?: return null).text.substringAfter("replace(\"")
-            .substringBefore("\")")
-        if (path == "/404") return null
-        return fixUrl(path, getBaseUrl(driveUrl))
-    }
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
