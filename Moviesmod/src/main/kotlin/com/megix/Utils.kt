@@ -142,6 +142,8 @@ class Driveseed : ExtractorApi() {
         callback: (ExtractorLink) -> Unit
     ) {
         val document = app.get(url).document
+        val quality = document.selectFirst("li.list-group-item:contains(Name)").text()
+
         val resumeCloudUrl = url.replace("file", "zfile")
         val resumeCloud = resumeCloudLink(resumeCloudUrl)
 
@@ -152,7 +154,7 @@ class Driveseed : ExtractorApi() {
                     "ResumeCloud",
                     resumeCloud,
                     "",
-                    Qualities.Unknown.value
+                    getQualityFromName(quality)
                 )
             )
         }
@@ -166,7 +168,7 @@ class Driveseed : ExtractorApi() {
                     "ResumeBot",
                     resumeLink,
                     "",
-                    Qualities.Unknown.value
+                    getQualityFromName(quality)
                 )
             )
         }
@@ -178,7 +180,7 @@ class Driveseed : ExtractorApi() {
                     "CF Type1",
                     cfType1,
                     "",
-                    Qualities.Unknown.value
+                    getQualityFromName(quality)
                 )
             )
         }
@@ -191,7 +193,7 @@ class Driveseed : ExtractorApi() {
                     "CF Type2",
                     cfType2,
                     "",
-                    Qualities.Unknown.value
+                    getQualityFromName(quality)
                 )
             )
         }
@@ -205,7 +207,7 @@ class Driveseed : ExtractorApi() {
                     "Instant",
                     instant,
                     "",
-                    Qualities.Unknown.value
+                    getQualityFromName(quality)
                 )
             )
         }
