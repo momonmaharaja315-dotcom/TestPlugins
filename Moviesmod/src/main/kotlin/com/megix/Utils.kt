@@ -68,6 +68,20 @@ class Driveseed : ExtractorApi() {
     override val mainUrl: String = "https://driveseed.org"
     override val requiresReferer = false
 
+    private suspend fun CFType1(url: String): String? {
+        val cfWorkersLink = url.replace("/file", "/wfile") + "?type=1"
+        val document = app.get(cfWorkersLink).document
+        val link = document.selectFirst("a.btn-success").attr("href")
+        return link ?: null
+    }
+
+    private suspend fun CFType2(url: String): String? {
+        val cfWorkersLink = url.replace("/file", "/wfile") + "?type=2"
+        val document = app.get(cfWorkersLink).document
+        val link = document.selectFirst("a.btn-success").attr("href")
+        return link ?: null
+    }
+
     private suspend fun resumeBot(url : String): String? {
         val resumeBotResponse = app.get(url)
         val resumeBotDoc = resumeBotResponse.document.toString()
@@ -109,6 +123,31 @@ class Driveseed : ExtractorApi() {
                     "ResumeBot",
                     "ResumeBot",
                     resumeLink,
+                    "",
+                    Qualities.Unknown.value
+                )
+            )
+        }
+        val cfType1 = CFType1(url)
+        if (cfType1 != null) {
+            callback.invoke(
+                ExtractorLink(
+                    "CF Type1",
+                    "CF Type1",
+                    cfType1,
+                    "",
+                    Qualities.Unknown.value
+                )
+            )
+        }
+
+        val cfType2 = CFType2(url)
+        if (cfType2 != null) {
+            callback.invoke(
+                ExtractorLink(
+                    "CF Type2",
+                    "CF Type2",
+                    cfType2,
                     "",
                     Qualities.Unknown.value
                 )
