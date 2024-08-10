@@ -87,29 +87,9 @@ class Driveseed : ExtractorApi() {
         return link ?: null
     }
 
-    private suspend fun instantLink(url: String): String? {
-        val token = url.substringAfter("https://video-seed.xyz/?url=")
-        val downloadlink = app.post(
-            url = "https://video-seed.xyz/api",
-            data = mapOf(
-                "keys" to token
-            ),
-            referer = url,
-            headers = mapOf(
-                "x-token" to "video-seed.xyz",
-                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"
-            )
-        )
-        val link =
-            downloadlink.toString().substringAfter("url\":\"")
-                .substringBefore("\",\"name")
-                .replace("\\/", "/")
-
-        return link ?: null
-    }
-
     private suspend fun resumeCloudLink(url: String): String? {
-        val document = app.get(url).document
+        val resumeCloudUrl = url.replace("file", "zfile")
+        val document = app.get(resumeCloudUrl).document
         val link = document.selectFirst("a.btn-success").attr("href")
         return link ?: null
     }
@@ -149,20 +129,18 @@ class Driveseed : ExtractorApi() {
         val document = app.get(url).document
         val quality = document.selectFirst("li.list-group-item:contains(Name)").text()
 
-        // val resumeCloudUrl = url.replace("file", "zfile")
-        // val resumeCloud = resumeCloudLink(resumeCloudUrl)
-
-        // if (resumeCloud != null) {
-        //     callback.invoke(
-        //         ExtractorLink(
-        //             "ResumeCloud",
-        //             "ResumeCloud",
-        //             resumeCloud,
-        //             "",
-        //             getIndexQuality(quality)
-        //         )
-        //     )
-        // }
+        val resumeCloud = resumeCloudLink(url)
+        if (resumeCloud != null) {
+            callback.invoke(
+                ExtractorLink(
+                    "ResumeCloud",
+                    "ResumeCloud",
+                    resumeCloud,
+                    "",
+                    getIndexQuality(quality)
+                )
+            )
+        }
 
         val resumeBotUrl = document.selectFirst("a.btn.btn-light").attr("href")
         val resumeLink = resumeBot(resumeBotUrl)
@@ -170,13 +148,14 @@ class Driveseed : ExtractorApi() {
             callback.invoke(
                 ExtractorLink(
                     "ResumeBot",
-                    "ResumeBot",
+                    "ResumeBot(VLC)",
                     resumeLink,
                     "",
                     getIndexQuality(quality)
                 )
             )
         }
+
         val cfType1 = CFType1(url)
         if (cfType1 != null) {
             callback.invoke(
