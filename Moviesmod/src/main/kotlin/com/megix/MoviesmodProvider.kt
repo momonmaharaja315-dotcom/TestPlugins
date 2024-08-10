@@ -78,22 +78,34 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
 
             buttons.mapNotNull {
                 var link = it.attr("href")
+                val titleElement = it.parent().previousElementSibling()
+                val seasonText = titleElement.text()
+                seasonList.add(Pair(seasonText, seasonNum))
 
                 if(link.contains("url=")) {
                     val base64Value = link.substringAfter("url=")
                     link = base64Decode(base64Value)
                 }
-                tvSeriesEpisodes.add(
-                    newEpisode(link) {
-                        name = "test"
-                        season = seasonNum
+                val doc = app.get(link).document
+                val hTags = doc.select("h3,h4")
+                hTags.mapNotNull {
+                    val title = it.text()
+                    var epUrl = it.selectFirst("a").attr("href")
+                    if(epUrl.contains("unblockedgames")) {
+                        epUrl = bypass(epUrl)
                     }
-                )
+                    tvSeriesEpisodes.add(
+                        newEpisode(epUrl) {
+                            name = title
+                            season = seasonNum
+                        }
+                    )
+                }
                 seasonNum++
             }
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl
-                //this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
+                this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
                 this.plot = description
                 addImdbUrl(imdbUrl)
             }
@@ -107,8 +119,6 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
         }
 
 
-        //     val doc = app.get(link).document
-        //     val hTags = doc.select("h3,h4")
 
         //     hTags.mapNotNull {
         //         val title = it.text()
@@ -133,16 +143,8 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        if(data.contains("archives")) {
-            callback.invoke (
-                ExtractorLink(
-                    this.name,
-                    this.name,
-                    data,
-                    "",
-                    Qualities.Unknown.value
-                )
-            )
+        if(data.contains("driveseed")) {
+            loadExtractor(data, subtitleCallback, callback)
             return true
         }
         val document = app.get(data).document
