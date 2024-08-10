@@ -131,16 +131,7 @@ open class TopmoviesProvider : MainAPI() { // all providers must be an instance 
     ): Boolean {
         if(data.contains("unblockedgames")) {
             val link = bypass(data).toString()
-            callback.invoke(
-                ExtractorLink(
-                    this.name,
-                    this.name,
-                    link,
-                    "",
-                    Qualities.Unknown.value
-                )
-            )
-            //loadExtractor(link, subtitleCallback, callback)
+            loadExtractor(link, subtitleCallback, callback)
         }
         else {
             val document = app.get(data).document
@@ -154,16 +145,7 @@ open class TopmoviesProvider : MainAPI() { // all providers must be an instance 
                 val doc = app.get(link).document
                 val url = doc.selectFirst("a.maxbutton-fast-server-gdrive").attr("href")
                 val driveLink = bypass(url).toString()
-                callback.invoke(
-                    ExtractorLink(
-                        this.name,
-                        this.name,
-                        driveLink,
-                        "",
-                        Qualities.Unknown.value
-                    )
-                )
-                //loadExtractor(driveLink, subtitleCallback, callback)
+                loadExtractor(driveLink, subtitleCallback, callback)
             }
         }
         return true
