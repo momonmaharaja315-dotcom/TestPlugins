@@ -68,6 +68,11 @@ class Driveseed : ExtractorApi() {
     override val mainUrl: String = "https://driveseed.org"
     override val requiresReferer = false
 
+    private fun getIndexQuality(str: String?): Int {
+        return Regex("(\\d{3,4})[pP]").find(str ?: "") ?. groupValues ?. getOrNull(1) ?. toIntOrNull()
+            ?: Qualities.Unknown.value
+    }
+
     private suspend fun CFType1(url: String): String? {
         val cfWorkersLink = url.replace("/file", "/wfile") + "?type=1"
         val document = app.get(cfWorkersLink).document
@@ -144,20 +149,20 @@ class Driveseed : ExtractorApi() {
         val document = app.get(url).document
         val quality = document.selectFirst("li.list-group-item:contains(Name)").text()
 
-        val resumeCloudUrl = url.replace("file", "zfile")
-        val resumeCloud = resumeCloudLink(resumeCloudUrl)
+        // val resumeCloudUrl = url.replace("file", "zfile")
+        // val resumeCloud = resumeCloudLink(resumeCloudUrl)
 
-        if (resumeCloud != null) {
-            callback.invoke(
-                ExtractorLink(
-                    "ResumeCloud",
-                    "ResumeCloud",
-                    resumeCloud,
-                    "",
-                    getQualityFromName(quality)
-                )
-            )
-        }
+        // if (resumeCloud != null) {
+        //     callback.invoke(
+        //         ExtractorLink(
+        //             "ResumeCloud",
+        //             "ResumeCloud",
+        //             resumeCloud,
+        //             "",
+        //             getIndexQuality(quality)
+        //         )
+        //     )
+        // }
 
         val resumeBotUrl = document.selectFirst("a.btn.btn-light").attr("href")
         val resumeLink = resumeBot(resumeBotUrl)
@@ -168,7 +173,7 @@ class Driveseed : ExtractorApi() {
                     "ResumeBot",
                     resumeLink,
                     "",
-                    getQualityFromName(quality)
+                    getIndexQuality(quality)
                 )
             )
         }
@@ -180,7 +185,7 @@ class Driveseed : ExtractorApi() {
                     "CF Type1",
                     cfType1,
                     "",
-                    getQualityFromName(quality)
+                    getIndexQuality(quality)
                 )
             )
         }
@@ -193,23 +198,23 @@ class Driveseed : ExtractorApi() {
                     "CF Type2",
                     cfType2,
                     "",
-                    getQualityFromName(quality)
+                    getIndexQuality(quality)
                 )
             )
         }
 
-        val instant = instantLink(document.selectFirst("a.btn-danger").attr("href"))
+        // val instant = instantLink(document.selectFirst("a.btn-danger").attr("href"))
 
-        if(instant != null){
-            callback.invoke(
-                ExtractorLink(
-                    "Instant",
-                    "Instant",
-                    instant,
-                    "",
-                    getQualityFromName(quality)
-                )
-            )
-        }
+        // if(instant != null){
+        //     callback.invoke(
+        //         ExtractorLink(
+        //             "Instant",
+        //             "Instant",
+        //             instant,
+        //             "",
+        //             getIndexQuality(quality)
+        //         )
+        //     )
+        // }
     }
 }
