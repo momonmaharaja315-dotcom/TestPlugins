@@ -5,6 +5,7 @@ import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import com.lagradost.cloudstream3.base64Decode
+import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
 
 class MoviesmodProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://moviesmod.band"
@@ -67,8 +68,9 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
         val description = document.selectFirst("div.imdbwp__teaser").text()
         val div = document.selectFirst("div.thecontent").text()
         val tvtype = if(div.contains("season", ignoreCase = true)) TvType.TvSeries else TvType.Movie
+        val imdbUrl = document.selectFirst("a.imdbwp__link").attr("href")
 
-        if(tvtype == TvType.Series) {
+        if(tvtype == TvType.TvSeries) {
             val tvSeriesEpisodes = mutableListOf<Episode>()
             var seasonNum = 1
             val seasonList = mutableListOf<Pair<String, Int>>()
@@ -93,12 +95,14 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
                 this.posterUrl = posterUrl
                 //this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
                 this.plot = description
+                addImdbUrl(imdbUrl)
             }
         }
         else {
             return newMovieLoadResponse(title, url, TvType.Movie, url) {
                 this.posterUrl = posterUrl
                 this.plot = description
+                addImdbUrl(imdbUrl)
             }
         }
 
