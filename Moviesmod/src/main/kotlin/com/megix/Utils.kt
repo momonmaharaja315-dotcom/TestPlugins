@@ -5,7 +5,6 @@ import okhttp3.FormBody
 import org.json.JSONObject
 import java.net.URI
 import org.jsoup.nodes.Document
-import okhttp3.FormBody
 
 fun fixUrl(url: String, domain: String): String {
     if (url.startsWith("http")) {
