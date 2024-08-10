@@ -175,8 +175,26 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-
-        loadExtractor(data, subtitleCallback, callback)
+        val document = app.get(data).document
+        document.select("a.maxbutton-download-links").mapNotNull {
+            var link = it.attr("href")
+            if(link.contains("url=")) {
+                 val base64Value = link.substringAfter("url=")
+                 link = base64Decode(base64Value)
+            }
+            val doc = app.get(link).document
+            val url = doc.selectFirst("a.maxbutton-1").attr("href")
+            callback.invoke(
+                ExtractorLink(
+                    this.name,
+                    this.name,
+                    url,
+                    referer = "",
+                    Qualities.Unknown.value
+                )
+            )
+        }
+        //loadExtractor(data, subtitleCallback, callback)
 
         return true
     }
