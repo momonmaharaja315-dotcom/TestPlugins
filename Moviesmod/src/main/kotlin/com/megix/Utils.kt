@@ -117,6 +117,17 @@ class Driveseed : ExtractorApi() {
         val document = app.get(url).document
         val resumeBotUrl = document.selectFirst("a.btn.btn-light").attr("href")
         val resumeLink = resumeBot(resumeBotUrl)
+        val headers = mapOf(
+            "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Language" to "en-GB,en;q=0.5",
+            "Sec-Fetch-Dest" to "document",
+            "Sec-Fetch-Mode" to "navigate",
+            "Sec-Fetch-Site" to "none",
+            "Sec-Fetch-User" to "?1",
+            "Sec-GPC" to "1",
+            "Upgrade-Insecure-Requests" to "1",
+            "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+        )
         if (resumeLink != null) {
             callback.invoke(
                 ExtractorLink(
@@ -124,7 +135,8 @@ class Driveseed : ExtractorApi() {
                     "ResumeBot",
                     resumeLink,
                     "",
-                    Qualities.Unknown.value
+                    Qualities.Unknown.value,
+                    headers = headers
                 )
             )
         }
@@ -136,7 +148,8 @@ class Driveseed : ExtractorApi() {
                     "CF Type1",
                     cfType1,
                     "",
-                    Qualities.Unknown.value
+                    Qualities.Unknown.value,
+                    headers = headers
                 )
             )
         }
@@ -149,7 +162,8 @@ class Driveseed : ExtractorApi() {
                     "CF Type2",
                     cfType2,
                     "",
-                    Qualities.Unknown.value
+                    Qualities.Unknown.value,
+                    headers = headers
                 )
             )
         }
