@@ -5,6 +5,7 @@ import okhttp3.FormBody
 import org.json.JSONObject
 import java.net.URI
 import org.jsoup.nodes.Document
+import okhttp3.FormBody
 
 fun fixUrl(url: String, domain: String): String {
     if (url.startsWith("http")) {
@@ -123,11 +124,10 @@ class Driveseed : ExtractorApi() {
     private suspend fun instantLink(url: String): String? {
         val token = url.split("=").getOrNull(1) ?: ""
         val videoSeedUrl = url.split("/").take(3).joinToString("/") + "/api"
+        val requestBody = FormBody.Builder().add("keys", "$token").build()
         val downloadlink = app.post(
             url = videoSeedUrl,
-            requestBody = mapOf(
-                "keys" to "$token"
-            ),
+            requestBody = requestBody,
             headers = mapOf(
                 "x-token" to "$videoSeedUrl",
             )
