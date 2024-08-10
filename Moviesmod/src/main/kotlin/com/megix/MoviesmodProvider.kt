@@ -6,6 +6,7 @@ import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import com.lagradost.cloudstream3.base64Decode
 import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
+import com.lagradost.cloudstream3.network.CloudflareKiller
 
 class MoviesmodProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://moviesmod.band"
@@ -13,6 +14,7 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
     override val hasMainPage = true
     override var lang = "hi"
     override val hasDownloadSupport = true
+    private val cfInterceptor = CloudflareKiller()
     override val supportedTypes = setOf(
         TvType.Movie,
         TvType.TvSeries
@@ -20,6 +22,8 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
 
     override val mainPage = mainPageOf(
         "$mainUrl/page/" to "Home",
+        "$mainUrl/web-series/on-going/page/" to "Latest Web Series",
+        "$mainUrl/movies/latest-released/page/" to "Latest Movies",
     )
 
     override suspend fun getMainPage(
@@ -47,7 +51,7 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
         val searchResponse = mutableListOf<SearchResponse>()
 
         for (i in 1..3) {
-            val document = app.get("$mainUrl/search/$query/page/$i").document
+            val document = app.get("$mainUrl/search/$query/page/$i", interceptor = cfInterceptor).document
 
             val results = document.select("div.post-cards > article").mapNotNull { it.toSearchResult() }
 

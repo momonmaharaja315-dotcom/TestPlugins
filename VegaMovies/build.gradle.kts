@@ -1,10 +1,10 @@
-version = 5
+version = 36
 
 cloudstream {
     language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = ""
+    description = "Includes LuxMovies"
      authors = listOf("megix")
 
     /**
@@ -20,5 +20,5 @@ cloudstream {
         "Movie",
     )
 
-    iconUrl = "https://moviesmod.band/wp-content/uploads/2022/12/moviesmodnew-Custom.png"
+    iconUrl = "https://vegamovies.tw/wp-content/uploads/2024/04/logo.png"
 }
