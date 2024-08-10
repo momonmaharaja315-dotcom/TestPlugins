@@ -117,24 +117,6 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
                 addImdbUrl(imdbUrl)
             }
         }
-
-
-
-        //     hTags.mapNotNull {
-        //         val title = it.text()
-        //         var epUrl = it.selectFirst("a").attr("href")
-        //         if(epUrl.contains("unblockedgames")) {
-        //             epUrl = bypass(epUrl)
-        //         }
-        //         tvSeriesEpisodes.add (
-        //             newEpisode(epUrl) {
-        //                 name = title
-        //                 season = seasonNum
-        //             }
-        //         )
-        //     }
-        //     seasonNum++
-        // }
     }
 
     override suspend fun loadLinks(
@@ -143,7 +125,7 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        if(data.contains("driveseed")) {
+        if(data.contains("unblockedgame")) {
             callback.invoke(
                 ExtractorLink (
                     this.name,
