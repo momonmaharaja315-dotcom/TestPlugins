@@ -129,22 +129,6 @@ class Driveseed : ExtractorApi() {
         val document = app.get(url).document
         val quality = document.selectFirst("li.list-group-item:contains(Name)").text()
 
-        val resumeCloudUrl = document.selectFirst("a.btn-warning").attr("href")
-        if(resumeCloudUrl != null){
-            val resumeCloud = resumeCloudLink(resumeCloudUrl)
-            if (resumeCloud != null) {
-                callback.invoke(
-                    ExtractorLink(
-                        "ResumeCloud",
-                        "ResumeCloud",
-                        resumeCloud,
-                        "",
-                        getIndexQuality(quality)
-                    )
-                )
-            }
-        }
-
         val resumeBotUrl = document.selectFirst("a.btn.btn-light").attr("href")
         val resumeLink = resumeBot(resumeBotUrl)
         if (resumeLink != null) {
@@ -185,8 +169,21 @@ class Driveseed : ExtractorApi() {
             )
         }
 
-        // val instant = instantLink(document.selectFirst("a.btn-danger").attr("href"))
+        // val resumeCloudUrl = document.selectFirst("a.btn-warning").attr("href")
+        // val resumeCloud = resumeCloudLink(resumeCloudUrl)
+        // if (resumeCloud != null) {
+        //     callback.invoke(
+        //         ExtractorLink(
+        //             "ResumeCloud",
+        //             "ResumeCloud",
+        //             resumeCloud,
+        //             "",
+        //             getIndexQuality(quality)
+        //         )
+        //     )
+        // }
 
+        // val instant = instantLink(document.selectFirst("a.btn-danger").attr("href"))
         // if(instant != null){
         //     callback.invoke(
         //         ExtractorLink(
