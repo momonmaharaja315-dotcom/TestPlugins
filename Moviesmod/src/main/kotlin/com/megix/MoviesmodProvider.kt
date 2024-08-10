@@ -65,19 +65,43 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
         val title = document.selectFirst("meta[property=og:title]").attr("content").replace("Download ", "")
         val posterUrl = document.selectFirst("meta[property=og:image]").attr("content")
         val description = document.selectFirst("div.imdbwp__teaser").text()
+        val div = document.selectFirst("div.thecontent").text()
+        val tvtype = if(div.contains("season", ignoreCase = true)) TvType.TvSeries else TvType.Movie
 
-        //val tvSeriesEpisodes = mutableListOf<Episode>()
-        //var seasonNum = 1
-        //val seasonList = mutableListOf<Pair<String, Int>>()
-        //val buttons = document.select("a.maxbutton-episode-links,.maxbutton-g-drive,.maxbutton-af-download")
+        if(tvtype == TvType.Series) {
+            val tvSeriesEpisodes = mutableListOf<Episode>()
+            var seasonNum = 1
+            val seasonList = mutableListOf<Pair<String, Int>>()
+            val buttons = document.select("a.maxbutton-episode-links,.maxbutton-g-drive,.maxbutton-af-download")
 
-        // buttons.mapNotNull {
-        //     var link = it.attr("href")
+            buttons.mapNotNull {
+                var link = it.attr("href")
 
-        //     if(link.contains("url=")) {
-        //         val base64Value = link.substringAfter("url=")
-        //         link = base64Decode(base64Value)
-        //     }
+                if(link.contains("url=")) {
+                    val base64Value = link.substringAfter("url=")
+                    link = base64Decode(base64Value)
+                }
+                tvSeriesEpisodes.add(
+                    newEpisode(link) {
+                        name = "test"
+                        season = seasonNum
+                    }
+                )
+                seasonNum++
+            }
+            return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
+                this.posterUrl = posterUrl
+                //this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
+                this.plot = description
+            }
+        }
+        else {
+            return newMovieLoadResponse(title, url, TvType.Movie, url) {
+                this.posterUrl = posterUrl
+                this.plot = description
+            }
+        }
+
 
         //     val doc = app.get(link).document
         //     val hTags = doc.select("h3,h4")
@@ -97,16 +121,6 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
         //     }
         //     seasonNum++
         // }
-        // return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
-        //     this.posterUrl = posterUrl
-        //     //this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
-        //     this.plot = description
-        // }
-
-        return newMovieLoadResponse(title, url, TvType.Movie, url) {
-            this.posterUrl = posterUrl
-            this.plot = description
-        }
     }
 
     override suspend fun loadLinks(
@@ -115,6 +129,18 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        if(data.contains("archives")) {
+            callback.invoke (
+                ExtractorLink(
+                    this.name,
+                    this.name,
+                    data,
+                    "",
+                    Qualities.Unknown.value
+                )
+            )
+            return true
+        }
         val document = app.get(data).document
         document.select("a.maxbutton-download-links").mapNotNull {
             var link = it.attr("href")
