@@ -92,6 +92,7 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
                 }
                 val doc = app.get(link).document
                 val hTags = doc.select("h3,h4")
+                var e = 1
                 hTags.mapNotNull {
                     val title = it.text()
                     val epUrl = it.selectFirst("a").attr("href")
@@ -99,9 +100,11 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
                         newEpisode(epUrl) {
                             name = title
                             season = seasonNum
+                            episode = e++
                         }
                     )
                 }
+                e = 1
                 seasonNum++
             }
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
