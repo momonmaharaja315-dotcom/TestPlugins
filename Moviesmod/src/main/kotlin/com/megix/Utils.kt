@@ -169,31 +169,20 @@ class Driveseed : ExtractorApi() {
             )
         }
 
-        // val resumeCloudUrl = document.selectFirst("a.btn-warning").attr("href")
-        // val resumeCloud = resumeCloudLink(resumeCloudUrl)
-        // if (resumeCloud != null) {
-        //     callback.invoke(
-        //         ExtractorLink(
-        //             "ResumeCloud",
-        //             "ResumeCloud",
-        //             resumeCloud,
-        //             "",
-        //             getIndexQuality(quality)
-        //         )
-        //     )
-        // }
-
-        // val instant = instantLink(document.selectFirst("a.btn-danger").attr("href"))
-        // if(instant != null){
-        //     callback.invoke(
-        //         ExtractorLink(
-        //             "Instant",
-        //             "Instant",
-        //             instant,
-        //             "",
-        //             getIndexQuality(quality)
-        //         )
-        //     )
-        // }
+        val resumeCloudUrl = document.selectFirst("a.btn-warning").attr("href") ?: "empty"
+        if(resumeCloudUrl != "empty") {
+            val resumeCloud = resumeCloudLink(resumeCloudUrl)
+            if (resumeCloud != null) {
+                callback.invoke(
+                    ExtractorLink(
+                        "ResumeCloud",
+                        "ResumeCloud",
+                        resumeCloud,
+                        "",
+                        getIndexQuality(quality)
+                    )
+                )
+            }
+        }
     }
 }
