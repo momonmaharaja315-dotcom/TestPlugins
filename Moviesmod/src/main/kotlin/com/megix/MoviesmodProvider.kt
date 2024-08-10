@@ -78,9 +78,9 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
 
             buttons.mapNotNull {
                 var link = it.attr("href")
-                //val titleElement = it.parent().previousElementSibling()
-                //val seasonText = titleElement.text()
-                //seasonList.add(Pair(seasonText, seasonNum))
+                val titleElement = it.parent().previousElementSibling()
+                val seasonText = titleElement.text()
+                seasonList.add(Pair(seasonText, seasonNum))
 
                 if(link.contains("url=")) {
                     val base64Value = link.substringAfter("url=")
@@ -91,9 +91,9 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
                 hTags.mapNotNull {
                     val title = it.text()
                     var epUrl = it.selectFirst("a").attr("href")
-                    if(epUrl.contains("unblockedgames")) {
-                        epUrl = bypass(epUrl)
-                    }
+                    // if(epUrl.contains("unblockedgames")) {
+                    //     epUrl = bypass(epUrl)
+                    // }
                     tvSeriesEpisodes.add(
                         newEpisode(epUrl) {
                             name = title
@@ -105,7 +105,7 @@ class MoviesmodProvider : MainAPI() { // all providers must be an instance of Ma
             }
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl
-                //this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
+                this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
                 this.plot = description
                 addImdbUrl(imdbUrl)
             }
