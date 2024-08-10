@@ -184,7 +184,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 tvSeriesEpisodes.add(episode)
                 seasonNum++
             }
-            return newTvSeriesLoadResponse(trimTitle, url, TvType.TvSeries, tvSeriesEpisodes) {
+            return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl
                 this.plot = plot
                 this.rating = rating
