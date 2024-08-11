@@ -131,7 +131,7 @@ class Driveseed : ExtractorApi() {
                 .substringBefore("\",\"name")
                 .replace("\\/", "/")
         val link = finaldownloadlink
-        return links ?: null
+        return link ?: null
     }
 
 
