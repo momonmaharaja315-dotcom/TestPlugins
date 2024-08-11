@@ -114,15 +114,16 @@ class Driveseed : ExtractorApi() {
     }
 
     private suspend fun instantLink(finallink: String): String? {
-        val token = finallink.substringAfter("https://video-seed.xyz/?url=")
+        val url = if(finallink.contains("video-leech")) "video-leech.xyz" else "video-seed.xyz"
+        val token = finallink.substringAfter("https://$url/?url=")
         val downloadlink = app.post(
-            url = "https://video-seed.xyz/api",
+            url = "https://$url/api",
             data = mapOf(
                 "keys" to token
             ),
             referer = finallink,
             headers = mapOf(
-                "x-token" to "video-seed.xyz",
+                "x-token" to "$url",
                 "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"
             )
         )
