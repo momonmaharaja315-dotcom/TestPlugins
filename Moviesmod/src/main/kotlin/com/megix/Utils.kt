@@ -113,6 +113,28 @@ class Driveseed : ExtractorApi() {
         return link ?: null
     }
 
+    private suspend fun instantLink(finallink: String): String? {
+        val token = finallink.substringAfter("https://video-seed.xyz/?url=")
+        val downloadlink = app.post(
+            url = "https://video-seed.xyz/api",
+            data = mapOf(
+                "keys" to token
+            ),
+            referer = finallink,
+            headers = mapOf(
+                "x-token" to "video-seed.xyz",
+                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"
+            )
+        )
+        val finaldownloadlink =
+            downloadlink.toString().substringAfter("url\":\"")
+                .substringBefore("\",\"name")
+                .replace("\\/", "/")
+        val link = finaldownloadlink
+        return links ?: null
+    }
+
+
     override suspend fun getUrl(
         url: String,
         referer: String?,
@@ -163,6 +185,20 @@ class Driveseed : ExtractorApi() {
                     )
                 )
             }
+        }
+
+        val instantUrl = document.selectFirst("a.btn-danger").attr("href")
+        val instant = instantLink(instantUrl)
+        if (instant != null) {
+            callback.invoke(
+                ExtractorLink(
+                    "Instant(Download)",
+                    "Instant(Download)",
+                    instant,
+                    "",
+                    getIndexQuality(quality)
+                )
+            )
         }
     }
 }
