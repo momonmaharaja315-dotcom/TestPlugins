@@ -144,49 +144,6 @@ class Driveseed : ExtractorApi() {
         val document = app.get(url).document
         val quality = document.selectFirst("li.list-group-item:contains(Name)").text()
 
-        // val resumeBotUrl = document.selectFirst("a.btn.btn-light").attr("href")
-        // val resumeLink = resumeBot(resumeBotUrl)
-        // if (resumeLink != null) {
-        //     callback.invoke(
-        //         ExtractorLink(
-        //             "ResumeBot",
-        //             "ResumeBot(VLC)",
-        //             resumeLink,
-        //             "",
-        //             getIndexQuality(quality)
-        //         )
-        //     )
-        // }
-
-        // val resumeCloudUrl = document.selectFirst("a.btn-warning").attr("href")
-        // val resumeCloud = resumeCloudLink(resumeCloudUrl)
-        // if (resumeCloud != null) {
-        //     callback.invoke(
-        //         ExtractorLink(
-        //             "ResumeCloud",
-        //             "ResumeCloud",
-        //             resumeCloud,
-        //             "",
-        //             getIndexQuality(quality)
-        //         )
-        //     )
-        // }
-
-        // val cfType1 = CFType1(url)
-        // if (cfType1 != null) {
-        //     cfType1.forEach {
-        //         callback.invoke(
-        //             ExtractorLink(
-        //                 "CF Type1",
-        //                 "CF Type1",
-        //                 it,
-        //                 "",
-        //                 getIndexQuality(quality)
-        //             )
-        //         )
-        //     }
-        // }
-
         val instantUrl = document.selectFirst("a.btn-danger").attr("href")
         val instant = instantLink(instantUrl)
         if (instant != null) {
@@ -200,5 +157,49 @@ class Driveseed : ExtractorApi() {
                 )
             )
         }
+
+        val resumeBotUrl = document.selectFirst("a.btn.btn-light").attr("href")
+        val resumeLink = resumeBot(resumeBotUrl)
+        if (resumeLink != null) {
+            callback.invoke(
+                ExtractorLink(
+                    "ResumeBot",
+                    "ResumeBot(VLC)",
+                    resumeLink,
+                    "",
+                    getIndexQuality(quality)
+                )
+            )
+        }
+
+        val cfType1 = CFType1(url)
+        if (cfType1 != null) {
+            cfType1.forEach {
+                callback.invoke(
+                    ExtractorLink(
+                        "CF Type1",
+                        "CF Type1",
+                        it,
+                        "",
+                        getIndexQuality(quality)
+                    )
+                )
+            }
+        }
+
+        val resumeCloudUrl = document.selectFirst("a.btn-warning").attr("href")
+        val resumeCloud = resumeCloudLink(resumeCloudUrl)
+        if (resumeCloud != null) {
+            callback.invoke(
+                ExtractorLink(
+                    "ResumeCloud",
+                    "ResumeCloud",
+                    resumeCloud,
+                    "",
+                    getIndexQuality(quality)
+                )
+            )
+        }
+
     }
 }

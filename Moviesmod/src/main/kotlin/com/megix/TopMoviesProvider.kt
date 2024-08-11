@@ -135,7 +135,7 @@ class TopmoviesProvider : MainAPI() { // all providers must be an instance of Ma
         }
         else {
             val document = app.get(data).document
-            document.select("a.maxbutton-download-links").mapNotNull {
+            document.select("a.maxbutton-download-links").amap {
                 var link = it.attr("href")
                 if(link.contains("url=")) {
                     val base64Value = link.substringAfter("url=")
