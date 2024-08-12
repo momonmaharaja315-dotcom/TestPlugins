@@ -16,7 +16,7 @@ class GDIndexProvider : MainAPI() {
     )
     override var lang = "en"
 
-    override var mainUrl = "https://worker-mute-fog-66ae.ihrqljobdq.workers.dev"
+    override var mainUrl = "https://a.datadiff.us.kg"
     override var name = "GDIndex"
 
     override val hasMainPage = true
