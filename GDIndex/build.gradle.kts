@@ -1,11 +1,12 @@
+// use an integer for version numbers
 version = 1
 
 cloudstream {
-    language = "hi"
+    language = "en"
     // All of these properties are optional, you can safely remove them
 
-    description = "Includes Topmovies"
-     authors = listOf("megix")
+//    description = "Lorem Ipsum"
+    authors = listOf("Horis")
 
     /**
      * Status int as the following:
@@ -16,9 +17,10 @@ cloudstream {
      * */
     status = 1 // will be 3 if unspecified
     tvTypes = listOf(
-        "TvSeries",
         "Movie",
+        "TvSeries",
     )
 
-    iconUrl = "https://moviesmod.band/wp-content/uploads/2022/12/moviesmodnew-Custom.png"
+    iconUrl = "https://cdn.jsdelivr.net/npm/@googledrive/index@2.0.20/images/favicon.ico"
+
 }
