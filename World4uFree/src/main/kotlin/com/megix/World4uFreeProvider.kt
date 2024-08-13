@@ -125,14 +125,14 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
                 tvSeriesEpisodes.addAll(episodes)
                 seasonNum++
             }
-            return newTvSeriesLoadResponse(trimTitle, url, TvType.TvSeries, tvSeriesEpisodes) {
+            return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl
                 this.plot = plot
                 this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
             }
         }
         else {
-            return newMovieLoadResponse(trimTitle, url, TvType.Movie, url) {
+            return newMovieLoadResponse(title, url, TvType.Movie, url) {
                 this.posterUrl = posterUrl
                 this.plot = plot
             }
