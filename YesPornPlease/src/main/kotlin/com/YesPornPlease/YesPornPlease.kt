@@ -80,8 +80,7 @@ class YesPornPlease : MainAPI() {
         ): Boolean {
 
         val document = app.get(data).document
-        val link = document.selectFirst("source").attr("src")
-
+        val link = document.selectFirst("video > a").attr("href")
         callback.invoke(
             ExtractorLink(
                 this.name,
