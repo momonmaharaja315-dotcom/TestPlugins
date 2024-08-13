@@ -69,7 +69,7 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
         val div = document.selectFirst("div.entry-content")
         val plot = div.selectFirst("p:matches((?i)(plot|synopsis|story))").text()
 
-        val posterUrl = document.selectFirst("meta[property=og:image]").attr("content").toString()
+        var posterUrl = document.selectFirst("meta[property=og:image]").attr("content").toString()
         if(posterUrl.isEmpty()) {
             posterUrl = document.selectFirst("div.separator > a > img").attr("data-src").toString()
         }
