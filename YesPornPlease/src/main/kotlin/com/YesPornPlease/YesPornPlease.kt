@@ -79,13 +79,13 @@ class YesPornPlease : MainAPI() {
         callback: (ExtractorLink) -> Unit
         ): Boolean {
 
-        val document = app.get(data).document
-        val link = document.selectFirst("video > a").attr("href")
+        val document = app.get(data).document.toString()
+        //val link = document.selectFirst("video > a").attr("href")
         callback.invoke(
             ExtractorLink(
                 this.name,
                 this.name,
-                link,
+                document,
                 referer = mainUrl,
                 quality = Qualities.Unknown.value,
             )
