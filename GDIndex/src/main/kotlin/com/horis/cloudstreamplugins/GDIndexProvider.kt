@@ -75,7 +75,7 @@ class GDIndexProvider : MainAPI() {
             seasons = folders.mapIndexed { i, f ->
                 SeasonData(i + 1, "S\\d+".toRegex().find(f.name)?.value ?: f.name)
             }
-            folders.amapIndexed { index, gdFile ->
+            folders.mapIndexed { index, gdFile ->
                 listDir(gdFile).mapNotNull {
                     if (!it.name.contains("(?i)\\.(mkv|mp4)$".toRegex())) return@mapNotNull null
                     newEpisode(it) {
