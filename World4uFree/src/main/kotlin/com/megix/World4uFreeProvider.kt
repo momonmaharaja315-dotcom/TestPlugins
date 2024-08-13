@@ -37,7 +37,10 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
     private fun Element.toSearchResult(): SearchResponse? {
         val title = this.selectFirst("div > a").attr("title").replace("Download ", "")
         val href = this.selectFirst("div > a") ?. attr("href").toString()
-        val posterUrl = this.selectFirst("div > a > img").attr("data-src") ?: this.selectFirst("div > a > img").attr("src")
+        var posterUrl = this.selectFirst("div > a > img").attr("data-src").toString()
+        if(posterUrl.isEmpty()) {
+            posterUrl = this.selectFirst("div > a > img").attr("src").toString()
+        }
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
         }
@@ -66,8 +69,10 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
         val div = document.selectFirst("div.entry-content")
         val plot = div.selectFirst("p:matches((?i)(plot|synopsis|story))").text()
 
-        val posterUrl = document.selectFirst("meta[property=og:image]").attr("content") ?: document.selectFirst("div.separator > a > img").attr("data-src")
-
+        val posterUrl = document.selectFirst("meta[property=og:image]").attr("content").toString()
+        if(posterUrl.isEmpty()) {
+            posterUrl = document.selectFirst("div.separator > a > img").attr("data-src").toString()
+        }
         val tvType = if (document.select("div.entry-content").text().contains("movie name", ignoreCase = true)) {
             TvType.Movie
         }
