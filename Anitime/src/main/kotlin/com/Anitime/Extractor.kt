@@ -22,18 +22,17 @@ class AbyssCdn : ExtractorApi() {
         callback: (ExtractorLink) -> Unit
     ) {
         val document = app.get(url).document
-        val script = document.selectFirst("script").data().toString()
+        val responseText = document.toString()
         callback.invoke(
             ExtractorLink(
                 this.name,
                 this.name,
-                script,
+                responseText,
                 referer = "",
                 Qualities.Unknown.value
             )
         )
 
-        // val responseText = document.toString()
         // val base64Pattern = Regex("PLAYER\\(atob\\(\"(.*?)\"\\)")
         // val base64Value = base64Pattern.find(responseText)?.groups?.get(1)?.value ?: ""
         // val decodedJson = base64Decode(base64Value)
