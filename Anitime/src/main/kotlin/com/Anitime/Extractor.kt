@@ -44,7 +44,7 @@ class AbyssCdn : ExtractorApi() {
             var modifiedChar = char
                 .replace("(oﾟｰﾟo)", "u")
                 .replace(char1, "0")
-                .replace(char2, "c")
+                .replace(char2.first, "c") // Use first from Pair
                 .replace("ﾟΘﾟ", "1")
                 .replace("!+[]", "1")
                 .replace("-~", "1+")
@@ -86,12 +86,13 @@ class AbyssCdn : ExtractorApi() {
             val txtTemp = if (result.contains("+(")) {
                 m3 = true
                 sumBase = Regex(".toString...\\d+").find(result)?.groups?.get(1)?.value ?: ""
-                Regex("..(\\d),(\\d+)").findAll(result).map { it.destructured }.toList()
+                Regex("..(\\d),(\\d+)").findAll(result).map { it.destructured.toList() }.toList()
             } else {
-                Regex("(\\d+)\\.0\\.\\w+\\.([^\\)]+)").findAll(result)
+                Regex("(\\d+)\\.0\\.\\w+\\.([^\\)]+)").findAll(result).map { it.destructured.toList() }.toList()
             }
 
-            for ((numero, base) in txtTemp) {
+            for (pair in txtTemp) {
+                val (numero, base) = pair // Destructure into numero and base
                 val code = toString(numero.toInt(), eval(base + sumBase))
                 result = if (m3) {
                     result.replace("\"|\\+", "").replace("($base,$numero)", code)
