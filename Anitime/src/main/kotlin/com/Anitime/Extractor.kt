@@ -26,6 +26,12 @@ class AbyssCdn : ExtractorApi() {
         val domain: String,
     )
 
+    private val client = OkHttpClient()
+
+    constructor() {
+        this.client = OkHttpClient()
+    }
+
     override suspend fun getUrl(
         url: String,
         referer: String?,
@@ -44,7 +50,7 @@ class AbyssCdn : ExtractorApi() {
             .url("https://abyss-oybwdysyx-saurabhkaperwans-projects.vercel.app/decode")
             .post(requestBody)
             .build()
-        val response = app.client.newCall(request).execute()
+        val response = this.client.newCall(request).execute()
         val jsonDataString = response.body?.string() ?: ""
         val responseData = Gson().fromJson(jsonDataString, ResponseData::class.java)
 
