@@ -43,9 +43,9 @@ class AbyssCdn : ExtractorApi() {
             .build()
 
         val jsonDataString = app.post("https://abyss-oybwdysyx-saurabhkaperwans-projects.vercel.app/decode", requestBody = reqBody).text
-        val ResponseData = Gson().fromJson(jsonDataString, ResponseData::class.java)
+        val responseData = Gson().fromJson(jsonDataString, ResponseData::class.java)
 
-        responseData.sources.forEach { source ->
+        ResponseData.sources.forEach { source: Source ->
             val label = source.label
             val domain = "https://${responseData.domain}"
             val id = responseData.id
