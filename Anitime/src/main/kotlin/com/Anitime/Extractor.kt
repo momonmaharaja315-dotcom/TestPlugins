@@ -5,7 +5,7 @@ import com.lagradost.cloudstream3.utils.*
 import com.google.gson.Gson
 import okhttp3.FormBody
 import okhttp3.Request
-import okhttp3.OkHttpClient
+import okhttp3.MultipartBody
 
 class Boosterx : Chillx() {
     override val name = "Boosterx"
@@ -40,14 +40,13 @@ class AbyssCdn : ExtractorApi() {
         val match = regex.find(doc)
         val data2 = match?.groupValues?.get(1) ?: ""
 
-        val requestBody = FormBody.Builder()
-            .add("abyss", data2)
+        val reqBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("abyss", data2)
             .build()
-        val request = Request.Builder()
-            .url("https://abyss-oybwdysyx-saurabhkaperwans-projects.vercel.app/decode")
-            .post(requestBody)
-            .build()
-        val response = client.newCall(request).execute()
+
+        val response = app.post("https://abyss-oybwdysyx-saurabhkaperwans-projects.vercel.app/decode", requestBody = reqBody).text
+
         val jsonDataString = response.body?.string() ?: ""
         val responseData = Gson().fromJson(jsonDataString, ResponseData::class.java)
 
