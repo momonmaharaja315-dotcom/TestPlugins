@@ -79,7 +79,7 @@ class YesPornPlease : MainAPI() {
         callback: (ExtractorLink) -> Unit
         ): Boolean {
 
-        val document = app.get(data).document.toString()
+        val document = app.get(data).document
         val link = document.selectFirst("iframe").attr("src")
         callback.invoke(
             ExtractorLink(

@@ -64,7 +64,7 @@ class FilmycityProvider : MainAPI() { // all providers must be an instance of Ma
         val plot = document.selectFirst("div > p").text()
         val posterUrl = document.selectFirst("img.img-cover").attr("src")
 
-        return newMovieLoadResponse(title, url, TvType.TvMovie, url) {
+        return newMovieLoadResponse(title, url, TvType.Movie, url) {
             this.posterUrl = posterUrl
             this.plot = plot
         }
@@ -77,7 +77,7 @@ class FilmycityProvider : MainAPI() { // all providers must be an instance of Ma
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val document = app.get(data).document
-        val buttons = app.get("a:contains(Direct Download|Download links)")
+        val buttons = document.selectFirst("a:contains(Direct Download|Download links)")
 
         buttons.mapNotNull {
             val href = it.attr("href")
@@ -96,7 +96,9 @@ class FilmycityProvider : MainAPI() { // all providers must be an instance of Ma
                 data = mapOf(
                     "token" to "$token",
                 ),
-                cookies = cookies
+                cookies = mapOf(
+                    "PHPSESSID" to "$cookies",
+                )
             ).toString()
 
             callback.invoke(
@@ -105,7 +107,7 @@ class FilmycityProvider : MainAPI() { // all providers must be an instance of Ma
                     "Filmycity",
                     response,
                     referer = "",
-                    Qualities.Unknown.Value
+                    Qualities.Unknown.value
                 )
             )
         }
