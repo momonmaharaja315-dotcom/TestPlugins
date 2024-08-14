@@ -80,13 +80,15 @@ class YesPornPlease : MainAPI() {
         ): Boolean {
 
         val document = app.get(data).document
-        val link = document.select("iframe")
-        link.mapNotNull{
+        val iframes = document.select("iframe")
+        if(iframes.size >= 3) {
+            val thirdIframe = iframes[2]
+            val link = thirdIframe.attr("src")
             callback.invoke(
                 ExtractorLink(
                     this.name,
                     this.name,
-                    it.attr("src"),
+                    link,
                     referer = mainUrl,
                     quality = Qualities.Unknown.value,
                 )
