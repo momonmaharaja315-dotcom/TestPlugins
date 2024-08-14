@@ -80,16 +80,19 @@ class YesPornPlease : MainAPI() {
         ): Boolean {
 
         val document = app.get(data).document
-        val link = document.selectFirst("iframe").attr("src")
-        callback.invoke(
-            ExtractorLink(
-                this.name,
-                this.name,
-                link,
-                referer = mainUrl,
-                quality = Qualities.Unknown.value,
+        val link = document.select("iframe")
+        link.mapNotNull{
+            callback.invoke(
+                ExtractorLink(
+                    this.name,
+                    this.name,
+                    it.attr("src"),
+                    referer = mainUrl,
+                    quality = Qualities.Unknown.value,
+                )
             )
-        )
+        }
+
         return true
     }
 }
