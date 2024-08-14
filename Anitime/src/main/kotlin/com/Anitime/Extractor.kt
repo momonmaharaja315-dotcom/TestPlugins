@@ -2,9 +2,9 @@ package com.Anitime
 import com.lagradost.cloudstream3.extractors.Chillx
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
-import com.lagradost.cloudstream3.base64Decode
-import org.json.JSONObject
 import com.google.gson.Gson
+import okhttp3.FormBody
+import okhttp3.Request
 
 class Boosterx : Chillx() {
     override val name = "Boosterx"
@@ -37,15 +37,18 @@ class AbyssCdn : ExtractorApi() {
         val match = regex.find(doc)
         val data2 = match?.groupValues?.get(1) ?: ""
 
-        val reqBody = MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
-            .addFormDataPart("abyss", data2)
+        val requestBody = FormBody.Builder()
+            .add("abyss", data2)
             .build()
-
-        val jsonDataString = app.post("https://abyss-oybwdysyx-saurabhkaperwans-projects.vercel.app/decode", requestBody = reqBody).text
+        val request = Request.Builder()
+            .url("https://abyss-oybwdysyx-saurabhkaperwans-projects.vercel.app/decode")
+            .post(requestBody)
+            .build()
+        val response = app.client.newCall(request).execute()
+        val jsonDataString = response.body?.string() ?: ""
         val responseData = Gson().fromJson(jsonDataString, ResponseData::class.java)
 
-        ResponseData.sources.forEach { source: Source ->
+        responseData.sources.forEach { source: Source ->
             val label = source.label
             val domain = "https://${responseData.domain}"
             val id = responseData.id
