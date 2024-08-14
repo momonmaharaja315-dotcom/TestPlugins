@@ -39,18 +39,18 @@ class AbyssCdn : ExtractorApi() {
         // val match = regex.find(doc)
         // val data2 = match?.groupValues?.get(1) ?: ""
 
-        // val reqBody = MultipartBody.Builder()
-        //     .setType(MultipartBody.FORM)
-        //     .addFormDataPart("abyss", data2)
-        //     .build()
+        val reqBody = MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("abyss", data2)
+            .build()
 
-        //val jsonDataString = app.post("https://abyss-oybwdysyx-saurabhkaperwans-projects.vercel.app/decode", requestBody = reqBody).text
+        val jsonDataString = app.post("https://abyss-oybwdysyx-saurabhkaperwans-projects.vercel.app/decode", requestBody = reqBody).text
 
         callback.invoke(
             ExtractorLink(
                 this.name,
                 this.name,
-                data2,
+                jsonDataString,
                 referer = "",
                 Qualities.Unknown.value
             )
