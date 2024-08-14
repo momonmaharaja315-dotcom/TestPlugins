@@ -44,7 +44,7 @@ class AbyssCdn : ExtractorApi() {
             .addFormDataPart("abyss", data2)
             .build()
 
-        val jsonDataString = app.post("https://abyss-oybwdysyx-saurabhkaperwans-projects.vercel.app/decode", requestBody = reqBody).text
+        val jsonDataString = app.post("https://abyss-api-two.vercel.app/decode", requestBody = reqBody).text
 
         callback.invoke(
             ExtractorLink(
