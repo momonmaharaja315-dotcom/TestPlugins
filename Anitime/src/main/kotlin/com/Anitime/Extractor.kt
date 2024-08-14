@@ -29,22 +29,27 @@ class AbyssCdn : ExtractorApi() {
 
     private fun decode(text: String): String {
         var cleanedText = text.replace(Regex("\\s+|/\\*.*?\\*/"), "")
-        val (data, chars, char1, char2) = if (cleanedText.contains("(ﾟɆﾟ)")) {
+
+        // Correctly destructure the Triple
+        val (data, chars, charPair) = if (cleanedText.contains("(ﾟɆﾟ)")) {
             val parts = cleanedText.split("+(ﾟɆﾟ)[ﾟoﾟ]")
             val chars = parts[1].split("+(ﾟɆﾟ)[ﾟεﾟ]+").drop(1)
-            Triple(parts[1], chars, "ღ" to "(ﾟɆﾟ)[ﾟΘﾟ]")
+            Triple(parts[1], chars, Pair("ღ", "(ﾟɆﾟ)[ﾟΘﾟ]")) // Use Pair explicitly
         } else {
             val parts = cleanedText.split("+(ﾟДﾟ)[ﾟoﾟ]")
             val chars = parts[1].split("+(ﾟДﾟ)[ﾟεﾟ]+").drop(1)
-            Triple(parts[1], chars, "c" to "(ﾟДﾟ)['0']")
+            Triple(parts[1], chars, Pair("c", "(ﾟДﾟ)['0']")) // Use Pair explicitly
         }
+
+        // Destructure the Pair
+        val (char1, char2) = charPair
 
         var txt = ""
         for (char in chars) {
             var modifiedChar = char
                 .replace("(oﾟｰﾟo)", "u")
                 .replace(char1, "0")
-                .replace(char2.first, "c") // Use first from Pair
+                .replace(char2, "c") // Use char2 directly
                 .replace("ﾟΘﾟ", "1")
                 .replace("!+[]", "1")
                 .replace("-~", "1+")
