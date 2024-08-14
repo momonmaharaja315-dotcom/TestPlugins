@@ -92,7 +92,8 @@ class AbyssCdn : ExtractorApi() {
             }
 
             for (pair in txtTemp) {
-                val (numero, base) = pair // Destructure into numero and base
+                // Destructure the pair correctly
+                val (numero, base) = pair // Ensure this matches the structure of your regex
                 val code = toString(numero.toInt(), eval(base + sumBase))
                 result = if (m3) {
                     result.replace("\"|\\+", "").replace("($base,$numero)", code)
