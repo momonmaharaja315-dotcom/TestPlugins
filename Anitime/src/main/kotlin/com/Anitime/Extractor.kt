@@ -16,7 +16,7 @@ class AbyssCdn : ExtractorApi() {
     override val mainUrl: String = "https://abysscdn.com"
     override val requiresReferer = true
 
-    private fun fetchTodecode(url: String): String? {
+    private suspend fun fetchTodecode(url: String): String? {
         val response = app.get(url).document
         val scripts = response.select("script:contains(━┻)")
         for (script in scripts) {
@@ -28,15 +28,15 @@ class AbyssCdn : ExtractorApi() {
     }
 
     private fun decode(text: String): String {
-        var cleanedText = text.replace(Regex("\\s+|/\\*.*?\\*/"), "").toString()
+        var cleanedText = text.replace(Regex("\\s+|/\\*.*?\\*/"), "")
         val (data, chars, char1, char2) = if (cleanedText.contains("(ﾟɆﾟ)")) {
             val parts = cleanedText.split("+(ﾟɆﾟ)[ﾟoﾟ]")
             val chars = parts[1].split("+(ﾟɆﾟ)[ﾟεﾟ]+").drop(1)
-            Pair(parts[1], chars, "ღ", "(ﾟɆﾟ)[ﾟΘﾟ]")
+            Triple(parts[1], chars, "ღ" to "(ﾟɆﾟ)[ﾟΘﾟ]")
         } else {
             val parts = cleanedText.split("+(ﾟДﾟ)[ﾟoﾟ]")
             val chars = parts[1].split("+(ﾟДﾟ)[ﾟεﾟ]+").drop(1)
-            Pair(parts[1], chars, "c", "(ﾟДﾟ)['0']")
+            Triple(parts[1], chars, "c" to "(ﾟДﾟ)['0']")
         }
 
         var txt = ""
@@ -60,8 +60,7 @@ class AbyssCdn : ExtractorApi() {
             for (v in modifiedChar) {
                 c += v
                 try {
-                    val x = c
-                    subchar += eval(x).toString()
+                    subchar += eval(c).toString()
                     c = ""
                 } catch (e: Exception) {
                     // Ignore exceptions
@@ -84,14 +83,14 @@ class AbyssCdn : ExtractorApi() {
         var result = txtResult
 
         if (result.contains(".toString(")) {
-            if (result.contains("+(")) {
+            val txtTemp = if (result.contains("+(")) {
                 m3 = true
                 sumBase = Regex(".toString...\\d+").find(result)?.groups?.get(1)?.value ?: ""
-                val txtPreTemp = Regex("..(\\d),(\\d+)").findAll(result).map { it.destructured }.toList()
-                val txtTemp = txtPreTemp.map { (n, b) -> b to n }
+                Regex("..(\\d),(\\d+)").findAll(result).map { it.destructured }.toList()
             } else {
-                val txtTemp = Regex("(\\d+)\\.0\\.\\w+\\.([^\\)]+)").findAll(result)
+                Regex("(\\d+)\\.0\\.\\w+\\.([^\\)]+)").findAll(result)
             }
+
             for ((numero, base) in txtTemp) {
                 val code = toString(numero.toInt(), eval(base + sumBase))
                 result = if (m3) {
@@ -117,7 +116,8 @@ class AbyssCdn : ExtractorApi() {
         return try {
             code.toInt()
         } catch (e: Exception) {
-            eval(code)
+            // Implement a proper eval logic if needed
+            0
         }
     }
 
@@ -127,11 +127,9 @@ class AbyssCdn : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        //val document = app.get(url).document
-        //val responseText = document.toString()
         val decodeString = fetchTodecode(url)
         val base64Pattern = Regex("PLAYER\\(atob\\(\"(.*?)\"\\)")
-        val base64Value = base64Pattern.find(decodeString)?.groups?.get(1)?.value ?: ""
+        val base64Value = base64Pattern.find(decodeString ?: "")?.groups?.get(1)?.value ?: ""
         val decodedJson = base64Decode(base64Value)
         val jsonObject = JSONObject(decodedJson)
 
@@ -143,13 +141,13 @@ class AbyssCdn : ExtractorApi() {
             "1080p" to "https://$domain/whw$vidId"
         )
         val headers = mapOf(
-            "Referer" to "$mainUrl",
+            "Referer" to mainUrl,
             "Sec-Fetch-Mode" to "cors"
         )
 
         for ((quality, link) in videoUrls) {
-            callback.invoke (
-                ExtractorLink (
+            callback.invoke(
+                ExtractorLink(
                     this.name,
                     this.name,
                     link,
