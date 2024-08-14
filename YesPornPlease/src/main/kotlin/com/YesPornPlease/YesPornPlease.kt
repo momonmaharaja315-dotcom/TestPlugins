@@ -85,7 +85,7 @@ class YesPornPlease : MainAPI() {
             ExtractorLink(
                 this.name,
                 this.name,
-                document,
+                link,
                 referer = mainUrl,
                 quality = Qualities.Unknown.value,
             )

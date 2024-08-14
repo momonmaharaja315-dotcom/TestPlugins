@@ -77,7 +77,7 @@ class FilmycityProvider : MainAPI() { // all providers must be an instance of Ma
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val document = app.get(data).document
-        val buttons = document.selectFirst("a:contains(Direct Download|Download links)")
+        val buttons = document.select("a:contains(Direct Download|Download links)")
 
         buttons.mapNotNull {
             val href = it.attr("href")
