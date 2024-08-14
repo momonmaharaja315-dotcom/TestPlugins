@@ -5,6 +5,7 @@ import com.lagradost.cloudstream3.utils.*
 import com.google.gson.Gson
 import okhttp3.FormBody
 import okhttp3.Request
+import okhttp3.OkHttpClient
 
 class Boosterx : Chillx() {
     override val name = "Boosterx"
@@ -28,10 +29,6 @@ class AbyssCdn : ExtractorApi() {
 
     private val client = OkHttpClient()
 
-    constructor() {
-        this.client = OkHttpClient()
-    }
-
     override suspend fun getUrl(
         url: String,
         referer: String?,
@@ -50,7 +47,7 @@ class AbyssCdn : ExtractorApi() {
             .url("https://abyss-oybwdysyx-saurabhkaperwans-projects.vercel.app/decode")
             .post(requestBody)
             .build()
-        val response = this.client.newCall(request).execute()
+        val response = client.newCall(request).execute()
         val jsonDataString = response.body?.string() ?: ""
         val responseData = Gson().fromJson(jsonDataString, ResponseData::class.java)
 
