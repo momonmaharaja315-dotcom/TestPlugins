@@ -33,10 +33,11 @@ class AbyssCdn : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val doc = app.get(url, referer = mainUrl).text
-        val regex = Regex("(ﾟωﾟﾉ=.+?) \\('_'\\);")
-        val match = regex.find(doc)
-        val data2 = match?.groupValues?.get(1) ?: ""
+        val data2 = app.get(url, referer = mainUrl).document.select("script").findLast { it.data().contains("━┻") }?.data() ?: ""
+
+        // val regex = Regex("(ﾟωﾟﾉ=.+?) \\('_'\\);")
+        // val match = regex.find(doc)
+        // val data2 = match?.groupValues?.get(1) ?: ""
 
         // val reqBody = MultipartBody.Builder()
         //     .setType(MultipartBody.FORM)
