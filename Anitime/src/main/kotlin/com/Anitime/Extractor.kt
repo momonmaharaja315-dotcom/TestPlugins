@@ -135,34 +135,43 @@ class AbyssCdn : ExtractorApi() {
         callback: (ExtractorLink) -> Unit
     ) {
         val decodeString = fetchTodecode(url)
-        val base64Pattern = Regex("PLAYER\\(atob\\(\"(.*?)\"\\)")
-        val base64Value = base64Pattern.find(decodeString ?: "")?.groups?.get(1)?.value ?: ""
-        val decodedJson = base64Decode(base64Value)
-        val jsonObject = JSONObject(decodedJson)
-
-        val domain = jsonObject.getString("domain")
-        val vidId = jsonObject.getString("id")
-        val videoUrls = mapOf(
-            "360p" to "https://$domain/$vidId",
-            "720p" to "https://$domain/www$vidId",
-            "1080p" to "https://$domain/whw$vidId"
-        )
-        val headers = mapOf(
-            "Referer" to mainUrl,
-            "Sec-Fetch-Mode" to "cors"
-        )
-
-        for ((quality, link) in videoUrls) {
-            callback.invoke(
-                ExtractorLink(
-                    this.name,
-                    this.name,
-                    link,
-                    referer = mainUrl,
-                    getQualityFromName(quality),
-                    headers = headers
-                )
+        callback.invoke(
+            ExtractorLink(
+                this.name,
+                this.name,
+                decode(decodeString ?: ""),
+                referer = "",
+                Qualities.Unknown.value
             )
-        }
+        )
+        // val base64Pattern = Regex("PLAYER\\(atob\\(\"(.*?)\"\\)")
+        // val base64Value = base64Pattern.find(decodeString ?: "")?.groups?.get(1)?.value ?: ""
+        // val decodedJson = base64Decode(base64Value)
+        // val jsonObject = JSONObject(decodedJson)
+
+        // val domain = jsonObject.getString("domain")
+        // val vidId = jsonObject.getString("id")
+        // val videoUrls = mapOf(
+        //     "360p" to "https://$domain/$vidId",
+        //     "720p" to "https://$domain/www$vidId",
+        //     "1080p" to "https://$domain/whw$vidId"
+        // )
+        // val headers = mapOf(
+        //     "Referer" to mainUrl,
+        //     "Sec-Fetch-Mode" to "cors"
+        // )
+
+        // for ((quality, link) in videoUrls) {
+        //     callback.invoke(
+        //         ExtractorLink(
+        //             this.name,
+        //             this.name,
+        //             link,
+        //             referer = mainUrl,
+        //             getQualityFromName(quality),
+        //             headers = headers
+        //         )
+        //     )
+        // }
     }
 }
