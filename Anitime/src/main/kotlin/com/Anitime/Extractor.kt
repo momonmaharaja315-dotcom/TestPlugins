@@ -34,11 +34,6 @@ class AbyssCdn : ExtractorApi() {
         callback: (ExtractorLink) -> Unit
     ) {
         val data2 = app.get(url, referer = mainUrl).document.select("script").findLast { it.data().contains("━┻") }?.data() ?: ""
-
-        // val regex = Regex("(ﾟωﾟﾉ=.+?) \\('_'\\);")
-        // val match = regex.find(doc)
-        // val data2 = match?.groupValues?.get(1) ?: ""
-
         val reqBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart("abyss", data2)
@@ -55,33 +50,33 @@ class AbyssCdn : ExtractorApi() {
                 Qualities.Unknown.value
             )
         )
-        // val responseData = Gson().fromJson(jsonDataString, ResponseData::class.java)
+        val responseData = Gson().fromJson(jsonDataString, ResponseData::class.java)
 
-        // responseData.sources.forEach { source: Source ->
-        //     val label = source.label
-        //     val domain = "https://${responseData.domain}"
-        //     val id = responseData.id
-        //     var url = ""
-        //     when (label) {
-        //         "360p" -> url = "$domain/$id"
-        //         "720p" -> url = "$domain/www$id"
-        //         "1080p" -> url = "$domain/whw$id"
-        //     }
+        responseData.sources.forEach { source: Source ->
+            val label = source.label
+            val domain = "https://${responseData.domain}"
+            val id = responseData.id
+            var url = ""
+            when (label) {
+                "360p" -> url = "$domain/$id"
+                "720p" -> url = "$domain/www$id"
+                "1080p" -> url = "$domain/whw$id"
+            }
 
-        //     val headers = mapOf(
-        //         "Sec-Fetch-Mode" to "cors",
-        //     )
+            val headers = mapOf(
+                "Sec-Fetch-Mode" to "cors",
+            )
 
-        //     callback.invoke (
-        //         ExtractorLink (
-        //             this.name,
-        //             this.name,
-        //             url,
-        //             referer = mainUrl,
-        //             getQualityFromName(label),
-        //             headers = headers
-        //         )
-        //     )
-        // }
+            callback.invoke (
+                ExtractorLink (
+                    this.name,
+                    this.name,
+                    url,
+                    referer = mainUrl,
+                    getQualityFromName(label),
+                    headers = headers
+                )
+            )
+        }
     }
 }
