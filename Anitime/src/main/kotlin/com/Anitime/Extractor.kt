@@ -24,7 +24,7 @@ class AbyssCdn : ExtractorApi() {
     ) {
         val document = app.get(url).document
         val responseText = document.toString()
-        val base64Pattern = Regex("PLAYER\\(atob\\(\"(.*?)\"\\)")
+        val base64Pattern = Regex("parse\\(atob\\(\"(.*?)\"\\)")
         val base64Value = base64Pattern.find(responseText)?.groups?.get(1)?.value ?: ""
         val decodedJson = base64Decode(base64Value)
         val jsonObject = JSONObject(decodedJson)
