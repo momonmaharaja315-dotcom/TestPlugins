@@ -94,42 +94,30 @@ class AbyssCdn : ExtractorApi() {
         val responseText = document.toString()
         val base64Pattern = Regex("parse\\(atob\\(\"(.*?)\"\\)")
         val base64Value = base64Pattern.find(responseText)?.groups?.get(1)?.value ?: ""
-        val decodedString = customDecode(base64Value)
-
-        callback.invoke(
-            ExtractorLink(
-                this.name,
-                this.name,
-                decodedString,
-                referer = mainUrl,
-                Qualities.Unknown.value
-            )
+        val decodedJson = customDecode(base64Value)
+        val jsonObject = JSONObject(decodedJson)
+        val domain = jsonObject.getString("domain")
+        val vidId = jsonObject.getString("id")
+        val videoUrls = mapOf(
+            "360p" to "https://$domain/$vidId",
+            "720p" to "https://$domain/www$vidId",
+            "1080p" to "https://$domain/whw$vidId"
         )
-        // val decodedJson = base64Decode(base64Value)
-        // val jsonObject = JSONObject(decodedJson)
+        val headers = mapOf(
+            "Sec-Fetch-Mode" to "cors"
+        )
 
-        // val domain = jsonObject.getString("domain")
-        // val vidId = jsonObject.getString("id")
-        // val videoUrls = mapOf(
-        //     "360p" to "https://$domain/$vidId",
-        //     "720p" to "https://$domain/www$vidId",
-        //     "1080p" to "https://$domain/whw$vidId"
-        // )
-        // val headers = mapOf(
-        //     "Sec-Fetch-Mode" to "cors"
-        // )
-
-        // for ((quality, link) in videoUrls) {
-        //     callback.invoke (
-        //         ExtractorLink (
-        //             this.name,
-        //             this.name,
-        //             link,
-        //             referer = mainUrl,
-        //             getQualityFromName(quality),
-        //             headers = headers
-        //         )
-        //     )
-        // }
+        for ((quality, link) in videoUrls) {
+            callback.invoke (
+                ExtractorLink (
+                    this.name,
+                    this.name,
+                    link,
+                    referer = mainUrl,
+                    getQualityFromName(quality),
+                    headers = headers
+                )
+            )
+        }
     }
 }
