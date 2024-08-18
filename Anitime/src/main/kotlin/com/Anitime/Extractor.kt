@@ -25,7 +25,6 @@ class AbyssCdn : ExtractorApi() {
         var enc3: Int
         var enc4: Int
 
-        // Clean the input
         var cleanedInput = input.replace("_", "")
         cleanedInput = cleanedInput.replace(Regex("[^A-Za-z0-9+/=]"), "")
 
@@ -103,9 +102,17 @@ class AbyssCdn : ExtractorApi() {
             "720p" to "https://$domain/www$vidId",
             "1080p" to "https://$domain/whw$vidId"
         )
+        
         val headers = mapOf(
-            "Sec-Fetch-Mode" to "cors"
+            "accept" to "*/*",
+            "accept-encoding" to "gzip, deflate, br",
+            "origin" to "https://abysscdn.com",
+            "connection" to "keep-alive",
+            "sec-fetch-dest" to "empty",
+            "sec-fetch-mode" to "cors",
+            "sec-fetch-site" to "cross-site"
         )
+
 
         for ((quality, link) in videoUrls) {
             callback.invoke (
