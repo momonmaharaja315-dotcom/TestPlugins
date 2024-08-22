@@ -94,11 +94,8 @@ class Full4MoviesProvider : MainAPI() { // all providers must be an instance of 
 
             val urls = regex.findAll(document.html()).map { it.groupValues[1] }.toList()
 
-            val episodes = urls.mapNotNull {
-                val doc = app.get(it).document
-                doc.selectFirst("iframe")?.attr("src")?.let { link ->
-                    Episode(link, "Episode ${urls.indexOf(it) + 1}")
-                }
+            val episodes = urls.mapNotNull { url ->
+                newEpisode(url){"Episode ${urls.indexOf(it) + 1}"}
             }
             newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
                 this.posterUrl = posterUrl
@@ -110,9 +107,7 @@ class Full4MoviesProvider : MainAPI() { // all providers must be an instance of 
         }
         else {
             val movieUrl = Regex("""<a\s+class="myButton"\s+href="([^"]+)".*?>Watch Online 1<\/a>""").find(document.html())?.groupValues?.get(1) ?: ""
-            val doc = app.get(movieUrl).document
-            val link = doc.selectFirst("iframe")?.attr("src")
-            return newMovieLoadResponse(title, url, TvType.Movie, link) {
+            return newMovieLoadResponse(title, url, TvType.Movie, movieUrl) {
                 this.posterUrl = posterUrl
                 this.plot = plot
                 this.rating = imdbRating
@@ -128,7 +123,9 @@ class Full4MoviesProvider : MainAPI() { // all providers must be an instance of 
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        loadExtractor(data, referer = "https://www.4links.click/", subtitleCallback, callback)
+        val doc = app.get(data).document
+        val link = doc.selectFirst("iframe").attr("src")
+        loadExtractor(data, referer = data, subtitleCallback, callback)
         return true
     }
 
