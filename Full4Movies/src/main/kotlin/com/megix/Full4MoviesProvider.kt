@@ -95,7 +95,7 @@ class Full4MoviesProvider : MainAPI() { // all providers must be an instance of 
             val urls = regex.findAll(document.html()).map { it.groupValues[1] }.toList()
 
             val episodes = urls.mapNotNull { url ->
-                newEpisode(url){"Episode ${urls.indexOf(it) + 1}"}
+                newEpisode(url){"Episode ${urls.indexOf(url) + 1}"}
             }
             newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
                 this.posterUrl = posterUrl
