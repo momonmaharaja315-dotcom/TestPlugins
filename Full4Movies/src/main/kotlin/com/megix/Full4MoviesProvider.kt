@@ -128,26 +128,7 @@ class Full4MoviesProvider : MainAPI() { // all providers must be an instance of 
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-
-        callback.invoke(
-            ExtractorLink(
-                this.name,
-                this.name,
-                data,
-                referer = "",
-                quality = Qualities.Unknown.value,
-            )
-        )
-        // var link = data
-        // link = when {
-        //     link.contains("watchx.top") -> link.replace("watchx.top", "boltx.stream")
-        //     link.contains("bestx.stream") -> link.replace("bestx.stream", "boltx.stream")
-        //     link.contains("chillx.top") -> link.replace("chillx.top", "boltx.stream")
-        //     else -> link
-        // }
-
-        // loadExtractor(link, subtitleCallback, callback)
-
+        loadExtractor(data, referer = "https://www.4links.click/", subtitleCallback, callback)
         return true
     }
 
