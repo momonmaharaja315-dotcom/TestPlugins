@@ -35,7 +35,7 @@ class Asumanaksoy : ExtractorApi() {
         M3u8Helper.generateM3u8(
             this.name,
             m3uLink,
-            referer,
+            referer.toString(),
         ).forEach(callback)
 
 
