@@ -1,10 +1,10 @@
-version = 5
+version = 1
 
 cloudstream {
     language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "High Quality Movies and TV Shows"
+    description = "Indian Multilingual Provider"
      authors = listOf("megix")
 
     /**
@@ -20,5 +20,5 @@ cloudstream {
         "Movie",
     )
 
-    iconUrl = "https://i.imgur.com/9bGkGMi.png"
+    iconUrl = "https://0gomovies.movie/wp-content/themes/assets/images/logo-dark.png"
 }
