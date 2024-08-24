@@ -143,52 +143,44 @@ open class KatMovieHDProvider : MainAPI() { // all providers must be an instance
         val document = app.get(url, interceptor = cfInterceptor).document
         val title = document.selectFirst("title").text()
         val posterUrl = document.selectFirst("meta[property=og:image]").attr("content")
-        //val discription = document.selectFirst("div.more-details-label").text() ?: document.selectFirst("div.content").text() ?: ""
 
-        return newMovieLoadResponse(title, url, TvType.Movie, url) {
-            this.posterUrl = posterUrl
-            //this.plot = discription
+        val tvType = if (
+            title.contains("Episode", ignoreCase = true) ||
+            title.contains("season", ignoreCase = true) ||
+            title.contains("series", ignoreCase = true)
+        ) {
+            TvType.TvSeries
+        } else {
+            TvType.Movie
         }
 
-        // val tvType = if (
-        //     title.contains("Episode", ignoreCase = true) ||
-        //     title.contains("season", ignoreCase = true) ||
-        //     title.contains("series", ignoreCase = true)
-        // ) {
-        //     TvType.TvSeries
-        // } else {
-        //     TvType.Movie
-        // }
+        if(tvType == TvType.TvSeries) {
+            val tvSeriesEpisodes = mutableListOf<Episode>()
 
-        // if(tvType == TvType.TvSeries) {
-        //     val tvSeriesEpisodes = mutableListOf<Episode>()
-
-        //     val pTags = document.select("p:matches((?i)(Episode [0-9]+)),h3:matches((?i)(E[0-9]+)),h2:matches((?i)(Episode [0-9]+))")
-        //     if (pTags.isNotEmpty()) {
-        //         val episodesList = type1(url)
-        //         tvSeriesEpisodes.addAll(episodesList)
-        //         return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
-        //             this.posterUrl = posterUrl
-        //             this.plot = discription
-        //         }
-        //     }
-        //     else {
-        //         val seasonList = mutableListOf<Pair<String, Int>>()
-        //         val episodesList = type2(url, seasonList)
-        //         tvSeriesEpisodes.addAll(episodesList)
-        //         return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
-        //             this.posterUrl = posterUrl
-        //             this.plot = discription
-        //             this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
-        //         }
-        //     }
-        // }
-        // else {
-        //     return newMovieLoadResponse(title, url, TvType.Movie, url) {
-        //         this.posterUrl = posterUrl
-        //         this.plot = discription
-        //     }
-        // }
+            val pTags = document.select("p:matches((?i)(Episode [0-9]+)),h3:matches((?i)(E[0-9]+)),h2:matches((?i)(Episode [0-9]+))")
+            if (pTags.isNotEmpty()) {
+                val episodesList = type1(url)
+                tvSeriesEpisodes.addAll(episodesList)
+                return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
+                    this.posterUrl = posterUrl
+                    this.plot = discription
+                }
+            }
+            else {
+                val seasonList = mutableListOf<Pair<String, Int>>()
+                val episodesList = type2(url, seasonList)
+                tvSeriesEpisodes.addAll(episodesList)
+                return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
+                    this.posterUrl = posterUrl
+                    this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
+                }
+            }
+        }
+        else {
+            return newMovieLoadResponse(title, url, TvType.Movie, url) {
+                this.posterUrl = posterUrl
+            }
+        }
     }
 
     override suspend fun loadLinks(
