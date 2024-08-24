@@ -2,117 +2,16 @@ package com.megix
 
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
-import java.net.URI
 import okhttp3.FormBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import org.json.JSONObject
+import java.net.URI
 
-//Extractors
-class KMHD : ExtractorApi() {
-    override val name: String = "KMHD"
-    override val mainUrl: String = "https://links.kmhd.net/file"
-    override val requiresReferer = false
-
-    override suspend fun getUrl(
-        url: String,
-        referer: String?,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
-    ) 
-    {
-        val document = app.get(url).document
-        val HubId = Regex("""hubdrive_res:"([^"]+)""").find(document.html()) ?. groupValues ?. get(1)
-        val GDId = Regex("""gdflix_res:"([^"]+)""").find(document.html()) ?. groupValues ?. get(1)
-        val KatId = Regex("""katdrive_res:"([^"]+)""").find(document.html()) ?. groupValues ?. get(1)
-        val SendcmId = Regex("""sendcm_res:"([^"]+)""").find(document.html()) ?. groupValues ?. get(1)
-
-        if(HubId != "None") {
-            val link = "https://hubcloud.club/drive/$HubId"
-            loadExtractor(link, subtitleCallback, callback)
-        }
-
-        if(GDId != "None") {
-            val link = "https://new2.gdflix.cfd/file/$GDId"
-            loadExtractor(link, subtitleCallback, callback)
-        }
-
-        if(KatId != "None") {
-            val link = "https://katdrive.in/file/$KatId"
-            loadExtractor(link, subtitleCallback, callback)
-        }
-
-        if(SendcmId != "None") {
-            val link = "https://send.cm/$SendcmId"
-            loadExtractor(link, subtitleCallback, callback)
-        }
-    }
-}
-
-class KMHTFile : ExtractorApi() {
-    override val name: String = "KMHTFile"
-    override val mainUrl: String = "https://gd.kmhd.net/file/"
-    override val requiresReferer = false
-
-    override suspend fun getUrl(
-        url: String,
-        referer: String?,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
-    )
-    {
-        var link = url
-        link = link.replace("https://gd.kmhd.net/file/", "https://new2.gdflix.cfd/file/")
-        loadExtractor(link, subtitleCallback, callback)
-    }
-}
-
-class KatDrive : ExtractorApi() {
-    override val name: String = "KatDrive"
-    override val mainUrl: String = "https://katdrive.in"
-    override val requiresReferer = false
-
-    override suspend fun getUrl(
-        url: String,
-        referer: String?,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
-    ) 
-    {
-        val cookiesSSID = app.get(url).cookies["PHPSESSID"]
-        val cookies = mapOf(
-            "PHPSESSID" to "$cookiesSSID"
-        )
-        val document = app.get(url, cookies = cookies).document
-        val link = document.selectFirst("h5 > a") ?. attr("href").toString()
-        var fileIdRegex = Regex("""video\/([^"]+)"[^>]*>""")
-        var fileIdMatch = fileIdRegex.find(link)
-        var fileId = fileIdMatch ?. groupValues ?. get(1) ?: ""
-        var hubLink = "https://hubcloud.club/video/${fileId}"
-        loadExtractor(hubLink, subtitleCallback, callback)
-    }
-}
-
-class KMHTNet : ExtractorApi() {
-    override val name: String = "KMHTNet"
-    override val mainUrl: String = "https://kmhd.net/archives/"
-    override val requiresReferer = false
-
-    override suspend fun getUrl(
-        url: String,
-        referer: String?,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
-    ) 
-    {
-        val document = app.get(url).document
-        document.select("h3 > a").apmap {
-            val link = it.attr("href")
-            loadExtractor(link, subtitleCallback, callback)
-        }
-    }
-}
-
-class HubCloud : ExtractorApi() {
-    override val name: String = "Hub-Cloud"
-    override val mainUrl: String = "https://hubcloud.club"
+class FastLinks : ExtractorApi() {
+    override val name: String = "FastLinks"
+    override val mainUrl: String = "https://fastilinks.fun"
     override val requiresReferer = false
 
     override suspend fun getUrl(
@@ -121,70 +20,97 @@ class HubCloud : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val doc = app.get(url).document
-        var gamerLink = ""
-        if(url.contains("drive")) {
-            val scriptTag = doc.selectFirst("script:containsData(url)").toString()
-            gamerLink = Regex("var url = '([^']*)'").find(scriptTag) ?. groupValues ?. get(1) ?: ""
-        }
-        else {
-            gamerLink = doc.selectFirst("div.vd > center > a") ?. attr("href") ?: ""
-        }
-        
-        val document = app.get(gamerLink).document
+        val res = app.get(url)
+        val ssid = res.cookies["PHPSESSID"].toString()
+        val cookies = mapOf("PHPSESSID" to "$ssid")
+        val formBody = FormBody.Builder()
+            .add("_csrf_token_645a83a41868941e4692aa31e7235f2", "8afaabe2fa563a3cd17780e9b832ba4fdc778a9e")
+            .build()
 
-        val size = document.selectFirst("i#size") ?. text()
-        val div = document.selectFirst("div.card-body")
-        val header = document.selectFirst("div.card-header") ?. text()
-        div.select("a").amap {
-            val link = it.attr("href")
-            if (link.contains("pixeldra")) {
-                callback.invoke(
-                    ExtractorLink(
-                        "Pixeldrain",
-                        "Pixeldrain $size",
-                        link,
-                        "",
-                        getIndexQuality(header),
-                    )
-                )
-            }
-            else if(link.contains("dl.php")) {
-                val response = app.get(link, allowRedirects = false)
-                val downloadLink = response.headers["location"].toString().split("link=").getOrNull(1) ?: link
-                callback.invoke(
-                    ExtractorLink(
-                        "Hub-Cloud[Download]",
-                        "Hub-Cloud[Download] $size",
-                        downloadLink,
-                        "",
-                        getIndexQuality(header),
-                    )
-                )
-            }
-            else if(link.contains(".dev")) {
-                callback.invoke(
-                    ExtractorLink(
-                        "Hub-Cloud",
-                        "Hub-Cloud $size",
-                        link,
-                        "",
-                        getIndexQuality(header),
-                    )
-                )
-            }
-            else {
-                loadExtractor(link, subtitleCallback, callback)
-            }
+        val doc = app.post(
+            url,
+            requestBody = formBody,
+            cookies = cookies
+        ).document
+        doc.select("div.well > a"). amap { link ->
+            loadExtractor(link.attr("href"), subtitleCallback, callback)
         }
     }
+}
 
+class WLinkFast : ExtractorApi() {
+    override val name: String = "WLinkFast"
+    override val mainUrl: String = "https://wlinkfast.store"
+    override val requiresReferer = false
+    private val client = OkHttpClient()
 
+    override suspend fun getUrl(
+        url: String,
+        referer: String?,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val res = app.get(url)
+        val document = res.document
+        val ssid = res.cookies["PHPSESSID"].toString()
+        val cookies = mapOf("PHPSESSID" to "$ssid")
+        val regex = Regex("""formData\.append\('key', '(\d+)'\);""")
+        val key = regex.find(document.html()) ?. groupValues ?. get(1) ?: ""
+
+        val quality = document.selectFirst("title") ?. text()
+        
+        val formBody = FormBody.Builder()
+            .add("key", "$key")
+            .build()
+
+        val response = app.post(
+            url,
+            requestBody = formBody,
+            cookies = cookies
+        )
+        
+        val jsonResponse = response.text
+        val jsonObject = JSONObject(jsonResponse)
+        val link = jsonObject.getString("download")
+        val requireRepairRequest = Request.Builder()
+            .url(link)
+            .head()
+            .build()
+
+        val requireRepairResponse: Response = client.newCall(requireRepairRequest).execute()
+        val contentType = requireRepairResponse.header("Content-Type").toString()
+        
+        if(contentType != null && contentType.contains("video")) {
+            callback.invoke (
+                ExtractorLink (
+                    this.name,
+                    this.name,
+                    link,
+                    referer = "",
+                    quality = getIndexQuality(quality),
+                )
+            )
+        }
+        else {
+            val reResponse = app.get(link).document
+            val reLink = "https://www.mediafire.com" + reResponse.selectFirst("a#continue-btn").attr("href").toString()
+            val doc = app.get(reLink).document
+            val downloadLink = doc.selectFirst("a.input.popsok").attr("href")
+            callback.invoke (
+                ExtractorLink (
+                    this.name,
+                    this.name,
+                    downloadLink,
+                    referer = "",
+                    quality = getIndexQuality(quality),
+                )
+            )
+        }
+    }
     private fun getIndexQuality(str: String?): Int {
         return Regex("(\\d{3,4})[pP]").find(str ?: "") ?. groupValues ?. getOrNull(1) ?. toIntOrNull()
             ?: Qualities.Unknown.value
     }
-
 }
 
 class GDFlix : ExtractorApi() {
@@ -252,19 +178,19 @@ class GDFlix : ExtractorApi() {
                     val indexbotDoc = indexbotresponse.document
                     val token = Regex("""formData\.append\('token', '([a-f0-9]+)'\)""").find(indexbotDoc.toString()) ?. groupValues ?. get(1) ?: "token"
                     val postId = Regex("""fetch\('\/download\?id=([a-zA-Z0-9\/+]+)'""").find(indexbotDoc.toString()) ?. groupValues ?. get(1) ?: "postId"
-                
+
                     val requestBody = FormBody.Builder()
                         .add("token", token)
                         .build()
-                
+
                     val headers = mapOf(
                         "Referer" to indexbotlink
                     )
-                
+
                     val cookies = mapOf(
                         "PHPSESSID" to "$cookiesSSID",
                     )
-                
+
                     val response = app.post(
                         "https://indexbot.lol/download?id=${postId}",
                         requestBody = requestBody,
@@ -272,16 +198,16 @@ class GDFlix : ExtractorApi() {
                         cookies = cookies,
                         timeout = 60L
                     ).toString()
-                
-                    var downloadlink = Regex("url\":\"(.*?)\"").find(response) ?. groupValues ?. get(1) ?: ""    
 
-                    downloadlink = downloadlink.replace("\\", "")                
-                
+                    var downloadlink = Regex("url\":\"(.*?)\"").find(response) ?. groupValues ?. get(1) ?: ""
+
+                    downloadlink = downloadlink.replace("\\", "")
+
                     callback.invoke(
                         ExtractorLink(
-                            "IndexBot", 
-                            "IndexBot $tagquality", 
-                            downloadlink, 
+                            "IndexBot",
+                            "IndexBot $tagquality",
+                            downloadlink,
                             "https://indexbot.lol/",
                             getQualityFromName(tags)
                         )
@@ -349,7 +275,7 @@ class Sendcm : ExtractorApi() {
             .build()
         val response = app.post(
             mainUrl,
-            requestBody = body,  
+            requestBody = body,
             allowRedirects = false
         )
 
