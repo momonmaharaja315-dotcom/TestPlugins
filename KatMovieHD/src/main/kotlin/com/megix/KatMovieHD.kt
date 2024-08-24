@@ -15,7 +15,7 @@ class KatMovieHD: Plugin() {
         registerExtractorAPI(Sendcm())
         registerExtractorAPI(KMHD())
         registerExtractorAPI(GDFlix())
-        registerExtractorAPI(KatDrive())
+        //registerExtractorAPI(KatDrive())
         registerExtractorAPI(KMHTNet())
     }
 }
