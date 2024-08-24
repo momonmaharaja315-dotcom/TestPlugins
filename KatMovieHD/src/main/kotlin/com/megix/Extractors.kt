@@ -20,7 +20,7 @@ class KMHD : ExtractorApi() {
         val document = app.get(url).document
         val HubId = Regex("""hubdrive_res:"([^"]+)""").find(document.html()) ?. groupValues ?. get(1)
         val GDId = Regex("""gdflix_res:"([^"]+)""").find(document.html()) ?. groupValues ?. get(1)
-        //val KatId = Regex("""katdrive_res:"([^"]+)""").find(document.html()) ?. groupValues ?. get(1)
+        val KatId = Regex("""katdrive_res:"([^"]+)""").find(document.html()) ?. groupValues ?. get(1)
         val SendcmId = Regex("""sendcm_res:"([^"]+)""").find(document.html()) ?. groupValues ?. get(1)
 
         if(HubId != "None") {
@@ -33,10 +33,10 @@ class KMHD : ExtractorApi() {
             loadExtractor(link, subtitleCallback, callback)
         }
 
-        // if(KatId != "None") {
-        //     val link = "https://katdrive.in/file/$KatId"
-        //     loadExtractor(link, subtitleCallback, callback)
-        // }
+        if(KatId != "None") {
+            val link = "https://katdrive.in/file/$KatId"
+            loadExtractor(link, subtitleCallback, callback)
+        }
 
         if(SendcmId != "None") {
             val link = "https://send.cm/$SendcmId"
@@ -63,31 +63,31 @@ class KMHTFile : ExtractorApi() {
     }
 }
 
-// class KatDrive : ExtractorApi() {
-//     override val name: String = "KatDrive"
-//     override val mainUrl: String = "https://katdrive.in"
-//     override val requiresReferer = false
+class KatDrive : ExtractorApi() {
+    override val name: String = "KatDrive"
+    override val mainUrl: String = "https://katdrive.in"
+    override val requiresReferer = false
 
-//     override suspend fun getUrl(
-//         url: String,
-//         referer: String?,
-//         subtitleCallback: (SubtitleFile) -> Unit,
-//         callback: (ExtractorLink) -> Unit
-//     )
-//     {
-//         val cookiesSSID = app.get(url).cookies["PHPSESSID"]
-//         val cookies = mapOf(
-//             "PHPSESSID" to "$cookiesSSID"
-//         )
-//         val document = app.get(url, cookies = cookies).document
-//         val link = document.selectFirst("h5 > a") ?. attr("href").toString()
-//         var fileIdRegex = Regex("""video\/([^"]+)"[^>]*>""")
-//         var fileIdMatch = fileIdRegex.find(link)
-//         var fileId = fileIdMatch ?. groupValues ?. get(1) ?: ""
-//         var hubLink = "https://hubcloud.club/video/${fileId}"
-//         loadExtractor(hubLink, subtitleCallback, callback)
-//     }
-// }
+    override suspend fun getUrl(
+        url: String,
+        referer: String?,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    )
+    {
+        val cookiesSSID = app.get(url).cookies["PHPSESSID"]
+        val cookies = mapOf(
+            "PHPSESSID" to "$cookiesSSID"
+        )
+        val document = app.get(url, cookies = cookies).document
+        val link = document.selectFirst("h5 > a") ?. attr("href").toString()
+        var fileIdRegex = Regex("""video\/([^"]+)"[^>]*>""")
+        var fileIdMatch = fileIdRegex.find(link)
+        var fileId = fileIdMatch ?. groupValues ?. get(1) ?: ""
+        var hubLink = "https://hubcloud.club/video/${fileId}"
+        loadExtractor(hubLink, subtitleCallback, callback)
+    }
+}
 
 class KMHTNet : ExtractorApi() {
     override val name: String = "KMHTNet"
