@@ -8,7 +8,7 @@ import com.lagradost.cloudstream3.network.CloudflareKiller
 
 
 open class KatMovieHDProvider : MainAPI() { // all providers must be an instance of MainAPI
-    override var mainUrl = "https://katmoviehd.foo"
+    override var mainUrl = "https://katmoviehd.fyi"
     override var name = "KatMovieHD"
     override val hasMainPage = true
     override var lang = "hi"
@@ -143,11 +143,11 @@ open class KatMovieHDProvider : MainAPI() { // all providers must be an instance
         val document = app.get(url, interceptor = cfInterceptor).document
         val title = document.selectFirst("title").text()
         val posterUrl = document.selectFirst("meta[property=og:image]").attr("content")
-        val discription = document.selectFirst("div.more-details-label").text() ?: document.selectFirst("div.content").text() ?: ""
+        //val discription = document.selectFirst("div.more-details-label").text() ?: document.selectFirst("div.content").text() ?: ""
 
         return newMovieLoadResponse(title, url, TvType.Movie, url) {
             this.posterUrl = posterUrl
-            this.plot = discription
+            //this.plot = discription
         }
 
         // val tvType = if (
