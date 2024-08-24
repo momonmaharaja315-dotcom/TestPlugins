@@ -67,7 +67,7 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
         val document = app.get(url).document
         val title = document.selectFirst("meta[property=og:title]").attr("content").replace("Download ", "")
         val div = document.selectFirst("div.entry-content")
-        val plot = div ?. selectFirst("p:matches((?i)(plot|synopsis|story))").text() ?: ""
+        val plot = div.selectFirst("p:matches((?i)(plot|synopsis|story))").text() ?: ""
 
         var posterUrl = document.selectFirst("meta[property=og:image]").attr("content").toString()
 
