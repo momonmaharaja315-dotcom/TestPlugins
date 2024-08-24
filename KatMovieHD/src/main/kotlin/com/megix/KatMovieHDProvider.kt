@@ -163,7 +163,6 @@ open class KatMovieHDProvider : MainAPI() { // all providers must be an instance
                 tvSeriesEpisodes.addAll(episodesList)
                 return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                     this.posterUrl = posterUrl
-                    this.plot = discription
                 }
             }
             else {
