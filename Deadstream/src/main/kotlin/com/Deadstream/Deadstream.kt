@@ -68,7 +68,16 @@ class Deadstream : MainAPI() {
             val doc = app.get(url).document
             val sources = doc.select("ul.list-server-items").select("li")
             sources.mapNotNull { source ->
-                loadExtractor(source.attr("data-src"), subtitleCallback, callback)
+                callback.invoke(
+                    ExtractorLink(
+                        this.name,
+                        this.name,
+                        source.attr("data-src"),
+                        referer = "",
+                        Qualities.Unknown.value
+                    )
+                )
+                //loadExtractor(source.attr("data-src"), subtitleCallback, callback)
             }
         }
         return true
