@@ -49,7 +49,8 @@ class Deadstream : MainAPI() {
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
         val title = document.selectFirst("title").text().replace("Watch ", "")
-        var poster = document.selectFirst("div.film-poster > img").attr("src")
+        val div = document.selectFirst("div[style*=background-image]")
+        val posterUrl = div.attr("style").substringAfter("url(").substringBefore(")")
         val url = fixUrl(document.selectFirst("a.btn-play").attr("href"))
         return newMovieLoadResponse(title, url, TvType.Movie, url) {
             this.posterUrl = posterUrl
@@ -60,32 +61,21 @@ class Deadstream : MainAPI() {
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
         val document = app.get(data).document
         val quality = document.selectFirst("div#servers-content")
-        val id = quality.selectFirst("div.item").attr("data-id")
+        val id = quality.selectFirst("div.item").attr("data-embed")
         val url = "https://deaddrive.xyz/embed/$id"
-
-        callback.invoke(
-            ExtractorLink(
-                "Deadstream",
-                "Deadstream",
-                url,
-                referer = "",
-                quality = Qualities.Unknown.value
+        val doc = app.get(url).document
+        val sources = doc.select("ul.list-server-items").select("li")
+        sources.mapNotNull { source ->
+            callback.invoke(
+                ExtractorLink(
+                    "Deadstream",
+                    "Deadstream",
+                    source.attr("data-video"),
+                    referer = "",
+                    quality = Qualities.Unknown.value
+                )
             )
-        )
-
-            // val doc = app.get(url).document
-            // val sources = doc.select("ul.list-server-items").select("li")
-            // sources.mapNotNull { source ->
-            //     callback.invoke(
-            //         ExtractorLink(
-            //             "Deadstream",
-            //             "Deadstream",
-            //             source.attr("data-video"),
-            //             referer = "",
-            //             quality = Qualities.Unknown.value
-            //         )
-            //     )
-            // }
+        }
         return true
     }
 }
