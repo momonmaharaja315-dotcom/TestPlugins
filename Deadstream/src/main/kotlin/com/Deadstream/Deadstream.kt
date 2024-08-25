@@ -61,7 +61,7 @@ class Deadstream : MainAPI() {
             val doc = app.get(url).document
 
             doc.select("div.ss-list").mapNotNull { episode ->
-                val name = episode.selectFirst("a").attr("title")
+                val epName = episode.selectFirst("a").attr("title")
                 val epNum = episode.selectFirst("a").attr("data-number").toIntOrNull() ?: 0
                 val epUrl = fixUrl(episode.selectFirst("a").attr("href"))
                 val epDoc = app.get(epUrl).document
@@ -71,7 +71,7 @@ class Deadstream : MainAPI() {
                     val embedUrl = "https://deaddrive.xyz/embed/$id"
                     tvSeriesEpisodes.add(
                         newEpisode(embedUrl) {
-                            name = name
+                            name = epName
                             season = seasonNum
                             episode = epNum
                         }
