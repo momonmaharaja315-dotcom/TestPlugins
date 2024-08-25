@@ -73,9 +73,9 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
         val title = document.selectFirst("div.sheader > div.data > h1")?.text().toString()
-        var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content")
+        var posterUrl = document.selectFirst("div.sheader noscript img")?.attr("src")
         if (posterUrl == null || posterUrl.isEmpty()) {
-            posterUrl = document.selectFirst("div.sheader noscript img")?.attr("src")
+            posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content")
         }
         var description = document.selectFirst("div[itemprop=description]")?.text()
         if(description == null || description.isEmpty()) {
