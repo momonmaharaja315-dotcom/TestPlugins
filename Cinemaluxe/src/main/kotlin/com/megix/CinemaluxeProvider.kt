@@ -72,7 +72,7 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
-        val title = document.selectFirst("div.sheader > div.data > h1")?.text()
+        val title = document.selectFirst("div.sheader > div.data > h1")?.text().toString()
         var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content")
         if (posterUrl == null) {
             posterUrl = document.selectFirst("div.sheader noscript img")?.attr("src")
@@ -122,9 +122,9 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
                 seasonNum++
             }
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
-                this.posterUrl = posterUrl.toString()
+                this.posterUrl = posterUrl
                 this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
-                this.plot = description.toString()
+                this.plot = description
             }
         }
     
