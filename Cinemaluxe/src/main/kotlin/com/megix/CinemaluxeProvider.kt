@@ -122,9 +122,9 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
                 seasonNum++
             }
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
-                this.posterUrl = posterUrl
+                this.posterUrl = posterUrl.toString()
                 this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
-                this.plot = description
+                this.plot = description.toString()
             }
         }
     
