@@ -91,7 +91,7 @@ class Deadstream : MainAPI() {
 
         }
         else {
-                val movieLink = document.select("a.btn-play").attr("href")
+                val movieLink = document.selectFirst("a.btn-play").attr("href")
                 return newMovieLoadResponse(title, url, TvType.Movie, movieLink) {
                 this.posterUrl = posterUrl
                 this.plot = plot
