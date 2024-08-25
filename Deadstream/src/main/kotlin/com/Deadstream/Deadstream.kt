@@ -51,19 +51,22 @@ class Deadstream : MainAPI() {
         val title = document.selectFirst("h2.film-name").text()
         val div = document.selectFirst("div[style*=background-image]")
         val posterUrl = div.attr("style").substringAfter("url(").substringBefore(")")
-        //val url = fixUrl(document.selectFirst("a.btn-play").attr("href"))
+        val plot = document.selectFirst("div.item-title.w-hide").text()
+
         val tvSeriesEpisodes = mutableListOf<Episode>()
         var seasonNum = 1
+        val seasonList = mutableListOf<Pair<String, Int>>()
 
         document.select("a.btn-play").mapNotNull {
-            //val season = it.text()
+            val seasonText = it.text()
+            seasonList.add(Pair(seasonText, seasonNum))
             val url = fixUrl(it.attr("href"))
             val doc = app.get(url).document
 
-            doc.select("div.ss-list").mapNotNull { episode ->
-                val epName = episode.selectFirst("a").attr("title")
-                val epNum = episode.selectFirst("a").attr("data-number").toIntOrNull() ?: 0
-                val epUrl = fixUrl(episode.selectFirst("a").attr("href"))
+            doc.selectFirst("div.ss-list").select("a").mapNotNull { episode ->
+                val epName = episode.attr("title")
+                val epNum = episode.attr("data-number").toIntOrNull() ?: 0
+                val epUrl = fixUrl(episode.attr("href"))
                 tvSeriesEpisodes.add(
                     newEpisode(epUrl) {
                         name = epName
@@ -77,6 +80,8 @@ class Deadstream : MainAPI() {
 
         return newTvSeriesLoadResponse(title, url, TvType.Anime, tvSeriesEpisodes) {
             this.posterUrl = posterUrl
+            this.plot = plot
+            this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
         }
 
         // return newMovieLoadResponse(title, url, TvType.Movie, url) {
@@ -92,7 +97,7 @@ class Deadstream : MainAPI() {
             val id = it.attr("data-embed")
             val url = "https://deaddrive.xyz/embed/$id"
             val doc = app.get(url).document
-            doc.select("ul.list-server-items").select("li").mapNotNull { source ->
+            doc.selectFirst("ul.list-server-items").select("li").mapNotNull { source ->
                 loadExtractor(source.attr("data-video"), subtitleCallback, callback)
             }
         }
