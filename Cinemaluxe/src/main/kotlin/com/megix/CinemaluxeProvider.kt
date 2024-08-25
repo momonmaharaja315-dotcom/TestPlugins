@@ -74,10 +74,13 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
         val document = app.get(url).document
         val title = document.selectFirst("div.sheader > div.data > h1")?.text().toString()
         var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content")
-        if (posterUrl == null) {
+        if (posterUrl == null || posterUrl.isEmpty()) {
             posterUrl = document.selectFirst("div.sheader noscript img")?.attr("src")
         }
-        var description = document.selectFirst("div[itemprop=description]")?.text() ?: ""
+        var description = document.selectFirst("div[itemprop=description]")?.text()
+        if(description == null || description.isEmpty()) {
+            description = document.selectFirst("div.wp-content")?.text()
+        }
 
         val tvType = if (url.contains("tvshows")) {
             TvType.TvSeries
