@@ -91,7 +91,7 @@ class Deadstream : MainAPI() {
 
         }
         else {
-                val movieLink = document.selectFirst("a.btn-play").attr("href")
+                val movieLink = fixUrl(document.selectFirst("a.btn-play").attr("href"))
                 return newMovieLoadResponse(title, url, TvType.Movie, movieLink) {
                 this.posterUrl = posterUrl
                 this.plot = plot
@@ -103,11 +103,11 @@ class Deadstream : MainAPI() {
         val document = app.get(data).document
         val quality = document.selectFirst("div#servers-content")
 
-        quality.select("div.item").mapNotNull {
+        quality.select("div.item").amap {
             val id = it.attr("data-embed")
             val url = "https://deaddrive.xyz/embed/$id"
             val doc = app.get(url).document
-            doc.selectFirst("ul.list-server-items").select("li").mapNotNull { source ->
+            doc.selectFirst("ul.list-server-items").select("li").amap { source ->
                 loadExtractor(source.attr("data-video"), subtitleCallback, callback)
             }
         }
