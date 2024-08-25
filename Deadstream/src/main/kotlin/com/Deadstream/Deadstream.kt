@@ -107,7 +107,7 @@ class Deadstream : MainAPI() {
             val id = it.attr("data-embed")
             val url = "https://deaddrive.xyz/embed/$id"
             val doc = app.get(url, timeout = 30L).document
-            doc.selectFirst("ul.list-server-items").select("li").amap { source ->
+            doc.selectFirst("ul.list-server-items").select("li").mapNotNull { source ->
                 if(source.attr("data-video") != "short.ink") {
                     loadExtractor(source.attr("data-video"), referer = url ,subtitleCallback, callback)
                 }
