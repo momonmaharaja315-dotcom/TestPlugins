@@ -30,7 +30,7 @@ class Deadstream : MainAPI() {
     }
 
     private fun Element.toSearchResult(): SearchResponse {
-        val title = this.selectFirst("a").attr("alt")
+        val title = this.selectFirst("a").attr("title")
         val href = fixUrl(this.selectFirst("a").attr("href"))
         val posterUrl = fixUrl(this.selectFirst("img").attr("data-src"))
         return newMovieSearchResponse(title, href, TvType.Movie) {
@@ -49,7 +49,7 @@ class Deadstream : MainAPI() {
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
         val title = document.selectFirst("title").text().replace("Watch ", "")
-        var poster = document.selectFirst("img.film-poster-img").attr("src")
+        var poster = document.selectFirst("div.film-poster > img").attr("src")
         val url = fixUrl(document.selectFirst("a.btn-play").attr("href"))
         return newMovieLoadResponse(title, url, TvType.Movie, url) {
             this.posterUrl = posterUrl
@@ -59,24 +59,33 @@ class Deadstream : MainAPI() {
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
         val document = app.get(data).document
-        val qualities = document.select("div#servers-content")
-        qualities.mapNotNull {
-            val id = it.selectFirst("div.item").attr("data-id")
-            val url = "https://deaddrive.xyz/embed/$id"
-            val doc = app.get(url).document
-            val sources = doc.select("ul.list-server-items").select("li")
-            sources.mapNotNull { source ->
-                callback.invoke(
-                    ExtractorLink(
-                        "Deadstream",
-                        "Deadstream",
-                        source.attr("data-video"),
-                        referer = "",
-                        quality = Qualities.Unknown.value
-                    )
-                )
-            }
-        }
+        val quality = document.selectFirst("div#servers-content")
+        val id = quality.selectFirst("div.item").attr("data-id")
+        val url = "https://deaddrive.xyz/embed/$id"
+
+        callback.invoke(
+            ExtractorLink(
+                "Deadstream",
+                "Deadstream",
+                url,
+                referer = "",
+                quality = Qualities.Unknown.value
+            )
+        )
+
+            // val doc = app.get(url).document
+            // val sources = doc.select("ul.list-server-items").select("li")
+            // sources.mapNotNull { source ->
+            //     callback.invoke(
+            //         ExtractorLink(
+            //             "Deadstream",
+            //             "Deadstream",
+            //             source.attr("data-video"),
+            //             referer = "",
+            //             quality = Qualities.Unknown.value
+            //         )
+            //     )
+            // }
         return true
     }
 }
