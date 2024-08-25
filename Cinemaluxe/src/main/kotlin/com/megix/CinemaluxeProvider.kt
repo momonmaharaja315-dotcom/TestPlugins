@@ -72,9 +72,9 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
-        val title = document.selectFirst("div.sheader > div.data > h1") ?. text() ?: ""
-        val posterUrl = document.selectFirst("meta[property=og:image]") ?. attr("content") ?: document.selectFirst("div.sheader noscript img") ?. attr("src")
-        val description = document.selectFirst("div[itemprop=description]")?.text() ?: document.selectFirst("div.wp-content")?.text() ?: ""
+        val title = document.selectFirst("div.sheader > div.data > h1").text() ?: ""
+        val posterUrl = document.selectFirst("meta[property=og:image]").attr("content") ?: document.selectFirst("div.sheader noscript img").attr("src") ?: ""
+        val description = document.selectFirst("div[itemprop=description]").text() ?: document.selectFirst("div.wp-content").text() ?: ""
 
         val tvType = if (url.contains("tvshows")) { 
             TvType.TvSeries
@@ -140,10 +140,10 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
         if(data.contains("cinemaluxe") && !data.contains("sharepoint")) {
             val document = app.get(data).document
             val buttons = document.select("a.maxbutton")
-            buttons.mapNotNull { button ->
+            buttons.amap { button ->
                 val link = button.attr("href")
                 val doc = app.get(link).document
-                doc.select("a.maxbutton").mapNotNull {
+                doc.select("a.maxbutton").amap {
                     var href = it.attr("href")
                     if(href.contains("luxedailyupdates")) {
                         href = bypass(href)
