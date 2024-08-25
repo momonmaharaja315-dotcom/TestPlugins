@@ -1,10 +1,10 @@
-version = 11
+version = 1
 
 cloudstream {
     language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "Include PikaHD"
+    description = "Indian Multilingual Provider"
      authors = listOf("megix")
 
     /**
@@ -20,5 +20,5 @@ cloudstream {
         "Movie",
     )
 
-    iconUrl = "https://katmoviehd.fyi/wp-content/uploads/2022/03/cropped-cropped-KatMovie-G-S1.png"
+    iconUrl = "https://0gomovies.movie/wp-content/themes/assets/images/logo-dark.png"
 }
