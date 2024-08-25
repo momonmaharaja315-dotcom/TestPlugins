@@ -3,10 +3,10 @@ package com.Deadstream
 import com.lagradost.cloudstream3.plugins.CloudstreamPlugin
 import com.lagradost.cloudstream3.plugins.Plugin
 import android.content.Context
-import com.lagradost.cloudstream3.extractor.VidHidePro
-import com.lagradost.cloudstream3.extractor.Voe
-import com.lagradost.cloudstream3.extractor.StreamWishExtractor
-import com.lagradost.cloudstream3.extractor.Chillx
+import com.lagradost.cloudstream3.extractors.VidHidePro
+import com.lagradost.cloudstream3.extractors.Voe
+import com.lagradost.cloudstream3.extractors.StreamWishExtractor
+import com.lagradost.cloudstream3.extractors.Chillx
 
 @CloudstreamPlugin
 class DeadstreamProvider: Plugin() {
