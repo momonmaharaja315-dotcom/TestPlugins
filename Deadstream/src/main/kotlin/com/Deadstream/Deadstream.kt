@@ -14,6 +14,9 @@ class Deadstream : MainAPI() {
 
     override val mainPage = mainPageOf(
         "$mainUrl/recently-updated" to "Latest",
+        "$mainUrl/most-popular" to "Most Popular",
+        "$mainUrl/tv" to "Series",
+        "$mainUrl/movie" to "Movies",
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
@@ -25,7 +28,7 @@ class Deadstream : MainAPI() {
                 list = home,
                 isHorizontalImages = false
             ),
-            hasNext = false
+            hasNext = true
         )
     }
 
@@ -52,7 +55,7 @@ class Deadstream : MainAPI() {
         val div = document.selectFirst("div[style*=background-image]")
         val posterUrl = div.attr("style").substringAfter("url(").substringBefore(")")
         val plot = document.selectFirst("div.item-title.w-hide").text()
-        val type = if(document.selectFirst("div.film-stats").contains("MOVIE")) TvType.Movie else TvType.TvSeries
+        val type = if(document.selectFirst("div.film-stats").text().contains("MOVIE")) TvType.Movie else TvType.TvSeries
 
         if(type == TvType.TvSeries) {
             val tvSeriesEpisodes = mutableListOf<Episode>()
