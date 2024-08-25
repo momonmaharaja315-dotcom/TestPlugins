@@ -51,25 +51,61 @@ class Deadstream : MainAPI() {
         val title = document.selectFirst("h2.film-name").text()
         val div = document.selectFirst("div[style*=background-image]")
         val posterUrl = div.attr("style").substringAfter("url(").substringBefore(")")
-        val url = fixUrl(document.selectFirst("a.btn-play").attr("href"))
-        return newMovieLoadResponse(title, url, TvType.Movie, url) {
+        //val url = fixUrl(document.selectFirst("a.btn-play").attr("href"))
+        val tvSeriesEpisodes = mutableListOf<Episode>()
+        var seasonNum = 1
+
+        document.select("a.btn-play").mapNotNull {
+            //val season = it.text()
+            val url = fixUrl(it.attr("href"))
+            val doc = app.get(url).document
+
+            doc.select("div.ss-list").mapNotNull { episode ->
+                val name = episode.selectFirst("a").attr("title")
+                val epNum = episode.selectFirst("a").attr("data-number").toIntOrNull() ?: 0
+                val epUrl = fixUrl(episode.selectFirst("a").attr("href"))
+                val epDoc = app.get(epUrl).document
+                val quality = document.selectFirst("div#servers-content")
+                quality.select("div.item").mapNotNull {
+                    val id = it.attr("data-embed")
+                    val embedUrl = "https://deaddrive.xyz/embed/$id"
+                    tvSeriesEpisodes.add(
+                        newEpisode(embedUrl) {
+                            name = name
+                            season = seasonNum
+                            episode = epNum
+                        }
+                    )
+                }
+            }
+            seasonNum++
+        }
+
+        return newTvSeriesLoadResponse(title, url, TvType.Anime, tvSeriesEpisodes) {
             this.posterUrl = posterUrl
         }
 
+        // return newMovieLoadResponse(title, url, TvType.Movie, url) {
+        //     this.posterUrl = posterUrl
+        // }
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
-        val document = app.get(data).document
-        val quality = document.selectFirst("div#servers-content")
-
-        quality.select("div.item").mapNotNull {
-            val id = it.attr("data-embed")
-            val url = "https://deaddrive.xyz/embed/$id"
-            val doc = app.get(url).document
-            doc.select("ul.list-server-items").select("li").mapNotNull { source ->
-                loadExtractor(source.attr("data-video"), subtitleCallback, callback)
-            }
+        val doc = app.get(data).document
+        doc.select("ul.list-server-items").select("li").mapNotNull { source ->
+            loadExtractor(source.attr("data-video"), subtitleCallback, callback)
         }
+        // val document = app.get(data).document
+        // val quality = document.selectFirst("div#servers-content")
+
+        // quality.select("div.item").mapNotNull {
+        //     val id = it.attr("data-embed")
+        //     val url = "https://deaddrive.xyz/embed/$id"
+        //     val doc = app.get(url).document
+        //     doc.select("ul.list-server-items").select("li").mapNotNull { source ->
+        //         loadExtractor(source.attr("data-video"), subtitleCallback, callback)
+        //     }
+        // }
         return true
     }
 }
