@@ -64,19 +64,13 @@ class Deadstream : MainAPI() {
                 val epName = episode.selectFirst("a").attr("title")
                 val epNum = episode.selectFirst("a").attr("data-number").toIntOrNull() ?: 0
                 val epUrl = fixUrl(episode.selectFirst("a").attr("href"))
-                val epDoc = app.get(epUrl).document
-                val quality = document.selectFirst("div#servers-content")
-                quality.select("div.item").mapNotNull {
-                    val id = it.attr("data-embed")
-                    val embedUrl = "https://deaddrive.xyz/embed/$id"
-                    tvSeriesEpisodes.add(
-                        newEpisode(embedUrl) {
-                            name = epName
-                            season = seasonNum
-                            this.episode = epNum
-                        }
-                    )
-                }
+                tvSeriesEpisodes.add(
+                    newEpisode(epUrl) {
+                        name = epName
+                        season = seasonNum
+                        this.episode = epNum
+                    }
+                )
             }
             seasonNum++
         }
@@ -91,21 +85,17 @@ class Deadstream : MainAPI() {
     }
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
-        val doc = app.get(data).document
-        doc.select("ul.list-server-items").select("li").mapNotNull { source ->
-            loadExtractor(source.attr("data-video"), subtitleCallback, callback)
-        }
-        // val document = app.get(data).document
-        // val quality = document.selectFirst("div#servers-content")
+        val document = app.get(data).document
+        val quality = document.selectFirst("div#servers-content")
 
-        // quality.select("div.item").mapNotNull {
-        //     val id = it.attr("data-embed")
-        //     val url = "https://deaddrive.xyz/embed/$id"
-        //     val doc = app.get(url).document
-        //     doc.select("ul.list-server-items").select("li").mapNotNull { source ->
-        //         loadExtractor(source.attr("data-video"), subtitleCallback, callback)
-        //     }
-        // }
+        quality.select("div.item").mapNotNull {
+            val id = it.attr("data-embed")
+            val url = "https://deaddrive.xyz/embed/$id"
+            val doc = app.get(url).document
+            doc.select("ul.list-server-items").select("li").mapNotNull { source ->
+                loadExtractor(source.attr("data-video"), subtitleCallback, callback)
+            }
+        }
         return true
     }
 }
