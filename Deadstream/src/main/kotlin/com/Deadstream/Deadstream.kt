@@ -73,7 +73,7 @@ class Deadstream : MainAPI() {
                         newEpisode(embedUrl) {
                             name = epName
                             season = seasonNum
-                            episode = epNum
+                            this.episode = epNum
                         }
                     )
                 }
