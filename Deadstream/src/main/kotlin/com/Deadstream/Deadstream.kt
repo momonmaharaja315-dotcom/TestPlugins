@@ -103,11 +103,11 @@ class Deadstream : MainAPI() {
         val document = app.get(data).document
         val quality = document.selectFirst("div#servers-content")
 
-        quality.select("div.item").amap {
+        quality.select("div.item").mapNotNull {
             val id = it.attr("data-embed")
             val url = "https://deaddrive.xyz/embed/$id"
             val doc = app.get(url).document
-            doc.selectFirst("ul.list-server-items").select("li").amap { source ->
+            doc.selectFirst("ul.list-server-items").select("li").mapNotNull { source ->
                 loadExtractor(source.attr("data-video"), subtitleCallback, callback)
             }
         }
