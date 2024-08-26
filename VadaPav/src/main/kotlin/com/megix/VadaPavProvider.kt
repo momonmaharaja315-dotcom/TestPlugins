@@ -118,6 +118,7 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
                 }
             }
             tvSeriesEpisodes.addAll(episodes)
+            seasonNum++
         }
 
         if(dTags.isNotEmpty()) {
