@@ -140,12 +140,13 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        var link = data.replace("$mainUrl", "")
         for((index, mirror) in mirrors.withIndex()) {
             callback.invoke(
                 ExtractorLink(
                     name+ " ${index+1}",
                     name+" ${index+1}",
-                    mirror + data,
+                    mirror + link,
                     referer = "",
                     quality = Qualities.Unknown.value,
                 )
