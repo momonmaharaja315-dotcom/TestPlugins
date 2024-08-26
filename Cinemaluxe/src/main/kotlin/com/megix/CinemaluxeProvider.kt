@@ -113,12 +113,11 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
                     val epText = aTag.text() ?: "Unknown"
                     val epLink = aTag.attr("href")
                     episodes.add(
-                        Episode(
-                            name = epText,
-                            data = epLink,
-                            season = seasonNum,
+                        newEpisode(epLink){
+                            name = epText
+                            season = seasonNum
                             episode = aTags.indexOf(aTag) + 1
-                        )
+                        }
                     )
                 }
                 tvSeriesEpisodes.addAll(episodes)
