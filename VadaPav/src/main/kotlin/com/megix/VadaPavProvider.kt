@@ -113,7 +113,7 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
             val span = document.select("div > span")
             val lastSpan = span.takeIf { it.isNotEmpty() } ?. lastOrNull()
             val title = lastSpan ?. text() ?: ""
-            seasonList.add("$title" to seasonNum)
+            seasonList.add("$title" to mutableSeasonNum.value)
             val episodes = fTags.amap { tag ->
                 newEpisode(tag.attr("href")){
                     name = tag.text()
