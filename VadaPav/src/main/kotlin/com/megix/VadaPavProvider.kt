@@ -117,12 +117,12 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
             val episodes = fTags.amap { tag ->
                 newEpisode(tag.attr("href")){
                     name = tag.text()
-                    season = seasonNum
+                    season = mutableSeasonNum.value
                     episode = fTags.indexOf(tag) + 1
                 }
             }
             tvSeriesEpisodes.addAll(episodes)
-            seasonNum++
+            mutableSeasonNum.value++
         }
 
         if(dTags.isNotEmpty()) {
