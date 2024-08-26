@@ -74,15 +74,13 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
             val document = app.get(mainUrl + dTag.attr("href")).document
             val innerDTags = document.select("div.directory > ul > li > div > a.directory-entry").filter { element -> !element.text().contains("Parent Directory", true) }
             val innerFTags = document.select("div.directory > ul > li > div > a.file-entry")
-            if(innerDTags.isNotEmpty()) {
-                traverse(innerDTags, tvSeriesEpisodes, seasonList, mutableSeasonNum)
-            }
+
             if(innerFTags.isNotEmpty()) {
                 val span = document.select("div > span")
                 val lastSpan = span.takeIf { it.isNotEmpty() }?.lastOrNull()
-                val title = lastSpan ?. text()?: ""
+                val title = lastSpan ?. text() ?: ""
                 seasonList.add("$title" to mutableSeasonNum.value)
-                val episodes = innerFTags.mapNotNull { tag ->
+                val episodes = innerFTags.amap { tag ->
                     newEpisode(tag.attr("href")){
                         name = tag.text()
                         season = mutableSeasonNum.value
@@ -91,6 +89,10 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
                 }
                 tvSeriesEpisodes.addAll(episodes)
                 mutableSeasonNum.value++
+            }
+
+            if(innerDTags.isNotEmpty()) {
+                traverse(innerDTags, tvSeriesEpisodes, seasonList, mutableSeasonNum)
             }
         }
     }
@@ -106,11 +108,9 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
         val fTags = document.select("div.directory > ul > li > div > a.file-entry")
         val seasonList = mutableListOf<Pair<String, Int>>()
         val mutableSeasonNum = MutableInt(seasonNum)
-        if(dTags.isNotEmpty()) {
-            traverse(dTags, tvSeriesEpisodes, seasonList, mutableSeasonNum)
-        }
+
         if(fTags.isNotEmpty()) {
-            val episodes = fTags.mapNotNull { tag ->
+            val episodes = fTags.amap { tag ->
                 newEpisode(tag.attr("href")){
                     name = tag.text()
                     season = seasonNum
@@ -118,8 +118,10 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
                 }
             }
             tvSeriesEpisodes.addAll(episodes)
-            return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
-            }
+        }
+
+        if(dTags.isNotEmpty()) {
+            traverse(dTags, tvSeriesEpisodes, seasonList, mutableSeasonNum)
         }
        
         return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
