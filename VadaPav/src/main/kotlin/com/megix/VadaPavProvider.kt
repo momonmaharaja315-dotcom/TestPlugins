@@ -82,7 +82,7 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
                 val lastSpan = span.takeIf { it.isNotEmpty() }?.lastOrNull()
                 val title = lastSpan ?. text()?: ""
                 seasonList.add("$title" to mutableSeasonNum.value)
-                val episodes = innerFTags.apmap { tag ->
+                val episodes = innerFTags.mapNotNull { tag ->
                     newEpisode(tag.attr("href")){
                         name = tag.text()
                         season = mutableSeasonNum.value
@@ -110,7 +110,7 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
             traverse(dTags, tvSeriesEpisodes, seasonList, mutableSeasonNum)
         }
         if(fTags.isNotEmpty()) {
-            val episodes = fTags.apmap { tag ->
+            val episodes = fTags.mapNotNull { tag ->
                 newEpisode(tag.attr("href")){
                     name = tag.text()
                     season = seasonNum
