@@ -71,13 +71,13 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
 
     private suspend fun traverse(dTags: List<Element> ,tvSeriesEpisodes: MutableList<Episode>, seasonList: MutableList<Pair<String, Int>>, mutableSeasonNum: MutableInt) {
         for(dTag in dTags) {
-            val document = app.get(mainUrl + dTag.attr("href")).document
+            val document = app.get(fixUrl(dTag.attr("href"))).document
             val innerDTags = document.select("div.directory > ul > li > div > a.directory-entry").filter { element -> !element.text().contains("Parent Directory", true) }
             val innerFTags = document.select("div.directory > ul > li > div > a.file-entry")
 
             if(innerFTags.isNotEmpty()) {
                 val span = document.select("div > span")
-                val lastSpan = span.takeIf { it.isNotEmpty() }?.lastOrNull()
+                val lastSpan = span.takeIf { it.isNotEmpty() } ?. lastOrNull()
                 val title = lastSpan ?. text() ?: ""
                 seasonList.add("$title" to mutableSeasonNum.value)
                 val episodes = innerFTags.amap { tag ->
@@ -100,8 +100,8 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
         val span = document.select("div > span")
-        val lastSpan = span.takeIf { it.isNotEmpty() }?.lastOrNull()
-        val title = lastSpan ?. text()?: ""
+        val lastSpan = span.takeIf { it.isNotEmpty() } ?. lastOrNull()
+        val title = lastSpan ?. text() ?: ""
         var seasonNum = 1
         val tvSeriesEpisodes = mutableListOf<Episode>()
         val dTags = document.select("div.directory > ul > li > div > a.directory-entry").filter { element -> !element.text().contains("Parent Directory", true) }
@@ -110,6 +110,10 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
         val mutableSeasonNum = MutableInt(seasonNum)
 
         if(fTags.isNotEmpty()) {
+            val span = document.select("div > span")
+            val lastSpan = span.takeIf { it.isNotEmpty() } ?. lastOrNull()
+            val title = lastSpan ?. text() ?: ""
+            seasonList.add("$title" to seasonNum)
             val episodes = fTags.amap { tag ->
                 newEpisode(tag.attr("href")){
                     name = tag.text()
