@@ -50,7 +50,7 @@ class VadaPavProvider : MainAPI() { // all providers must be an instance of Main
 
     private fun Element.toSearchResult(): SearchResponse? {
         val title = this.text() ?: ""
-        val link = fixUrlNull(this.attr("href"))
+        val link = fixUrl(this.attr("href"))
 
         return newMovieSearchResponse(title, link, TvType.Movie) {
         }
