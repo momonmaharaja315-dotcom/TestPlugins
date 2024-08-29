@@ -4,7 +4,6 @@ import org.jsoup.nodes.Element
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.network.WebViewResolver
 import com.lagradost.cloudstream3.utils.*
-import android.util.Log
 
 class Eporner : MainAPI() {
     override var mainUrl              = "https://www.eporner.com"
@@ -90,7 +89,15 @@ class Eporner : MainAPI() {
             data, interceptor = WebViewResolver(Regex("""https://www\.eporner\.com/xhr/video"""))
         )
         val json=response.text
-        Log.d("&&&&&&&&Test",json)
+        callback.invoke(
+            ExtractorLink(
+                source = name,
+                name = name,
+                url = src,
+                referer = "",
+                quality = Qualities.Unknown.value
+            )
+        )
         // val regex = Regex("labelShort\":\\s\"(.*?)\"|src\":\\s\"(.*)\"")
         // val matches = regex.findAll(json)
         // val srcList = mutableListOf<Pair<String, String>>()
