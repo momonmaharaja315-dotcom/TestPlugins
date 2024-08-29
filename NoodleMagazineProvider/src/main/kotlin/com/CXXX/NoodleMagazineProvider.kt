@@ -92,34 +92,21 @@ class NoodleMagazineProvider : MainAPI() { // all providers must be an instance 
     ): Boolean {
         val document = app.get(data).document
         val script = document.selectFirst("script:containsData(playlist)").data()
-        val jason = script.substringAfter("window.playlist = ").substringBefore(";")
+        val jason = script.substringAfter("window.playlist = ").substringBefore(";").parsed<SusJSON>()
 
-        callback.invoke(
+        val extlinkList = mutableListOf<ExtractorLink>()
+        jason.sources.map {
+            extlinkList.add(
                 ExtractorLink(
-                        source = this.name,
-                        name = this.name,
-                        url = jason,
-                        referer = "",
-                        quality = Qualities.Unknown.value
+                    source = name,
+                    name = name,
+                    url = it.streamlink!!,
+                    referer = "$mainUrl/",
+                    quality = getQualityFromName(it.qualityfile)
                 )
-        )
-
-        // val jason = app.get(
-        //         data, interceptor = WebViewResolver(Regex("""/playlist/"""))
-        // ).parsed<SusJSON>()
-        // val extlinkList = mutableListOf<ExtractorLink>()
-        // jason.sources.map {
-        //     extlinkList.add(
-        //             ExtractorLink(
-        //                     source = name,
-        //                     name = name,
-        //                     url = it.streamlink!!,
-        //                     referer = "$mainUrl/",
-        //                     quality = getQualityFromName(it.qualityfile)
-        //             )
-        //     )
-        // }
-        // extlinkList.forEach(callback)
+            )
+        }
+        extlinkList.forEach(callback)
         return true
     }
 
