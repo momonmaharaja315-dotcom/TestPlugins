@@ -92,7 +92,7 @@ class NoodleMagazineProvider : MainAPI() { // all providers must be an instance 
     ): Boolean {
         val document = app.get(data).document
         val script = document.selectFirst("script:containsData(playlist)").data()
-        val jason = script.substringAfter("playlist = '").substringBefore("';")
+        val jason = script.substringAfter("window.playlist = ").substringBefore(";")
 
         callback.invoke(
                 ExtractorLink(
