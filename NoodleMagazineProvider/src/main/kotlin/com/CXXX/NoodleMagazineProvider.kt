@@ -97,7 +97,7 @@ class NoodleMagazineProvider : MainAPI() { // all providers must be an instance 
         val jsonString = script.data()
             .substringAfter("window.playlist = ")
             .substringBefore(";")
-        val jason = Json.decodeFromString(jsonString).parsed<SusJSON>()
+        val jason: SusJSON = Json.decodeFromString(jsonString)
 
         val extlinkList = mutableListOf<ExtractorLink>()
         jason.sources.map {
@@ -115,16 +115,16 @@ class NoodleMagazineProvider : MainAPI() { // all providers must be an instance 
         return true
     }
 
+    @Serializable
     data class SusJSON(
             @JsonProperty("image") val img: String? = null,
             @JsonProperty("sources") val sources: ArrayList<Streams> = arrayListOf()
     )
 
+    @Serializable
     data class Streams(
             @JsonProperty("file") val streamlink: String? = null,//the link
             @JsonProperty("label") val qualityfile: String? = null,//720 480 360 240
             @JsonProperty("type") val type: String? = null,//mp4
     )
-
 }
-
