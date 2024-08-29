@@ -1,12 +1,12 @@
-package com.megix
+package com.Eporner
 
-import android.content.Context
 import com.lagradost.cloudstream3.plugins.CloudstreamPlugin
 import com.lagradost.cloudstream3.plugins.Plugin
+import android.content.Context
 
 @CloudstreamPlugin
-class YesPornPleaseProvider : Plugin() {
+class EpornerProvider: Plugin() {
     override fun load(context: Context) {
-        registerMainAPI(YesPornPlease())
+        registerMainAPI(Eporner())
     }
 }
