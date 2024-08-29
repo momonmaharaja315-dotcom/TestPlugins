@@ -103,26 +103,21 @@ class Eporner : MainAPI() {
         val jsonObject = JSONObject(json)
         val sources = jsonObject.getJSONObject("sources")
         val mp4Sources = sources.getJSONObject("mp4")
-        val hlsSources = sources.getJSONObject("hls")
-
-        for (source in listOf(mp4Sources, hlsSources)) {
-            val qualities = source.keys()
-            while (qualities.hasNext()) {
-                val quality = qualities.next() as String
-                val sourceObject = source.getJSONObject(quality)
-                val labelShort = sourceObject.getString("labelShort") ?: ""
-                val src = sourceObject.getString("src")
-
-                callback.invoke(
-                    ExtractorLink(
-                        source = name,
-                        name = name,
-                        url = src,
-                        referer = "",
-                        getIndexQuality(labelShort)
-                    )
+        val qualities = mp4Sources.keys()
+        while (qualities.hasNext()) {
+            val quality = qualities.next() as String
+            val sourceObject = mp4Sources.getJSONObject(quality)
+            val src = sourceObject.getString("src")
+            val labelShort = sourceObject.getString("labelShort") ?: ""
+            callback.invoke(
+                ExtractorLink(
+                    source = name,
+                    name = name,
+                    url = src,
+                    referer = "",
+                    getIndexQuality(labelShort)
                 )
-            }
+            )
         }
         return true
     }
@@ -131,4 +126,26 @@ class Eporner : MainAPI() {
         return Regex("(\\d{3,4})[pP]").find(str ?: "") ?. groupValues ?. getOrNull(1) ?. toIntOrNull()
             ?: Qualities.Unknown.value
     }
+}
+
+
+import org.json.JSONObject
+
+// Parse the JSON string
+val jsonString = "{ ... }" // Replace with your actual JSON string
+val jsonObject = JSONObject(jsonString)
+
+// Get the sources object
+val sources = jsonObject.getJSONObject("sources")
+
+// Get the mp4 sources object
+val mp4Sources = sources.getJSONObject("mp4")
+
+// Iterate over each quality and print the link
+val qualities = mp4Sources.keys()
+while (qualities.hasNext()) {
+    val quality = qualities.next() as String
+    val sourceObject = mp4Sources.getJSONObject(quality)
+    val src = sourceObject.getString("src")
+    println("$quality: $src")
 }
