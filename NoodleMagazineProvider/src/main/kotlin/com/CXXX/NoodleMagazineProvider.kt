@@ -1,13 +1,10 @@
 package com.CXXX
 
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.lagradost.cloudstream3.*
-import com.lagradost.cloudstream3.network.WebViewResolver
 import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
+import org.json.JSONObject
 
 class NoodleMagazineProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://tyler-brown.com"
@@ -87,22 +84,18 @@ class NoodleMagazineProvider : MainAPI() { // all providers must be an instance 
             val jsonString = script.data()
                 .substringAfter("window.playlist = ")
                 .substringBefore(";")
-
-            val mapper = ObjectMapper()
-            val jsonNode: JsonNode = mapper.readTree(jsonString)
-
-            val img = jsonNode["image"].textValue()
-            val sources = jsonNode["sources"]
-
+            val jsonObject = JSONObject(jsonString)
+            val sources = jsonObject.getJSONArray("sources")
             val extlinkList = mutableListOf<ExtractorLink>()
+
             sources.forEach { source ->
                 extlinkList.add(
                     ExtractorLink(
                         source = name,
                         name = name,
-                        url = source["file"].textValue(),
-                        referer = "$mainUrl/",
-                        quality = getQualityFromName(source["label"].textValue())
+                        url = source["file"].toString(),
+                        referer = data,
+                        quality = getQualityFromName(source["label"].toString())
                     )
                 )
             }
@@ -110,17 +103,4 @@ class NoodleMagazineProvider : MainAPI() { // all providers must be an instance 
         }
         return true
     }
-
-    @JsonProperty
-    data class SusJSON(
-        @JsonProperty("image") val img: String? = null,
-        @JsonProperty("sources") val sources: List<Streams> = emptyList()
-    )
-
-    @JsonProperty
-    data class Streams(
-        @JsonProperty("file") val streamlink: String? = null, // the link
-        @JsonProperty("label") val qualityfile: String? = null, // 720 480 360 240
-        @JsonProperty("type") val type: String? = null // mp4
-    )
 }
