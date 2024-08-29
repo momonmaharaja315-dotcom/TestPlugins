@@ -5,6 +5,8 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.network.WebViewResolver
 import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 
 class NoodleMagazineProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://tyler-brown.com"
@@ -91,8 +93,11 @@ class NoodleMagazineProvider : MainAPI() { // all providers must be an instance 
             callback: (ExtractorLink) -> Unit
     ): Boolean {
         val document = app.get(data).document
-        val script = document.selectFirst("script:containsData(playlist)").data()
-        val jason = script.substringAfter("window.playlist = ").substringBefore(";").parsed<SusJSON>()
+        val script = document.selectFirst("script:containsData(playlist)")
+        val jsonString = script.data()
+            .substringAfter("window.playlist = ")
+            .substringBefore(";")
+        val jason = Json.decodeFromString(jsonString).parsed<SusJSON>()
 
         val extlinkList = mutableListOf<ExtractorLink>()
         jason.sources.map {
