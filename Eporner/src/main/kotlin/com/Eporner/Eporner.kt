@@ -93,45 +93,32 @@ class Eporner : MainAPI() {
         val jsonObject = JSONObject(json)
         val sources = jsonObject.getJSONObject("sources")
         val mp4Sources = sources.getJSONObject("mp4")
+        val hlsSources = sources.getJSONObject("hls")
         val qualities = mp4Sources.keys()
 
-        while (qualities.hasNext()) {
-            val quality = qualities.next() as String
-            val sourceObject = mp4Sources.getJSONObject(quality)
-            val src = sourceObject.getString("src")
-            callback.invoke(
-                ExtractorLink(
-                    source = name,
-                    name = name,
-                    url = src,
-                    referer = "",
-                    quality = getQualityFromName(quality)
+        for (source in listOf(mp4Sources, hlsSources)) {
+            val qualities = source.keys()
+            while (qualities.hasNext()) {
+                val quality = qualities.next() as String
+                val sourceObject = source.getJSONObject(quality)
+                val src = sourceObject.getString("src")
+
+                callback.invoke(
+                    ExtractorLink(
+                        source = name,
+                        name = name,
+                        url = src,
+                        referer = "",
+                        getIndexQuality(quality)
+                    )
                 )
-            )
+            }
         }
-        // val regex = Regex("labelShort\":\\s\"(.*?)\"|src\":\\s\"(.*)\"")
-        // val matches = regex.findAll(json)
-        // val srcList = mutableListOf<Pair<String, String>>()
-        // for (match in matches) {
-        //     val labelShort = match.groupValues[1]
-        //     val src = match.groupValues[2]
-        //     srcList.add(labelShort to src)
-        // }
-        // srcList.forEach { (labelShort, src) ->
-        //     if (!src.contains(".php")and(labelShort.isEmpty())) {
-        //         callback.invoke(
-        //             ExtractorLink(
-        //                 source = name,
-        //                 name = name,
-        //                 url = src,
-        //                 referer = "",
-        //                 quality = getQualityFromName(labelShort)
-        //             )
-        //         )
-        //     }
-        // }
         return true
     }
+
+    private fun getIndexQuality(str: String?): Int {
+        return Regex("(\\d{3,4})[pP]").find(str ?: "") ?. groupValues ?. getOrNull(1) ?. toIntOrNull()
+            ?: Qualities.Unknown.value
+    }
 }
-
-
