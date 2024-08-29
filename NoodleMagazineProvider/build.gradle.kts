@@ -1,11 +1,12 @@
-version = 6
+version = 8
+
 
 cloudstream {
-    language = "hi"
+    language = "en"
     // All of these properties are optional, you can safely remove them
 
-    description = ""
-     authors = listOf("megix")
+    description = "type .nofap in discord - Full Length"
+    authors = listOf("KillerDogeEmpire, Coxju")
 
     /**
      * Status int as the following:
@@ -16,9 +17,8 @@ cloudstream {
      * */
     status = 1 // will be 3 if unspecified
     tvTypes = listOf(
-        "TvSeries",
-        "Movie",
+        "NSFW",
     )
 
-    iconUrl = "https://cinemaluxe.bond/wp-content/uploads/2024/07/fresh-logo-dark-theme-.webp"
+    iconUrl = "https://www.google.com/s2/favicons?domain=noodlemagazine.com/&sz=%size%"
 }
