@@ -88,12 +88,12 @@ class Eporner : MainAPI() {
         val response = app.get(
             data, interceptor = WebViewResolver(Regex("""https://www\.eporner\.com/xhr/video"""))
         )
-        val json=response.text
+        val json = response.text
         callback.invoke(
             ExtractorLink(
                 source = name,
                 name = name,
-                url = src,
+                url = json,
                 referer = "",
                 quality = Qualities.Unknown.value
             )
