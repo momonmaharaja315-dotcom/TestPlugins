@@ -90,8 +90,7 @@ class NoodleMagazineProvider : MainAPI() { // all providers must be an instance 
             subtitleCallback: (SubtitleFile) -> Unit,
             callback: (ExtractorLink) -> Unit
     ): Boolean {
-        val document = app.get(data)
-
+        val document = app.get(data).document
         val script = document.selectFirst("script:containsData(playlist)").data()
         val jason = script.substringAfter("playlist = '").substringBefore("';")
 
