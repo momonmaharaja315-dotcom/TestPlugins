@@ -88,14 +88,15 @@ class NoodleMagazineProvider : MainAPI() { // all providers must be an instance 
             val sources = jsonObject.getJSONArray("sources")
             val extlinkList = mutableListOf<ExtractorLink>()
 
-            sources.forEach { source ->
+            for (i in 0 until sources.length()) {
+                val source = sources.getJSONObject(i)
                 extlinkList.add(
                     ExtractorLink(
                         source = name,
                         name = name,
-                        url = source["file"].toString(),
+                        url = source.getString("file"),
                         referer = data,
-                        quality = getQualityFromName(source["label"].toString())
+                        quality = getQualityFromName(source.getString("label"))
                     )
                 )
             }
