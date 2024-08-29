@@ -4,6 +4,7 @@ import org.jsoup.nodes.Element
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.network.WebViewResolver
 import com.lagradost.cloudstream3.utils.*
+import org.json.JSONObject
 
 class Eporner : MainAPI() {
     override var mainUrl              = "https://www.eporner.com"
@@ -28,12 +29,12 @@ class Eporner : MainAPI() {
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         val document = app.get("$mainUrl/${request.data}/$page/").document
-        val home     = document.select("#vidresults div.mb").mapNotNull { it.toSearchResult() }
+        val home = document.select("#vidresults div.mb").mapNotNull { it.toSearchResult() }
 
         return newHomePageResponse(
             list    = HomePageList(
-                name               = request.name,
-                list               = home,
+                name = request.name,
+                list = home,
                 isHorizontalImages = true
             ),
             hasNext = true
@@ -41,8 +42,8 @@ class Eporner : MainAPI() {
     }
 
     private fun Element.toSearchResult(): SearchResponse {
-        val title     = fixTitle(this.select("div.mbunder p a").text()).trim()
-        val href      = fixUrl(this.select("div.mbcontent a").attr("href"))
+        val title = fixTitle(this.select("div.mbunder p a").text()).trim()
+        val href = fixUrl(this.select("div.mbcontent a").attr("href"))
         val posterUrl = fixUrlNull(this.select("div.mbcontent a img").attr("src"))
 
         return newMovieSearchResponse(title, href, TvType.Movie) {
@@ -73,14 +74,14 @@ class Eporner : MainAPI() {
     override suspend fun load(url: String): LoadResponse {
         val document = app.get(url).document
 
-        val title       = document.selectFirst("meta[property=og:title]")?.attr("content")?.trim().toString()
-        val poster      = fixUrlNull(document.selectFirst("[property='og:image']")?.attr("content"))
+        val title = document.selectFirst("meta[property=og:title]")?.attr("content")?.trim().toString()
+        val poster = fixUrlNull(document.selectFirst("[property='og:image']")?.attr("content"))
         val description = document.selectFirst("meta[property=og:description]")?.attr("content")?.trim()
     
 
         return newMovieLoadResponse(title, url, TvType.NSFW, url) {
             this.posterUrl = poster
-            this.plot      = description
+            this.plot = description
         }
     }
 
@@ -89,15 +90,25 @@ class Eporner : MainAPI() {
             data, interceptor = WebViewResolver(Regex("""https://www\.eporner\.com/xhr/video"""))
         )
         val json = response.text
-        callback.invoke(
-            ExtractorLink(
-                source = name,
-                name = name,
-                url = json,
-                referer = "",
-                quality = Qualities.Unknown.value
+        val jsonObject = JSONObject(json)
+        val sources = jsonObject.getJSONObject("sources")
+        val mp4Sources = sources.getJSONObject("mp4")
+        val qualities = mp4Sources.keys()
+
+        while (qualities.hasNext()) {
+            val quality = qualities.next() as String
+            val sourceObject = mp4Sources.getJSONObject(quality)
+            val src = sourceObject.getString("src")
+            callback.invoke(
+                ExtractorLink(
+                    source = name,
+                    name = name,
+                    url = src,
+                    referer = "",
+                    quality = getQualityFromName(quality)
+                )
             )
-        )
+        }
         // val regex = Regex("labelShort\":\\s\"(.*?)\"|src\":\\s\"(.*)\"")
         // val matches = regex.findAll(json)
         // val srcList = mutableListOf<Pair<String, String>>()
@@ -122,3 +133,5 @@ class Eporner : MainAPI() {
         return true
     }
 }
+
+
