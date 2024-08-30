@@ -81,7 +81,7 @@ class GDFlix : ExtractorApi() {
                     )
                 )
             }
-            else if (it.select("a").text().contains("DRIVEBOT DL"))
+            else if (it.select("a").text().contains("DRIVEBOT LINK"))
             {
                 val driveLink = it.attr("href")
                 val id = driveLink.substringAfter("id=").substringBefore("&")
@@ -142,7 +142,7 @@ class GDFlix : ExtractorApi() {
                     referer = Instant_link,
                     headers = mapOf(
                         "x-token" to "direct.zencloud.lol",
-                        "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"
+                        "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; rv:128.0) Gecko/20100101 Firefox/128.0"
                     ),
                     timeout = 60L,
                 )

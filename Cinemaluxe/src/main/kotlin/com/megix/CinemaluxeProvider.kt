@@ -5,9 +5,10 @@ import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import com.lagradost.cloudstream3.base64Decode
+import org.json.JSONObject
 
 class CinemaluxeProvider : MainAPI() { // all providers must be an instance of MainAPI
-    override var mainUrl = "https://cinemaluxe.link"
+    override var mainUrl = fetchMainUrl()
     override var name = "Cinemaluxe"
     override val hasMainPage = true
     override var lang = "hi"
@@ -16,6 +17,14 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
         TvType.Movie,
         TvType.TvSeries
     )
+
+    private suspend fun fetchMainUrl(): String {
+        val response = app.get("https://raw.githubusercontent.com/SaurabhKaperwan/URL/main/urls.json")
+        val json = response.body ?. string() ?: ""
+        val jsonObject = JSONObject(json)
+        val url = jsonObject.getString("cinemaluxe_url")
+        return url
+    }
 
     override val mainPage = mainPageOf(
         "$mainUrl/page/" to "Home",
