@@ -103,50 +103,6 @@ class actionviewphotography : MainAPI() {
             }
             extlinkList.forEach(callback)
         }
-        // val gson = Gson()
-        // val jsonObject = gson.fromJson(script, Map::class.java)
-        // val sources = (jsonObject["sources"] as? List<Map<String, Any>>) ?: emptyList()
-        // sources.forEach { source ->
-        //     val file = source["file"] as? String
-        //     val label = source["label"] as? String
-        //     callback.invoke(
-        //         ExtractorLink(
-        //             source  = this.name,
-        //             name    = this.name,
-        //             url     = file.toString(),
-        //             referer = data,
-        //             quality = getQualityFromName(label)
-        //         )
-        //     )
-        // }
-
-        // val embededurl=document.select("#iplayer").attr("src")
-        // val properurldoc = app.get(mainUrl+embededurl).document
-        // val properurldocactual=properurldoc.selectFirst("script:containsData(window.playlistUrl)")?.data().toString()
-        // // Extracting Base64 encoded string using regex
-        // val regex = Regex("""window\.playlistUrl='([^']+)';""")
-        // val matchResult = regex.find(properurldocactual)
-        // val playlistUrl = matchResult?.groups?.get(1)?.value
-        // val sourcesurl= app.get(mainUrl+playlistUrl).document
-        // val links=sourcesurl.body().text().toString().trim()
-        // val gson = Gson()
-        // val jsonObject = gson.fromJson(links, Map::class.java)
-        // val sources = (jsonObject["sources"] as? List<Map<String, Any>>) ?: emptyList()
-        // sources.forEach { source ->
-        //     val file = source["file"] as? String
-        //     val label = source["label"] as? String
-        //     callback.invoke(
-        //         ExtractorLink(
-        //             source  = this.name,
-        //             name    = this.name,
-        //             url     = file.toString(),
-        //             referer = data,
-        //             quality = getQualityFromName(label)
-
-        //         )
-        //     )
-        //     //println("  File: $file, Label: $label")
-        // }
         return true
     }
 }
