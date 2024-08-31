@@ -1,6 +1,6 @@
 package com.coxju
 
-import com.google.gson.Gson
+import org.json.JSONObject
 import org.jsoup.nodes.Element
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
