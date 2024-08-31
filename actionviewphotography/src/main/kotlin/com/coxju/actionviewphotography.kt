@@ -1,18 +1,15 @@
 package com.coxju
 
-
 import com.google.gson.Gson
 import org.jsoup.nodes.Element
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 
-
-
 class actionviewphotography : MainAPI() {
     override var mainUrl              = "https://ukdevilz.com"
     override var name                 = "Noodle NSFW"
     override val hasMainPage          = true
-    override var lang                 = "hi"
+    override var lang                 = "en"
     override val hasQuickSearch       = false
     override val hasDownloadSupport   = true
     override val hasChromecastSupport = true
@@ -20,11 +17,11 @@ class actionviewphotography : MainAPI() {
     override val vpnStatus            = VPNStatus.MightBeNeeded
 
     override val mainPage = mainPageOf(
-            "video/milf" to "Milf",
-            "video/brattysis" to "Brattysis",
-            "video/web%20series" to "Web Series",
-            "video/japanese" to "Japanese",
-            "video/Step" to "Step category",
+        "video/milf" to "Milf",
+        "video/brattysis" to "Brattysis",
+        "video/web%20series" to "Web Series",
+        "video/japanese" to "Japanese",
+        "video/Step" to "Step category",
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
@@ -84,22 +81,33 @@ class actionviewphotography : MainAPI() {
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
         val document = app.get(data).document
         val script = document.selectFirst("script:containsData(window.playlist)")?.data().toString()
-        val gson = Gson()
-        val jsonObject = gson.fromJson(script, Map::class.java)
-        val sources = (jsonObject["sources"] as? List<Map<String, Any>>) ?: emptyList()
-        sources.forEach { source ->
-            val file = source["file"] as? String
-            val label = source["label"] as? String
-            callback.invoke(
-                ExtractorLink(
-                    source  = this.name,
-                    name    = this.name,
-                    url     = file.toString(),
-                    referer = data,
-                    quality = getQualityFromName(label)
-                )
+
+        callback.invoke(
+            ExtractorLink(
+                source  = this.name,
+                name    = this.name,
+                url     = script,
+                referer = "",
+                quality = Qualities.Unknown.value
             )
-        }
+        )
+        // val gson = Gson()
+        // val jsonObject = gson.fromJson(script, Map::class.java)
+        // val sources = (jsonObject["sources"] as? List<Map<String, Any>>) ?: emptyList()
+        // sources.forEach { source ->
+        //     val file = source["file"] as? String
+        //     val label = source["label"] as? String
+        //     callback.invoke(
+        //         ExtractorLink(
+        //             source  = this.name,
+        //             name    = this.name,
+        //             url     = file.toString(),
+        //             referer = data,
+        //             quality = getQualityFromName(label)
+        //         )
+        //     )
+        // }
+
         // val embededurl=document.select("#iplayer").attr("src")
         // val properurldoc = app.get(mainUrl+embededurl).document
         // val properurldocactual=properurldoc.selectFirst("script:containsData(window.playlistUrl)")?.data().toString()
