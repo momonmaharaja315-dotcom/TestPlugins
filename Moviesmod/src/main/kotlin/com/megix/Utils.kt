@@ -151,12 +151,12 @@ class Driveseed : ExtractorApi() {
             val link = it.attr("href")
             if(text.contains("Resume Cloud")) {
                 val streamUrl = resumeCloudLink(link)
-                if (resumeCloud != null) {
+                if (streamUrl != null) {
                     callback.invoke(
                         ExtractorLink(
                             "ResumeCloud",
                             "ResumeCloud",
-                            streamUrl,
+                            streamUrl.toString(),
                             "",
                             quality
                         )
@@ -165,12 +165,12 @@ class Driveseed : ExtractorApi() {
             }
             else if(text.contains("Instant Download")) {
                 val streamUrl = instantLink(link)
-                if (instant != null) {
+                if (streamUrl != null) {
                     callback.invoke(
                         ExtractorLink(
                             "Instant(Download)",
                             "Instant(Download)",
-                            streamUrl,
+                            streamUrl.toString(),
                             "",
                             quality
                         )
@@ -179,12 +179,12 @@ class Driveseed : ExtractorApi() {
             }
             else if(text.contains("Resume Worker Bot")) {
                 val streamUrl = resumeBot(link)
-                if (resumeLink != null) {
+                if (streamUrl != null) {
                     callback.invoke(
                         ExtractorLink(
                             "ResumeBot",
                             "ResumeBot(VLC)",
-                            streamUrl,
+                            streamUrl.toString(),
                             "",
                             quality
                         )
@@ -199,13 +199,16 @@ class Driveseed : ExtractorApi() {
                             ExtractorLink(
                                 "CF Type1",
                                 "CF Type1",
-                                it,
+                                it.toString(),
                                 "",
                                 quality
                             )
                         )
                     }
                 }
+            }
+            else {
+
             }
         }
 
