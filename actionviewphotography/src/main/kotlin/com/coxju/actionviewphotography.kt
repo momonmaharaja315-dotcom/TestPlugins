@@ -80,17 +80,29 @@ class actionviewphotography : MainAPI() {
 
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
         val document = app.get(data).document
-        val script = document.selectFirst("script:containsData(window.playlist)")?.data().toString()
+        val script = document.selectFirst("script:containsData(window.playlist)")
+        if (script != null) {
+            val jsonString = script.data()
+                .substringAfter("window.playlist = ")
+                .substringBefore(";")
+            val jsonObject = JSONObject(jsonString)
+            val sources = jsonObject.getJSONArray("sources")
+            val extlinkList = mutableListOf<ExtractorLink>()
 
-        callback.invoke(
-            ExtractorLink(
-                source  = this.name,
-                name    = this.name,
-                url     = script,
-                referer = "",
-                quality = Qualities.Unknown.value
-            )
-        )
+            for (i in 0 until sources.length()) {
+                val source = sources.getJSONObject(i)
+                extlinkList.add(
+                    ExtractorLink(
+                        source = name,
+                        name = name,
+                        url = source.getString("file"),
+                        referer = data,
+                        quality = getQualityFromName(source.getString("label"))
+                    )
+                )
+            }
+            extlinkList.forEach(callback)
+        }
         // val gson = Gson()
         // val jsonObject = gson.fromJson(script, Map::class.java)
         // val sources = (jsonObject["sources"] as? List<Map<String, Any>>) ?: emptyList()

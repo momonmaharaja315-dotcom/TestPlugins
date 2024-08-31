@@ -44,8 +44,10 @@ class Eporner : MainAPI() {
     private fun Element.toSearchResult(): SearchResponse {
         val title = fixTitle(this.select("div.mbunder p a").text()).trim()
         val href = fixUrl(this.select("div.mbcontent a").attr("href"))
-        val posterUrl = fixUrlNull(this.selectFirst("img").attr("src"))
-
+        var posterUrl = fixUrlNull(this.selectFirst("img").attr("src"))
+        if (posterUrl.isNullOrBlank()) {
+            posterUrl = fixUrlNull(this.selectFirst("img").attr("data-src"))
+        }
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
         }
@@ -57,7 +59,7 @@ class Eporner : MainAPI() {
         for (i in 1..10) {
             val document = app.get("${mainUrl}/search/$query/$i").document
 
-            val results = document.select("#vidresults div.mb").mapNotNull { it.toSearchResult() }
+            val results = document.select("div.mb.hdy").mapNotNull { it.toSearchResult() }
 
             if (!searchResponse.containsAll(results)) {
                 searchResponse.addAll(results)
