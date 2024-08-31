@@ -70,7 +70,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         val description = document.selectFirst("div.imdbwp__teaser")?.text()
         val div = document.selectFirst("div.thecontent").text()
         val tvtype = if(div.contains("season", ignoreCase = true)) TvType.TvSeries else TvType.Movie
-        val imdbUrl = document.selectFirst("a.imdbwp__link").attr("href")
+        val imdbUrl = document.selectFirst("a.imdbwp__link")?.attr("href")
 
         if(tvtype == TvType.TvSeries) {
             val tvSeriesEpisodes = mutableListOf<Episode>()
