@@ -99,6 +99,7 @@ class actionviewphotography : MainAPI() {
                     quality = getQualityFromName(label)
                 )
             )
+        }
         // val embededurl=document.select("#iplayer").attr("src")
         // val properurldoc = app.get(mainUrl+embededurl).document
         // val properurldocactual=properurldoc.selectFirst("script:containsData(window.playlistUrl)")?.data().toString()
