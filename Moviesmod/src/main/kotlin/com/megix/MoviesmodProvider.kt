@@ -8,7 +8,7 @@ import com.lagradost.cloudstream3.base64Decode
 import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
 
 open class MoviesmodProvider : MainAPI() { // all providers must be an instance of MainAPI
-    override var mainUrl = "https://moviesmod.band"
+    override var mainUrl = "https://moviesmod.bet"
     override var name = "Moviesmod"
     override val hasMainPage = true
     override var lang = "hi"
@@ -67,7 +67,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         val document = app.get(url).document
         val title = document.selectFirst("meta[property=og:title]").attr("content").replace("Download ", "")
         val posterUrl = document.selectFirst("meta[property=og:image]").attr("content")
-        val description = document.selectFirst("div.imdbwp__teaser").text()
+        val description = document.selectFirst("div.imdbwp__teaser")?.text()
         val div = document.selectFirst("div.thecontent").text()
         val tvtype = if(div.contains("season", ignoreCase = true)) TvType.TvSeries else TvType.Movie
         val imdbUrl = document.selectFirst("a.imdbwp__link").attr("href")
