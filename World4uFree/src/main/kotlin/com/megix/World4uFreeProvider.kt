@@ -71,7 +71,7 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
         var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
 
         if(posterUrl.isEmpty() || posterUrl.contains("$mainUrl/favicon-32x32.png")) {
-            posterUrl = document.selectFirst("div.separator > a > img").attr("data-src").toString()
+            posterUrl = document.selectFirst("div.separator > a > img")?.attr("data-src").toString()
         }
         val tvType = if (document.select("div.entry-content").text().contains("movie name", ignoreCase = true)) {
             TvType.Movie
@@ -101,34 +101,36 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
                     seasonList.add("$title" to seasonNum)
                 }
 
-                val wlinkz = button.attr("href")
-                val doc = app.get(wlinkz).document
-                val elements = doc.select("h3:matches((?i)(episode))")
-                val episodes = mutableListOf<Episode>()
-                elements.forEach { element ->
-                    val epTitle = element.text().replace("—", "")
-                    var linkElement = element.nextElementSibling()
-                    while (linkElement != null && linkElement.tagName() != "h4") {
-                        linkElement = linkElement.nextElementSibling()
-                    }
-                    var link = ""
-                    if(linkElement != null) {
-                        val aTag = linkElement.selectFirst("a")
-                        link = aTag ?. attr("href") ?: ""
-                    }
+                val wlinkz = button.attr("href").toString()
+                if(wlinkz.isNotEmpty()) {
+                    val doc = app.get(wlinkz).document
+                    val elements = doc.select("h3:matches((?i)(episode))")
+                    val episodes = mutableListOf<Episode>()
+                    elements.forEach { element ->
+                        val epTitle = element.text().replace("—", "")
+                        var linkElement = element.nextElementSibling()
+                        while (linkElement != null && linkElement.tagName() != "h4") {
+                            linkElement = linkElement.nextElementSibling()
+                        }
+                        var link = ""
+                        if(linkElement != null) {
+                            val aTag = linkElement.selectFirst("a")
+                            link = aTag ?. attr("href") ?: ""
+                        }
 
-                    if (link.isNotEmpty() && !title.contains("zip", ignoreCase = true)) {
-                        episodes.add(
-                            newEpisode(link){
-                                name = "$epTitle"
-                                season = seasonNum
-                                episode = elements.indexOf(element) + 1
-                            }
-                        )
+                        if (link.isNotEmpty() && !title.contains("zip", ignoreCase = true)) {
+                            episodes.add(
+                                newEpisode(link){
+                                    name = "$epTitle"
+                                    season = seasonNum
+                                    episode = elements.indexOf(element) + 1
+                                }
+                            )
+                        }
                     }
+                    tvSeriesEpisodes.addAll(episodes)
+                    seasonNum++
                 }
-                tvSeriesEpisodes.addAll(episodes)
-                seasonNum++
             }
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl

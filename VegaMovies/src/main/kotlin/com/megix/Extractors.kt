@@ -15,8 +15,8 @@ class VCloud : ExtractorApi() {
         callback: (ExtractorLink) -> Unit
     ) {
         val doc = app.get(url).document
-        val scriptTag = doc.selectFirst("script:containsData(url)")
-        val urlValue = Regex("var url = '([^']*)'").find(scriptTag.toString()) ?. groupValues ?. get(1) ?: ""
+        val scriptTag = doc.selectFirst("script:containsData(url)") ?. data().toString()
+        val urlValue = Regex("var url = '([^']*)'").find(scriptTag) ?. groupValues ?. get(1) ?: ""
         val document = app.get(urlValue).document
 
         val size = document.selectFirst("i#size") ?. text()
