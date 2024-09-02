@@ -91,11 +91,11 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                 val hTags = doc.select("h3,h4")
                 var e = 1
                 hTags.mapNotNull {
-                    val title = it.text()
+                    val titleText = it.text()
                     val epUrl = it.selectFirst("a")?.attr("href")
                     tvSeriesEpisodes.add(
                         newEpisode(epUrl) {
-                            name = title
+                            name = titleText
                             season = seasonNum
                             episode = e++
                         }
@@ -140,7 +140,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                 }
 
                 val doc = app.get(link).document
-                val url = doc.selectFirst("a.maxbutton-1").attr("href").toString()
+                val url = doc.selectFirst("a.maxbutton-1")?.attr("href").toString()
                 val driveLink = bypass(url).toString()
                 loadExtractor(driveLink, subtitleCallback, callback)
             }

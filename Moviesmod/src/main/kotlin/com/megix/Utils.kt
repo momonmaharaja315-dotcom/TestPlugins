@@ -77,14 +77,14 @@ class Driveseed : ExtractorApi() {
     private suspend fun CFType1(url: String): List<String> {
         val cfWorkersLink = url.replace("/file", "/wfile") + "?type=1"
         val document = app.get(cfWorkersLink).document
-        val links = document?.select("a.btn-success")?.mapNotNull { it.attr("href") } ?: emptyList()
+        val links = document.select("a.btn-success")?.mapNotNull { it.attr("href") } ?: emptyList()
         return links
     }
 
     private suspend fun resumeCloudLink(url: String): String {
         val resumeCloudUrl = "https://driveseed.org" + url
         val document = app.get(resumeCloudUrl).document
-        val link = document?.selectFirst("a.btn-success")?.attr("href")
+        val link = document.selectFirst("a.btn-success")?.attr("href")
         return link ?: ""
     }
 
@@ -115,7 +115,7 @@ class Driveseed : ExtractorApi() {
         return link ?: null
     }
 
-    private suspend fun instantLink(finallink: String): String? {
+    private suspend fun instantLink(finallink: String): String {
         val url = if(finallink.contains("video-leech")) "video-leech.xyz" else "video-seed.xyz"
         val token = finallink.substringAfter("https://$url/?url=")
         val downloadlink = app.post(
@@ -133,11 +133,8 @@ class Driveseed : ExtractorApi() {
             downloadlink.toString().substringAfter("url\":\"")
             .substringBefore("\",\"name")
             .replace("\\/", "/")
-        return if (finaldownloadlink == null) {
-            null
-        } else {
-            finaldownloadlink
-        }
+
+        return finaldownloadlink
     }
 
 
@@ -170,7 +167,7 @@ class Driveseed : ExtractorApi() {
             }
             else if(text.contains("Instant Download")) {
                 val streamUrl = instantLink(link)
-                if (streamUrl != null) {
+                if (streamUrl.isNotEmpty()) {
                     callback.invoke(
                         ExtractorLink(
                             "Instant(Download)",
