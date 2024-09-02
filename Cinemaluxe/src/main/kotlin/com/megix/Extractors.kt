@@ -37,7 +37,7 @@ class GDFlix2 : GDFlix() {
     override val mainUrl: String = "https://new2.gdflix.cfd"
 }
 
-class GDFlix : ExtractorApi() {
+open class GDFlix : ExtractorApi() {
     override val name: String = "GDFlix"
     override val mainUrl: String = "https://new4.gdflix.cfd"
     override val requiresReferer = false
