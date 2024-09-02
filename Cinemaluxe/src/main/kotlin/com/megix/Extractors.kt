@@ -5,6 +5,7 @@ import com.lagradost.cloudstream3.utils.*
 import java.net.URI
 import okhttp3.FormBody
 
+
 class Sharepoint : ExtractorApi() {
     override val name: String = "Sharepoint"
     override val mainUrl: String = "https://indjatin-my.sharepoint.com"
@@ -170,7 +171,7 @@ class GDFlix : ExtractorApi() {
 
 class HubCloud : ExtractorApi() {
     override val name: String = "Hub-Cloud"
-    override val mainUrl: String = "https://hubcloud.club"
+    override val mainUrl: String = "https://hubcloud.art"
     override val requiresReferer = false
 
     override suspend fun getUrl(
