@@ -81,15 +81,15 @@ class Driveseed : ExtractorApi() {
         return links
     }
 
-    private suspend fun resumeCloudLink(url: String): String {
+    private suspend fun resumeCloudLink(url: String): String? {
         val resumeCloudUrl = "https://driveseed.org" + url
         val document = app.get(resumeCloudUrl).document
         val link = document.selectFirst("a.btn-success")?.attr("href")
-        return link ?: ""
+        return link
     }
 
 
-    private suspend fun resumeBot(url : String): String {
+    private suspend fun resumeBot(url : String): String? {
         val resumeBotResponse = app.get(url)
         val resumeBotDoc = resumeBotResponse.document.toString()
         val ssid = resumeBotResponse.cookies["PHPSESSID"]
@@ -115,7 +115,7 @@ class Driveseed : ExtractorApi() {
         return link
     }
 
-    private suspend fun instantLink(finallink: String): String {
+    private suspend fun instantLink(finallink: String): String? {
         val url = if(finallink.contains("video-leech")) "video-leech.xyz" else "video-seed.xyz"
         val token = finallink.substringAfter("https://$url/?url=")
         val downloadlink = app.post(
