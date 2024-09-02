@@ -73,10 +73,12 @@ class Driveseed : ExtractorApi() {
             ?: Qualities.Unknown.value
     }
 
+
     private suspend fun CFType1(url: String): List<String> {
         val cfWorkersLink = url.replace("/file", "/wfile") + "?type=1"
         val document = app.get(cfWorkersLink).document
         val links = document?.select("a.btn-success")?.mapNotNull { it.attr("href") } ?: emptyList()
+        return links
     }
 
     private suspend fun resumeCloudLink(url: String): String? {

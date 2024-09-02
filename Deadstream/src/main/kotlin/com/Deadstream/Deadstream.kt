@@ -65,8 +65,8 @@ class Deadstream : MainAPI() {
             document.select("a.btn-play").mapNotNull {
                 val seasonText = it.text()
                 seasonList.add(Pair(seasonText, seasonNum))
-                val url = fixUrl(it.attr("href"))
-                val doc = app.get(url, timeout = 30L).document
+                val href = fixUrl(it.attr("href"))
+                val doc = app.get(href, timeout = 30L).document
 
                 doc.selectFirst("div.ss-list")?.select("a")?.mapNotNull { episode ->
                     val epName = episode.attr("title")

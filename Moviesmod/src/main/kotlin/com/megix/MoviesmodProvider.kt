@@ -36,10 +36,10 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
     }
 
     fun Element.toSearchResult(): SearchResponse? {
-        val title = this.selectFirst("a")?.attr("title")?.replace("Download ", "")
-        val href = this.selectFirst("a")?.attr("href")
-        val posterUrl = this.selectFirst("a > div > img")?.attr("src")
-    
+        val title = this.selectFirst("a")?.attr("title")?.replace("Download ", "") ?: ""
+        val href = this.selectFirst("a")?.attr("href") ?: ""
+        val posterUrl = this.selectFirst("a > div > img")?.attr("src") ?: ""
+
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
         }
@@ -65,11 +65,11 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
-        val title = document.selectFirst("meta[property=og:title]")?.attr("content")?.replace("Download ", "")
-        val posterUrl = document.selectFirst("meta[property=og:image]").attr("content")
-        val description = document.selectFirst("div.imdbwp__teaser")?.text()
+        val title = document.selectFirst("meta[property=og:title]")?.attr("content")?.replace("Download ", "") ?: ""
+        val posterUrl = document.selectFirst("meta[property=og:image]").attr("content") ?: ""
+        val description = document.selectFirst("div.imdbwp__teaser")?.text() ?: ""
         val div = document.selectFirst("div.thecontent")?.text()
-        val tvtype = if(div.contains("season", ignoreCase = true)) TvType.TvSeries else TvType.Movie
+        val tvtype = if (div?.contains("season", ignoreCase = true) == true) TvType.TvSeries else TvType.Movie
         val imdbUrl = document.selectFirst("a.imdbwp__link")?.attr("href")
 
         if(tvtype == TvType.TvSeries) {
@@ -81,7 +81,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
             buttons.mapNotNull {
                 var link = it.attr("href")
                 val titleElement = it.parent()?.previousElementSibling()
-                val seasonText = titleElement?.text()
+                val seasonText = titleElement?.text() ?: ""
                 seasonList.add(Pair(seasonText, seasonNum))
 
                 if(link.contains("url=")) {
