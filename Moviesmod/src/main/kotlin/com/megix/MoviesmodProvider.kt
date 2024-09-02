@@ -36,9 +36,9 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
     }
 
     fun Element.toSearchResult(): SearchResponse? {
-        val title = this.selectFirst("a")?.attr("title")?.replace("Download ", "") ?: ""
-        val href = this.selectFirst("a")?.attr("href") ?: ""
-        val posterUrl = this.selectFirst("a > div > img")?.attr("src") ?: ""
+        val title = this.selectFirst("a")?.attr("title")?.replace("Download ", "").toString()
+        val href = this.selectFirst("a")?.attr("href").toString()
+        val posterUrl = this.selectFirst("a > div > img")?.attr("src").toString()
 
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
@@ -141,7 +141,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                 }
 
                 val doc = app.get(link).document
-                val url = doc.selectFirst("a.maxbutton-1")?.attr("href")
+                val url = doc.selectFirst("a.maxbutton-1")?.attr("href").toString()
                 val driveLink = bypass(url).toString()
                 loadExtractor(driveLink, subtitleCallback, callback)
             }
