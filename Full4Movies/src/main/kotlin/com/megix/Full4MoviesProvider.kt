@@ -65,13 +65,17 @@ class Full4MoviesProvider : MainAPI() { // all providers must be an instance of 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
         val infoDiv = document.selectFirst("div.wp-block-image")
+
         val imdbRatingText = infoDiv?.select("td:contains(IMDb) + td")?.text()
         val imdbRating = imdbRatingText?.substringBefore("/")?.toRatingInt()
-        val plot = infoDiv?.select("td:contains(Plot) + td")?.text().toString()
+
+        val plot = infoDiv?.select("td:contains(Plot) + td")?.text()?.toString()
+
         val genresText = infoDiv?.select("td:contains(Genres) + td")?.text()
-        val genresList = genresText?.split(",").map { it.trim() }
+        val genresList = genresText?.split(",").map { it.trim() } ?: emptyList()
+
         val castText = infoDiv?.select("td:contains(Cast) + td")?.text()
-        val castList = castText.split(",").map { it.trim() }
+        val castList = castText?.split(",").map { it.trim() } ?: emptyList()
         val actors = castList.map {
             ActorData(
                 Actor(it),

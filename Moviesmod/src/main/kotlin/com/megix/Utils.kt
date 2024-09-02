@@ -77,7 +77,7 @@ class Driveseed : ExtractorApi() {
     private suspend fun CFType1(url: String): List<String> {
         val cfWorkersLink = url.replace("/file", "/wfile") + "?type=1"
         val document = app.get(cfWorkersLink).document
-        val links = document.select("a.btn-success").map { it.attr("href") } ?: emptyList()
+        val links = document.select("a.btn-success").map { it.attr("href") }
         return links
     }
 
@@ -89,7 +89,7 @@ class Driveseed : ExtractorApi() {
     }
 
 
-    private suspend fun resumeBot(url : String): String? {
+    private suspend fun resumeBot(url : String): String {
         val resumeBotResponse = app.get(url)
         val resumeBotDoc = resumeBotResponse.document.toString()
         val ssid = resumeBotResponse.cookies["PHPSESSID"]
@@ -112,7 +112,7 @@ class Driveseed : ExtractorApi() {
         ).text
         val jsonObject = JSONObject(jsonResponse)
         val link = jsonObject.getString("url")
-        return link ?: null
+        return link
     }
 
     private suspend fun instantLink(finallink: String): String {
@@ -153,7 +153,7 @@ class Driveseed : ExtractorApi() {
             val link = it.attr("href")
             if(text.contains("Resume Cloud")) {
                 val streamUrl = resumeCloudLink(link)
-                if (streamUrl.isNotEmpty()) {
+                if (streamUrl != null) {
                     callback.invoke(
                         ExtractorLink(
                             "ResumeCloud",
@@ -167,7 +167,7 @@ class Driveseed : ExtractorApi() {
             }
             else if(text.contains("Instant Download")) {
                 val streamUrl = instantLink(link)
-                if (streamUrl.isNotEmpty()) {
+                if (streamUrl != null) {
                     callback.invoke(
                         ExtractorLink(
                             "Instant(Download)",
