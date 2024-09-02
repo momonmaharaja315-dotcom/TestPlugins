@@ -38,9 +38,9 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
-        val title = this.selectFirst("figure > img")?.attr("title")?.replace("Download ", "")
-        val href = fixUrl(this.selectFirst("figure > a") ?. attr("href").toString())
-        val posterUrl = fixUrlNull(this.selectFirst("figure > img") ?. attr("src").toString())
+        val title = this.selectFirst("figure > img").attr("title").replace("Download ", "").toString()
+        val href = fixUrl(this.selectFirst("figure > a").attr("href").toString())
+        val posterUrl = fixUrlNull(this.selectFirst("figure > img").attr("src").toString())
     
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
