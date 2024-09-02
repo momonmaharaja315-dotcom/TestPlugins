@@ -66,15 +66,15 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
-        val title = document.selectFirst("meta[property=og:title]")?.attr("content")?.replace("Download ", "")
+        val title = document.selectFirst("meta[property=og:title]").attr("content").replace("Download ", "").toString()
 
         val plotElement = document.select(
             "h2:contains(Storyline), h3:contains(Storyline), h5:contains(Storyline), h4:contains(Storyline), h4:contains(STORYLINE)"
         ).firstOrNull() ?. nextElementSibling()
 
-        val plot = plotElement ?. text() ?: document.select(".ipc-html-content-inner-div").firstOrNull() ?. text() ?: ""
+        val plot = plotElement ?. text() ?: document.select(".ipc-html-content-inner-div").firstOrNull() ?. text().toString()
 
-        val posterUrl = document.selectFirst("img[decoding=\"async\"]") ?. attr("src") ?: ""
+        val posterUrl = document.selectFirst("img[decoding=\"async\"]").attr("src").toString()
         val seasonRegex = """(?i)season\s*\d+""".toRegex()
         val imdbId = document.selectFirst("a:contains(IMDb)") ?. attr("href")
 
