@@ -5,11 +5,12 @@ import com.lagradost.cloudstream3.plugins.Plugin
 import android.content.Context
 
 @CloudstreamPlugin
-class Moviesmod: Plugin() {
+class Cinemaluxe: Plugin() {
     override fun load(context: Context) {
         // All providers should be added in this manner. Please don't edit the providers list directly.
-        registerMainAPI(MoviesmodProvider())
-        registerMainAPI(TopmoviesProvider())
-        registerExtractorAPI(Driveseed())
+        registerMainAPI(CinemaluxeProvider())
+        registerExtractorAPI(GDFlix())
+        registerExtractorAPI(Sharepoint())
+        registerExtractorAPI(HubCloud())
     }
 }

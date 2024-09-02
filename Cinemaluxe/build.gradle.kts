@@ -1,10 +1,10 @@
-version = 2
+version = 7
 
 cloudstream {
     language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "Includes Topmovies"
+    description = "Movies and Series upto 4K"
      authors = listOf("megix")
 
     /**
@@ -20,5 +20,5 @@ cloudstream {
         "Movie",
     )
 
-    iconUrl = "https://moviesmod.band/wp-content/uploads/2022/12/moviesmodnew-Custom.png"
+    iconUrl = "https://cinemaluxe.link/wp-content/uploads/2024/07/fresh-logo-dark-theme-.webp"
 }
