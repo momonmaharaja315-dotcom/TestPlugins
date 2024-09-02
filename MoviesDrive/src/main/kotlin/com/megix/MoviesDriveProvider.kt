@@ -38,9 +38,9 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
-        val title = this.selectFirst("figure > img").attr("title").replace("Download ", "").toString()
-        val href = fixUrl(this.selectFirst("figure > a").attr("href").toString())
-        val posterUrl = fixUrlNull(this.selectFirst("figure > img").attr("src").toString())
+        val title = this.selectFirst("figure > img")?.attr("title")?.replace("Download ", "")?.toString() ?: ""
+        val href = fixUrl(this.selectFirst("figure > a")?.attr("href")?.toString() ?: "")
+        val posterUrl = fixUrlNull(this.selectFirst("figure > img")?.attr("src")?.toString() ?: "")
     
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
@@ -79,9 +79,9 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
         val imdbId = document.selectFirst("a:contains(IMDb)") ?. attr("href")
 
         val tvType = if (
-            title!!.contains("Episode", ignoreCase = true) ||
+            title.contains("Episode", ignoreCase = true) ||
             seasonRegex.containsMatchIn(title) ||
-            title!!.contains("series", ignoreCase = true)
+            title.contains("series", ignoreCase = true)
         ) {
             TvType.TvSeries
         } else {
@@ -120,10 +120,10 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                         var titleText = mainTitle
                         if(element.tagName() == "span") {
                             val titleTag = element.parent()
-                            titleText = titleTag ?. text() ?: ""
+                            titleText = titleTag.text() ?: ""
                             var linkTag = titleTag.nextElementSibling()
 
-                            while(linkTag != null && (linkTag.text() ?. contains("HubCloud", ignoreCase = true) ?: false)) {
+                            while(linkTag != null && (linkTag.text().contains("HubCloud", ignoreCase = true) ?: false)) {
                                 episodeString += linkTag.toString()
                                 linkTag = linkTag.nextElementSibling()
                             }

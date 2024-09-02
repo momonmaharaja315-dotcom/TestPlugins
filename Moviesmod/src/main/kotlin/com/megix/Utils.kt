@@ -81,7 +81,7 @@ class Driveseed : ExtractorApi() {
         return links
     }
 
-    private suspend fun resumeCloudLink(url: String): String? {
+    private suspend fun resumeCloudLink(url: String): String {
         val resumeCloudUrl = "https://driveseed.org" + url
         val document = app.get(resumeCloudUrl).document
         val link = document?.selectFirst("a.btn-success")?.attr("href")

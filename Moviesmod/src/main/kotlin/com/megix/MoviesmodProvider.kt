@@ -81,7 +81,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
             buttons.mapNotNull {
                 var link = it.attr("href")
                 val titleElement = it.parent()?.previousElementSibling()
-                val seasonText = titleElement.text().toString()
+                val seasonText = titleElement?.text()?.toString()
                 seasonList.add(Pair(seasonText, seasonNum))
 
                 if(link.contains("url=")) {
