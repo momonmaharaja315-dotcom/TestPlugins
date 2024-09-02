@@ -66,7 +66,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
-        val title = document.selectFirst("meta[property=og:title]").attr("content").replace("Download ", "").toString()
+        val title = document.selectFirst("meta[property=og:title]")?.attr("content")?.replace("Download ", "")?.toString() ?: ""
 
         val plotElement = document.select(
             "h2:contains(Storyline), h3:contains(Storyline), h5:contains(Storyline), h4:contains(Storyline), h4:contains(STORYLINE)"
@@ -74,14 +74,14 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
 
         val plot = plotElement ?. text() ?: document.select(".ipc-html-content-inner-div").firstOrNull() ?. text().toString()
 
-        val posterUrl = document.selectFirst("img[decoding=\"async\"]").attr("src").toString()
+        val posterUrl = document.selectFirst("img[decoding=\"async\"]")?.attr("src")?.toString() ?: ""
         val seasonRegex = """(?i)season\s*\d+""".toRegex()
         val imdbId = document.selectFirst("a:contains(IMDb)") ?. attr("href")
 
         val tvType = if (
-            title.contains("Episode", ignoreCase = true) ||
+            title?.contains("Episode", ignoreCase = true) == true ||
             seasonRegex.containsMatchIn(title) ||
-            title.contains("series", ignoreCase = true)
+            title?.contains("series", ignoreCase = true) == true
         ) {
             TvType.TvSeries
         } else {
@@ -120,10 +120,10 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                         var titleText = mainTitle
                         if(element.tagName() == "span") {
                             val titleTag = element.parent()
-                            titleText = titleTag.text() ?: ""
-                            var linkTag = titleTag.nextElementSibling()
+                            titleText = titleTag?.text() ?: ""
+                            var linkTag = titleTag?.nextElementSibling()
 
-                            while(linkTag != null && (linkTag.text().contains("HubCloud", ignoreCase = true) ?: false)) {
+                            while (linkTag != null && linkTag.text().contains("HubCloud", ignoreCase = true)) {
                                 episodeString += linkTag.toString()
                                 linkTag = linkTag.nextElementSibling()
                             }
