@@ -65,17 +65,17 @@ open class KatMovieHDProvider : MainAPI() {
 
         pTags.mapNotNull { pTag ->
             var hTagString = ""
-            var hTag = pTag
+            var hTag: Element? = pTag
 
-            if (hTag.tagName() == "p") {
+            if (hTag?.tagName() == "p") {
                 hTag = pTag.nextElementSibling()
             }
 
-            if (hTag.tagName() == "div") {
+            if (hTag?.tagName() == "div") {
                 hTag = hTag.nextElementSibling()
             }
 
-            while (hTag.tagName().matches(Regex("h\\d+"))) {
+            while (hTag?.tagName()?.matches(Regex("h\\d+"))) {
                 hTagString += hTag.toString()
                 hTag = hTag.nextElementSibling()
             }

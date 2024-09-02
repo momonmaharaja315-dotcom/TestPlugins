@@ -44,7 +44,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
         val title = this.selectFirst("a")?.attr("title")?.replace("Download ", "").toString()
         val href = fixUrl(this.selectFirst("a")?.attr("href").toString())
         val imgTag = this.selectFirst("img.blog-picture")
-        val posterUrl = imgTag ?. attr("data-src")
+        var posterUrl = imgTag ?. attr("data-src")
         if (posterUrl == null) {
             posterUrl = fixUrlNull(this.selectFirst("img.blog-picture")?.attr("src").toString())
         }
