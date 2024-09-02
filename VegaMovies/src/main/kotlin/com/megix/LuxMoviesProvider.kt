@@ -27,4 +27,15 @@ class LuxMoviesProvider : VegaMoviesProvider() { // all providers must be an ins
         "$mainUrl/category/web-series/zee5-originals/page/%d/" to "Zee5",
         "$mainUrl/category/web-series/alt-balaji-web-series/page/%d/" to "ALT Balaji",
     )
+
+    fun Element.toSearchResult(): SearchResponse? {
+        val title = this.selectFirst("a").attr("title").replace("Download ", "")
+        val href = fixUrl(this.selectFirst("a")?.attr("href").toString())
+        val imgTag = this.selectFirst("img.blog-picture")
+        val posterUrl = imgTag ?. attr("data-src")
+
+        return newMovieSearchResponse(title, href, TvType.Movie) {
+            this.posterUrl = posterUrl
+        }
+    }
 }
