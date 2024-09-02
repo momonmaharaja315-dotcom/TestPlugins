@@ -179,16 +179,21 @@ class HubCloud : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val doc = app.get(url).document
+        val text = app.get(url).text
+        val newLink = text.substringAfter("url=").substringBefore("\"")
+        val newDoc = app.get(newLink).document
         var gamerLink : String
-        if (url.contains("drive")) {
-            val scriptTag = doc.selectFirst("script:containsData(url)")?.toString() ?: ""
-            gamerLink = Regex("var url = '([^']*)'").find(scriptTag)?.groupValues?.get(1) ?: ""
-        } else {
-            gamerLink = doc.selectFirst("div.vd > center > a")?.attr("href") ?: ""
-        }
-        val document = app.get(gamerLink).document
 
+        if(newLink.contains("drive")) {
+            val scriptTag = newDoc.selectFirst("script:containsData(url)")?.toString() ?: ""
+            gamerLink = Regex("var url = '([^']*)'").find(scriptTag) ?. groupValues ?. get(1) ?: ""
+        }
+
+        else {
+            gamerLink = newDoc.selectFirst("div.vd > center > a") ?. attr("href") ?: ""
+        }
+
+        val document = app.get(gamerLink).document
         val size = document.selectFirst("i#size") ?. text()
         val div = document.selectFirst("div.card-body")
         val header = document.selectFirst("div.card-header") ?. text()
