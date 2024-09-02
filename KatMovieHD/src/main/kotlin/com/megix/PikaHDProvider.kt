@@ -67,7 +67,7 @@ class PikaHDProvider : KatMovieHDProvider() { // all providers must be an instan
                 val seasonList = mutableListOf<Pair<String, Int>>()
                 aTags.apmap {
                     val emText = it.selectFirst("em")?.text() ?: ""
-                    val quality = Regex("(\\d{3,4})[pP]").find(emText ?: "") ?.groupValues ?.getOrNull(1)
+                    val quality = Regex("(\\d{3,4})[pP]").find(emText) ?.groupValues ?.getOrNull(1)
                     seasonList.add("$quality" to seasonNum)
                     val link = it.attr("href")
                     val episodeDocument = app.get(link).document

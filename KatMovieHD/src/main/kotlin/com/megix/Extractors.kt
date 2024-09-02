@@ -343,8 +343,8 @@ class Sendcm : ExtractorApi() {
     )
     {
         val doc = app.get(url).document
-        val op = doc.select("input[name=op]") ?. attr("value").toString()
-        val id = doc.select("input[name=id]") ?. attr("value").toString()
+        val op = doc.select("input[name=op]").attr("value").toString()
+        val id = doc.select("input[name=id]").attr("value").toString()
         val body = FormBody.Builder()
             .addEncoded("op", op)
             .addEncoded("id", id)

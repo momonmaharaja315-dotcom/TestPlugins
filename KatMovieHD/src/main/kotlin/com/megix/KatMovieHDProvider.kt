@@ -63,19 +63,19 @@ open class KatMovieHDProvider : MainAPI() {
         val episodesList = mutableListOf<Episode>()
         val pTags = document.select("p:matches((?i)(Episode [0-9]+)),h3:matches((?i)(E[0-9]+)),h2:matches((?i)(Episode [0-9]+))")
 
-        pTags.forEach { pTag ->
+        pTags.mapNotNull { pTag ->
             var hTagString = ""
             var hTag = pTag
 
-            if (hTag?.tagName() == "p") {
+            if (hTag.tagName() == "p") {
                 hTag = pTag.nextElementSibling()
             }
 
-            if (hTag != null && hTag.tagName() == "div") {
+            if (hTag.tagName() == "div") {
                 hTag = hTag.nextElementSibling()
             }
 
-            while (hTag != null && hTag.tagName().matches(Regex("h\\d+"))) {
+            while (hTag.tagName().matches(Regex("h\\d+"))) {
                 hTagString += hTag.toString()
                 hTag = hTag.nextElementSibling()
             }
@@ -97,7 +97,7 @@ open class KatMovieHDProvider : MainAPI() {
 
         var seasonNum = 1
         aTags.forEach { aTag ->
-            val details = aTag?.text() ?: ""
+            val details = aTag.text() ?: ""
             val quality = Regex("(\\d{3,4})[pP]").find(details)?.groupValues?.getOrNull(1) ?: "Unknown"
             seasonList.add(Pair(quality, seasonNum))
             val link = aTag.attr("href")
@@ -137,8 +137,8 @@ open class KatMovieHDProvider : MainAPI() {
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url, interceptor = cfInterceptor).document
-        val title = document.selectFirst("title").text()
-        val posterUrl = document.selectFirst("meta[property=og:image]").attr("content")
+        val title = document.selectFirst("title")?.text().toString()
+        val posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
         val tvType = if (
             title.contains("Episode", ignoreCase = true) ||
             title.contains("season", ignoreCase = true) ||
