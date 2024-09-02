@@ -65,7 +65,7 @@ open class KatMovieHDProvider : MainAPI() {
 
         pTags.mapNotNull { pTag ->
             var hTagString = ""
-            var hTag: Element? = pTag
+            var hTag = pTag
 
             if (hTag?.tagName() == "p") {
                 hTag = pTag.nextElementSibling()
