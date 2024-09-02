@@ -182,10 +182,10 @@ class HubCloud : ExtractorApi() {
         val doc = app.get(url).document
         var gamerLink : String
         if (url.contains("drive")) {
-            val scriptTag = doc.selectFirst("script:containsData(url)").toString()
+            val scriptTag = doc.selectFirst("script:containsData(url)")?.toString() ?: ""
             gamerLink = Regex("var url = '([^']*)'").find(scriptTag)?.groupValues?.get(1) ?: ""
         } else {
-            gamerLink = doc.selectFirst("div.vd > center > a").attr("href") ?: ""
+            gamerLink = doc.selectFirst("div.vd > center > a")?.attr("href") ?: ""
         }
         val document = app.get(gamerLink).document
 
