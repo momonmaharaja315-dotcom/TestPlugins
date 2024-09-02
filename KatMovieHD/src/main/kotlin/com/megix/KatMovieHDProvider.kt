@@ -75,7 +75,7 @@ open class KatMovieHDProvider : MainAPI() {
                 hTag = hTag.nextElementSibling()
             }
 
-            while (hTag?.tagName()?.matches(Regex("h\\d+"))) {
+            while (hTag?.tagName().matches(Regex("h\\d+"))) {
                 hTagString += hTag.toString()
                 hTag = hTag.nextElementSibling()
             }
