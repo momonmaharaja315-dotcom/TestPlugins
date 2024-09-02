@@ -57,14 +57,15 @@ class GDFlix : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val tags = extractbollytag(url)
-        val tagquality = extractbollytag2(url)
+        var originalUrl = url
+        val tags = extractbollytag(originalUrl)
+        val tagquality = extractbollytag2(originalUrl)
 
-        if (url.startsWith("https://new2.gdflix.cfd/goto/token/")) {
-            val partialurl = app.get(url).text.substringAfter("replace(\"").substringBefore("\")")
-            url = mainUrl + partialurl
+        if (originalUrl.startsWith("https://new2.gdflix.cfd/goto/token/")) {
+            val partialurl = app.get(originalUrl).text.substringAfter("replace(\"").substringBefore("\")")
+            originalUrl = mainUrl + partialurl
         }
-        app.get(url).document.select("div.text-center a").amap {
+        app.get(originalUrl).document.select("div.text-center a").amap {
             if (it.select("a").text().contains("FAST CLOUD DL"))
             {
                 val link=it.attr("href")
