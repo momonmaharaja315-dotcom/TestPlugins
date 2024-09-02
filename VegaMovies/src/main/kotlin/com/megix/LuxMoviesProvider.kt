@@ -28,7 +28,7 @@ class LuxMoviesProvider : VegaMoviesProvider() { // all providers must be an ins
         "$mainUrl/category/web-series/alt-balaji-web-series/page/%d/" to "ALT Balaji",
     )
 
-    fun Element.toSearchResult(): SearchResponse? {
+    override fun Element.toSearchResult(): SearchResponse? {
         val title = this.selectFirst("a").attr("title").replace("Download ", "")
         val href = fixUrl(this.selectFirst("a")?.attr("href").toString())
         val imgTag = this.selectFirst("img.blog-picture")
