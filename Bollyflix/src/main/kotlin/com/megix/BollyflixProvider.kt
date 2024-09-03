@@ -85,8 +85,8 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
             val tvSeriesEpisodes = mutableListOf<Episode>()
             var seasonNum = 1
             val seasonList = mutableListOf<Pair<String, Int>>()
-            val buttons = document.select("a.maxbutton-download-links")
-            buttons.mapNotNull { button ->
+            val buttons = document.select("a.maxbutton-download-links, a.dl")
+            buttons.amap { button ->
                 val id = button.attr("href").substringAfterLast("id=").toString()
                 val seasonText = button.parent()?.previousElementSibling()?.text().toString()
                 seasonList.add(Pair(seasonText, seasonNum))
