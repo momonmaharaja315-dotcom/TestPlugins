@@ -39,7 +39,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
-        val title = this.selectFirst("a") ?. attr("title").toString()
+        val title = this.selectFirst("a") ?. attr("title") ?. replace("Download ", "").toString()
         val href = this.selectFirst("a") ?. attr("href").toString()
         val posterUrl = this.selectFirst("img") ?. attr("src").toString()
     
@@ -67,7 +67,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
-        val title = document.selectFirst("title")?.text().toString()
+        val title = document.selectFirst("title")?.text()?.replace("Download ", "").toString()
         var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
 
     
@@ -85,12 +85,12 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         val document = app.get(data).document
         val id = document.selectFirst("a.dl")?.attr("src")?.substringAfterLast("id=")
         val decodeUrl = bypass("https://web.sidexfee.com/?id=$id")
-        val gdflixUrl = app.get(decodeUrl, allowRedirects = false).headers["location"].toString()
+        //val gdflixUrl = app.get(decodeUrl, allowRedirects = false).headers["location"].toString()
         callback.invoke(
             ExtractorLink(
                 name,
                 name,
-                gdflixUrl,
+                decodeUrl,
                 "",
                 Qualities.Unknown.value
             )
