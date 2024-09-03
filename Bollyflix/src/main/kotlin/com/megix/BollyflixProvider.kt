@@ -69,8 +69,6 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         val document = app.get(url).document
         val title = document.selectFirst("title")?.text()?.replace("Download ", "").toString()
         var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
-
-    
         return newMovieLoadResponse(title, url, TvType.Movie, url) {
             this.posterUrl = posterUrl
         }
@@ -83,14 +81,14 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val document = app.get(data).document
-        val id = document.selectFirst("a.dl")?.attr("src")?.substringAfterLast("id=")
-        val decodeUrl = bypass("https://web.sidexfee.com/?id=$id")
+        val id = document.selectFirst("a.dl")?.attr("src")?.substringAfterLast("id=").toString()
+        //val decodeUrl = bypass("https://web.sidexfee.com/?id=$id")
         //val gdflixUrl = app.get(decodeUrl, allowRedirects = false).headers["location"].toString()
         callback.invoke(
             ExtractorLink(
                 name,
                 name,
-                decodeUrl,
+                id,
                 "",
                 Qualities.Unknown.value
             )
