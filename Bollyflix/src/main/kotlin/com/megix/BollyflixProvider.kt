@@ -85,7 +85,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         val document = app.get(data).document
         val id = document.selectFirst("a.dl")?.attr("src")?.substringAfterLast("id=")
         val decodeUrl = bypass("https://web.sidexfee.com/?id=$id")
-        val gdflixUrl = app.get(decodeUrl).headers["location"].toString()
+        val gdflixUrl = app.get(decodeUrl, allowRedirects = false).headers["location"].toString()
         callback.invoke(
             ExtractorLink(
                 name,
@@ -95,5 +95,6 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
                 Qualities.Unknown.value
             )
         )
+        return true
     }
 }
