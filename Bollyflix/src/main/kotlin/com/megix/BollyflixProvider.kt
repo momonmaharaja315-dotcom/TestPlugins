@@ -70,8 +70,50 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         val document = app.get(url).document
         val title = document.selectFirst("title")?.text()?.replace("Download ", "").toString()
         var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
-        return newMovieLoadResponse(title, url, TvType.Movie, url) {
-            this.posterUrl = posterUrl
+        val tvType = if(title.contains("Series") || url.contains("web-series")) {
+            TvType.TvSeries
+        }
+        else {
+            TvType.Movie
+        }
+        if(tvType == TvType.TvSeries) {
+            val tvSeriesEpisodes = mutableListOf<Episode>()
+            var seasonNum = 1
+            val seasonList = mutableListOf<Pair<String, Int>>()
+            val buttons = document.select("a.maxbutton-download-links")
+            buttons.mapNotNull { button ->
+                val id = button.attr("href")?.attr("href")?.substringAfterLast("id=").toString()
+                val seasonText = button.parent().previousElementSibling()?.text().toString()
+                seasonList.add(Pair(seasonText, seasonNum))
+                val decodeUrl = bypass(link)
+                val seasonDoc = app.get(decodeUrl).document
+                val epLinks = seasonDoc.select("h3 > a")
+                    .filter { element -> !element.text().contains("Zip", true) }
+                var epNum = 1
+                epLinks.mapNotNull {
+                    epLink = app.get(it.attr("href"), allowRedirects = false).headers["location"].toString()
+                    val epText = it.text()
+                    tvSeriesEpisodes.add(
+                        newEpiode(epLink) {
+                            name = epText
+                            season = seasonNum
+                            episode = epNum
+                        }
+                    )
+                    epNum++
+                }
+                epNum = 1
+                seasonNum++
+            }
+            return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
+                this.posterUrl = posterUrl
+                this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name) }
+            }
+        }
+        else {
+            return newMovieLoadResponse(title, url, TvType.Movie, url) {
+                this.posterUrl = posterUrl
+            }
         }
     }
 
@@ -81,11 +123,18 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        val document = app.get(data).document
-        val id = document.selectFirst("a.dl")?.attr("href")?.substringAfterLast("id=").toString()
-        val decodeUrl = bypass(id)
-        val gdflixUrl = app.get(decodeUrl, allowRedirects = false).headers["location"].toString()
-        loadExtractor(gdflixUrl, subtitleCallback, callback)
+        if(data.contains("gdflix")) {
+            loadExtractor(data, subtitleCallback, callback)
+        }
+        else {
+            val document = app.get(data).document
+            document.select("a.dl").amap {
+                val id = it.attr("href")?.substringAfterLast("id=").toString()
+                val decodeUrl = bypass(id)
+                val gdflixUrl = app.get(decodeUrl, allowRedirects = false).headers["location"].toString()
+                loadExtractor(gdflixUrl, subtitleCallback, callback)
+            }
+        }
         return true
     }
 }
