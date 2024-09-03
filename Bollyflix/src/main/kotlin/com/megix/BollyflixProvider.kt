@@ -81,14 +81,14 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val document = app.get(data).document
-        val id = document.selectFirst("a.dl")?.attr("src")?.substringAfterLast("id=").toString()
-        //val decodeUrl = bypass("https://web.sidexfee.com/?id=$id")
-        //val gdflixUrl = app.get(decodeUrl, allowRedirects = false).headers["location"].toString()
+        val id = document.selectFirst("a.dl")?.attr("href")?.substringAfterLast("id=").toString()
+        val decodeUrl = bypass("https://web.sidexfee.com/?id=$id")
+        val gdflixUrl = app.get(decodeUrl, allowRedirects = false).headers["location"].toString()
         callback.invoke(
             ExtractorLink(
                 name,
                 name,
-                id,
+                gdflixUrl,
                 "",
                 Qualities.Unknown.value
             )
