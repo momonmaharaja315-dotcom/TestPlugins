@@ -32,7 +32,8 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         return newHomePageResponse(request.name, home)
     }
 
-    private suspend fun bypass(url: String): String {
+    private suspend fun bypass(id: String): String {
+        val url = "https://web.sidexfee.com/?id=$id"
         val document = app.get(url).text
         val encodeUrl = Regex("""link":"([^"]+)""").find(document) ?. groupValues ?. get(1) ?: ""
         return base64Decode(encodeUrl)
@@ -82,17 +83,9 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
     ): Boolean {
         val document = app.get(data).document
         val id = document.selectFirst("a.dl")?.attr("href")?.substringAfterLast("id=").toString()
-        val decodeUrl = bypass("https://web.sidexfee.com/?id=$id")
+        val decodeUrl = bypass(id)
         val gdflixUrl = app.get(decodeUrl, allowRedirects = false).headers["location"].toString()
-        callback.invoke(
-            ExtractorLink(
-                name,
-                name,
-                gdflixUrl,
-                "",
-                Qualities.Unknown.value
-            )
-        )
+        loadExtractor(gdflixUrl, subtitleCallback, callback)
         return true
     }
 }
