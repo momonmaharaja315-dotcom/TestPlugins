@@ -82,22 +82,22 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
             val seasonList = mutableListOf<Pair<String, Int>>()
             val buttons = document.select("a.maxbutton-download-links")
             buttons.mapNotNull { button ->
-                val id = button.attr("href")?.attr("href")?.substringAfterLast("id=").toString()
+                val id = button.attr("href")?.substringAfterLast("id=").toString()
                 val seasonText = button.parent().previousElementSibling()?.text().toString()
                 seasonList.add(Pair(seasonText, seasonNum))
-                val decodeUrl = bypass(link)
+                val decodeUrl = bypass(id)
                 val seasonDoc = app.get(decodeUrl).document
                 val epLinks = seasonDoc.select("h3 > a")
                     .filter { element -> !element.text().contains("Zip", true) }
                 var epNum = 1
                 epLinks.mapNotNull {
-                    epLink = app.get(it.attr("href"), allowRedirects = false).headers["location"].toString()
+                    val epLink = app.get(it.attr("href"), allowRedirects = false).headers["location"].toString()
                     val epText = it.text()
                     tvSeriesEpisodes.add(
-                        newEpiode(epLink) {
-                            name = epText
-                            season = seasonNum
-                            episode = epNum
+                        newEpisode(epLink) {
+                            this.name = epText
+                            this.season = seasonNum
+                            this.episode = epNum
                         }
                     )
                     epNum++
