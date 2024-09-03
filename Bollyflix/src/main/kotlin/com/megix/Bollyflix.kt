@@ -9,6 +9,8 @@ class Bollyflix: Plugin() {
     override fun load(context: Context) {
         // All providers should be added in this manner. Please don't edit the providers list directly.
         registerMainAPI(BollyflixProvider())
-        //registerExtractorAPI(HubCloud())
+        registerExtractorAPI(GDFlix())
+        registerExtractorAPI(GDFlix1())
+        registerExtractorAPI(GDFlix2())
     }
 }
