@@ -19,6 +19,10 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
 
     override val mainPage = mainPageOf(
         "$mainUrl/page/" to "Home",
+        "$mainUrl/movies/bollywood/page/" to "Bollywood Movies",
+        "$mainUrl/movies/hollywood/page/" to "Hollywood Movies",
+        "$mainUrl/web-series/ongoing-series/page/" to "Ongoing Series",
+        "$mainUrl/anime/page/" to "Anime"
     )
 
     override suspend fun getMainPage(
@@ -70,6 +74,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         val document = app.get(url).document
         val title = document.selectFirst("title")?.text()?.replace("Download ", "").toString()
         var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
+        val plot = document.selectFirst("span#summary")?.text().toString()
         val tvType = if(title.contains("Series") || url.contains("web-series")) {
             TvType.TvSeries
         }
@@ -82,8 +87,8 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
             val seasonList = mutableListOf<Pair<String, Int>>()
             val buttons = document.select("a.maxbutton-download-links")
             buttons.mapNotNull { button ->
-                val id = button.attr("href")?.substringAfterLast("id=").toString()
-                val seasonText = button.parent().previousElementSibling()?.text().toString()
+                val id = button.attr("href").substringAfterLast("id=").toString()
+                val seasonText = button.parent()?.previousElementSibling()?.text().toString()
                 seasonList.add(Pair(seasonText, seasonNum))
                 val decodeUrl = bypass(id)
                 val seasonDoc = app.get(decodeUrl).document
@@ -107,12 +112,14 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
             }
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl
+                this.plot = plot
                 this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name) }
             }
         }
         else {
             return newMovieLoadResponse(title, url, TvType.Movie, url) {
                 this.posterUrl = posterUrl
+                this.plot = plot
             }
         }
     }
@@ -129,7 +136,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         else {
             val document = app.get(data).document
             document.select("a.dl").amap {
-                val id = it.attr("href")?.substringAfterLast("id=").toString()
+                val id = it.attr("href").substringAfterLast("id=").toString()
                 val decodeUrl = bypass(id)
                 val gdflixUrl = app.get(decodeUrl, allowRedirects = false).headers["location"].toString()
                 loadExtractor(gdflixUrl, subtitleCallback, callback)
