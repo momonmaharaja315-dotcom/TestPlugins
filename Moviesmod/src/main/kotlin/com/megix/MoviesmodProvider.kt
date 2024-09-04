@@ -67,24 +67,30 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
-        // val title = document.selectFirst("meta[property=og:title]")?.attr("content")?.replace("Download ", "").toString()
-        // val posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
-        // val description = document.selectFirst("div.imdbwp__teaser")?.text()
+        var title = document.selectFirst("meta[property=og:title]")?.attr("content")?.replace("Download ", "").toString()
+        var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
+        var description = document.selectFirst("div.imdbwp__teaser")?.text()
         val div = document.selectFirst("div.thecontent")?.text().toString()
-        val imdbUrl = document.selectFirst("a.imdbwp__link")?.attr("href")
-        val imdbId = imdbUrl?.substringAfter("title/")?.substringBefore("/")
         val tvtype = if (div.contains("season", ignoreCase = true) == true) "series" else "movie"
-        val jsonResponse = app.get("$cinemeta_url/$tvtype/$imdbId.json").text
-        val gson = Gson()
-        val responseData = gson.fromJson(jsonResponse, ResponseData::class.java)
-        val description = responseData.meta.description
-        val cast = responseData.meta.cast
-        val title = responseData.meta.name
-        val genre = responseData.meta.genre
-        val imdbRating = responseData.meta.imdbRating
-        val year = responseData.meta.year
-        val posterUrl = responseData.meta.background
+        val imdbUrl = document.selectFirst("a.imdbwp__link")?.attr("href")
+        var cast : List<String>
+        var genre : List<String>
+        var imdbRating : String
+        var year : String
 
+        if(!imdbUrl.isNullOrEmpty()) {
+            val imdbId = imdbUrl?.substringAfter("title/")?.substringBefore("/")
+            val jsonResponse = app.get("$cinemeta_url/$tvtype/$imdbId.json").text
+            val gson = Gson()
+            val responseData = gson.fromJson(jsonResponse, ResponseData::class.java)
+            description = responseData.meta.description
+            cast = responseData.meta.cast
+            title = responseData.meta.name
+            genre = responseData.meta.genre
+            imdbRating = responseData.meta.imdbRating
+            year = responseData.meta.year
+            posterUrl = responseData.meta.background
+        }
 
         if(tvtype == "series") {
             val tvSeriesEpisodes = mutableListOf<Episode>()
