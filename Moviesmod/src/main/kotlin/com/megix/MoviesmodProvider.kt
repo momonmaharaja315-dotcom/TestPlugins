@@ -8,6 +8,7 @@ import com.lagradost.cloudstream3.base64Decode
 import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.google.gson.Gson
+import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 
 open class MoviesmodProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://moviesmod.bet"
@@ -136,14 +137,19 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
 
             for ((key, value) in episodesMap) {
                 val episodeInfo = responseData?.meta?.videos?.find { it.season == key.first && it.episode == key.second }
-                val epTitle = episodeInfo?.title.toString()
+                val data = value.map { source->
+                    EpisodeLink(
+                        source
+                    )
+                }
+
                 tvSeriesEpisodes.add(
-                    newEpisode(value.first()) {
-                        this.name = epTitle
+                    newEpisode(data) {
+                        this.name = episodeInfo?.title
                         this.season = key.first
                         this.episode = key.second
-                        this.posterUrl = episodeInfo?.thumbnail.toString()
-                        this.description = episodeInfo?.overview.toString()
+                        this.posterUrl = episodeInfo?.thumbnail
+                        this.description = episodeInfo?.overview
                     }
                 )
             }
@@ -177,25 +183,33 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        if(data.contains("unblockedgames")) {
-            val link = bypass(data).toString()
+        val sources = parseJson<ArrayList<EpisodeLink>>(data)
+        sources.mapNotNull {
+            val source = it.source
+            val link = bypass(source).toString()
             loadExtractor(link, subtitleCallback, callback)
         }
-        else {
-            val document = app.get(data).document
-            document.select("a.maxbutton-download-links").amap {
-                var link = it.attr("href")
-                if(link.contains("url=")) {
-                    val base64Value = link.substringAfter("url=")
-                    link = base64Decode(base64Value)
-                }
 
-                val doc = app.get(link).document
-                val url = doc.selectFirst("a.maxbutton-1, a.maxbutton-5")?.attr("href").toString()
-                val driveLink = bypass(url).toString()
-                loadExtractor(driveLink, subtitleCallback, callback)
-            }
-        }
+
+        // if(data.contains("unblockedgames")) {
+        //     val link = bypass(data).toString()
+        //     loadExtractor(link, subtitleCallback, callback)
+        // }
+        // else {
+        //     val document = app.get(data).document
+        //     document.select("a.maxbutton-download-links").amap {
+        //         var link = it.attr("href")
+        //         if(link.contains("url=")) {
+        //             val base64Value = link.substringAfter("url=")
+        //             link = base64Decode(base64Value)
+        //         }
+
+        //         val doc = app.get(link).document
+        //         val url = doc.selectFirst("a.maxbutton-1, a.maxbutton-5")?.attr("href").toString()
+        //         val driveLink = bypass(url).toString()
+        //         loadExtractor(driveLink, subtitleCallback, callback)
+        //     }
+        // }
         return true
     }
 
@@ -235,6 +249,10 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
 
     data class ResponseData(
         val meta: Meta
+    )
+
+    data class EpisodeLink(
+        val source: String
     )
 }
 
