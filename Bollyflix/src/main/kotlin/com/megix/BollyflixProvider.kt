@@ -9,7 +9,6 @@ import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.google.gson.Gson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
-import com.lagradost.cloudstream3.network.CloudflareKiller
 
 class BollyflixProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://bollyflix.wales"
@@ -17,8 +16,20 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
     override val hasMainPage = true
     override var lang = "hi"
     val cinemeta_url = "https://v3-cinemeta.strem.io/meta"
-    private val cfInterceptor = CloudflareKiller()
     override val hasDownloadSupport = true
+    val headers = mapOf(
+        "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; rv:128.0) Gecko/20100101 Firefox/128.0",
+        "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8",
+        "Accept-Language" to "en-US,en;q=0.5",
+        "Accept-Encoding" to "gzip, deflate, br, zstd",
+        "DNT" to "1",
+        "Connection" to "keep-alive",
+        "Upgrade-Insecure-Requests" to "1",
+        "Sec-Fetch-Dest" to "document",
+        "Sec-Fetch-Mode" to "navigate",
+        "Sec-Fetch-Site" to "none",
+        "Sec-Fetch-User" to "?1"
+    )
     override val supportedTypes = setOf(
         TvType.Movie,
         TvType.TvSeries
@@ -36,7 +47,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         page: Int,
         request: MainPageRequest
     ): HomePageResponse {
-        val document = app.get(request.data + page, interceptor = cfInterceptor).document
+        val document = app.get(request.data + page, headers = headers).document
         val home = document.select("div.post-cards > article").mapNotNull {
             it.toSearchResult()
         }
@@ -64,7 +75,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         val searchResponse = mutableListOf<SearchResponse>()
 
         for (i in 1..3) {
-            val document = app.get("$mainUrl/search/$query/page/$i/", interceptor = cfInterceptor).document
+            val document = app.get("$mainUrl/search/$query/page/$i/", headers = headers).document
 
             val results = document.select("div.post-cards > article").mapNotNull { it.toSearchResult() }
 
@@ -78,7 +89,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
     }
 
     override suspend fun load(url: String): LoadResponse? {
-        val document = app.get(url, interceptor = cfInterceptor).document
+        val document = app.get(url, headers = headers).document
         var title = document.selectFirst("title")?.text()?.replace("Download ", "").toString()
         var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
         var description = document.selectFirst("span#summary")?.text().toString()
@@ -116,7 +127,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
             val tvSeriesEpisodes = mutableListOf<Episode>()
             val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
             val buttons = document.select("a.maxbutton-download-links, a.dl")
-            buttons.mapNotNull { button ->
+            buttons.amap { button ->
                 val id = button.attr("href").substringAfterLast("id=").toString()
                 val seasonText = button.parent()?.previousElementSibling()?.text().toString()
                 val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
@@ -126,7 +137,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
                 val epLinks = seasonDoc.select("h3 > a")
                     .filter { element -> !element.text().contains("Zip", true) }
                 var e = 1
-                epLinks.mapNotNull {
+                epLinks.amap {
                     val epUrl = app.get(it.attr("href"), allowRedirects = false).headers["location"].toString()
                     val key = Pair(realSeason, e)
                     if (episodesMap.containsKey(key)) {
