@@ -142,7 +142,6 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                         source
                     )
                 }
-
                 tvSeriesEpisodes.add(
                     newEpisode(data) {
                         this.name = episodeInfo?.title
@@ -165,7 +164,20 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
             }
         }
         else {
-            return newMovieLoadResponse(title, url, TvType.Movie, url) {
+            val data = document.select("a.maxbutton-download-links").mapNotNull {
+                var link = it.attr("href")
+                if(link.contains("url=")) {
+                    val base64Value = link.substringAfter("url=")
+                    link = base64Decode(base64Value)
+                }
+
+                val doc = app.get(link).document
+                val source = doc.selectFirst("a.maxbutton-1, a.maxbutton-5")?.attr("href").toString()
+                EpisodeLink(
+                    source
+                )
+            }
+            return newMovieLoadResponse(title, url, TvType.Movie, data) {
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
@@ -189,27 +201,6 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
             val link = bypass(source).toString()
             loadExtractor(link, subtitleCallback, callback)
         }
-
-
-        // if(data.contains("unblockedgames")) {
-        //     val link = bypass(data).toString()
-        //     loadExtractor(link, subtitleCallback, callback)
-        // }
-        // else {
-        //     val document = app.get(data).document
-        //     document.select("a.maxbutton-download-links").amap {
-        //         var link = it.attr("href")
-        //         if(link.contains("url=")) {
-        //             val base64Value = link.substringAfter("url=")
-        //             link = base64Decode(base64Value)
-        //         }
-
-        //         val doc = app.get(link).document
-        //         val url = doc.selectFirst("a.maxbutton-1, a.maxbutton-5")?.attr("href").toString()
-        //         val driveLink = bypass(url).toString()
-        //         loadExtractor(driveLink, subtitleCallback, callback)
-        //     }
-        // }
         return true
     }
 
