@@ -112,6 +112,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
 
         if(tvType == "series") {
             val tvSeriesEpisodes = mutableListOf<Episode>()
+            val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
             val buttons = document.select("a.maxbutton-download-links, a.dl")
             buttons.mapNotNull { button ->
                 val id = button.attr("href").substringAfterLast("id=").toString()
