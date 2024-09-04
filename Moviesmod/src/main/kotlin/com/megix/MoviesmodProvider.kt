@@ -77,7 +77,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         val jsonResponse = app.get("$cinemeta_url/$tvtype/$imdbId.json").text
         val gson = Gson()
         val responseData = gson.fromJson(jsonResponse, ResponseData::class.java)
-        val plot = responseData.meta.description
+        val description = responseData.meta.description
         val cast = responseData.meta.cast
         val title = responseData.meta.name
         val genre = responseData.meta.genre
@@ -121,14 +121,14 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl
                 this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
-                this.plot = plot
+                this.plot = description
                 addImdbUrl(imdbUrl)
             }
         }
         else {
             return newMovieLoadResponse(title, url, TvType.Movie, url) {
                 this.posterUrl = posterUrl
-                this.plot = plot
+                this.plot = description
                 addImdbUrl(imdbUrl)
             }
         }
@@ -169,7 +169,8 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         val genre: List<String>,
         val imdbRating: String,
         val year: String,
-        val background: String
+        val background: String,
+        val description: String
     )
 
     data class ResponseData(
