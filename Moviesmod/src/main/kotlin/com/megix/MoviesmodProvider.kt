@@ -80,7 +80,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         var year: String = ""
 
         if(!imdbUrl.isNullOrEmpty()) {
-            val imdbId = imdbUrl?.substringAfter("title/")?.substringBefore("/")
+            val imdbId = imdbUrl.substringAfter("title/")?.substringBefore("/")
             val jsonResponse = app.get("$cinemeta_url/$tvtype/$imdbId.json").text
             val gson = Gson()
             val responseData = gson.fromJson(jsonResponse, ResponseData::class.java)
@@ -95,15 +95,14 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
 
         if(tvtype == "series") {
             val tvSeriesEpisodes = mutableListOf<Episode>()
-            var seasonNum = 1
-            val seasonList = mutableListOf<Pair<String, Int>>()
+            val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
             val buttons = document.select("a.maxbutton-episode-links,.maxbutton-g-drive,.maxbutton-af-download")
 
             buttons.mapNotNull {
                 var link = it.attr("href")
                 val seasonText = it.parent()?.previousElementSibling()?.text().toString()
-                seasonList.add(Pair(seasonText, seasonNum))
-
+                val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
+                val realSeason = realSeasonRegex.find(seasonText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
                 if(link.contains("url=")) {
                     val base64Value = link.substringAfter("url=")
                     link = base64Decode(base64Value)
@@ -112,26 +111,35 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                 val hTags = doc.select("h3,h4")
                 var e = 1
                 hTags.mapNotNull {
-                    val titleText = it.text()
                     val epUrl = it.selectFirst("a")?.attr("href")
-                    tvSeriesEpisodes.add(
-                        newEpisode(epUrl) {
-                            name = titleText
-                            season = seasonNum
-                            episode = e++
+                    val key = Pair(realSeason, e)
+                    if(epUrl != null) {
+                        if (episodesMap.containsKey(key)) {
+                            episodesMap[key]?.add(epUrl)
+                        } else {
+                            episodesMap[key] = mutableListOf(epUrl)
                         }
-                    )
+                    }
                 }
                 e = 1
-                seasonNum++
             }
+
+            for ((key, value) in episodesMap) {
+                tvSeriesEpisodes.add(
+                    newEpisode(value.first()) {
+                        title = "${key.second}"
+                        season = key.first
+                        episode = key.second
+                    }
+                )
+            }
+
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl
-                this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
                 this.plot = description
                 this.tags = genre
-                this.rating = imdbRating.toRatingInt()
-                this.year = year.toIntOrNull()
+                this.rating = imdbRating?.toRatingInt()
+                this.year = year?.toIntOrNull()
                 addActors(cast)
                 addImdbUrl(imdbUrl)
             }
@@ -141,8 +149,8 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
-                this.rating = imdbRating.toRatingInt()
-                this.year = year.toIntOrNull()
+                this.rating = imdbRating?.toRatingInt()
+                this.year = year?.toIntOrNull()
                 addActors(cast)
                 addImdbUrl(imdbUrl)
             }
@@ -192,6 +200,3 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         val meta: Meta
     )
 }
-
-
-//url = https://v3-cinemeta.strem.io/meta/movie/tt17505010.json
