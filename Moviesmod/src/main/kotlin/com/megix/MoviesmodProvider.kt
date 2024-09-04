@@ -6,6 +6,7 @@ import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import com.lagradost.cloudstream3.base64Decode
 import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
+import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.google.gson.Gson
 
 open class MoviesmodProvider : MainAPI() { // all providers must be an instance of MainAPI
@@ -73,10 +74,10 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         val div = document.selectFirst("div.thecontent")?.text().toString()
         val tvtype = if (div.contains("season", ignoreCase = true) == true) "series" else "movie"
         val imdbUrl = document.selectFirst("a.imdbwp__link")?.attr("href")
-        var cast : List<String>
-        var genre : List<String>
-        var imdbRating : String
-        var year : String
+        var cast : List<String>?
+        var genre : List<String>?
+        var imdbRating : String?
+        var year : String?
 
         if(!imdbUrl.isNullOrEmpty()) {
             val imdbId = imdbUrl?.substringAfter("title/")?.substringBefore("/")
