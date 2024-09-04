@@ -203,8 +203,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         val sources = parseJson<ArrayList<EpisodeLink>>(data)
         sources.amap {
             val source = it.source
-            val link = bypass(source).toString()
-            loadExtractor(link, subtitleCallback, callback)
+            loadExtractor(source, subtitleCallback, callback)
         }
         return true
     }
