@@ -80,7 +80,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         var title = document.selectFirst("title")?.text()?.replace("Download ", "").toString()
         var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
         var description = document.selectFirst("span#summary")?.text().toString()
-        val tvType = if(title.contains("Series") || url.contains("web-series")) {
+        val tvtype = if(title.contains("Series") || url.contains("web-series")) {
             "series"
         }
         else {
