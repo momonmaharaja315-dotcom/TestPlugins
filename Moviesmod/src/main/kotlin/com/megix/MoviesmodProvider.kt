@@ -129,6 +129,7 @@
 //                             episodesMap[key] = mutableListOf(epUrl)
 //                         }
 //                     }
+//                     e++
 //                 }
 //                 e = 1
 //             }
@@ -237,7 +238,6 @@
 //     )
 // }
 
-
 package com.megix
 
 import com.lagradost.cloudstream3.*
@@ -335,14 +335,14 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
 
         if(tvtype == "series") {
             val tvSeriesEpisodes = mutableListOf<Episode>()
-            var seasonNum = 1
-            val seasonList = mutableListOf<Pair<String, Int>>()
             val buttons = document.select("a.maxbutton-episode-links,.maxbutton-g-drive,.maxbutton-af-download")
+            val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
 
             buttons.mapNotNull {
                 var link = it.attr("href")
                 val seasonText = it.parent()?.previousElementSibling()?.text().toString()
-                seasonList.add(Pair(seasonText, seasonNum))
+                val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
+                val realSeason = realSeasonRegex.find(seasonText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
 
                 if(link.contains("url=")) {
                     val base64Value = link.substringAfter("url=")
@@ -354,20 +354,38 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                 hTags.mapNotNull {
                     val titleText = it.text()
                     val epUrl = it.selectFirst("a")?.attr("href")
-                    tvSeriesEpisodes.add(
-                        newEpisode(epUrl) {
-                            name = titleText
-                            season = seasonNum
-                            episode = e++
+                    val key = Pair(realSeason, e)
+                    if(epUrl != null) {
+                        if (episodesMap.containsKey(key)) {
+                            // If it exists, create a new list with the existing values plus the new URL
+                            val currentList = episodesMap[key] ?: emptyList()
+                            val newList = currentList.toMutableList() // Create a mutable copy
+                            newList.add(epUrl) // Add the new URL
+                            episodesMap[key] = newList // Put the new list back into the map
+                        } else {
+                            episodesMap[key] = mutableListOf(epUrl)
                         }
-                    )
+                    }
+                    e++
                 }
                 e = 1
-                seasonNum++
+            }
+
+            for ((key, value) in episodesMap) {
+                //val episodeInfo = responseData?.meta?.videos?.find { it.season == key.first && it.episode == key.second }
+                //val epTitle = episodeInfo?.title.toString()
+                tvSeriesEpisodes.add(
+                    newEpisode(value.first()) {
+                        this.name = "${key.second}"
+                        this.season = key.first
+                        this.episode = key.second
+                        //this.posterUrl = episodeInfo?.thumbnail.toString()
+                        //this.description = episodeInfo?.overview.toString()
+                    }
+                )
             }
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl
-                this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
                 this.plot = description
                 this.tags = genre
                 this.rating = imdbRating?.toRatingInt()
@@ -425,7 +443,15 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         val imdbRating: String,
         val year: String,
         val background: String,
-        val description: String
+        val description: String,
+        val videos: List<Episode>
+    )
+    data class Episode(
+        val title: String,
+        val season: Int,
+        val episode: Int,
+        val overview: String,
+        val thumbnail: String,
     )
 
     data class ResponseData(
