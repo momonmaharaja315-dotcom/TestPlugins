@@ -119,7 +119,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
             val tvSeriesEpisodes = mutableListOf<Episode>()
             val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
             val buttons = document.select("a.maxbutton-download-links, a.dl")
-            buttons.amap { button ->
+            buttons.mapNotNull { button ->
                 val id = button.attr("href").substringAfterLast("id=").toString()
                 val seasonText = button.parent()?.previousElementSibling()?.text().toString()
                 val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
@@ -129,7 +129,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
                 val epLinks = seasonDoc.select("h3 > a")
                     .filter { element -> !element.text().contains("Zip", true) }
                 var e = 1
-                epLinks.amap {
+                epLinks.mapNotNull {
                     val epUrl = app.get(it.attr("href"), allowRedirects = false).headers["location"].toString()
                     val key = Pair(realSeason, e)
                     if (episodesMap.containsKey(key)) {
