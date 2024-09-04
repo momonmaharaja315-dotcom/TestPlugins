@@ -74,14 +74,19 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         val div = document.selectFirst("div.thecontent")?.text().toString()
         val tvtype = if (div.contains("season", ignoreCase = true) == true) "series" else "movie"
         val imdbUrl = document.selectFirst("a.imdbwp__link")?.attr("href")
+
+        val jsonResponse = if (!imdbUrl.isNullOrEmpty()) {
+            val imdbId = imdbUrl.substringAfter("title/")?.substringBefore("/")
+            app.get("$cinemeta_url/$tvtype/$imdbId.json").text
+        } else {
+            null
+        }
         var cast: List<String> = emptyList()
         var genre: List<String> = emptyList()
         var imdbRating: String = ""
         var year: String = ""
 
-        if(!imdbUrl.isNullOrEmpty()) {
-            val imdbId = imdbUrl.substringAfter("title/")?.substringBefore("/")
-            val jsonResponse = app.get("$cinemeta_url/$tvtype/$imdbId.json").text
+        if(jsonResponse != null) {
             val gson = Gson()
             val responseData = gson.fromJson(jsonResponse, ResponseData::class.java)
             description = responseData.meta.description
@@ -130,11 +135,15 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
             }
 
             for ((key, value) in episodesMap) {
+                val episodeInfo = responseData?.meta?.videos?.find { it.season == key.first && it.episode == key.second }
+                val epTitle = episodeInfo?.title ?: "S${key.first}E${key.second}"
                 tvSeriesEpisodes.add(
                     newEpisode(value.first()) {
-                        name = "${key.second}"
+                        name = epTitle
                         season = key.first
                         episode = key.second
+                        posterUrl = episodeInfo?.thumbnail
+                        description = episodeInfo?.overview
                     }
                 )
             }
@@ -191,14 +200,36 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
     }
 
     data class Meta(
+        val id: String,
         val imdb_id: String,
-        val name: String,
-        val cast: List<String>,
-        val genre: List<String>,
-        val imdbRating: String,
-        val year: String,
+        val type: String,
+        val poster: String,
+        val logo: String,
         val background: String,
-        val description: String
+        val moviedb_id: Int,
+        val name: String,
+        val description: String,
+        val genres: List<String>,
+        val releaseInfo: String,
+        val status: String,
+        val runtime: String,
+        val cast: List<String>,
+        val language: String,
+        val country: String,
+        val imdbRating: String,
+        val slug: String,
+        val videos: List<Episode>
+    )
+
+    data class Episode(
+        val id: String,
+        val title: String,
+        val season: Int,
+        val episode: Int,
+        val released: String,
+        val overview: String,
+        val thumbnail: String,
+        val moviedb_id: Int
     )
 
     data class ResponseData(
