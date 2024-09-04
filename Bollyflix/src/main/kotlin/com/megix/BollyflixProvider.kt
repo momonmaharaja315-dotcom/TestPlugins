@@ -18,17 +18,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
     val cinemeta_url = "https://v3-cinemeta.strem.io/meta"
     override val hasDownloadSupport = true
     val headers = mapOf(
-        "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; rv:128.0) Gecko/20100101 Firefox/128.0",
-        "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8",
-        "Accept-Language" to "en-US,en;q=0.5",
-        "Accept-Encoding" to "gzip, deflate, br, zstd",
-        "DNT" to "1",
-        "Connection" to "keep-alive",
-        "Upgrade-Insecure-Requests" to "1",
-        "Sec-Fetch-Dest" to "document",
-        "Sec-Fetch-Mode" to "navigate",
-        "Sec-Fetch-Site" to "none",
-        "Sec-Fetch-User" to "?1"
+        "User-Agent" to "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.186 Mobile Safari/537.36",
     )
     override val supportedTypes = setOf(
         TvType.Movie,
