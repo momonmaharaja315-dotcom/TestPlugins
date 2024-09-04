@@ -128,6 +128,10 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                 this.posterUrl = posterUrl
                 this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
                 this.plot = description
+                this.tags = genre
+                this.rating = imdbRating.toRatingInt()
+                this.year = year.toIntOrNull()
+                addActors(cast)
                 addImdbUrl(imdbUrl)
             }
         }
@@ -135,6 +139,10 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
             return newMovieLoadResponse(title, url, TvType.Movie, url) {
                 this.posterUrl = posterUrl
                 this.plot = description
+                this.tags = genre
+                this.rating = imdbRating.toRatingInt()
+                this.year = year.toIntOrNull()
+                addActors(cast)
                 addImdbUrl(imdbUrl)
             }
         }
