@@ -136,19 +136,19 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
 
             for ((key, value) in episodesMap) {
                 val episodeInfo = responseData?.meta?.videos?.find { it.season == key.first && it.episode == key.second }
-                val epTitle = episodeInfo?.title ?: "S${key.first}E${key.second}"
+                val epTitle = episodeInfo?.title.toString()
                 tvSeriesEpisodes.add(
                     newEpisode(value.first()) {
                         this.name = epTitle
                         this.season = key.first
                         this.episode = key.second
-                        this.posterUrl = episodeInfo?.thumbnail.toString()
-                        this.description = episodeInfo?.overview.toString()
+                        //this.posterUrl = episodeInfo?.thumbnail.toString()
+                        //this.description = episodeInfo?.overview.toString()
                     }
                 )
             }
 
-            return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes.toList()) {
+            return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
