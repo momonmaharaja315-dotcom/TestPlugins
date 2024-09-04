@@ -74,21 +74,17 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         val div = document.selectFirst("div.thecontent")?.text().toString()
         val tvtype = if (div.contains("season", ignoreCase = true) == true) "series" else "movie"
         val imdbUrl = document.selectFirst("a.imdbwp__link")?.attr("href")
-
-        val responseData = if (!imdbUrl.isNullOrEmpty()) {
-            val imdbId = imdbUrl.substringAfter("title/")?.substringBefore("/")
-            val jsonResponse = app.get("$cinemeta_url/$tvtype/$imdbId.json").text
-            val gson = Gson()
-            gson.fromJson(jsonResponse, ResponseData::class.java)
-        } else {
-            null
-        }
         var cast: List<String> = emptyList()
         var genre: List<String> = emptyList()
         var imdbRating: String = ""
         var year: String = ""
 
-        if(responseData != null) {
+        if(!imdbUrl.isNullOrEmpty()) {
+            val imdbId = imdbUrl.substringAfter("title/")?.substringBefore("/")
+            val jsonResponse = app.get("$cinemeta_url/$tvtype/$imdbId.json").text
+            val gson = Gson()
+            val responseData = gson.fromJson(jsonResponse, ResponseData::class.java)
+
             description = responseData.meta.description
             cast = responseData.meta.cast
             title = responseData.meta.name
