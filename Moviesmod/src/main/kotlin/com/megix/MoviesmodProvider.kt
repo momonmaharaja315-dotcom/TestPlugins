@@ -131,7 +131,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
             for ((key, value) in episodesMap) {
                 tvSeriesEpisodes.add(
                     newEpisode(value.first()) {
-                        title = "${key.second}"
+                        name = "${key.second}"
                         season = key.first
                         episode = key.second
                     }
