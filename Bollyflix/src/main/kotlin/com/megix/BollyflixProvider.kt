@@ -17,27 +17,29 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
     override var lang = "hi"
     val cinemeta_url = "https://v3-cinemeta.strem.io/meta"
     override val hasDownloadSupport = true
-    val headers = mapOf(
-        "User-Agent" to "Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.6478.186 Mobile Safari/537.36",
-    )
     override val supportedTypes = setOf(
         TvType.Movie,
         TvType.TvSeries
     )
 
     override val mainPage = mainPageOf(
-        "$mainUrl/page/" to "Home",
-        "$mainUrl/movies/bollywood/page/" to "Bollywood Movies",
-        "$mainUrl/movies/hollywood/page/" to "Hollywood Movies",
-        "$mainUrl/web-series/ongoing-series/page/" to "Ongoing Series",
-        "$mainUrl/anime/page/" to "Anime"
+        "$mainUrl/" to "Home",
+        "$mainUrl/movies/bollywood/" to "Bollywood Movies",
+        "$mainUrl/movies/hollywood/" to "Hollywood Movies",
+        "$mainUrl/web-series/ongoing-series/" to "Ongoing Series",
+        "$mainUrl/anime/" to "Anime"
     )
 
     override suspend fun getMainPage(
         page: Int,
         request: MainPageRequest
     ): HomePageResponse {
-        val document = app.get(request.data + page, headers = headers).document
+        val document = if(page == 1) {
+            app.get(request.data).document
+        }
+        else {
+            app.get(request.data + "page/" + page).document
+        }
         val home = document.select("div.post-cards > article").mapNotNull {
             it.toSearchResult()
         }
@@ -65,7 +67,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         val searchResponse = mutableListOf<SearchResponse>()
 
         for (i in 1..3) {
-            val document = app.get("$mainUrl/search/$query/page/$i/", headers = headers).document
+            val document = app.get("$mainUrl/search/$query/page/$i/").document
 
             val results = document.select("div.post-cards > article").mapNotNull { it.toSearchResult() }
 
@@ -79,7 +81,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
     }
 
     override suspend fun load(url: String): LoadResponse? {
-        val document = app.get(url, headers = headers).document
+        val document = app.get(url).document
         var title = document.selectFirst("title")?.text()?.replace("Download ", "").toString()
         var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
         var description = document.selectFirst("span#summary")?.text().toString()
@@ -172,7 +174,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
             }
         }
         else {
-            val data = document.select("a.dl").mapNotNull {
+            val data = document.select("a.dl").amap {
                 val id = it.attr("href").substringAfterLast("id=").toString()
                 val decodeUrl = bypass(id)
                 val source = app.get(decodeUrl, allowRedirects = false).headers["location"].toString()
