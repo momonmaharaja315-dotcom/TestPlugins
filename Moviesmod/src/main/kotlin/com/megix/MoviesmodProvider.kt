@@ -115,7 +115,11 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                     val key = Pair(realSeason, e)
                     if(epUrl != null) {
                         if (episodesMap.containsKey(key)) {
-                            episodesMap[key]?.add(epUrl)
+                            // If it exists, create a new list with the existing values plus the new URL
+                            val currentList = episodesMap[key] ?: emptyList()
+                            val newList = currentList.toMutableList() // Create a mutable copy
+                            newList.add(epUrl) // Add the new URL
+                            episodesMap[key] = newList // Put the new list back into the map
                         } else {
                             episodesMap[key] = mutableListOf(epUrl)
                         }
