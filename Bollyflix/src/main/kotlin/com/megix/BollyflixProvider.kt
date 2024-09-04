@@ -110,7 +110,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
             posterUrl = responseData.meta.background
         }
 
-        if(tvType == "series") {
+        if(tvtype == "series") {
             val tvSeriesEpisodes = mutableListOf<Episode>()
             val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
             val buttons = document.select("a.maxbutton-download-links, a.dl")
