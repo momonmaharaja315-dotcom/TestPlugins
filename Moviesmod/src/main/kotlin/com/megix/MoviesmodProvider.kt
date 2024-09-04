@@ -138,7 +138,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                 val episodeInfo = responseData?.meta?.videos?.find { it.season == key.first && it.episode == key.second }
                 val epTitle = episodeInfo?.title ?: "S${key.first}E${key.second}"
                 tvSeriesEpisodes.add(
-                    newEpisode(value.first()) {
+                    provider.newEpisode(value.first()) {
                         this.name = epTitle
                         this.season = key.first
                         episode = key.second
