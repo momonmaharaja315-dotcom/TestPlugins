@@ -125,7 +125,6 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                             episodesMap[key] = mutableListOf(epUrl)
                         }
                     }
-                    e++
                 }
                 e = 1
             }
