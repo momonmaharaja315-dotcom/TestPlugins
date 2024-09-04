@@ -77,7 +77,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         val imdbUrl = document.selectFirst("a.imdbwp__link")?.attr("href")
 
         val responseData = if (!imdbUrl.isNullOrEmpty()) {
-            val imdbId = imdbUrl.substringAfter("title/")?.substringBefore("/")
+            val imdbId = imdbUrl.substringAfter("title/").substringBefore("/")
             val jsonResponse = app.get("$cinemeta_url/$tvtype/$imdbId.json").text
             val gson = Gson()
             gson.fromJson(jsonResponse, ResponseData::class.java)
@@ -157,8 +157,8 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
-                this.rating = imdbRating?.toRatingInt()
-                this.year = year?.toIntOrNull()
+                this.rating = imdbRating.toRatingInt()
+                this.year = year.toIntOrNull()
                 addActors(cast)
                 addImdbUrl(imdbUrl)
             }
@@ -181,8 +181,8 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
-                this.rating = imdbRating?.toRatingInt()
-                this.year = year?.toIntOrNull()
+                this.rating = imdbRating.toRatingInt()
+                this.year = year.toIntOrNull()
                 addActors(cast)
                 addImdbUrl(imdbUrl)
             }
@@ -196,7 +196,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val sources = parseJson<ArrayList<EpisodeLink>>(data)
-        sources.mapNotNull {
+        sources.amap {
             val source = it.source
             val link = bypass(source).toString()
             loadExtractor(link, subtitleCallback, callback)
