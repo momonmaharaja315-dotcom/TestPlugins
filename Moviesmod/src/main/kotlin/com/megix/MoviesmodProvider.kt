@@ -71,13 +71,13 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         // val posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
         // val description = document.selectFirst("div.imdbwp__teaser")?.text()
         val div = document.selectFirst("div.thecontent")?.text().toString()
-        val tvtype = if (div.contains("season", ignoreCase = true) == true) "series" else "movie"
         val imdbUrl = document.selectFirst("a.imdbwp__link")?.attr("href")
         val imdbId = imdbUrl?.substringAfter("title/")?.substringBefore("/")
+        val tvtype = if (div.contains("season", ignoreCase = true) == true) "series" else "movie"
         val jsonResponse = app.get("$cinemeta_url/$tvtype/$imdbId.json").text
         val gson = Gson()
         val responseData = gson.fromJson(jsonResponse, ResponseData::class.java)
-        val description = responseData.meta.description
+        val plot = responseData.meta.description
         val cast = responseData.meta.cast
         val title = responseData.meta.name
         val genre = responseData.meta.genre
@@ -121,14 +121,14 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl
                 this.seasonNames = seasonList.map {(name, int) -> SeasonData(int, name)}
-                this.plot = description
+                this.plot = plot
                 addImdbUrl(imdbUrl)
             }
         }
         else {
             return newMovieLoadResponse(title, url, TvType.Movie, url) {
                 this.posterUrl = posterUrl
-                this.plot = description
+                this.plot = plot
                 addImdbUrl(imdbUrl)
             }
         }
