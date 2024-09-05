@@ -228,7 +228,6 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                     }
                     e++
                 }
-
             }
             for ((key, value) in episodesMap) {
                 val episodeInfo = responseData?.meta?.videos?.find { it.season == key.first && it.episode == key.second }
@@ -293,7 +292,16 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
         val sources = parseJson<ArrayList<EpisodeLink>>(data)
         sources.amap {
             val source = it.source
-            loadExtractor(source, subtitleCallback, callback)
+            if(source.contains(".graph")) {
+                val doc = app.get(source).document
+                doc.select("h3 > a").mapNotNull {
+                    val src = it.attr("href")
+                    loadExtractor(source, subtitleCallback, callback)
+                }
+            }
+            else {
+                loadExtractor(source, subtitleCallback, callback)
+            }
         }
         return true   
     }
