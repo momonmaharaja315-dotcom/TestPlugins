@@ -112,14 +112,14 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         var background: String = posterUrl
 
         if(responseData != null) {
-            description = responseData.meta.description
+            description = responseData.meta.description ?: description
             cast = responseData.meta.cast
-            title = responseData.meta?.name.toString()
+            title = responseData.meta?.name.toString() ?: title
             genre = responseData.meta.genre
             imdbRating = responseData.meta.imdbRating
             year = responseData.meta.year
-            posterUrl = responseData.meta.poster
-            background = responseData.meta.background
+            posterUrl = responseData.meta.poster ?: posterUrl
+            background = responseData.meta.background ?: background
         }
 
         if(tvtype == "series") {
