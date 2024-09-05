@@ -183,7 +183,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                                     } else {
                                         episodesMap[key] = mutableListOf(epUrl)
                                     }
-                                    linkTag = linkTag.nextElementSibling()
+                                    hTag = hTag.nextElementSibling()
                                 }
                             }
                         }
