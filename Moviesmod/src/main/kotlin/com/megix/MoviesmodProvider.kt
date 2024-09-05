@@ -93,8 +93,8 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         var cast: List<String> = emptyList()
         var genre: List<String> = emptyList()
         var imdbRating: String = ""
-        var year: String = ""
-        var background: String = posterUrl
+        var year: String? = ""
+        var background: String? = posterUrl
 
         if(responseData != null) {
             description = if (responseData.meta.description.isNullOrEmpty()) {
