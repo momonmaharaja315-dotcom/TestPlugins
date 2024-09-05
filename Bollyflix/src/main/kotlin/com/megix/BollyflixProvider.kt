@@ -104,6 +104,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         var genre: List<String> = emptyList()
         var imdbRating: String = ""
         var year: String = ""
+        var background: String = ""
 
         if(responseData != null) {
             description = responseData.meta.description
@@ -112,7 +113,8 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
             genre = responseData.meta.genre
             imdbRating = responseData.meta.imdbRating
             year = responseData.meta.year
-            posterUrl = responseData.meta.background
+            posterUrl = responseData.meta.poster
+            background = responseData.meta.background
         }
 
         if(tvtype == "series") {
@@ -154,7 +156,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
                 }
                 tvSeriesEpisodes.add(
                     newEpisode(data) {
-                        this.name = episodeInfo?.title
+                        this.name = episodeInfo?.name
                         this.season = key.first
                         this.episode = key.second
                         this.posterUrl = episodeInfo?.thumbnail
@@ -169,6 +171,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
                 this.tags = genre
                 this.rating = imdbRating?.toRatingInt()
                 this.year = year?.toIntOrNull()
+                this.backgroundPosterUrl = background
                 addActors(cast)
                 addImdbUrl(imdbUrl)
             }
@@ -186,8 +189,9 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
-                this.rating = imdbRating?.toRatingInt()
-                this.year = year?.toIntOrNull()
+                this.rating = imdbRating.toRatingInt()
+                this.year = year.toIntOrNull()
+                this.backgroundPosterUrl = background
                 addActors(cast)
                 addImdbUrl(imdbUrl)
             }
@@ -233,7 +237,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
 
     data class EpisodeDetails(
         val id: String,
-        val title: String,
+        val name: String,
         val season: Int,
         val episode: Int,
         val released: String,
