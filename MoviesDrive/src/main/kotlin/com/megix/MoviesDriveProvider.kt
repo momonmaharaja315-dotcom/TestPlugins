@@ -70,15 +70,15 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
-        val title = document.selectFirst("meta[property=og:title]")?.attr("content")?.replace("Download ", "").toString()
+        var title = document.selectFirst("meta[property=og:title]")?.attr("content")?.replace("Download ", "").toString()
 
         val plotElement = document.select(
             "h2:contains(Storyline), h3:contains(Storyline), h5:contains(Storyline), h4:contains(Storyline), h4:contains(STORYLINE)"
         ).firstOrNull() ?. nextElementSibling()
 
-        val description = plotElement ?. text() ?: document.select(".ipc-html-content-inner-div").firstOrNull() ?. text().toString()
+        var description = plotElement ?. text() ?: document.select(".ipc-html-content-inner-div").firstOrNull() ?. text().toString()
 
-        val posterUrl = document.selectFirst("img[decoding=\"async\"]")?.attr("src").toString()
+        var posterUrl = document.selectFirst("img[decoding=\"async\"]")?.attr("src").toString()
         val seasonRegex = """(?i)season\s*\d+""".toRegex()
         val imdbUrl = document.selectFirst("a:contains(IMDb)") ?. attr("href")
 
@@ -144,7 +144,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
             }
         }
 
-        if(tvType == "series") {
+        if(tvtype == "series") {
             val tvSeriesEpisodes = mutableListOf<Episode>()
             val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
             var buttons = document.select("h5 > a")
@@ -213,6 +213,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                 var e = 1
                 pTags.forEach { pTag ->
                     val nextTag = pTag.nextElementSibling()
+                    val key = Pair(1, e)
                     val epUrl = nextTag?.selectFirst("a")?.attr("href") ?: ""
                     if(epUrl != null) {
                         if (episodesMap.containsKey(key)) {
