@@ -99,7 +99,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         if(responseData != null) {
             description = responseData.meta.description
             cast = responseData.meta.cast
-            title = responseData.meta.name
+            title = responseData.meta.name.toString()
             genre = responseData.meta.genre
             imdbRating = responseData.meta.imdbRating
             year = responseData.meta.year
