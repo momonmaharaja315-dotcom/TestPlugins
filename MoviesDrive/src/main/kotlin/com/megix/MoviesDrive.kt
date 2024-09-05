@@ -5,12 +5,10 @@ import com.lagradost.cloudstream3.plugins.Plugin
 import android.content.Context
 
 @CloudstreamPlugin
-class Bollyflix: Plugin() {
+class MoviesDrive: Plugin() {
     override fun load(context: Context) {
         // All providers should be added in this manner. Please don't edit the providers list directly.
-        registerMainAPI(BollyflixProvider())
-        registerExtractorAPI(GDFlix())
-        registerExtractorAPI(GDFlix1())
-        registerExtractorAPI(GDFlix2())
+        registerMainAPI(MoviesDriveProvider())
+        registerExtractorAPI(HubCloud())
     }
 }
