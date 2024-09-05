@@ -92,9 +92,9 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
 
         var cast: List<String> = emptyList()
         var genre: List<String> = emptyList()
-        var imdbRating: String = ""
+        var imdbRating: String? = ""
         var year: String? = ""
-        var background: String? = posterUrl
+        var background: String = posterUrl
 
         if(responseData != null) {
             description = if (responseData.meta.description.isNullOrEmpty()) {
@@ -112,8 +112,8 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
             }
 
             genre = responseData.meta.genre
-            imdbRating = responseData.meta.imdbRating
-            year = responseData.meta.year
+            imdbRating = responseData.meta?.imdbRating
+            year = responseData.meta?.year
 
             posterUrl = if (responseData.meta.poster.isNullOrEmpty()) {
                 posterUrl
@@ -186,8 +186,8 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
-                this.rating = imdbRating?.toRatingInt()
-                this.year = year?.toIntOrNull()
+                this.rating = imdbRating.toRatingInt()
+                this.year = year.toIntOrNull()
                 this.backgroundPosterUrl = background
                 addActors(cast)
                 addImdbUrl(imdbUrl)
@@ -211,8 +211,8 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
-                this.rating = imdbRating?.toRatingInt()
-                this.year = year?.toIntOrNull()
+                this.rating = imdbRating.toRatingInt()
+                this.year = year.toIntOrNull()
                 this.backgroundPosterUrl = background
                 addActors(cast)
                 addImdbUrl(imdbUrl)
