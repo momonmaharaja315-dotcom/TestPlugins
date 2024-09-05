@@ -166,15 +166,13 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                     var e = 1
                     
                     elements.forEach { element ->
-                        var episodeString = ""
-                        var titleText = mainTitle
                         if(element.tagName() == "span") {
                             val titleTag = element.parent()
-                            titleText = titleTag?.text() ?: ""
-                            var linkTag = titleTag?.nextElementSibling()
+                            var hTag = titleTag?.nextElementSibling()
 
-                            while (linkTag != null && linkTag.text().contains("HubCloud", ignoreCase = true)) {
-                                val epUrl = linkTag.attr("href")
+                            while (hTag != null && hTag.text().contains("HubCloud", ignoreCase = true)) {
+                                val aTag = hTag.selectFirst("a")
+                                val epUrl = aTag.attr("href").toString()
                                 val key = Pair(realSeason, e)
                                 if(epUrl != null) {
                                     if (episodesMap.containsKey(key)) {
@@ -212,10 +210,13 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                 val pTags = document.select("p.p1")
                 var e = 1
                 pTags.forEach { pTag ->
-                    val nextTag = pTag.nextElementSibling()
+                    var nextTag = pTag.nextElementSibling()
+                    while(nextTag != null && nextTag.tagName() != "h3") {
+                        nextTag = nextTag.nextElementSibling()
+                    }
                     val key = Pair(1, e)
-                    val epUrl = nextTag?.selectFirst("a")?.attr("href") ?: ""
-                    if(epUrl != null) {
+                    val epUrls = nextTag?.select("a")?.map { it.attr("href") }
+                    epUrls?.forEach { epUrl ->
                         if (episodesMap.containsKey(key)) {
                             val currentList = episodesMap[key] ?: emptyList()
                             val newList = currentList.toMutableList()
