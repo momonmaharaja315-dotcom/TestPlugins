@@ -107,10 +107,10 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             null
         }
 
-        var cast: List<String>?
-        var genre: List<String>?
-        var imdbRating: String?
-        var year: String?
+        var cast: List<String>? = emptyList()
+        var genre: List<String>? = emptyList()
+        var imdbRating: String? = ""
+        var year: String? = ""
         var background: String? = posterUrl
 
         if(responseData != null) {
