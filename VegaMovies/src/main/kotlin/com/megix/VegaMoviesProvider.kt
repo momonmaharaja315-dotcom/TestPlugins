@@ -20,7 +20,9 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
     private val cfInterceptor = CloudflareKiller()
     override val supportedTypes = setOf(
         TvType.Movie,
-        TvType.TvSeries
+        TvType.TvSeries,
+        TvType.AsianDrama,
+        TvType.Anime
     )
 
     override val mainPage = mainPageOf(
@@ -75,9 +77,9 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
         var title = document.selectFirst("meta[property=og:title]")?.attr("content")?.replace("Download ", "").toString()
         val posterUrl = fixUrlNull(document.selectFirst("meta[property=og:image]")?.attr("content"))
         val documentText = document.text()
-        val div = document.select("div.entry-content")
-        val hTagsDisc = div.select("h3:matches((?i)(SYNOPSIS|PLOT)), h4:matches((?i)(SYNOPSIS|PLOT))")
-        val pTagDisc = hTagsDisc.first()?.nextElementSibling()
+        val div = document.selectFirst("div.entry-content")
+        val hTagsDisc = div.selectFirst("h3:matches((?i)(SYNOPSIS|PLOT)), h4:matches((?i)(SYNOPSIS|PLOT))")
+        val pTagDisc = hTagsDisc?.nextElementSibling()
         var description = pTagDisc?.text()
 
         val aTagRating = div.selectFirst("a:matches((?i)(Rating))")
@@ -221,9 +223,12 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
 
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl
-                this.plot = plot
-                this.rating = rating
-                this.seasonNames = seasonList.map { (name, int) -> SeasonData(int, name) }
+                this.plot = description
+                this.tags = genre
+                this.rating = imdbRating?.toRatingInt()
+                this.year = year?.toIntOrNull()
+                this.backgroundPosterUrl = background
+                addActors(cast)
                 addImdbUrl(imdbUrl)
             }
         } else {

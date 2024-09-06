@@ -172,25 +172,8 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
 
                             while (hTag != null && hTag.text().contains("HubCloud", ignoreCase = true)) {
                                 val aTag = hTag.selectFirst("a")
-                                val epUrl = aTag.attr("href").toString()
+                                val epUrl = aTag?.attr("href").toString()
                                 val key = Pair(realSeason, e)
-                                if(epUrl != null) {
-                                    if (episodesMap.containsKey(key)) {
-                                        val currentList = episodesMap[key] ?: emptyList()
-                                        val newList = currentList.toMutableList()
-                                        newList.add(epUrl)
-                                        episodesMap[key] = newList
-                                    } else {
-                                        episodesMap[key] = mutableListOf(epUrl)
-                                    }
-                                    hTag = hTag.nextElementSibling()
-                                }
-                            }
-                        }
-                        else {
-                            val epUrl = element.attr("href")
-                            val key = Pair(realSeason, e)
-                            if(epUrl != null) {
                                 if (episodesMap.containsKey(key)) {
                                     val currentList = episodesMap[key] ?: emptyList()
                                     val newList = currentList.toMutableList()
@@ -199,6 +182,19 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                                 } else {
                                     episodesMap[key] = mutableListOf(epUrl)
                                 }
+                                hTag = hTag.nextElementSibling()
+                            }
+                        }
+                        else {
+                            val epUrl = element.attr("href")
+                            val key = Pair(realSeason, e)
+                            if (episodesMap.containsKey(key)) {
+                                val currentList = episodesMap[key] ?: emptyList()
+                                val newList = currentList.toMutableList()
+                                newList.add(epUrl)
+                                episodesMap[key] = newList
+                            } else {
+                                episodesMap[key] = mutableListOf(epUrl)
                             }
                         }
                         e++
@@ -296,7 +292,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                 val doc = app.get(source).document
                 doc.select("h3 > a").mapNotNull {
                     val src = it.attr("href")
-                    loadExtractor(source, subtitleCallback, callback)
+                    loadExtractor(src, subtitleCallback, callback)
                 }
             }
             else {
