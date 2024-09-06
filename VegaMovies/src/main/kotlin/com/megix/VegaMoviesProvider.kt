@@ -129,8 +129,8 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             }
 
             genre = responseData.meta.genre
-            imdbRating = responseData.meta.imdbRating
-            year = responseData.meta.year
+            imdbRating = responseData.meta.imdbRating ?:""
+            year = responseData.meta.year ?:""
 
             posterUrl = if (responseData.meta.poster.isNullOrEmpty()) {
                 posterUrl
@@ -154,7 +154,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
 
             for (tag in hTags) {
                 val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
-                val realSeason = realSeasonRegex.find(tag.toString())?.groupValues?.get(1) ?: "Unknown"
+                val realSeason = realSeasonRegex.find(tag.toString())?.groupValues?.get(1)?.toIntOrNull() ?: 0
 
                 val pTag = tag.nextElementSibling()
                 val aTags: List<Element>? = if (pTag != null && pTag.tagName() == "p") {
@@ -225,8 +225,8 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
-                this.rating = imdbRating?.toRatingInt()
-                this.year = year?.toIntOrNull()
+                this.rating = imdbRating.toRatingInt()
+                this.year = year.toIntOrNull()
                 this.backgroundPosterUrl = background
                 addActors(cast)
                 addImdbUrl(imdbUrl)
@@ -245,8 +245,8 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
-                this.rating = imdbRating?.toRatingInt()
-                this.year = year?.toIntOrNull()
+                this.rating = imdbRating.toRatingInt()
+                this.year = year.toIntOrNull()
                 this.backgroundPosterUrl = background
                 addActors(cast)
                 addImdbUrl(imdbUrl)
