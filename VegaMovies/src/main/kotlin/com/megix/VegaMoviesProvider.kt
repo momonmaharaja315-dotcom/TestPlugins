@@ -75,7 +75,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
         var title = document.selectFirst("meta[property=og:title]")?.attr("content")?.replace("Download ", "").toString()
-        val posterUrl = fixUrlNull(document.selectFirst("meta[property=og:image]")?.attr("content"))
+        var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
         val documentText = document.text()
         val div = document.selectFirst("div.entry-content")
         val hTagsDisc = div.selectFirst("h3:matches((?i)(SYNOPSIS|PLOT)), h4:matches((?i)(SYNOPSIS|PLOT))")
@@ -197,9 +197,6 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                             episodesMap[key] = mutableListOf(vcloudlink)
                         }
                     }
-
-                    tvSeriesEpisodes.addAll(episodes)
-                    seasonNum++
                 }
             }
 
