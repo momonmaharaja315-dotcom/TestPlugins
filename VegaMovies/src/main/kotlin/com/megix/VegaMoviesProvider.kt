@@ -78,11 +78,11 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
         var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
         val documentText = document.text()
         val div = document.selectFirst("div.entry-content")
-        val hTagsDisc = div.selectFirst("h3:matches((?i)(SYNOPSIS|PLOT)), h4:matches((?i)(SYNOPSIS|PLOT))")
+        val hTagsDisc = div?.selectFirst("h3:matches((?i)(SYNOPSIS|PLOT)), h4:matches((?i)(SYNOPSIS|PLOT))")
         val pTagDisc = hTagsDisc?.nextElementSibling()
         var description = pTagDisc?.text()
 
-        val aTagRating = div.selectFirst("a:matches((?i)(Rating))")
+        val aTagRating = div?.selectFirst("a:matches((?i)(Rating))")
         val imdbUrl = aTagRating?.attr("href").toString()
 
         val tvtype = if (url.contains("season") ||
@@ -107,46 +107,25 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             null
         }
 
-        var cast: List<String>? = emptyList()
-        var genre: List<String>? = emptyList()
-        var imdbRating: String? = ""
-        var year: String? = ""
-        var background: String? = posterUrl
+        var cast: List<String> = emptyList()
+        var genre: List<String> = emptyList()
+        var imdbRating: String = ""
+        var year: String = ""
+        var background: String = posterUrl
 
         if(responseData != null) {
-            description = if (responseData.meta?.description.isNullOrEmpty()) {
-                description
-            } else {
-                responseData.meta.description
-            }
-
-            cast = responseData.meta?.cast
-
-            title = if (responseData.meta?.name.isNullOrEmpty()) {
-                title
-            } else {
-                responseData.meta.name
-            }
-
-            genre = responseData.meta?.genre
-            imdbRating = responseData.meta?.imdbRating
-            year = responseData.meta?.year
-
-            posterUrl = if (responseData.meta?.poster.isNullOrEmpty()) {
-                posterUrl
-            } else {
-                responseData.meta.poster
-            }
-
-            background = if (responseData.meta?.background.isNullOrEmpty()) {
-                background
-            } else {
-                responseData.meta.background
-            }
+            description = responseData.meta?.description ?: description
+            cast = responseData.meta?.cast ?: emptyList()
+            title = responseData.meta?.name ?: title
+            genre = responseData.meta?.genre ?: emptyList()
+            imdbRating = responseData.meta?.imdbRating ?: ""
+            year = responseData.meta?.year ?: ""
+            posterUrl = responseData.meta?.poster ?: posterUrl
+            background = responseData.meta?.background ?: background
         }
 
         if (tvtype == "series") {
-            val hTags = div.select("h3:matches((?i)(4K|[0-9]*0p)),h5:matches((?i)(4K|[0-9]*0p))")
+            val hTags = div?.select("h3:matches((?i)(4K|[0-9]*0p)),h5:matches((?i)(4K|[0-9]*0p))")
                 .filter { element -> !element.text().contains("Zip", true) }
 
             val tvSeriesEpisodes = mutableListOf<Episode>()
