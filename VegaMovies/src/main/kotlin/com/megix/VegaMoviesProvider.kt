@@ -129,8 +129,8 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             }
 
             genre = responseData.meta.genre
-            imdbRating = responseData.meta.imdbRating ?:""
-            year = responseData.meta.year ?:""
+            imdbRating = responseData.meta.imdbRating
+            year = responseData.meta.year
 
             posterUrl = if (responseData.meta.poster.isNullOrEmpty()) {
                 posterUrl
