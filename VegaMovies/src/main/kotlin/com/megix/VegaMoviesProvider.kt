@@ -201,8 +201,8 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
-                this.rating = imdbRating?.toRatingInt()
-                this.year = year?.toIntOrNull()
+                this.rating = imdbRating.toRatingInt()
+                this.year = year.toIntOrNull()
                 this.backgroundPosterUrl = background
                 addActors(cast)
                 addImdbUrl(imdbUrl)
@@ -221,8 +221,8 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
-                this.rating = imdbRating?.toRatingInt()
-                this.year = year?.toIntOrNull()
+                this.rating = imdbRating.toRatingInt()
+                this.year = year.toIntOrNull()
                 this.backgroundPosterUrl = background
                 addActors(cast)
                 addImdbUrl(imdbUrl)
