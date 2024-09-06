@@ -4,18 +4,19 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
+import com.lagradost.cloudstream3.base64Decode
 import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.google.gson.Gson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 
-class MoviesDriveProvider : MainAPI() { // all providers must be an instance of MainAPI
-    override var mainUrl = "https://moviesdrive.world"
-    override var name = "MoviesDrive"
+class BollyflixProvider : MainAPI() { // all providers must be an instance of MainAPI
+    override var mainUrl = "https://bollyflix.wales"
+    override var name = "BollyFlix"
     override val hasMainPage = true
     override var lang = "hi"
-    override val hasDownloadSupport = true
     val cinemeta_url = "https://v3-cinemeta.strem.io/meta"
+    override val hasDownloadSupport = true
     override val supportedTypes = setOf(
         TvType.Movie,
         TvType.TvSeries,
@@ -24,29 +25,40 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
     )
 
     override val mainPage = mainPageOf(
-        "$mainUrl/page/" to "Home",
-        "$mainUrl/category/amzn-prime-video/page/" to "Prime Video",
-        "$mainUrl/category/netflix/page/" to "Netflix",
-        "$mainUrl/category/hotstar/page/" to "Hotstar",
-        "$mainUrl/category/anime/page/" to "Anime",
-        "$mainUrl/category/k-drama/page/" to "K Drama",
+        "$mainUrl/" to "Home",
+        "$mainUrl/movies/bollywood/" to "Bollywood Movies",
+        "$mainUrl/movies/hollywood/" to "Hollywood Movies",
+        "$mainUrl/web-series/ongoing-series/" to "Ongoing Series",
+        "$mainUrl/anime/" to "Anime"
     )
 
     override suspend fun getMainPage(
         page: Int,
         request: MainPageRequest
     ): HomePageResponse {
-        val document = app.get(request.data + page).document
-        val home = document.select("ul.recent-movies > li").mapNotNull {
+        val document = if(page == 1) {
+            app.get(request.data).document
+        }
+        else {
+            app.get(request.data + "page/" + page).document
+        }
+        val home = document.select("div.post-cards > article").mapNotNull {
             it.toSearchResult()
         }
         return newHomePageResponse(request.name, home)
     }
 
+    private suspend fun bypass(id: String): String {
+        val url = "https://web.sidexfee.com/?id=$id"
+        val document = app.get(url).text
+        val encodeUrl = Regex("""link":"([^"]+)""").find(document) ?. groupValues ?. get(1) ?: ""
+        return base64Decode(encodeUrl)
+    }
+
     private fun Element.toSearchResult(): SearchResponse? {
-        val title = this.selectFirst("figure > img")?.attr("title")?.replace("Download ", "")?.toString() ?: ""
-        val href = fixUrl(this.selectFirst("figure > a")?.attr("href")?.toString() ?: "")
-        val posterUrl = fixUrlNull(this.selectFirst("figure > img")?.attr("src")?.toString() ?: "")
+        val title = this.selectFirst("a") ?. attr("title") ?. replace("Download ", "").toString()
+        val href = this.selectFirst("a") ?. attr("href").toString()
+        val posterUrl = this.selectFirst("img") ?. attr("src").toString()
     
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
@@ -57,9 +69,9 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
         val searchResponse = mutableListOf<SearchResponse>()
 
         for (i in 1..3) {
-            val document = app.get("$mainUrl/page/$i/?s=$query").document
+            val document = app.get("$mainUrl/search/$query/page/$i/").document
 
-            val results = document.select("ul.recent-movies > li").mapNotNull { it.toSearchResult() }
+            val results = document.select("div.post-cards > article").mapNotNull { it.toSearchResult() }
 
             if (results.isEmpty()) {
                 break
@@ -72,28 +84,16 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
-        var title = document.selectFirst("meta[property=og:title]")?.attr("content")?.replace("Download ", "").toString()
-
-        val plotElement = document.select(
-            "h2:contains(Storyline), h3:contains(Storyline), h5:contains(Storyline), h4:contains(Storyline), h4:contains(STORYLINE)"
-        ).firstOrNull() ?. nextElementSibling()
-
-        var description = plotElement ?. text() ?: document.select(".ipc-html-content-inner-div").firstOrNull() ?. text().toString()
-
-        var posterUrl = document.selectFirst("img[decoding=\"async\"]")?.attr("src").toString()
-        val seasonRegex = """(?i)season\s*\d+""".toRegex()
-        val imdbUrl = document.selectFirst("a:contains(IMDb)") ?. attr("href")
-
-        val tvtype = if (
-            title.contains("Episode", ignoreCase = true) == true ||
-            seasonRegex.containsMatchIn(title) ||
-            title.contains("series", ignoreCase = true) == true
-        ) {
+        var title = document.selectFirst("title")?.text()?.replace("Download ", "").toString()
+        var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
+        var description = document.selectFirst("span#summary")?.text().toString()
+        val tvtype = if(title.contains("Series") || url.contains("web-series")) {
             "series"
-        } else {
+        }
+        else {
             "movie"
         }
-
+        val imdbUrl = document.selectFirst("div.imdb_left > a")?.attr("href")
         val responseData = if (!imdbUrl.isNullOrEmpty()) {
             val imdbId = imdbUrl.substringAfter("title/").substringBefore("/")
             val jsonResponse = app.get("$cinemeta_url/$tvtype/$imdbId.json").text
@@ -128,55 +128,27 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
         if(tvtype == "series") {
             val tvSeriesEpisodes = mutableListOf<Episode>()
             val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
-            var buttons = document.select("h5 > a")
-                .filter { element -> !element.text().contains("Zip", true) }
-
-
-            buttons.forEach { button ->
-                val titleElement = button.parent() ?. previousElementSibling()
-                val mainTitle = titleElement ?. text() ?: ""
+            val buttons = document.select("a.maxbutton-download-links, a.dl")
+            buttons.mapNotNull { button ->
+                val id = button.attr("href").substringAfterLast("id=").toString()
+                val seasonText = button.parent()?.previousElementSibling()?.text().toString()
                 val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
-                val realSeason = realSeasonRegex.find(mainTitle.toString()) ?. groupValues ?. get(1) ?.toInt() ?: 0
-                val episodeLink = button.attr("href") ?: ""
-
-                val doc = app.get(episodeLink).document
-                var elements = doc.select("span:matches((?i)(Ep))")
-                if(elements.isEmpty()) {
-                    elements = doc.select("a:matches((?i)(HubCloud))")
-                }
+                val realSeason = realSeasonRegex.find(seasonText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+                val decodeUrl = bypass(id)
+                val seasonDoc = app.get(decodeUrl).document
+                val epLinks = seasonDoc.select("h3 > a")
+                    .filter { element -> !element.text().contains("Zip", true) }
                 var e = 1
-
-                elements.forEach { element ->
-                    if(element.tagName() == "span") {
-                        val titleTag = element.parent()
-                        var hTag = titleTag?.nextElementSibling()
-
-                        while (hTag != null && hTag.text().contains("HubCloud", ignoreCase = true)) {
-                            val aTag = hTag.selectFirst("a")
-                            val epUrl = aTag?.attr("href").toString()
-                            val key = Pair(realSeason, e)
-                            if (episodesMap.containsKey(key)) {
-                                val currentList = episodesMap[key] ?: emptyList()
-                                val newList = currentList.toMutableList()
-                                newList.add(epUrl)
-                                episodesMap[key] = newList
-                            } else {
-                                episodesMap[key] = mutableListOf(epUrl)
-                            }
-                            hTag = hTag.nextElementSibling()
-                        }
-                    }
-                    else {
-                        val epUrl = element.attr("href")
-                        val key = Pair(realSeason, e)
-                        if (episodesMap.containsKey(key)) {
-                            val currentList = episodesMap[key] ?: emptyList()
-                            val newList = currentList.toMutableList()
-                            newList.add(epUrl)
-                            episodesMap[key] = newList
-                        } else {
-                            episodesMap[key] = mutableListOf(epUrl)
-                        }
+                epLinks.mapNotNull {
+                    val epUrl = app.get(it.attr("href"), allowRedirects = false).headers["location"].toString()
+                    val key = Pair(realSeason, e)
+                    if (episodesMap.containsKey(key)) {
+                        val currentList = episodesMap[key] ?: emptyList()
+                        val newList = currentList.toMutableList()
+                        newList.add(epUrl)
+                        episodesMap[key] = newList
+                    } else {
+                        episodesMap[key] = mutableListOf(epUrl)
                     }
                     e++
                 }
@@ -200,6 +172,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                     }
                 )
             }
+
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl
                 this.plot = description
@@ -212,17 +185,13 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
             }
         }
         else {
-            val buttons = document.select("h5 > a")
-            val data = buttons.flatMap { button ->
-                val link = button.attr("href")
-                val doc = app.get(link).document
-                val innerButtons = doc.select("h5 > a")
-                innerButtons.mapNotNull { innerButton ->
-                    val source = innerButton.attr("href")
-                    EpisodeLink(
-                        source
-                    )
-                }
+            val data = document.select("a.dl").amap {
+                val id = it.attr("href").substringAfterLast("id=").toString()
+                val decodeUrl = bypass(id)
+                val source = app.get(decodeUrl, allowRedirects = false).headers["location"].toString()
+                EpisodeLink(
+                    source
+                )
             }
             return newMovieLoadResponse(title, url, TvType.Movie, data) {
                 this.posterUrl = posterUrl
@@ -248,7 +217,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
             val source = it.source
             loadExtractor(source, subtitleCallback, callback)
         }
-        return true   
+        return true
     }
 
     data class Meta(
@@ -293,4 +262,3 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
         val source: String
     )
 }
-
