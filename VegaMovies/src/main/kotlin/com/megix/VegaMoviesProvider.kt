@@ -107,38 +107,38 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             null
         }
 
-        var cast: List<String> = emptyList()
-        var genre: List<String> = emptyList()
-        var imdbRating: String = ""
-        var year: String = ""
-        var background: String = posterUrl
+        var cast: List<String>?
+        var genre: List<String>?
+        var imdbRating: String?
+        var year: String?
+        var background: String? = posterUrl
 
         if(responseData != null) {
-            description = if (responseData.meta.description.isNullOrEmpty()) {
+            description = if (responseData.meta?.description.isNullOrEmpty()) {
                 description
             } else {
                 responseData.meta.description
             }
 
-            cast = responseData.meta.cast
+            cast = responseData.meta?.cast
 
-            title = if (responseData.meta.name.isNullOrEmpty()) {
+            title = if (responseData.meta?.name.isNullOrEmpty()) {
                 title
             } else {
                 responseData.meta.name
             }
 
-            genre = responseData.meta.genre
-            imdbRating = responseData.meta.imdbRating
-            year = responseData.meta.year
+            genre = responseData.meta?.genre
+            imdbRating = responseData.meta?.imdbRating
+            year = responseData.meta?.year
 
-            posterUrl = if (responseData.meta.poster.isNullOrEmpty()) {
+            posterUrl = if (responseData.meta?.poster.isNullOrEmpty()) {
                 posterUrl
             } else {
                 responseData.meta.poster
             }
 
-            background = if (responseData.meta.background.isNullOrEmpty()) {
+            background = if (responseData.meta?.background.isNullOrEmpty()) {
                 background
             } else {
                 responseData.meta.background
