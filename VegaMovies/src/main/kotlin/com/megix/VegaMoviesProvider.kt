@@ -126,7 +126,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
 
         if (tvtype == "series") {
             val hTags = div?.select("h3:matches((?i)(4K|[0-9]*0p)),h5:matches((?i)(4K|[0-9]*0p))")
-                .filter { element -> !element.text().contains("Zip", true) }
+                ?.filter { element -> !element.text().contains("Zip", true) } ?: emptyList()
 
             val tvSeriesEpisodes = mutableListOf<Episode>()
             val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
