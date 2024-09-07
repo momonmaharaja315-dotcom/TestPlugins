@@ -97,9 +97,10 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
             hTags.mapNotNull{ hTag ->
                 val seasonText = hTag.text()
                 val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
-                val realSeason = realSeasonRegex.find(seasonText.toString()) ?. groupValues ?. get(1) ?.toIntOrNull() ?: 0
+                val matchResult = realSeasonRegex.find(seasonText.toString())
+                val realSeason = matchResult?.groupValues?.get(1)?.toIntOrNull() ?: 0
                 val spanTag = hTag.nextElementSibling()
-                val seasonLink = spanTag ?. selectFirst("a") ?. attr("href")
+                val seasonLink = spanTag ?.selectFirst("a")?.attr("href").toString()
                 val doc = app.get(seasonLink).document
                 var aTags = doc.select("a:matches((?i)(Episode))")
                 
@@ -122,7 +123,6 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
             }
 
             for ((key, value) in episodesMap) {
-                val episodeInfo = responseData?.meta?.videos?.find { it.season == key.first && it.episode == key.second }
                 val data = value.map { source->
                     EpisodeLink(
                         source
