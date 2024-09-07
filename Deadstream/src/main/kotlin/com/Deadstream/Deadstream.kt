@@ -108,7 +108,11 @@ class Deadstream : MainAPI() {
             val url = "https://deaddrive.xyz/embed/$id"
             val doc = app.get(url, timeout = 30L).document
             doc.selectFirst("ul.list-server-items")?.select("li")?.amap { source ->
-                if (!source.attr("data-video").contains("short.ink")) {
+                if (source.attr("data-video").contains("voe.sx")) {
+                    val link = source.attr("data-video").replace("https://voe.sx/", "https://jessicaglassauthor.com/")
+                    loadCustomExtractor(link, "", subtitleCallback, callback, getIndexQuality(quality))
+                }
+                else if (!source.attr("data-video").contains("short.ink")) {
                     val link = source.attr("data-video").toString()
                     loadCustomExtractor(link, "", subtitleCallback, callback, getIndexQuality(quality))
                 }
