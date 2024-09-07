@@ -29,15 +29,7 @@ class Sharepoint : ExtractorApi() {
     }
 }
 
-class GDFlix1 : GDFlix() {
-    override val mainUrl: String = "https://new3.gdflix.cfd"
-}
-
-class GDFlix2 : GDFlix() {
-    override val mainUrl: String = "https://new2.gdflix.cfd"
-}
-
-open class GDFlix : ExtractorApi() {
+class GDFlix : ExtractorApi() {
     override val name: String = "GDFlix"
     override val mainUrl: String = "https://new4.gdflix.cfd"
     override val requiresReferer = false
@@ -66,19 +58,13 @@ open class GDFlix : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        var originalUrl = url
         val tags = extractbollytag(originalUrl)
         val tagquality = extractbollytag2(originalUrl)
-
-        if (originalUrl.startsWith("https://new2.gdflix.cfd/goto/token/")) {
-            val partialurl = app.get(originalUrl).text.substringAfter("replace(\"").substringBefore("\")")
-            originalUrl = mainUrl + partialurl
-        }
-        app.get(originalUrl).document.select("div.text-center a").amap {
+        app.get(url).document.select("div.text-center a").amap {
             if (it.select("a").text().contains("FAST CLOUD DL"))
             {
                 val link=it.attr("href")
-                val trueurl=app.get("https://new2.gdflix.cfd$link", timeout = 30L).document.selectFirst("a.btn-success")?.attr("href") ?:""
+                val trueurl=app.get("$mainUrl$link", timeout = 30L).document.selectFirst("a.btn-success")?.attr("href") ?:""
                 callback.invoke(
                     ExtractorLink(
                         "GDFlix[Fast Cloud]",
@@ -92,10 +78,7 @@ open class GDFlix : ExtractorApi() {
             else if (it.select("a").text().contains("DRIVEBOT LINK"))
             {
                 val driveLink = it.attr("href")
-                val id = driveLink.substringAfter("id=").substringBefore("&")
-                val doId = driveLink.substringAfter("do=").substringBefore("==")
-                val indexbotlink = "https://indexbot.lol/download?id=${id}&do=${doId}"
-                val indexbotresponse = app.get(indexbotlink, timeout = 30L)
+                val indexbotresponse = app.get(driveLink, timeout = 30L)
                 if(indexbotresponse.isSuccessful) {
                     val cookiesSSID = indexbotresponse.cookies["PHPSESSID"]
                     val indexbotDoc = indexbotresponse.document
@@ -140,38 +123,16 @@ open class GDFlix : ExtractorApi() {
             else if (it.select("a").text().contains("Instant DL"))
             {
                 val Instant_link=it.attr("href")
-                val token = Instant_link.substringAfter("url=")
-                val domain= getBaseUrl(Instant_link)
-                val downloadlink = app.post(
-                    url = "$domain/api",
-                    data = mapOf(
-                        "keys" to token
-                    ),
-                    referer = Instant_link,
-                    headers = mapOf(
-                        "x-token" to "direct.zencloud.lol",
-                        "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"
-                    ),
-                    timeout = 30L,
-                )
-                val finaldownloadlink =
-                    downloadlink.toString().substringAfter("url\":\"")
-                        .substringBefore("\",\"name")
-                        .replace("\\/", "/")
-                val link = finaldownloadlink
+                val headerLink = app.get(Instant_link, allowRedirects = false).headers["Location"].substringAfter("url=")
                 callback.invoke(
                     ExtractorLink(
                         "GDFlix[Instant Download]",
                         "GDFlix[Instant Download] $tagquality",
-                        url = link,
+                        headerLink,
                         "",
                         getQualityFromName(tags)
                     )
                 )
-            }
-            else
-            {
-
             }
         }
     }
