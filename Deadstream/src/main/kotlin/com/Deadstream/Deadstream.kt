@@ -110,15 +110,17 @@ class Deadstream : MainAPI() {
                 if (!source.attr("data-video").contains("short.ink")) {
                     loadExtractor(source.attr("data-video"), subtitleCallback, callback) { link ->
                         if(link.quality == Qualities.Unknown.value) {
-                            ExtractorLink (
-                                link.source,
-                                link.name,
-                                link.url,
-                                link.referer,
-                                Qualities.P1080,
-                                link.type,
-                                link.headers,
-                                link.extractorData
+                            callback.invoke (
+                                ExtractorLink (
+                                    link.source,
+                                    link.name,
+                                    link.url,
+                                    link.referer,
+                                    Qualities.P1080,
+                                    link.type,
+                                    link.headers,
+                                    link.extractorData
+                                )
                             )
                         }
 
