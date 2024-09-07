@@ -108,7 +108,8 @@ class Deadstream : MainAPI() {
             val doc = app.get(url, timeout = 30L).document
             doc.selectFirst("ul.list-server-items")?.select("li")?.amap { source ->
                 if (!source.attr("data-video").contains("short.ink")) {
-                    loadCustomExtractor(source.attr("data-video"), "", subtitleCallback, callback)
+                    val link = source.attr("data-video").toString()
+                    loadCustomExtractor(link, "", subtitleCallback, callback)
                 }
             }
         }
@@ -129,7 +130,7 @@ class Deadstream : MainAPI() {
                         link.name,
                         link.url,
                         link.referer,
-                        Qualities.P1080,
+                        link.quality,
                         link.type,
                         link.headers,
                         link.extractorData
