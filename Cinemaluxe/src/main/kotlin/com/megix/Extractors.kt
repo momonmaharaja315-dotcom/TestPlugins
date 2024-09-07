@@ -122,13 +122,14 @@ class GDFlix : ExtractorApi() {
             }
             else if (it.select("a").text().contains("Instant DL"))
             {
-                val Instant_link=it.attr("href")
-                val headerLink = app.get(Instant_link, allowRedirects = false)?.headers["Location"]?.substringAfter("url=").toString()
+                val link=it.attr("href").toString()
+                val response = app.get(link, allowRedirects = false)
+                val instant_link = response.headers["Location"].substringAfter("url=")
                 callback.invoke(
                     ExtractorLink(
                         "GDFlix[Instant Download]",
                         "GDFlix[Instant Download] $tagquality",
-                        headerLink,
+                        instant_link,
                         "",
                         getQualityFromName(tags)
                     )
