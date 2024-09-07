@@ -117,11 +117,10 @@ class Deadstream : MainAPI() {
 
     private suspend fun loadCustomExtractor(
         url: String,
-        referer: String? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit,
+        callback: (ExtractorLink) -> Unit
     ){
-        loadExtractor(url, referer ,subtitleCallback) { link ->
+        loadExtractor(url,subtitleCallback) { link ->
             if(link.quality == Qualities.Unknown.value) {
                 callback.invoke (
                     ExtractorLink (
