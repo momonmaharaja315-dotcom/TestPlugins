@@ -6,6 +6,7 @@ import android.content.Context
 import com.lagradost.cloudstream3.extractors.VidHidePro
 import com.lagradost.cloudstream3.extractors.Chillx
 import com.lagradost.cloudstream3.extractors.StreamWishExtractor
+import com.lagradost.cloudstream3.extractors.Voe
 
 @CloudstreamPlugin
 class DeadstreamProvider: Plugin() {
@@ -22,7 +23,7 @@ class DeadstreamProvider: Plugin() {
     override fun load(context: Context) {
         registerMainAPI(Deadstream())
         registerExtractorAPI(Chillx())
-        registerExtractorAPI(MyVoe())
+        registerExtractorAPI(Voe())
         registerExtractorAPI(StreamWishExtractor())
         registerExtractorAPI(MyFileMoon())
         /*
