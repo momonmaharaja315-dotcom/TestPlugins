@@ -108,26 +108,34 @@ class Deadstream : MainAPI() {
             val doc = app.get(url, timeout = 30L).document
             doc.selectFirst("ul.list-server-items")?.select("li")?.amap { source ->
                 if (!source.attr("data-video").contains("short.ink")) {
-                    loadExtractor(source.attr("data-video"), subtitleCallback, callback) { link ->
-                        if(link.quality == Qualities.Unknown.value) {
-                            callback.invoke (
-                                ExtractorLink (
-                                    link.source,
-                                    link.name,
-                                    link.url,
-                                    link.referer,
-                                    Qualities.P1080,
-                                    link.type,
-                                    link.headers,
-                                    link.extractorData
-                                )
-                            )
-                        }
-
-                    }
+                    loadCustomExtractor(source.attr("data-video"), subtitleCallback, callback)
                 }
             }
         }
         return true
+    }
+
+    private suspend fun loadCustomExtractor(
+        url: String,
+        referer: String? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit,
+    ){
+        loadExtractor(url, referer ,subtitleCallback) { link ->
+            if(link.quality == Qualities.Unknown.value) {
+                callback.invoke (
+                    ExtractorLink (
+                        link.source,
+                        link.name,
+                        link.url,
+                        link.referer,
+                        Qualities.P1080,
+                        link.type,
+                        link.headers,
+                        link.extractorData
+                    )
+                )
+            }
+        }
     }
 }
