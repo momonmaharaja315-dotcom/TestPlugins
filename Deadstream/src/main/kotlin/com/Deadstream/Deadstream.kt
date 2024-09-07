@@ -108,7 +108,7 @@ class Deadstream : MainAPI() {
             val doc = app.get(url, timeout = 30L).document
             doc.selectFirst("ul.list-server-items")?.select("li")?.amap { source ->
                 if (!source.attr("data-video").contains("short.ink")) {
-                    loadCustomExtractor(source.attr("data-video"), subtitleCallback, callback)
+                    loadCustomExtractor(source.attr("data-video"), "", subtitleCallback, callback)
                 }
             }
         }
@@ -117,10 +117,11 @@ class Deadstream : MainAPI() {
 
     private suspend fun loadCustomExtractor(
         url: String,
+        referer: String? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ){
-        loadExtractor(url,subtitleCallback) { link ->
+        loadExtractor(url, referer ,subtitleCallback) { link ->
             if(link.quality == Qualities.Unknown.value) {
                 callback.invoke (
                     ExtractorLink (
