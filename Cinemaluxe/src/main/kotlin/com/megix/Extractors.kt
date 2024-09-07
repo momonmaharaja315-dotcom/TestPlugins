@@ -46,21 +46,21 @@ class GDFlix : ExtractorApi() {
         return tags
     }
 
-    private fun getBaseUrl(url: String): String {
-        return URI(url).let {
-            "${it.scheme}://${it.host}"
-        }
-    }
-
     override suspend fun getUrl(
         url: String,
         referer: String?,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val tags = extractbollytag(url)
-        val tagquality = extractbollytag2(url)
-        app.get(url).document.select("div.text-center a").amap {
+        var originalUrl = url
+        val tags = extractbollytag(originalUrl)
+        val tagquality = extractbollytag2(originalUrl)
+
+        if (originalUrl.startsWith("$mainUrl/goto/token/")) {
+            val partialurl = app.get(originalUrl).text.substringAfter("replace(\"").substringBefore("\")")
+            originalUrl = mainUrl + partialurl
+        }
+        app.get(originalUrl).document.select("div.text-center a").amap {
             if (it.select("a").text().contains("FAST CLOUD DL"))
             {
                 val link=it.attr("href")
@@ -78,7 +78,10 @@ class GDFlix : ExtractorApi() {
             else if (it.select("a").text().contains("DRIVEBOT LINK"))
             {
                 val driveLink = it.attr("href")
-                val indexbotresponse = app.get(driveLink, timeout = 30L)
+                val id = driveLink.substringAfter("id=").substringBefore("&")
+                val doId = driveLink.substringAfter("do=").substringBefore("==")
+                val indexbotlink = "https://indexbot.lol/download?id=${id}&do=${doId}"
+                val indexbotresponse = app.get(indexbotlink, timeout = 30L)
                 if(indexbotresponse.isSuccessful) {
                     val cookiesSSID = indexbotresponse.cookies["PHPSESSID"]
                     val indexbotDoc = indexbotresponse.document
@@ -90,7 +93,7 @@ class GDFlix : ExtractorApi() {
                         .build()
 
                     val headers = mapOf(
-                        "Referer" to "$driveLink",
+                        "Referer" to indexbotlink
                     )
 
                     val cookies = mapOf(
@@ -111,8 +114,8 @@ class GDFlix : ExtractorApi() {
 
                     callback.invoke(
                         ExtractorLink(
-                            "GDFlix[IndexBot]",
-                            "GDFlix[IndexBot] $tagquality",
+                            "GDFlix[IndexBot](VLC)",
+                            "GDFlix[IndexBot](VLC) $tagquality",
                             downloadlink,
                             "https://indexbot.lol/",
                             getQualityFromName(tags)
@@ -122,14 +125,30 @@ class GDFlix : ExtractorApi() {
             }
             else if (it.select("a").text().contains("Instant DL"))
             {
-                val response = app.get(it.attr("href"), allowRedirects = false)
-                val locationHeader = response.headers["location"].toString()
-                val instant_link = locationHeader.substringAfter("url=")
+                val Instant_link=it.attr("href")
+                val token = Instant_link.substringAfter("url=")
+                val domain= getBaseUrl(Instant_link)
+                val downloadlink = app.post(
+                    url = "$domain/api",
+                    data = mapOf(
+                        "keys" to token
+                    ),
+                    referer = Instant_link,
+                    headers = mapOf(
+                        "x-token" to "direct.zencloud.lol",
+                        "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"
+                    ),
+                    timeout = 30L,
+                )
+                val finaldownloadlink =
+                    downloadlink.toString().substringAfter("url\":\"")
+                        .substringBefore("\",\"name")
+                        .replace("\\/", "/")
                 callback.invoke(
                     ExtractorLink(
                         "GDFlix[Instant Download]",
                         "GDFlix[Instant Download] $tagquality",
-                        instant_link,
+                        finaldownloadlink,
                         "",
                         getQualityFromName(tags)
                     )
