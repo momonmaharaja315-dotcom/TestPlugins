@@ -58,8 +58,8 @@ class GDFlix : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val tags = extractbollytag(originalUrl)
-        val tagquality = extractbollytag2(originalUrl)
+        val tags = extractbollytag(url)
+        val tagquality = extractbollytag2(url)
         app.get(url).document.select("div.text-center a").amap {
             if (it.select("a").text().contains("FAST CLOUD DL"))
             {
@@ -90,7 +90,7 @@ class GDFlix : ExtractorApi() {
                         .build()
 
                     val headers = mapOf(
-                        "Referer" to indexbotlink
+                        "Referer" to "$driveLink",
                     )
 
                     val cookies = mapOf(
@@ -123,7 +123,7 @@ class GDFlix : ExtractorApi() {
             else if (it.select("a").text().contains("Instant DL"))
             {
                 val Instant_link=it.attr("href")
-                val headerLink = app.get(Instant_link, allowRedirects = false).headers["Location"].substringAfter("url=")
+                val headerLink = app.get(Instant_link, allowRedirects = false)?.headers["Location"]?.substringAfter("url=").toString()
                 callback.invoke(
                     ExtractorLink(
                         "GDFlix[Instant Download]",
