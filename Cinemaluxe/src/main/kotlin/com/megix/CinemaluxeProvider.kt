@@ -106,7 +106,7 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
                 
                 aTags.mapNotNull { aTag ->
                     val epText = aTag.text()
-                    val e = Regex("""Episode\\s+(\\d+)""").find(epText)?.groups[1]?.value ?.toIntOrNull() ?: 0
+                    val e = Regex("""Episode\s+(\d+)""").find(epText)?.groups?.get(1)?.value ?.toIntOrNull() ?: 0
                     val epUrl = aTag.attr("href")
                     val key = Pair(realSeason, e)
                     if(epUrl != null) {
