@@ -46,6 +46,12 @@ class GDFlix : ExtractorApi() {
         return tags
     }
 
+    private fun getBaseUrl(url: String): String {
+        return URI(url).let {
+            "${it.scheme}://${it.host}"
+        }
+    }
+
     override suspend fun getUrl(
         url: String,
         referer: String?,
