@@ -5,7 +5,6 @@ import com.lagradost.cloudstream3.utils.*
 import java.net.URI
 import okhttp3.FormBody
 
-
 class Sharepoint : ExtractorApi() {
     override val name: String = "Sharepoint"
     override val mainUrl: String = "https://indjatin-my.sharepoint.com"
@@ -29,7 +28,15 @@ class Sharepoint : ExtractorApi() {
     }
 }
 
-class GDFlix : ExtractorApi() {
+class GDFlix1 : GDFlix() {
+    override val mainUrl: String = "https://new3.gdflix.cfd"
+}
+
+class GDFlix2 : GDFlix() {
+    override val mainUrl: String = "https://new2.gdflix.cfd"
+}
+
+open class GDFlix : ExtractorApi() {
     override val name: String = "GDFlix"
     override val mainUrl: String = "https://new4.gdflix.cfd"
     override val requiresReferer = false
@@ -70,7 +77,7 @@ class GDFlix : ExtractorApi() {
             if (it.select("a").text().contains("FAST CLOUD DL"))
             {
                 val link=it.attr("href")
-                val trueurl=app.get("$mainUrl$link", timeout = 30L).document.selectFirst("a.btn-success")?.attr("href") ?:""
+                val trueurl=app.get("$mainUrl$link", timeout = 60L).document.selectFirst("a.btn-success")?.attr("href") ?:""
                 callback.invoke(
                     ExtractorLink(
                         "GDFlix[Fast Cloud]",
@@ -132,29 +139,14 @@ class GDFlix : ExtractorApi() {
             else if (it.select("a").text().contains("Instant DL"))
             {
                 val Instant_link=it.attr("href")
-                val token = Instant_link.substringAfter("url=")
-                val domain= getBaseUrl(Instant_link)
-                val downloadlink = app.post(
-                    url = "$domain/api",
-                    data = mapOf(
-                        "keys" to token
-                    ),
-                    referer = Instant_link,
-                    headers = mapOf(
-                        "x-token" to "direct.zencloud.lol",
-                        "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"
-                    ),
-                    timeout = 30L,
-                )
-                val finaldownloadlink =
-                    downloadlink.toString().substringAfter("url\":\"")
-                        .substringBefore("\",\"name")
-                        .replace("\\/", "/")
+                val response = app.get(Instant_link)
+                val locationHeader = response.headers["location"].toString()
+                val downloadLink = locationHeader.substringAfter("url=")
                 callback.invoke(
                     ExtractorLink(
                         "GDFlix[Instant Download]",
                         "GDFlix[Instant Download] $tagquality",
-                        finaldownloadlink,
+                        downloadLink,
                         "",
                         getQualityFromName(tags)
                     )
@@ -235,7 +227,6 @@ class HubCloud : ExtractorApi() {
             }
         }
     }
-
 
     private fun getIndexQuality(str: String?): Int {
         return Regex("(\\d{3,4})[pP]").find(str ?: "") ?. groupValues ?. getOrNull(1) ?. toIntOrNull()
