@@ -5,7 +5,7 @@ import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
 import com.lagradost.cloudstream3.network.CloudflareKiller
 
-class LuxMoviesProvider : VegaMoviesProvider() { // all providers must be an instance of MainAPI
+class RogmoviesProvider : VegaMoviesProvider() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://rogmovies.top"
     override var name = "Rogmovies"
     override val hasMainPage = true
