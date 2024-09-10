@@ -8,7 +8,7 @@ import com.lagradost.cloudstream3.base64Decode
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 
 class CinemaluxeProvider : MainAPI() { // all providers must be an instance of MainAPI
-    override var mainUrl = "https://cinemaluxe.link"
+    override var mainUrl = "https://cinemaluxe.click"
     override var name = "Cinemaluxe"
     override val hasMainPage = true
     override var lang = "hi"
@@ -109,15 +109,13 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
                     val e = Regex("""Episode\s+(\d+)""").find(epText)?.groups?.get(1)?.value ?.toIntOrNull() ?: 0
                     val epUrl = aTag.attr("href")
                     val key = Pair(realSeason, e)
-                    if(epUrl != null) {
-                        if (episodesMap.containsKey(key)) {
-                            val currentList = episodesMap[key] ?: emptyList()
-                            val newList = currentList.toMutableList()
-                            newList.add(epUrl)
-                            episodesMap[key] = newList
-                        } else {
-                            episodesMap[key] = mutableListOf(epUrl)
-                        }
+                    if (episodesMap.containsKey(key)) {
+                        val currentList = episodesMap[key] ?: emptyList()
+                        val newList = currentList.toMutableList()
+                        newList.add(epUrl)
+                        episodesMap[key] = newList
+                    } else {
+                        episodesMap[key] = mutableListOf(epUrl)
                     }
                 }
             }
