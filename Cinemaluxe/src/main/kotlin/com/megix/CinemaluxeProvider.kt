@@ -101,7 +101,8 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
                 val realSeason = matchResult?.groupValues?.get(1)?.toIntOrNull() ?: 0
                 val spanTag = hTag.nextElementSibling()
                 val seasonLink = spanTag ?.selectFirst("a")?.attr("href").toString()
-                val doc = app.get(seasonLink).document
+                val trueSeasonLink = bypass(seasonLink)
+                val doc = app.get(trueSeasonLink).document
                 var aTags = doc.select("a:matches((?i)(Episode))")
                 
                 aTags.mapNotNull { aTag ->
@@ -166,8 +167,7 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
         val sources = parseJson<ArrayList<EpisodeLink>>(data)
         sources.amap {
             val source = it.source
-            val link = bypass(source)
-            loadExtractor(link, subtitleCallback, callback)
+            loadExtractor(source, subtitleCallback, callback)
         }
         return true   
     }

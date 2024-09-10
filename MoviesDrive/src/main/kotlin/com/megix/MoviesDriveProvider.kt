@@ -150,7 +150,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
                     if(element.tagName() == "span") {
                         val titleTag = element.parent()
                         var hTag = titleTag?.nextElementSibling()
-
+                        e = Regex("""Ep(\d{2})""").find(element.toString())?.groups?.get(1)?.value ?.toIntOrNull() ?: e
                         while (hTag != null && hTag.text().contains("HubCloud", ignoreCase = true)) {
                             val aTag = hTag.selectFirst("a")
                             val epUrl = aTag?.attr("href").toString()

@@ -128,7 +128,7 @@ class Full4MoviesProvider : MainAPI() { // all providers must be an instance of 
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val doc = app.get(data).document
-        val link = doc.selectFirst("iframe").attr("src")
+        val link = doc.selectFirst("iframe")?.attr("src").toString()
         loadExtractor(link, referer = data, subtitleCallback, callback)
         return true
     }
