@@ -207,9 +207,9 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 addImdbUrl(imdbUrl)
             }
         } else {
-            val buttons = document.select("p > a > button")
+            val buttons = document.select("p > a:has(button)")
             val data = buttons.mapNotNull { button ->
-                val link = fixUrlNull(button.selectFirst("a").attr("href"))
+                val link = fixUrl(button.attr("href"))
                 val doc = app.get(link).document
                 val source = doc.selectFirst("a:contains(V-Cloud)")?.attr("href").toString()
                 EpisodeLink(source)
@@ -234,7 +234,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val sources = parseJson<ArrayList<EpisodeLink>>(data)
-        sources.mapNotNull {
+        sources.amap {
             var source = it.source
             if(source.contains("vcloud.lol/api")) {
                 val document = app.get(source).document
