@@ -43,7 +43,7 @@ class RogmoviesProvider : VegaMoviesProvider() { // all providers must be an ins
     private fun Element.toSearchResult(): SearchResponse? {
         val title = this.attr("title").replace("Download ", "")
         val href = this.attr("href")
-        val posterUrl = this.selectFirst("img").attr("data-src")
+        val posterUrl = this.selectFirst("img")?.attr("data-src").toString()
 
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl

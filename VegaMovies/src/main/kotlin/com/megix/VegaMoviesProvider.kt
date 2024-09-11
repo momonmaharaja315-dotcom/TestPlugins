@@ -48,9 +48,9 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
     private fun Element.toSearchResult(): SearchResponse? {
         val title = this.attr("title").replace("Download ", "")
         val href = this.attr("href")
-        var posterUrl = this.selectFirst("img").attr("data-src")
+        var posterUrl = this.selectFirst("img")?.attr("data-src").toString()
         if(posterUrl.isEmpty()) {
-            posterUrl = this.selectFirst("img").attr("src")
+            posterUrl = this.selectFirst("img")?.attr("src").toString()
         }
 
         return newMovieSearchResponse(title, href, TvType.Movie) {
@@ -73,8 +73,8 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
-        var title = document.selectFirst("meta[property=og:title]").attr("content").replace("Download ", "")
-        var posterUrl = document.selectFirst("meta[property=og:image]").attr("content")
+        var title = document.selectFirst("meta[property=og:title]")?.attr("content")?.replace("Download ", "").toString()
+        var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
         val documentText = document.text()
         val div = document.selectFirst("div.entry-content")
         val hTagsDisc = div?.selectFirst("h3:matches((?i)(SYNOPSIS|PLOT)), h4:matches((?i)(SYNOPSIS|PLOT))")
@@ -207,11 +207,11 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 addImdbUrl(imdbUrl)
             }
         } else {
-            val pTags = document.select("p:has(a:has(button))")
-            val data = pTags.mapNotNull { pTag ->
-                val link = pTag.selectFirst("a")?.attr("href")
+            val buttons = document.select("p > a > button")
+            val data = buttons.mapNotNull { button ->
+                val link = button.selectFirst("a")?.attr("href")
                 if(!link.isNullOrEmpty()) {
-                    val doc = app.get(link).document
+                    val doc = app.get(fixUrl(link)).document
                     val source = doc.selectFirst("a:contains(V-Cloud)")?.attr("href").toString()
                     EpisodeLink(source)
                 }
