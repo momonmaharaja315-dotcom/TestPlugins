@@ -8,9 +8,12 @@ import android.content.Context
 class VegaMovies: Plugin() {
     override fun load(context: Context) {
         // All providers should be added in this manner. Please don't edit the providers list directly.
-        registerMainAPI(VegaMoviesProvider())
-        registerMainAPI(LuxMoviesProvider())
-        registerMainAPI(RogmoviesProvider())
-        registerExtractorAPI(VCloud())
+        registerMainAPI(World4uFreeProvider())
+        registerExtractorAPI(WLinkFast())
+        registerExtractorAPI(FastLinks())
+        registerExtractorAPI(GDFlix())
+        registerExtractorAPI(GDFlix2())
+        registerExtractorAPI(GDFlix1())
+        registerExtractorAPI(Sendcm())
     }
 }
