@@ -70,10 +70,10 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
-        val title = document.selectFirst("meta[property=og:title]")?.attr("content")?.replace("Download ", "").toString()
+        var title = document.selectFirst("meta[property=og:title]")?.attr("content")?.replace("Download ", "").toString()
         val div = document.selectFirst("div.entry-content")
         val imdbUrl = document.selectFirst("div.imdb_left > a") ?. attr("href")
-        val description = div ?. selectFirst("p:matches((?i)(plot|synopsis|story))") ?. text() ?: ""
+        var description = div ?. selectFirst("p:matches((?i)(plot|synopsis|story))") ?. text() ?: ""
         var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
 
         if(posterUrl.isEmpty() || posterUrl.contains("$mainUrl/favicon-32x32.png")) {
@@ -126,7 +126,7 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
                 val titleElement = button.parent()?.parent()?.previousElementSibling()
                 val titleText = titleElement ?. text() ?: ""
                 val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
-                val realSeason = realSeasonRegex.find(titleText) ?. groupValues ?. get(1) ?: ""
+                val realSeason = realSeasonRegex.find(titleText) ?. groupValues ?. get(1) ?.toIntOrNull() ?: 0
                 val qualityRegex = """(1080p|720p|480p|2160p|4K|[0-9]*0p)""".toRegex(RegexOption.IGNORE_CASE)
                 val quality = qualityRegex.find(titleText) ?. groupValues ?. get(1) ?: ""
                 var ep = 1
