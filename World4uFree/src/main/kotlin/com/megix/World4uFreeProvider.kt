@@ -245,12 +245,11 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
 
     private suspend fun loadCustomExtractor(
         url: String,
-        referer: String? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
         quality: Int = Qualities.Unknown.value,
     ){
-        loadExtractor(url, referer ,subtitleCallback) { link ->
+        loadExtractor(url,subtitleCallback) { link ->
             if(link.quality == Qualities.Unknown.value) {
                 callback.invoke (
                     ExtractorLink (
