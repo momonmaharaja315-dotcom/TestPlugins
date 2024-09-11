@@ -135,7 +135,7 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
                     val doc = app.get(wlinkz).document
                     val elements = doc.select("h3:matches((?i)(episode))")
                     elements.forEach { element ->
-                        val epTitle = element.text()
+                        //val epTitle = element.text()
                         var linkElement = element.nextElementSibling()
                         while (linkElement != null && linkElement.tagName() != "h4") {
                             linkElement = linkElement.nextElementSibling()
@@ -233,9 +233,39 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
         sources.amap {
             val source = it.source
             val quality = it.quality
-            loadExtractor(source, subtitleCallback, callback)
+            loadCustomExtractor(source, subtitleCallback, callback, getIndexQuality(quality))
         }
         return true   
+    }
+
+    private fun getIndexQuality(str: String?): Int {
+        return Regex("(\\d{3,4})[pP]").find(str ?: "") ?. groupValues ?. getOrNull(1) ?. toIntOrNull()
+            ?: Qualities.Unknown.value
+    }
+
+    private suspend fun loadCustomExtractor(
+        url: String,
+        referer: String? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit,
+        quality: Int = Qualities.Unknown.value,
+    ){
+        loadExtractor(url, referer ,subtitleCallback) { link ->
+            if(link.quality == Qualities.Unknown.value) {
+                callback.invoke (
+                    ExtractorLink (
+                        link.source,
+                        link.name,
+                        link.url,
+                        link.referer,
+                        quality,
+                        link.type,
+                        link.headers,
+                        link.extractorData
+                    )
+                )
+            }
+        }
     }
 
     data class Meta(

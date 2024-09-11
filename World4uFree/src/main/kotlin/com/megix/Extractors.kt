@@ -86,7 +86,7 @@ class WLinkFast : ExtractorApi() {
                     this.name,
                     link,
                     referer = "",
-                    quality = getIndexQuality(quality),
+                    Qualities.Unknown.value,
                 )
             )
         }
@@ -101,14 +101,10 @@ class WLinkFast : ExtractorApi() {
                     this.name,
                     downloadLink,
                     referer = "",
-                    quality = getIndexQuality(quality),
+                    Qualities.Unknown.value,
                 )
             )
         }
-    }
-    private fun getIndexQuality(str: String?): Int {
-        return Regex("(\\d{3,4})[pP]").find(str ?: "") ?. groupValues ?. getOrNull(1) ?. toIntOrNull()
-            ?: Qualities.Unknown.value
     }
 }
 
