@@ -32,7 +32,7 @@ class NetflixMirrorProvider : MainAPI() {
         "X-Requested-With" to "XMLHttpRequest"
     )
 
-    fun getCookieFromGithub(url: String): String {
+    private suspend fun getCookieFromGithub(url: String): String {
         val document = app.get(url).document
         val json = document.body().text()
         val jsonObject = JSONObject(json)
