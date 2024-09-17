@@ -14,6 +14,7 @@ import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.Response
 import org.jsoup.nodes.Element
+import org.json.JSONObject
 
 class NetflixMirrorProvider : MainAPI() {
     override val supportedTypes = setOf(
@@ -31,8 +32,15 @@ class NetflixMirrorProvider : MainAPI() {
         "X-Requested-With" to "XMLHttpRequest"
     )
 
+    fun getCookieFromGithub(url: String): String {
+        val document = app.get(url).document
+        val json = document.body().text()
+        val jsonObject = JSONObject(json)
+        return jsonObject.getString("cookie")
+    }
+
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse? {
-        val cookie_value = app.get("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/main/NF_Cookie.txt").text
+        val cookie_value = getCookieFromGithub("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/main/NF_Cookie.json")
         val cookies = mapOf(
             "t_hash_t" to cookie_value,
             "hd" to "on"
@@ -65,7 +73,7 @@ class NetflixMirrorProvider : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
-        val cookie_value = app.get("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/main/NF_Cookie.txt").text
+        val cookie_value = getCookieFromGithub("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/main/NF_Cookie.json")
         val cookies = mapOf(
             "t_hash_t" to cookie_value,
             "hd" to "on"
@@ -83,7 +91,7 @@ class NetflixMirrorProvider : MainAPI() {
 
     override suspend fun load(url: String): LoadResponse? {
         val id = parseJson<Id>(url).id
-        val cookie_value = app.get("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/main/NF_Cookie.txt").text
+        val cookie_value = getCookieFromGithub("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/main/NF_Cookie.json")
         val cookies = mapOf(
             "t_hash_t" to cookie_value,
             "hd" to "on"
@@ -132,7 +140,7 @@ class NetflixMirrorProvider : MainAPI() {
         title: String, eid: String, sid: String, page: Int
     ): List<Episode> {
         val episodes = arrayListOf<Episode>()
-        val cookie_value = app.get("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/main/NF_Cookie.txt").text
+        val cookie_value = getCookieFromGithub("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/main/NF_Cookie.json")
         val cookies = mapOf(
             "t_hash_t" to cookie_value,
             "hd" to "on"
@@ -165,7 +173,7 @@ class NetflixMirrorProvider : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val (title, id) = parseJson<LoadData>(data)
-        val cookie_value = app.get("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/main/NF_Cookie.txt").text
+        val cookie_value = getCookieFromGithub("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/main/NF_Cookie.json")
         val cookies = mapOf(
             "t_hash_t" to cookie_value,
             "hd" to "on"
