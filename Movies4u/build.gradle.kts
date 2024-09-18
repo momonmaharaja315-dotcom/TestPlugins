@@ -22,5 +22,5 @@ cloudstream {
         "Anime"
     )
 
-    iconUrl = ""
+    iconUrl = "https://movies4u.taxi/wp-content/uploads/2022/08/favicon.jpg"
 }

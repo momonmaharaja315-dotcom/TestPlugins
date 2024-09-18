@@ -112,111 +112,83 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
             background = responseData.meta?.background ?: background
         }
 
-        // if(tvtype == "series") {
-        //     val tvSeriesEpisodes = mutableListOf<Episode>()
-        //     val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
-        //     var buttons = document.select("h5 > a")
-        //         .filter { element -> !element.text().contains("Zip", true) }
+        if(tvtype == "series") {
+            val tvSeriesEpisodes = mutableListOf<Episode>()
+            val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
+            var buttons = document.select("div.downloads-btns-div")
 
+            buttons.forEach { button ->
+                val titleElement = button.previousElementSibling()?.text()
+                val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
+                val realSeason = realSeasonRegex.find(titleElement.toString()) ?. groupValues ?. get(1) ?.toInt() ?: 0
+                val seasonLink = button.selectFirst("a").attr("href")
+                val doc = app.get(seasonLink).document
+                val episodeDiv = doc.select("downloads-btns-div")
+                var e = 1
 
-        //     buttons.forEach { button ->
-        //         val titleElement = button.parent() ?. previousElementSibling()
-        //         val mainTitle = titleElement ?. text() ?: ""
-        //         val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
-        //         val realSeason = realSeasonRegex.find(mainTitle.toString()) ?. groupValues ?. get(1) ?.toInt() ?: 0
-        //         val episodeLink = button.attr("href") ?: ""
+                episodeDiv.forEach { element ->
+                    val epUrl = element.selectFirst("a").attr("href")
+                    val key = Pair(realSeason, e)
+                    if (episodesMap.containsKey(key)) {
+                        val currentList = episodesMap[key] ?: emptyList()
+                        val newList = currentList.toMutableList()
+                        newList.add(epUrl)
+                        episodesMap[key] = newList
+                    } else {
+                        episodesMap[key] = mutableListOf(epUrl)
+                    }
+                    e++
+                }
+                e = 1
+            }
 
-        //         val doc = app.get(episodeLink).document
-        //         var elements = doc.select("span:matches((?i)(Ep))")
-        //         if(elements.isEmpty()) {
-        //             elements = doc.select("a:matches((?i)(HubCloud))")
-        //         }
-        //         var e = 1
-
-        //         elements.forEach { element ->
-        //             if(element.tagName() == "span") {
-        //                 val titleTag = element.parent()
-        //                 var hTag = titleTag?.nextElementSibling()
-        //                 e = Regex("""Ep(\d{2})""").find(element.toString())?.groups?.get(1)?.value ?.toIntOrNull() ?: e
-        //                 while (hTag != null && hTag.text().contains("HubCloud", ignoreCase = true)) {
-        //                     val aTag = hTag.selectFirst("a")
-        //                     val epUrl = aTag?.attr("href").toString()
-        //                     val key = Pair(realSeason, e)
-        //                     if (episodesMap.containsKey(key)) {
-        //                         val currentList = episodesMap[key] ?: emptyList()
-        //                         val newList = currentList.toMutableList()
-        //                         newList.add(epUrl)
-        //                         episodesMap[key] = newList
-        //                     } else {
-        //                         episodesMap[key] = mutableListOf(epUrl)
-        //                     }
-        //                     hTag = hTag.nextElementSibling()
-        //                 }
-        //                 e++
-        //             }
-        //             else {
-        //                 val epUrl = element.attr("href")
-        //                 val key = Pair(realSeason, e)
-        //                 if (episodesMap.containsKey(key)) {
-        //                     val currentList = episodesMap[key] ?: emptyList()
-        //                     val newList = currentList.toMutableList()
-        //                     newList.add(epUrl)
-        //                     episodesMap[key] = newList
-        //                 } else {
-        //                     episodesMap[key] = mutableListOf(epUrl)
-        //                 }
-        //                 e++
-        //             }
-        //         }
-        //         e = 1
-        //     }
-
-        //     for ((key, value) in episodesMap) {
-        //         val episodeInfo = responseData?.meta?.videos?.find { it.season == key.first && it.episode == key.second }
-        //         val data = value.map { source->
-        //             EpisodeLink(
-        //                 source
-        //             )
-        //         }
-        //         tvSeriesEpisodes.add(
-        //             newEpisode(data) {
-        //                 this.name = episodeInfo?.name ?: episodeInfo?.title
-        //                 this.season = key.first
-        //                 this.episode = key.second
-        //                 this.posterUrl = episodeInfo?.thumbnail
-        //                 this.description = episodeInfo?.overview
-        //             }
-        //         )
-        //     }
-        //     return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
-        //         this.posterUrl = posterUrl
-        //         this.plot = description
-        //         this.tags = genre
-        //         this.rating = imdbRating.toRatingInt()
-        //         this.year = year.toIntOrNull()
-        //         this.backgroundPosterUrl = background
-        //         addActors(cast)
-        //         addImdbUrl(imdbUrl)
-        //     }
-        // }
-
-        val movieLink = document.selectFirst("div.downloads-btns-div > a").attr("href")
-        val doc = app.get(movieLink).document
-        val data = doc.select("div.downloads-btns-div > a").mapNotNull {
-            EpisodeLink(
-                it.attr("href")
-            )
+            for ((key, value) in episodesMap) {
+                val episodeInfo = responseData?.meta?.videos?.find { it.season == key.first && it.episode == key.second }
+                val data = value.map { source->
+                    EpisodeLink(
+                        source
+                    )
+                }
+                tvSeriesEpisodes.add(
+                    newEpisode(data) {
+                        this.name = episodeInfo?.name ?: episodeInfo?.title
+                        this.season = key.first
+                        this.episode = key.second
+                        this.posterUrl = episodeInfo?.thumbnail
+                        this.description = episodeInfo?.overview
+                    }
+                )
+            }
+            return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
+                this.posterUrl = posterUrl
+                this.plot = description
+                this.tags = genre
+                this.rating = imdbRating.toRatingInt()
+                this.year = year.toIntOrNull()
+                this.backgroundPosterUrl = background
+                addActors(cast)
+                addImdbUrl(imdbUrl)
+            }
         }
+        else {
+            val movieLink = document.selectFirst("div.downloads-btns-div > a").attr("href")
+            val doc = app.get(movieLink).document
+            val data = doc.select("div.downloads-btns-div > a").mapNotNull {
+                EpisodeLink(
+                    it.attr("href")
+                )
+            }
 
-        return newMovieLoadResponse(title, url, TvType.Movie, data) {
-            this.posterUrl = posterUrl
-            this.plot = description
-            this.tags = genre
-            this.rating = imdbRating.toRatingInt()
-            this.year = year.toIntOrNull()
-            this.backgroundPosterUrl = background
-            addActors(cast)
-            addImdbUrl(imdbUrl)
+            return newMovieLoadResponse(title, url, TvType.Movie, data) {
+                this.posterUrl = posterUrl
+                this.plot = description
+                this.tags = genre
+                this.rating = imdbRating.toRatingInt()
+                this.year = year.toIntOrNull()
+                this.backgroundPosterUrl = background
+                addActors(cast)
+                addImdbUrl(imdbUrl)
+            }
         }
     }
 
