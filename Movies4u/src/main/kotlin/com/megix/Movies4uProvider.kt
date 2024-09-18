@@ -200,7 +200,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
         //     }
         // }
 
-        val movieLink = document.selectFirst("downloads-btns-div > a").attr("href")
+        val movieLink = document.selectFirst("div.downloads-btns-div > a").attr("href")
         val doc = app.get(movieLink).document
         val data = doc.select("div.downloads-btns-div > a").mapNotNull {
             EpisodeLink(
