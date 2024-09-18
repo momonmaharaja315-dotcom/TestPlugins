@@ -24,7 +24,11 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
     )
 
     override val mainPage = mainPageOf(
-        "$mainUrl/page/" to "Home"
+        "$mainUrl/page/" to "Home",
+        "$mainUrl/category/bollywood/page/" to "Bollywood",
+        "$mainUrl/category/hollywood/page/" to "Hollywood",
+        "$mainUrl/category/web-series/page/" to "Web Series",
+        "$mainUrl/category/anime/page/" to "Anime"
     )
 
     override suspend fun getMainPage(
@@ -39,21 +43,22 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
-        val title = this.selectFirst("figure > a > img").attr("alt")
-        val href = this.selectFirst("figure > a").attr("href")
-        val posterUrl = this.selectFirst("figure > a > img").attr("src").toString()
-        val quality = getQualityFromString(this.selectFirst("article.post > figure > a > span").text().toString())
+        val title = this.selectFirst("figure > a > img")?.attr("alt").toString()
+        val href = this.selectFirst("figure > a")?.attr("href").toString()
+        val posterUrl = this.selectFirst("figure > a > img")?.attr("src").toString()
+        val quality = getQualityFromString(this.selectFirst("article.post > figure > a > span")?.text().toString())
     
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
+            this.quality = quality
         }
     }
 
     private fun Element.toSearchResult2(): SearchResponse? {
-        val title = this.selectFirst("figure > div > a > img").attr("alt")
-        val href = this.selectFirst("figure > div > a").attr("href")
-        val posterUrl = this.selectFirst("figure > div > a > img").attr("src").toString()
-        val quality = getQualityFromString(this.selectFirst("article.post > figure > div > a > span").text().toString())
+        val title = this.selectFirst("figure > div > a > img")?.attr("alt").toString()
+        val href = this.selectFirst("figure > div > a")?.attr("href").toString()
+        val posterUrl = this.selectFirst("figure > div > a > img")?.attr("src").toString()
+        val quality = getQualityFromString(this.selectFirst("article.post > figure > div > a > span")?.text().toString())
 
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
@@ -80,8 +85,8 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
-        var title = document.selectFirst("title").text()
-        var posterUrl = document.selectFirst("meta[property=og:image]").attr("content")
+        var title = document.selectFirst("title")?.text().toString()
+        var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
 
         val movieTitle = document.selectFirst("h3.movie-title")
         val nextElement = movieTitle?.nextElementSibling()
@@ -134,13 +139,13 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
                 val titleElement = button.previousElementSibling()?.text()
                 val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
                 val realSeason = realSeasonRegex.find(titleElement.toString()) ?. groupValues ?. get(1) ?.toInt() ?: 0
-                val seasonLink = button.selectFirst("a").attr("href")
+                val seasonLink = button.selectFirst("a")?.attr("href").toString()
                 val doc = app.get(seasonLink).document
                 val episodeDiv = doc.select("div.downloads-btns-div")
                 var e = 1
 
                 episodeDiv.forEach { element ->
-                    val epUrl = element.selectFirst("a").attr("href")
+                    val epUrl = element.selectFirst("a[href~=(?i)hubcloud|vcloud]")?.attr("href").toString()
                     val key = Pair(realSeason, e)
                     if (episodesMap.containsKey(key)) {
                         val currentList = episodesMap[key] ?: emptyList()
@@ -184,7 +189,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
             }
         }
         else {
-            val movieLink = document.selectFirst("div.downloads-btns-div > a").attr("href")
+            val movieLink = document.selectFirst("div.downloads-btns-div > a")?.attr("href").toString()
             val doc = app.get(movieLink).document
             val data = doc.select("div.downloads-btns-div > a").mapNotNull {
                 EpisodeLink(
