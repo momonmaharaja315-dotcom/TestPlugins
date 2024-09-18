@@ -75,7 +75,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
         val imdbUrl = nextElement?.selectFirst("a")?.attr("href")
         var description = nextElement?.nextElementSibling()?.nextElementSibling() ?.text()
 
-        val tvtype = if (nextElement?.text().contains("Movie Name")) {
+        val tvtype = if (nextElement?.text()?.contains("Movie Name")) {
             "movie"
         } else {
             "series"
