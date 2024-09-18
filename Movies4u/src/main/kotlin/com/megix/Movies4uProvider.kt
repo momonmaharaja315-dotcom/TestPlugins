@@ -42,6 +42,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
         val title = this.selectFirst("figure > a > img").attr("alt")
         val href = this.selectFirst("figure > a").attr("href")
         val posterUrl = this.selectFirst("figure > a > img").attr("src").toString()
+        val quality = getQualityFromString(this.selectFirst("article.post > figure > a > span").text().toString())
     
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
@@ -52,9 +53,11 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
         val title = this.selectFirst("figure > div > a > img").attr("alt")
         val href = this.selectFirst("figure > div > a").attr("href")
         val posterUrl = this.selectFirst("figure > div > a > img").attr("src").toString()
+        val quality = getQualityFromString(this.selectFirst("article.post > figure > div > a > span").text().toString())
 
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
+            this.quality = quality
         }
     }
 
