@@ -48,13 +48,23 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
         }
     }
 
+    private fun Element.toSearchResult2(): SearchResponse? {
+        val title = this.selectFirst("figure > div > a > img").attr("alt")
+        val href = this.selectFirst("figure > div > a").attr("href")
+        val posterUrl = this.selectFirst("figure > div > a > img").attr("src").toString()
+
+        return newMovieSearchResponse(title, href, TvType.Movie) {
+            this.posterUrl = posterUrl
+        }
+    }
+
     override suspend fun search(query: String): List<SearchResponse> {
         val searchResponse = mutableListOf<SearchResponse>()
 
         for (i in 1..3) {
             val document = app.get("$mainUrl/page/$i/?s=$query").document
 
-            val results = document.select("article.post").mapNotNull { it.toSearchResult() }
+            val results = document.select("article.post").mapNotNull { it.toSearchResult2() }
 
             if (results.isEmpty()) {
                 break
@@ -123,7 +133,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
                 val realSeason = realSeasonRegex.find(titleElement.toString()) ?. groupValues ?. get(1) ?.toInt() ?: 0
                 val seasonLink = button.selectFirst("a").attr("href")
                 val doc = app.get(seasonLink).document
-                val episodeDiv = doc.select("downloads-btns-div")
+                val episodeDiv = doc.select("div.downloads-btns-div")
                 var e = 1
 
                 episodeDiv.forEach { element ->
