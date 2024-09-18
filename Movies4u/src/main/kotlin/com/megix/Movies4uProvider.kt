@@ -41,7 +41,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
     private fun Element.toSearchResult(): SearchResponse? {
         val title = this.selectFirst("figure > a > img")?.attr("alt")
         val href = this.selectFirst("figure > a").attr("href")
-        val posterUrl = this.selectFirst("figure > a > img").attr("src")
+        val posterUrl = this.selectFirst("figure > a > img").attr("src").toString()
     
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
@@ -72,14 +72,14 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
 
         val movieTitle = document.selectFirst("h3.movie-title")
         val nextElement = movieTitle?.nextElementSibling()
-        val imdbUrl = nextElement?.selectFirst("a").attr("href")
+        val imdbUrl = nextElement?.selectFirst("a")?.attr("href")
         var description = nextElement?.nextElementSibling()?.nextElementSibling() ?.text()
 
-        // val tvtype = if (nextElementSibling?.text().contains("Movie Name")) {
-        //     "movie"
-        // } else {
-        //     "series"
-        // }
+        val tvtype = if (nextElementSibling?.text().contains("Movie Name")) {
+            "movie"
+        } else {
+            "series"
+        }
 
         val responseData = if (!imdbUrl.isNullOrEmpty()) {
             val imdbId = imdbUrl.substringAfter("title/").substringBefore("/")
