@@ -9,9 +9,9 @@ class ExtractorsPlugin: Plugin() {
     override fun load(context: Context) {
         // All providers should be added in this manner. Please don't edit the providers list directly.
         registerExtractorAPI(VCloud())
-        registerExtractorAPI(GdFlix())
-        registerExtractorAPI(GdFlix1())
-        registerExtractorAPI(GdFlix2())
+        registerExtractorAPI(GDFlix())
+        registerExtractorAPI(GDFlix1())
+        registerExtractorAPI(GDFlix2())
         registerExtractorAPI(HubCloud())
         registerExtractorAPI(HubCloudClub())
     }
