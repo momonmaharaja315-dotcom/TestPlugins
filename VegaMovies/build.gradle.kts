@@ -1,10 +1,10 @@
-version = 1
+version = 41
 
 cloudstream {
-    //language = "hi"
+    language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "Must Install(For other extensions to work properly)"
+    description = "Includes LuxMovies, Rogmovies"
      authors = listOf("megix")
 
     /**
@@ -22,5 +22,5 @@ cloudstream {
         "Anime"
     )
 
-    iconUrl = ""
+    iconUrl = "https://apkrabi.com/uploads/2023/4/vegamovies-icon.jpg"
 }

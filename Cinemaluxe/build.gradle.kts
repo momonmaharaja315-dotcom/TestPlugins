@@ -1,10 +1,10 @@
-version = 1
+version = 9
 
 cloudstream {
-    //language = "hi"
+    language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "Must Install(For other extensions to work properly)"
+    description = "Movies and Series upto 4K"
      authors = listOf("megix")
 
     /**
@@ -18,9 +18,7 @@ cloudstream {
     tvTypes = listOf(
         "TvSeries",
         "Movie",
-        "AsianDrama",
-        "Anime"
     )
 
-    iconUrl = ""
+    iconUrl = "https://cinemaluxe.click/wp-content/uploads/2024/07/fresh-logo-dark-theme-.webp"
 }
