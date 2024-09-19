@@ -113,9 +113,8 @@ open class OgomoviesProvider : MainAPI() { // all providers must be an instance 
             document.select("div.chbox > button").mapNotNull {
                 val onclick = it.attr("onclick")
                 val regex = Regex("""goto\('(.*)'\)""")
-                val matchResult = regex.find(onclick)
-                val urlGroup = matchResult?.groups[1]
-                val url = urlGroup?.value.toString()
+                val match = regex.find(onclick)
+                val url = match.groupValues[1]
                 loadExtractor(url, subtitleCallback, callback)
             }
         }
