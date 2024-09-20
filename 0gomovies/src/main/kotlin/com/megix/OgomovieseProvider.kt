@@ -118,7 +118,7 @@ open class OgomoviesProvider : MainAPI() { // all providers must be an instance 
 
                 if (matchResult != null) {
                     val urlGroup = matchResult.groups[1]
-                    val url = urlGroup.value
+                    val url = urlGroup?.value.toString()
                     loadExtractor(url, subtitleCallback, callback)
                 }
             }
