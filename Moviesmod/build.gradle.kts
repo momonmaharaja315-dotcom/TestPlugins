@@ -1,10 +1,10 @@
-version = 2
+version = 9
 
 cloudstream {
     language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "Indian Multilingual Provider"
+    description = "Includes Topmovies"
      authors = listOf("megix")
 
     /**
@@ -18,7 +18,9 @@ cloudstream {
     tvTypes = listOf(
         "TvSeries",
         "Movie",
+        "AsianDrama",
+        "Anime"
     )
 
-    iconUrl = "https://0gomovies.cam/wp-content/themes/assets/images/logo-dark.png"
+    iconUrl = "https://moviesmod.fit/wp-content/uploads/2022/12/moviesmodnew-Custom.png"
 }

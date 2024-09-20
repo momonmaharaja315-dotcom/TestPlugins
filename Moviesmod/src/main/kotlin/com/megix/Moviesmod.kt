@@ -5,10 +5,12 @@ import com.lagradost.cloudstream3.plugins.Plugin
 import android.content.Context
 
 @CloudstreamPlugin
-class Ogomovies: Plugin() {
+class Moviesmod: Plugin() {
     override fun load(context: Context) {
         // All providers should be added in this manner. Please don't edit the providers list directly.
-        registerMainAPI(OgomoviesProvider())
-        registerExtractorAPI(Asumanaksoy())
+        registerMainAPI(MoviesmodProvider())
+        registerMainAPI(TopmoviesProvider())
+        registerExtractorAPI(Driveseed())
+        registerExtractorAPI(Driveleech())
     }
 }
