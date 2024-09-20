@@ -68,7 +68,7 @@ class Driveleech : Driveseed() {
     override val mainUrl: String = "https://driveleech.org"
 }
 
-class Driveseed : ExtractorApi() {
+open class Driveseed : ExtractorApi() {
     override val name: String = "Driveseed"
     override val mainUrl: String = "https://driveseed.org"
     override val requiresReferer = false
