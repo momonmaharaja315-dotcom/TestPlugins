@@ -1,10 +1,10 @@
-version = 1
+version = 2
 
 cloudstream {
     language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "High Quality Movies and TV Shows"
+    description = "Indian Multilingual Provider"
      authors = listOf("megix")
 
     /**
@@ -18,9 +18,7 @@ cloudstream {
     tvTypes = listOf(
         "TvSeries",
         "Movie",
-        "AsianDrama",
-        "Anime"
     )
 
-    iconUrl = "https://movies4u.taxi/wp-content/uploads/2022/08/favicon.jpg"
+    iconUrl = "https://0gomovies.cam/wp-content/themes/assets/images/logo-dark.png"
 }
