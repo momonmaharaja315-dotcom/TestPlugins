@@ -123,27 +123,26 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                     val base64Value = link.substringAfter("url=")
                     link = base64Decode(base64Value)
                 }
-                if(link.isNullOrEmpty()) {
-                    val doc = app.get(link).document
-                    val hTags = doc.select("h3,h4")
-                    var e = 1
-                    hTags.mapNotNull {
-                        val epUrl = it.selectFirst("a")?.attr("href")
-                        val key = Pair(realSeason, e)
-                        if(epUrl != null) {
-                            if (episodesMap.containsKey(key)) {
-                                val currentList = episodesMap[key] ?: emptyList()
-                                val newList = currentList.toMutableList()
-                                newList.add(epUrl)
-                                episodesMap[key] = newList
-                            } else {
-                                episodesMap[key] = mutableListOf(epUrl)
-                            }
+                val doc = app.get(fixUrl(link)).document
+                val hTags = doc.select("h3,h4")
+                var e = 1
+                hTags.mapNotNull {
+                    val epUrl = it.selectFirst("a")?.attr("href")
+                    val key = Pair(realSeason, e)
+                    if(epUrl != null) {
+                        if (episodesMap.containsKey(key)) {
+                            // If it exists, create a new list with the existing values plus the new URL
+                            val currentList = episodesMap[key] ?: emptyList()
+                            val newList = currentList.toMutableList() // Create a mutable copy
+                            newList.add(epUrl) // Add the new URL
+                            episodesMap[key] = newList // Put the new list back into the map
+                        } else {
+                            episodesMap[key] = mutableListOf(epUrl)
                         }
-                        e++
                     }
-                    e = 1
+                    e++
                 }
+                e = 1
             }
 
             for ((key, value) in episodesMap) {
@@ -183,13 +182,11 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                     link = base64Decode(base64Value)
                 }
 
-                if(link.isNullOrEmpty()) {
-                    val doc = app.get(link).document
-                    val source = doc.selectFirst("a.maxbutton-1, a.maxbutton-5")?.attr("href").toString()
-                    EpisodeLink(
-                        source
-                    )
-                }
+                val doc = app.get(fixUrl(link)).document
+                val source = doc.selectFirst("a.maxbutton-1, a.maxbutton-5")?.attr("href").toString()
+                EpisodeLink(
+                    source
+                )
             }
             return newMovieLoadResponse(title, url, TvType.Movie, data) {
                 this.posterUrl = posterUrl
