@@ -1,16 +1,15 @@
-package com.megix
+package com.HindiProviders
 
 import com.lagradost.cloudstream3.plugins.CloudstreamPlugin
 import com.lagradost.cloudstream3.plugins.Plugin
 import android.content.Context
 
 @CloudstreamPlugin
-class Moviesmod: Plugin() {
+class UHDmoviesProviderPlugin: Plugin() {
     override fun load(context: Context) {
         // All providers should be added in this manner. Please don't edit the providers list directly.
-        registerMainAPI(MoviesmodProvider())
-        registerMainAPI(TopmoviesProvider())
+        registerMainAPI(UHDmoviesProvider())
+        registerExtractorAPI(UHDMovies())
         registerExtractorAPI(Driveseed())
-        registerExtractorAPI(Driveleech())
     }
 }
