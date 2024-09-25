@@ -64,7 +64,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
 
     private fun Element.toSearchResult(): SearchResponse? {
         val id = selectFirst("a")?.attr("data-post") ?: attr("data-post") ?: return null
-        val posterUrl = fixUrlNull(selectFirst(".card-img-container img, .top10-img img")?.attr("data-src"))
+        val posterUrl = fixUrlNull(selectFirst(".card-img-container img, img.top10-img-1")?.attr("data-src"))
 
         return newAnimeSearchResponse("", Id(id).toJson()) {
             this.posterUrl = posterUrl
@@ -79,12 +79,12 @@ class PrimeVideoMirrorProvider : MainAPI() {
             "ott" to "pv",
             "hd" to "on"
         )
-        val url = "$mainUrl/search.php?s=$query&t=$time"
+        val url = "$mainUrl/pv/search.php?s=$query&t=$time"
         val data = app.get(url, referer = "$mainUrl/", cookies = cookies).parsed<SearchData>()
 
         return data.searchResult.map {
             newAnimeSearchResponse(it.t, Id(it.id).toJson()) {
-                posterUrl = "https://img.nfmirrorcdn.top/poster/v/${it.id}.jpg"
+                posterUrl = "https://img.nfmirrorcdn.top/pv/341/${it.id}.jpg"
                 posterHeaders = mapOf("Referer" to "$mainUrl/")
             }
         }
@@ -131,7 +131,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
         val type = if (data.episodes.first() == null) TvType.Movie else TvType.TvSeries
 
         return newTvSeriesLoadResponse(title, url, type, episodes) {
-            posterUrl = "https://img.nfmirrorcdn.top/poster/h/$id.jpg"
+            posterUrl = "https://img.nfmirrorcdn.top/pv/700/$id.jpg"
             posterHeaders = mapOf("Referer" to "$mainUrl/")
             plot = data.desc
             year = data.year.toIntOrNull()
