@@ -99,7 +99,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
             "hd" to "on"
         )
         val data = app.get(
-            "$mainUrl/post.php?id=$id&t=$time", headers, referer = "$mainUrl/", cookies = cookies
+            "$mainUrl/pv/post.php?id=$id&t=$time", headers, referer = "$mainUrl/", cookies = cookies
         ).parsed<PostData>()
 
         val episodes = arrayListOf<Episode>()
@@ -151,7 +151,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
         var pg = page
         while (true) {
             val data = app.get(
-                "$mainUrl/episodes.php?s=$sid&series=$eid&t=$time&page=$pg",
+                "$mainUrl/pv/episodes.php?s=$sid&series=$eid&t=$time&page=$pg",
                 headers,
                 referer = "$mainUrl/",
                 cookies = cookies
@@ -183,7 +183,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
             "hd" to "on"
         )
         val playlist = app.get(
-            "$mainUrl/playlist.php?id=$id&t=$title&tm=$time",
+            "$mainUrl/pv/playlist.php?id=$id&t=$title&tm=$time",
             headers,
             referer = "$mainUrl/",
             cookies = cookies
