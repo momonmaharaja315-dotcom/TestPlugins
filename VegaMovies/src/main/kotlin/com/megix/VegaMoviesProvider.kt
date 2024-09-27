@@ -53,7 +53,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             posterUrl = this.selectFirst("img")?.attr("src").toString()
         }
 
-        val quality = if(title.contains("HDCAMRip") || title.contains("CAMRip")) {
+        val quality = if(title.contains("HDCAMRip", ignoreCase = true) || title.contains("CAMRip", ignoreCase = true)) {
             SearchQuality.CamRip
         }
         else {
