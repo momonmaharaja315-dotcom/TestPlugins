@@ -1,13 +1,11 @@
-// use an integer for version numbers
-version = 3
-
+version = 42
 
 cloudstream {
-    //language = "en"
+    language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "Netflix Content in Multiple Languages"
-    authors = listOf("Horis, megix")
+    description = "Includes LuxMovies, Rogmovies"
+     authors = listOf("megix")
 
     /**
      * Status int as the following:
@@ -18,9 +16,11 @@ cloudstream {
      * */
     status = 1 // will be 3 if unspecified
     tvTypes = listOf(
+        "TvSeries",
         "Movie",
-        "TvSeries"
+        "AsianDrama",
+        "Anime"
     )
 
-    iconUrl = "https://iosmirror.cc/img/nf2/icon_x192.png"
+    iconUrl = "https://apkrabi.com/uploads/2023/4/vegamovies-icon.jpg"
 }
