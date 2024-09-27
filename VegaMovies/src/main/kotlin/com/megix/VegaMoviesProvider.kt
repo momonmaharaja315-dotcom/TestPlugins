@@ -5,7 +5,7 @@ import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import com.lagradost.cloudstream3.network.CloudflareKiller
-import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrlToIdNullable
+import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.google.gson.Gson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
@@ -222,7 +222,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 this.year = year.toIntOrNull()
                 this.backgroundPosterUrl = background
                 addActors(cast)
-                addImdbUrlToIdNullable(imdbUrl)
+                addImdbUrl(imdbUrl)
             }
         } else {
             val buttons = document.select("p > a:has(button)")
@@ -240,7 +240,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
                 this.year = year.toIntOrNull()
                 this.backgroundPosterUrl = background
                 addActors(cast)
-                addImdbUrlToIdNullable(imdbUrl)
+                addImdbUrl(imdbUrl)
             }
         }
     }
