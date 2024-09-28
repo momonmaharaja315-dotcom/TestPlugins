@@ -34,21 +34,19 @@ open class HubCloud : ExtractorApi() {
         {
             url=app.get(url).document.selectFirst("div.main h4 a")?.attr("href") ?:""
         }
-        val text = app.get(url).text
-        val newLink = text.substringAfter("url=").substringBefore("\"")
-        val newDoc = app.get(newLink).document
-        var gamerLink : String
 
-        if(newLink.contains("drive")) {
-            val scriptTag = newDoc.selectFirst("script:containsData(url)")?.toString() ?: ""
-            gamerLink = Regex("var url = '([^']*)'").find(scriptTag) ?. groupValues ?. get(1) ?: ""
+        val doc = app.get(url).document
+        i
+        f(url.contains("drive") || url.contains("vcloud")) {
+            val scriptTag = doc.selectFirst("script:containsData(url)")?.toString() ?: ""
+            url = Regex("var url = '([^']*)'").find(scriptTag) ?. groupValues ?. get(1) ?: ""
         }
 
         else {
-            gamerLink = newDoc.selectFirst("div.vd > center > a") ?. attr("href") ?: ""
+            url = doc.selectFirst("div.vd > center > a") ?. attr("href") ?: ""
         }
 
-        val document = app.get(gamerLink).document
+        val document = app.get(url).document
         val size = document.selectFirst("i#size") ?. text() ?: ""
         val div = document.selectFirst("div.card-body")
         val header = getIndexQuality(document.selectFirst("div.card-header")?.text())
@@ -67,7 +65,7 @@ open class HubCloud : ExtractorApi() {
                 )
             }
             else if(linkText.contains("Download [Server : 10Gbps]")) {
-                val href=app.get(link).document.selectFirst("#vd")?.attr("href") ?:""
+                val href=app.get(link, timeout = 30L).document.selectFirst("#vd")?.attr("href") ?:""
                 callback.invoke(
                     ExtractorLink(
                         "$name[Download]",
