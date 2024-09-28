@@ -36,8 +36,7 @@ open class HubCloud : ExtractorApi() {
         }
 
         val doc = app.get(url).document
-        i
-        f(url.contains("drive") || url.contains("vcloud")) {
+        if(url.contains("drive") || url.contains("vcloud")) {
             val scriptTag = doc.selectFirst("script:containsData(url)")?.toString() ?: ""
             url = Regex("var url = '([^']*)'").find(scriptTag) ?. groupValues ?. get(1) ?: ""
         }
