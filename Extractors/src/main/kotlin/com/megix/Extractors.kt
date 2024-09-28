@@ -4,90 +4,9 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import okhttp3.FormBody
 
-class VCloud : ExtractorApi() {
+class VCloud : HubCloud() {
     override val name: String = "V-Cloud"
     override val mainUrl: String = "https://vcloud.lol"
-    override val requiresReferer = false
-
-    override suspend fun getUrl(
-        url: String,
-        referer: String?,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
-    ) {
-        var url=url
-        if (url.contains("api/index.php"))
-        {
-            url=app.get(url).document.selectFirst("div.main h4 a")?.attr("href") ?:""
-        }
-        val doc = app.get(url).document
-        val scriptTag = doc.selectFirst("script:containsData(url)")?.toString() ?:""
-        val urlValue = Regex("var url = '([^']*)'").find(scriptTag) ?. groupValues ?. get(1) ?: ""
-        val document = app.get(urlValue).document
-
-        val size = document.selectFirst("i#size") ?. text() ?: ""
-        val div = document.selectFirst("div.card-body")
-        val header = getIndexQuality(document.selectFirst("div.card-header")?.text())
-        div?.select("h2 a.btn")?.amap {
-            val link = it.attr("href")
-            val text = it.text()
-            if(text.contains("Download [FSL Server]")) {
-                callback.invoke(
-                    ExtractorLink(
-                        "$name[Download]",
-                        "$name[Download] $size",
-                        link,
-                        "",
-                        header,
-                    )
-                )
-            }
-            else if(text.contains("Download [Server : 10Gbps]")) {
-                val href=app.get(link).document.selectFirst("#vd")?.attr("href") ?:""
-                callback.invoke(
-                    ExtractorLink(
-                        "$name[Download]",
-                        "$name[Download] $size",
-                        href,
-                        "",
-                        header,
-                    )
-                )
-            }
-            else if (text.contains("Download File"))
-            {
-                callback.invoke(
-                    ExtractorLink(
-                        name,
-                        "$name $size",
-                        link,
-                        "",
-                        header,
-                    )
-                )
-            }
-            else if (text.contains("PixelServer")) {
-                callback.invoke(
-                    ExtractorLink(
-                        "Pixeldrain",
-                        "Pixeldrain $size",
-                        link,
-                        "",
-                        header,
-                    )
-                )
-            }
-
-            else{
-                loadExtractor(link, subtitleCallback, callback)
-            }
-        }
-    }
-
-    private fun getIndexQuality(str: String?): Int {
-        return Regex("(\\d{3,4})[pP]").find(str ?: "")?.groupValues?.getOrNull(1)?.toIntOrNull()
-            ?: Qualities.Unknown.value
-    }
 }
 
 class HubCloudClub : HubCloud() {
@@ -109,6 +28,12 @@ open class HubCloud : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
+        var url = url
+        //for vcloud some cases
+        if (url.contains("api/index.php"))
+        {
+            url=app.get(url).document.selectFirst("div.main h4 a")?.attr("href") ?:""
+        }
         val text = app.get(url).text
         val newLink = text.substringAfter("url=").substringBefore("\"")
         val newDoc = app.get(newLink).document
@@ -129,8 +54,8 @@ open class HubCloud : ExtractorApi() {
         val header = getIndexQuality(document.selectFirst("div.card-header")?.text())
         div?.select("h2 a.btn")?.amap {
             val link = it.attr("href")
-            val text = it.text()
-            if(text.contains("Download [FSL Server]")) {
+            val linkText = it.text()
+            if(linkText.contains("Download [FSL Server]")) {
                 callback.invoke(
                     ExtractorLink(
                         "$name[Download]",
@@ -141,7 +66,7 @@ open class HubCloud : ExtractorApi() {
                     )
                 )
             }
-            else if(text.contains("Download [Server : 10Gbps]")) {
+            else if(linkText.contains("Download [Server : 10Gbps]")) {
                 val href=app.get(link).document.selectFirst("#vd")?.attr("href") ?:""
                 callback.invoke(
                     ExtractorLink(
@@ -153,7 +78,7 @@ open class HubCloud : ExtractorApi() {
                     )
                 )
             }
-            else if (text.contains("Download File"))
+            else if (linkText.contains("Download File"))
             {
                 callback.invoke(
                     ExtractorLink(
@@ -165,7 +90,7 @@ open class HubCloud : ExtractorApi() {
                     )
                 )
             }
-            else if (text.contains("PixelServer")) {
+            else if (linkText.contains("PixelServer")) {
                 callback.invoke(
                     ExtractorLink(
                         "Pixeldrain",
@@ -183,7 +108,7 @@ open class HubCloud : ExtractorApi() {
         }
     }
 
-    private fun getIndexQuality(str: String?): Int {
+    fun getIndexQuality(str: String?): Int {
         return Regex("(\\d{3,4})[pP]").find(str ?: "") ?. groupValues ?. getOrNull(1) ?. toIntOrNull()
             ?: Qualities.Unknown.value
     }
