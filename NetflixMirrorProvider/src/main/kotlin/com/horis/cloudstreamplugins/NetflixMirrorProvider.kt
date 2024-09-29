@@ -73,7 +73,7 @@ class NetflixMirrorProvider : MainAPI() {
         }
     }
 
-    private fun Element.toSuggestResult(url: String): SearchResponse? {
+    private suspend fun Element.toSuggestResult(url: String): SearchResponse? {
         val id = parseJson<Id>(url).id
         val cookie_value = getCookieFromGithub()
         val cookies = mapOf(
