@@ -90,7 +90,6 @@ class NetflixMirrorProvider : MainAPI() {
         return totalMinutes
     }
 
-
     override suspend fun search(query: String): List<SearchResponse> {
         val cookie_value = getCookieFromGithub()
         val cookies = mapOf(
@@ -265,5 +264,4 @@ class NetflixMirrorProvider : MainAPI() {
     data class Cookie(
         val cookie: String
     )
-
 }
