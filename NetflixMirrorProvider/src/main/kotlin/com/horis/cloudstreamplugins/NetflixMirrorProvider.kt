@@ -103,9 +103,15 @@ class NetflixMirrorProvider : MainAPI() {
         val episodes = arrayListOf<Episode>()
 
         val title = data.title
-        val cast = data.cast?.split(",")?.map { it.trim() } ?: emptyList()
+        val castList = data.cast?.split(",")?.map { it.trim() } ?: emptyList()
+        val cast = castList.map {
+            ActorData(
+                Actor(it),
+            )
+        }
         val genre = data.genre?.split(",")?.map { it.trim() } ?: emptyList()
         val rating = data.match?.replace("IMDb ", "")?.toRatingInt()
+        val runTime = data.runtime?.toIntOrNull()
 
         if (data.episodes.first() == null) {
             episodes.add(newEpisode(LoadData(title, id)) {
@@ -140,7 +146,8 @@ class NetflixMirrorProvider : MainAPI() {
             year = data.year.toIntOrNull()
             tags = genre
             actors = cast
-            rating = rating
+            this.rating = rating
+            this.runTime = runTime
         }
     }
 
