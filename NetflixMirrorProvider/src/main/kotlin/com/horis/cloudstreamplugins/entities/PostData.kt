@@ -13,5 +13,6 @@ data class PostData(
     val year: String,
     val cast: String?,
     val match: String?,
-    val runtime: String?
+    val runtime: String?,
+    val suggest: List<Id>?,
 )

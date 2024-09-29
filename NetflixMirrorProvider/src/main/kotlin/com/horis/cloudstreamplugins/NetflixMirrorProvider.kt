@@ -4,6 +4,7 @@ import com.horis.cloudstreamplugins.entities.EpisodesData
 import com.horis.cloudstreamplugins.entities.PlayList
 import com.horis.cloudstreamplugins.entities.PostData
 import com.horis.cloudstreamplugins.entities.SearchData
+import com.horis.cloudstreamplugins.entities.Id
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
@@ -72,6 +73,25 @@ class NetflixMirrorProvider : MainAPI() {
         }
     }
 
+    private fun Element.toSuggestResult(url: String): SearchResponse? {
+        val id = parseJson<Id>(url).id
+        val cookie_value = getCookieFromGithub()
+        val cookies = mapOf(
+            "t_hash_t" to cookie_value,
+            "hd" to "on"
+        )
+        val data = app.get(
+            "$mainUrl/post.php?id=$id&t=$time", headers, referer = "$mainUrl/", cookies = cookies
+        ).parsed<PostData>()
+        val title = data.title
+        val posterUrl = "https://img.nfmirrorcdn.top/poster/h/$id.jpg"
+
+        return newAnimeSearchResponse(title, Id(id).toJson()) {
+            this.posterUrl = posterUrl
+            posterHeaders = mapOf("Referer" to "$mainUrl/")
+        }
+    }
+
     override suspend fun search(query: String): List<SearchResponse> {
         val cookie_value = getCookieFromGithub()
         val cookies = mapOf(
@@ -111,7 +131,10 @@ class NetflixMirrorProvider : MainAPI() {
         }
         val genre = data.genre?.split(",")?.map { it.trim() } ?: emptyList()
         val rating = data.match?.replace("IMDb ", "")?.toRatingInt()
-        val runTime = data.runtime?.toIntOrNull()
+        val runTime = data.runtime?.replace("m", "")?.toIntOrNull()
+        val suggestions = data.suggest?.map(
+            toSuggestResult(it)
+        )
 
         if (data.episodes.first() == null) {
             episodes.add(newEpisode(LoadData(title, id)) {
@@ -148,6 +171,7 @@ class NetflixMirrorProvider : MainAPI() {
             actors = cast
             this.rating = rating
             this.duration = runTime
+            this.recommendations = suggestions
         }
     }
 
@@ -234,10 +258,6 @@ class NetflixMirrorProvider : MainAPI() {
             }
         }
     }
-
-    data class Id(
-        val id: String
-    )
 
     data class LoadData(
         val title: String, val id: String
