@@ -4,7 +4,6 @@ import com.horis.cloudstreamplugins.entities.EpisodesData
 import com.horis.cloudstreamplugins.entities.PlayList
 import com.horis.cloudstreamplugins.entities.PostData
 import com.horis.cloudstreamplugins.entities.SearchData
-import com.horis.cloudstreamplugins.entities.Id
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
@@ -15,7 +14,6 @@ import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.Response
 import org.jsoup.nodes.Element
-import org.json.JSONObject
 
 class NetflixMirrorProvider : MainAPI() {
     override val supportedTypes = setOf(
@@ -34,10 +32,8 @@ class NetflixMirrorProvider : MainAPI() {
     )
 
     private suspend fun getCookieFromGithub(): String {
-        val document = app.get("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/main/NF_Cookie.json").document
-        val json = document.body().text()
-        val jsonObject = JSONObject(json)
-        return jsonObject.getString("cookie")
+        val data = app.get("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/main/NF_Cookie.json").parsed<Cookie>()
+        return data.cookie
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse? {
@@ -68,25 +64,6 @@ class NetflixMirrorProvider : MainAPI() {
             fixUrlNull(selectFirst(".card-img-container img, .top10-img img")?.attr("data-src"))
 
         return newAnimeSearchResponse("", Id(id).toJson()) {
-            this.posterUrl = posterUrl
-            posterHeaders = mapOf("Referer" to "$mainUrl/")
-        }
-    }
-
-    private suspend fun toSuggestResult(url: String): SearchResponse? {
-        val id = parseJson<Id>(url).id
-        val cookie_value = getCookieFromGithub()
-        val cookies = mapOf(
-            "t_hash_t" to cookie_value,
-            "hd" to "on"
-        )
-        val data = app.get(
-            "$mainUrl/post.php?id=$id&t=$time", headers, referer = "$mainUrl/", cookies = cookies
-        ).parsed<PostData>()
-        val title = data.title
-        val posterUrl = "https://img.nfmirrorcdn.top/poster/h/$id.jpg"
-
-        return newAnimeSearchResponse(title, Id(id).toJson()) {
             this.posterUrl = posterUrl
             posterHeaders = mapOf("Referer" to "$mainUrl/")
         }
@@ -132,9 +109,6 @@ class NetflixMirrorProvider : MainAPI() {
         val genre = data.genre?.split(",")?.map { it.trim() } ?: emptyList()
         val rating = data.match?.replace("IMDb ", "")?.toRatingInt()
         val runTime = data.runtime?.replace("m", "")?.toIntOrNull()
-        val suggestions = data.suggest?.map(
-            toSuggestResult(it)
-        )
 
         if (data.episodes.first() == null) {
             episodes.add(newEpisode(LoadData(title, id)) {
@@ -171,7 +145,6 @@ class NetflixMirrorProvider : MainAPI() {
             actors = cast
             this.rating = rating
             this.duration = runTime
-            this.recommendations = suggestions
         }
     }
 
@@ -259,8 +232,16 @@ class NetflixMirrorProvider : MainAPI() {
         }
     }
 
+    data class Id(
+        val id: String
+    )
+
     data class LoadData(
         val title: String, val id: String
+    )
+
+    data class Cookie(
+        val cookie: String
     )
 
 }
