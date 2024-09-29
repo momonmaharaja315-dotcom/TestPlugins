@@ -88,7 +88,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
 
         return data.searchResult.map {
             newAnimeSearchResponse(it.t, Id(it.id).toJson()) {
-                posterUrl = "https://img.nfmirrorcdn.top/pv/700/${it.id}.jpg"
+                posterUrl = "https://img.nfmirrorcdn.top/pv/900/${it.id}.jpg"
                 posterHeaders = mapOf("Referer" to "$mainUrl/")
             }
         }
@@ -135,7 +135,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
         val type = if (data.episodes.first() == null) TvType.Movie else TvType.TvSeries
 
         return newTvSeriesLoadResponse(title, url, type, episodes) {
-            posterUrl = "https://img.nfmirrorcdn.top/pv/700/$id.jpg"
+            posterUrl = "https://img.nfmirrorcdn.top/pv/900/$id.jpg"
             posterHeaders = mapOf("Referer" to "$mainUrl/")
             plot = data.desc
             year = data.year.toIntOrNull()
