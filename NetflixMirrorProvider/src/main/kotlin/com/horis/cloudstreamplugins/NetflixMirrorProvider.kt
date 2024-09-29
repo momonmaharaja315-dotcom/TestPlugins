@@ -147,7 +147,7 @@ class NetflixMirrorProvider : MainAPI() {
             tags = genre
             actors = cast
             this.rating = rating
-            this.runTime = runTime
+            this.duration = runTime
         }
     }
 
