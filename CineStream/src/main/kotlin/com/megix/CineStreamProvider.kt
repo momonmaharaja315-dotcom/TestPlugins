@@ -7,8 +7,6 @@ import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.google.gson.Gson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.google.gson.reflect.TypeToken
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.decodeFromString
 
 class CineStreamProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -44,34 +42,23 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
-        val movieJson = app.get("$mainUrl/catalog/movie/top/search=$query.json")
-        val movies = Json.decodeFromString<SearchResult>(movieJson)
-
-        movies.metas.forEach { meta ->
-            searchResponse.add(
-                newMovieSearchResponse(
-                    meta.name,
-                    Json.encodeToString(meta),
-                    TvType.Movie
-                ) {
-                    this.posterUrl = meta.poster
-                }
-            )
+        val searchResponse = mutableListOf<SearchResponse>()
+        val movieJson = app.get("$mainUrl/catalog/movie/top/search=$query.json").text
+        val movies = gson.fromJson(movieJson, SearchResult::class.java)
+        movies.metas.forEach {
+            searchResponse.add(newMovieSearchResponse(it.name, gson.toJson(it), TvType.Movie) {
+                this.posterUrl = it.poster
+            })
         }
 
-        val seriesJson = app.get("$mainUrl/catalog/series/top/search=$query.json")
-        val series = Json.decodeFromString<SearchResult>(seriesJson)
+        val seriesJson = app.get("$mainUrl/catalog/series/top/search=$query.json").text
+        val series = gson.fromJson(seriesJson, SearchResult::class.java)
+        series.metas.forEach {
+            searchResponse.add(newMovieSearchResponse(it.name, gson.toJson(it), TvType.Movie) {
+                this.posterUrl = it.poster
+            })
+        }
 
-        series.metas.forEach { meta ->
-        searchResponse.add(
-            newMovieSearchResponse(
-                meta.name,
-                Json.encodeToString(meta),
-                TvType.Movie
-            ) {
-                this.posterUrl = meta.poster
-            }
-        )
         return searchResponse
     }
 
