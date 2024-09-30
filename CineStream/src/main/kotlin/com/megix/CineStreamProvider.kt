@@ -31,7 +31,7 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
         request: MainPageRequest
     ): HomePageResponse {
         val json = app.get(request.data).text
-        val movies:List<Home> = gson.fromJson(json, List::class.java)
+        val movies:List<Home> = gson.fromJson(json, List<Home>::class.java)
         val home = movies.mapNotNull { movie ->
             newMovieSearchResponse(movie.name, gson.toJson(movie), TvType.Movie) {
                 this.posterUrl = movie.poster
