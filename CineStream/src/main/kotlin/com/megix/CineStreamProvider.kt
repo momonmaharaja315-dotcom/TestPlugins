@@ -6,6 +6,7 @@ import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.google.gson.Gson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
+import com.google.gson.reflect.TypeToken
 
 class CineStreamProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -31,7 +32,7 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
         request: MainPageRequest
     ): HomePageResponse {
         val json = app.get(request.data).text
-        val movies: List<Home> = Gson().fromJson(json, object : TypeToken<List<Home>>() {}.type)
+        val movies: List<Home> = gson.fromJson(json, object : TypeToken<List<Home>>() {}.type)
         val home = movies.mapNotNull { movie ->
             newMovieSearchResponse(movie.name, gson.toJson(movie), TvType.Movie) {
                 this.posterUrl = movie.poster
