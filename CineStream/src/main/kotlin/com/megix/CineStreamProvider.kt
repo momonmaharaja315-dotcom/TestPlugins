@@ -15,7 +15,7 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
     override var lang = "en"
     private val gson = Gson()
     override val hasDownloadSupport = true
-    val cinemeta_url = "https://v3-cinemeta.strem.io/meta"
+    val cinemeta_url = "https://v3-cinemeta.strem.io"
     override val supportedTypes = setOf(
         TvType.Movie,
         TvType.TvSeries,
@@ -43,7 +43,7 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
 
     override suspend fun search(query: String): List<SearchResponse> {
         val searchResponse = mutableListOf<SearchResponse>()
-        val movieJson = app.get("$mainUrl/catalog/movie/top/search=$query.json").text
+        val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
         val movies = gson.fromJson(movieJson, SearchResult::class.java)
         movies.metas.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, gson.toJson(it), TvType.Movie) {
@@ -51,7 +51,7 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
             })
         }
 
-        val seriesJson = app.get("$mainUrl/catalog/series/top/search=$query.json").text
+        val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
         val series = gson.fromJson(seriesJson, SearchResult::class.java)
         series.metas.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, gson.toJson(it), TvType.Movie) {
@@ -73,7 +73,7 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
         val tvtype = movie.type
         val imdbId = movie.id
 
-        val jsonResponse = app.get("$cinemeta_url/$tvtype/$imdbId.json").text
+        val jsonResponse = app.get("$cinemeta_url/meta/$tvtype/$imdbId.json").text
         val responseData = if(jsonResponse.isNotEmpty() && jsonResponse.startsWith("{")) {
              gson.fromJson(jsonResponse, ResponseData::class.java)
         }
