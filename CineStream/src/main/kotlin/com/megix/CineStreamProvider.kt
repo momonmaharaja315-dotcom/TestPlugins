@@ -77,14 +77,14 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
         val jsonResponse = app.get("$cinemeta_url/meta/$tvtype/$imdbId.json").text
         val responseData = gson.fromJson(jsonResponse, ResponseData::class.java)
 
-        val title = responseData.meta?.name
-        val posterUrl = responseData.meta?.poster
+        val title = responseData.meta?.name.toString()
+        val posterUrl = responseData.meta?.poster.toString()
         val imdbRating = responseData.meta?.imdbRating
-        val year = responseData.meta?.year
-        var description = responseData.meta?.description
+        val year = responseData.meta?.year.toString()
+        var description = responseData.meta?.description.toString()
         val cast = responseData.meta?.cast
         val genre = responseData.meta?.genre
-        val background = responseData.meta?.background
+        val background = responseData.meta?.background.toString()
 
 
         return newMovieLoadResponse(title, url, TvType.Movie, url) {
