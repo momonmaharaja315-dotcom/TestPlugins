@@ -7,7 +7,7 @@ import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.google.gson.Gson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.google.gson.reflect.TypeToken
-import com.lagradost.cloudstream3.utils.AppUtils.parseJson
+import kotlinx.serialization.json.Json
 
 class CineStreamProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -35,7 +35,8 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
         val json = app.get(request.data).text
         val movies: List<Home> = gson.fromJson(json, object : TypeToken<List<Home>>() {}.type)
         val home = movies.mapNotNull { movie ->
-            val data = PassData(movie.id, movie.type)
+            val jsonData = PassData(movie.id, movie.type)
+            val data =  Json.encodeToString(jsonData)
             newMovieSearchResponse(movie.name, data, TvType.Movie) {
                 this.posterUrl = movie.poster
             }
@@ -48,7 +49,8 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
         val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
         val movies = gson.fromJson(movieJson, SearchResult::class.java)
         movies.metas.forEach {
-            val data = PassData(it.id, it.type)
+            val jsonData = PassData(it.id, it.type)
+            val data =  Json.encodeToString(jsonData)
             searchResponse.add(newMovieSearchResponse(it.name, data, TvType.Movie) {
                 this.posterUrl = it.poster
             })
@@ -57,7 +59,8 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
         val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
         val series = gson.fromJson(seriesJson, SearchResult::class.java)
         series.metas.forEach {
-            val data = PassData(it.id, it.type)
+            val jsonData = PassData(it.id, it.type)
+            val data =  Json.encodeToString(jsonData)
             searchResponse.add(newMovieSearchResponse(it.name, data, TvType.Movie) {
                 this.posterUrl = it.poster
             })
