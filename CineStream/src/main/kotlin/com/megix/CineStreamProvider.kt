@@ -7,6 +7,7 @@ import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.google.gson.Gson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.google.gson.reflect.TypeToken
+import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 
 class CineStreamProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -34,7 +35,8 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
         val json = app.get(request.data).text
         val movies: List<Home> = gson.fromJson(json, object : TypeToken<List<Home>>() {}.type)
         val home = movies.mapNotNull { movie ->
-            newMovieSearchResponse(movie.name, gson.toJson(movie), TvType.Movie) {
+            val data = PassData(movie.id, movie.type)
+            newMovieSearchResponse(movie.name, data, TvType.Movie) {
                 this.posterUrl = movie.poster
             }
         }
@@ -46,7 +48,8 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
         val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
         val movies = gson.fromJson(movieJson, SearchResult::class.java)
         movies.metas.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, gson.toJson(it), TvType.Movie) {
+            val data = PassData(it.id, it.type)
+            searchResponse.add(newMovieSearchResponse(it.name, data, TvType.Movie) {
                 this.posterUrl = it.poster
             })
         }
@@ -54,7 +57,8 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
         val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
         val series = gson.fromJson(seriesJson, SearchResult::class.java)
         series.metas.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, gson.toJson(it), TvType.Movie) {
+            val data = PassData(it.id, it.type)
+            searchResponse.add(newMovieSearchResponse(it.name, data, TvType.Movie) {
                 this.posterUrl = it.poster
             })
         }
@@ -64,33 +68,20 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
 
 
     override suspend fun load(url: String): LoadResponse? {
-        val movie = gson.fromJson(url, Home::class.java)
-        val title = movie.name
-        val posterUrl = movie.poster
-        val imdbRating = movie.imdbRating
-        val year = movie.releaseInfo
-        var description = ""
+        val movie = parseJson<PassData>(url)
         val tvtype = movie.type
         val imdbId = movie.id
-
         val jsonResponse = app.get("$cinemeta_url/meta/$tvtype/$imdbId.json").text
-        val responseData = if(jsonResponse.isNotEmpty() && jsonResponse.startsWith("{")) {
-             gson.fromJson(jsonResponse, ResponseData::class.java)
-        }
-        else {
-            null
-        }
+        val responseData = gson.fromJson(jsonResponse, ResponseData::class.java)
 
-        var cast: List<String> = emptyList()
-        var genre: List<String> = emptyList()
-        var background: String = posterUrl
-
-        if(responseData != null) {
-            description = responseData.meta?.description ?: description
-            cast = responseData.meta?.cast ?: emptyList()
-            genre = responseData.meta?.genre ?: emptyList()
-            background = responseData.meta?.background ?: background
-        }
+        val title = responseData.meta?.name
+        val posterUrl = responseData.meta?.poster
+        val imdbRating = responseData.meta?.imdbRating
+        val year = responseData.meta?.year
+        var description = responseData.meta?.description
+        val cast = responseData.meta?.cast
+        val genre = responseData.meta?.genre
+        val background = responseData.meta?.background
 
 
         return newMovieLoadResponse(title, url, TvType.Movie, url) {
@@ -148,7 +139,17 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
         val query: String,
         val rank: Double,
         val cacheMaxAge: Long,
-        val metas: List<Home>
+        val metas: List<Media>
+    )
+
+    data class Media(
+        val id: String,
+        val imdb_id: String?,
+        val type: String,
+        val name: String,
+        val releaseInfo: String?,
+        val poster: String,
+        val slug: String,
     )
 
     // data class SearchMeta(
@@ -186,6 +187,10 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
 
     data class EpisodeLink(
         val source: String
+    )
+    data class PassData(
+        val id: String,
+        val type: String
     )
 }
 
