@@ -7,6 +7,8 @@ import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.google.gson.Gson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.google.gson.reflect.TypeToken
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.decodeFromString
 
 class CineStreamProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -42,23 +44,34 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
-        val searchResponse = mutableListOf<SearchResponse>()
         val movieJson = app.get("$mainUrl/catalog/movie/top/search=$query.json")
-        val movies = gson.fromJson(movieJson, SearchResult::class.java)
-        movies.metas.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, gson.toJson(it), TvType.Movie) {
-                this.posterUrl = it.poster
-            })
+        val movies = Json.decodeFromString<SearchResult>(movieJson)
+
+        movies.metas.forEach { meta ->
+            searchResponse.add(
+                newMovieSearchResponse(
+                    meta.name,
+                    Json.encodeToString(meta),
+                    TvType.Movie
+                ) {
+                    this.posterUrl = meta.poster
+                }
+            )
         }
 
         val seriesJson = app.get("$mainUrl/catalog/series/top/search=$query.json")
-        val series = gson.fromJson(seriesJson, SearchResult::class.java)
-        series.metas.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, gson.toJson(it), TvType.Movie) {
-                this.posterUrl = it.poster
-            })
-        }
+        val series = Json.decodeFromString<SearchResult>(seriesJson)
 
+        series.metas.forEach { meta ->
+        searchResponse.add(
+            newMovieSearchResponse(
+                meta.name,
+                Json.encodeToString(meta),
+                TvType.Movie
+            ) {
+                this.posterUrl = meta.poster
+            }
+        )
         return searchResponse
     }
 
@@ -148,14 +161,15 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
         val query: String,
         val rank: Double,
         val cacheMaxAge: Long,
-        val metas: List<SearchMeta>
+        val metas: List<Home>
     )
 
-    data class SearchMeta(
-        val id: String,
-        val name: String,
-        val poster: String,
-    )
+    // data class SearchMeta(
+    //     val id: String,
+    //     val name: String,
+    //     val poster: String,
+    //     val type : String,
+    // )
 
     data class EpisodeDetails(
         val id: String?,
