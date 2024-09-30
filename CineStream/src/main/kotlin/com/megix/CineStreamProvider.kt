@@ -43,6 +43,21 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
 
     override suspend fun search(query: String): List<SearchResponse> {
         val searchResponse = mutableListOf<SearchResponse>()
+        val movieJson = app.get("$mainUrl/catalog/movie/top/search=$query.json")
+        val movies = gson.fromJson(movieJson, SearchResult::class.java)
+        movies.metas.forEach {
+            searchResponse.add(newMovieSearchResponse(it.name, gson.toJson(it), TvType.Movie) {
+                this.posterUrl = it.poster
+            })
+        }
+
+        val seriesJson = app.get("$mainUrl/catalog/series/top/search=$query.json")
+        val series = gson.fromJson(seriesJson, SearchResult::class.java)
+        series.metas.forEach {
+            searchResponse.add(newMovieSearchResponse(it.name, gson.toJson(it), TvType.Movie) {
+                this.posterUrl = it.poster
+            })
+        }
 
         return searchResponse
     }
@@ -127,6 +142,19 @@ class CineStreamProvider : MainAPI() { // all providers must be an instance of M
         val slug: String?,
         val year: String?,
         val videos: List<EpisodeDetails>?
+    )
+
+    data class SearchResult(
+        val query: String,
+        val rank: Double,
+        val cacheMaxAge: Long,
+        val metas: List<SearchMeta>
+    )
+
+    data class SearchMeta(
+        val id: String,
+        val name: String,
+        val poster: String,
     )
 
     data class EpisodeDetails(
