@@ -20,7 +20,6 @@ class Moviesmod: Plugin() {
 }
 
 class VidHidePlus : VidHidePro() {
-    override var name = "VidHidePlus",
     override var mainUrl = "https://vidhideplus.com"
 }
 
