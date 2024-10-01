@@ -5,6 +5,7 @@ import com.lagradost.cloudstream3.plugins.Plugin
 import android.content.Context
 import com.lagradost.cloudstream3.extractors.Filesim
 import com.lagradost.cloudstream3.extractors.Voe
+import com.lagradost.cloudstream3.extractors.VidHidePro
 
 @CloudstreamPlugin
 class Moviesmod: Plugin() {
@@ -17,3 +18,9 @@ class Moviesmod: Plugin() {
         registerExtractorAPI(VidHidePlus())
     }
 }
+
+class VidHidePlus : VidHidePro() {
+    override var name = "VidHidePlus",
+    override var mainUrl = "https://vidhideplus.com"
+}
+
