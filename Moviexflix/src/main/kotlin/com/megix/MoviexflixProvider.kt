@@ -106,8 +106,8 @@ open class MoviezflixProvider : MainAPI() { // all providers must be an instance
             background = responseData.meta?.background ?: background
         }
 
-        val data = document.select("a.maxbutton-post-button-1")?.attr("href").flatMap { link ->
-            val doc = app.get(link).document
+        val data = document.select("a.maxbutton-post-button-1").flatMap { link ->
+            val doc = app.get(link.attr("href")).document
             doc.select("a.maxbutton").mapNotNull { aTag ->
                 val source = aTag.attr("href")
                 EpisodeLink(
@@ -228,8 +228,7 @@ open class MoviezflixProvider : MainAPI() { // all providers must be an instance
         val sources = parseJson<ArrayList<EpisodeLink>>(data)
         sources.amap {
             val source = it.source
-            val link = bypass(source).toString()
-            loadExtractor(link, subtitleCallback, callback)
+            loadExtractor(source, subtitleCallback, callback)
         }
         return true
     }

@@ -6,7 +6,7 @@ import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
 
-class TopmoviesProvider : MoviezflixProvider() { // all providers must be an instance of MainAPI
+class HDMoviesflixProvider : MoviezflixProvider() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://hdmoviesflix.online"
     override var name = "HDMoviesflix"
     override val hasMainPage = true
