@@ -134,7 +134,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
                 Actor(it),
             )
         }
-        val genre = listOf(it.ua.toString()) + (data.genre?.split(",")
+        val genre = listOf(data.ua.toString()) + (data.genre?.split(",")
             ?.map { it.trim() }
             ?.filter { it.isNotEmpty() }
             ?: emptyList())
