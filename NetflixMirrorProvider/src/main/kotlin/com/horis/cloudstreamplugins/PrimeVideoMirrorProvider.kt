@@ -234,7 +234,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
 
         playlist.forEach { item ->
             item.sources.forEach {
-                callback(
+                callback.invoke(
                     ExtractorLink(
                         name,
                         it.label,
@@ -246,8 +246,8 @@ class PrimeVideoMirrorProvider : MainAPI() {
                 )
             }
 
-            item.tracks.filter { it.kind == "captions" }.mapNotNull { track ->
-                subtitleCallback(
+            item.tracks.filter { it.kind == "captions" }.forEach { track ->
+                subtitleCallback.invoke(
                     SubtitleFile(
                         track.label,
                         httpsify(track.file)
