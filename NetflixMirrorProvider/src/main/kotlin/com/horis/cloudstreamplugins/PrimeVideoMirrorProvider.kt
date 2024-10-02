@@ -246,15 +246,13 @@ class PrimeVideoMirrorProvider : MainAPI() {
                 )
             }
 
-            item.tracks.forEach {
-                if(it.kind == "captions") {
-                    subtitleCallback(
-                        SubtitleFile(
-                            it.label,
-                            httpsify(it.file)
-                        )
+            item.tracks.filter { it.kind == "captions" }.forEach { track ->
+                subtitleCallback(
+                    SubtitleFile(
+                        track.label,
+                        httpsify(track.file)
                     )
-                }
+                )
             }
         }
         return true
