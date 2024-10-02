@@ -245,9 +245,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
                     )
                 )
             }
-        }
 
-        playlist.forEach { item ->
             item.tracks?.filter { it.kind == "captions" }?.map { track ->
                 subtitleCallback.invoke(
                     SubtitleFile(
