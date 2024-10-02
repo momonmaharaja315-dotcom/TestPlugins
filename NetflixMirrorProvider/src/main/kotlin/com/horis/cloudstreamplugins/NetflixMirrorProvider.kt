@@ -243,8 +243,8 @@ class NetflixMirrorProvider : MainAPI() {
             item.tracks?.filter { it.kind == "captions" }?.map { track ->
                 subtitleCallback.invoke(
                     SubtitleFile(
-                        track.label,
-                        httpsify(track.file)
+                        track.label.toString(),
+                        httpsify(track.file.toString())
                     )
                 )
             }
