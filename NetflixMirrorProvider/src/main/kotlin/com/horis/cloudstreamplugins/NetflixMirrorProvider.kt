@@ -238,7 +238,7 @@ class NetflixMirrorProvider : MainAPI() {
                 )
             }
 
-            item.tracks?.filter { it.kind == "captions" }?.forEach { track ->
+            item.tracks.filter { it.kind == "captions" }.mapNotNull { track ->
                 subtitleCallback(
                     SubtitleFile(
                         track.label,
