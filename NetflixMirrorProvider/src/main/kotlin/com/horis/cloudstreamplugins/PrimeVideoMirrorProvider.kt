@@ -245,7 +245,9 @@ class PrimeVideoMirrorProvider : MainAPI() {
                     )
                 )
             }
+        }
 
+        playlist.forEach { item ->
             item.tracks.filter { it.kind == "captions" }.forEach { track ->
                 subtitleCallback.invoke(
                     SubtitleFile(
@@ -255,6 +257,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
                 )
             }
         }
+
         return true
     }
 
