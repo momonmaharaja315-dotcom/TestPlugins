@@ -132,6 +132,10 @@ class VCloud : ExtractorApi() {
                 {
                     loadExtractor(link,"",subtitleCallback, callback)
                 }
+                else
+                {
+                    //Nothing
+                }
             }
         }
     }
@@ -140,6 +144,10 @@ class VCloud : ExtractorApi() {
     private fun getIndexQuality(str: String?): Int {
         return Regex("(\\d{3,4})[pP]").find(str ?: "")?.groupValues?.getOrNull(1)?.toIntOrNull()
             ?: Qualities.Unknown.value
+    }
+
+    private suspend fun getGBurl(url: String): String {
+        return app.get(url).document.selectFirst("#vd")?.attr("href") ?:""
     }
 
 }
@@ -251,12 +259,20 @@ open class HubCloud : ExtractorApi() {
             {
                 loadExtractor(link,"",subtitleCallback, callback)
             }
+            else
+            {
+                //Nothing
+            }
         }
     }
 
     private fun getIndexQuality(str: String?): Int {
         return Regex("(\\d{3,4})[pP]").find(str ?: "") ?. groupValues ?. getOrNull(1) ?. toIntOrNull()
             ?: Qualities.Unknown.value
+    }
+
+    private suspend fun getGBurl(url: String): String {
+        return app.get(url).document.selectFirst("#vd")?.attr("href") ?:""
     }
 
 }
