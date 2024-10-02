@@ -1,11 +1,12 @@
-version = 1
+// use an integer for version numbers
+version = 6
 
 cloudstream {
-    language = "en"
+    //language = "en"
     // All of these properties are optional, you can safely remove them
 
-    description = "Includes HDMoviesflix"
-     authors = listOf("megix")
+    description = "Netflix, PrimeVideo Content in Multiple Languages"
+    authors = listOf("Horis, megix")
 
     /**
      * Status int as the following:
@@ -16,11 +17,9 @@ cloudstream {
      * */
     status = 1 // will be 3 if unspecified
     tvTypes = listOf(
-        "TvSeries",
         "Movie",
-        "AsianDrama",
-        "Anime"
+        "TvSeries"
     )
 
-    iconUrl = "https://themoviezflix.cn.com/wp-content/uploads/2024/04/cropped-favicon-32x32-1.png"
+    iconUrl = "https://iosmirror.cc/img/nf2/icon_x192.png"
 }
