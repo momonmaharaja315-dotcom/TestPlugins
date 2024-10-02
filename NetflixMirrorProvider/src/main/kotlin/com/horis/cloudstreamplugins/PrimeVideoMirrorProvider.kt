@@ -133,7 +133,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
                 Actor(it),
             )
         }
-        val genre = data.genre?.split(",")?.map { it.trim() } ?: emptyList()
+        val genre = listOf(data.ua) + (data.genre?.split(",")?.map { it.trim() } ?: emptyList())
         val rating = data.match?.replace("IMDb ", "")?.toRatingInt()
         val runTime = convertRuntimeToMinutes(data.runtime.toString())
 
@@ -244,10 +244,10 @@ class PrimeVideoMirrorProvider : MainAPI() {
 
             item.tracks.forEach {
                 if(it.kind == "captions") {
-                    subtitleCallback.invoke(
+                    subtitleCallback(
                         SubtitleFile(
                             it.label,
-                            "https:" + it.file
+                            httpsfy(it.file)
                         )
                     )
                 }
