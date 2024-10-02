@@ -9,6 +9,7 @@ import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.Qualities
+import com.lagradost.cloudstream3.utils.httpsify
 import com.lagradost.cloudstream3.utils.getQualityFromName
 import okhttp3.Headers
 import okhttp3.Interceptor
@@ -133,7 +134,10 @@ class PrimeVideoMirrorProvider : MainAPI() {
                 Actor(it),
             )
         }
-        val genre = data.genre?.split(",")?.map { it.trim() } + listOf(data.ua.toString()) ?: emptyList()
+        val genre = listOf(it.ua.toString()) + (data.genre?.split(",")
+            ?.map { it.trim() }
+            ?.filter { it.isNotEmpty() }
+            ?: emptyList())
         val rating = data.match?.replace("IMDb ", "")?.toRatingInt()
         val runTime = convertRuntimeToMinutes(data.runtime.toString())
 
