@@ -47,7 +47,11 @@ class WLinkFast : ExtractorApi() {
         val document = app.get(url).document
         val link = document.selectFirst("h1 > a")?.attr("href").toString()
         val doc = app.get(link).document
-        val downloadLink = Regex("""window\.location\.href\s*=\s*['"]([^'"]+)['"];""").find(doc.html())?.groupValues?.get(1).toString()
+        var downloadLink = doc.selectFirst("a#downloadButton")?.attr("href").toString()
+
+        if(downloadLink.isEmpty()) {
+           downloadLink = Regex("""window\.location\.href\s*=\s*['"]([^'"]+)['"];""").find(doc.html())?.groupValues?.get(1).toString()
+        }
 
         callback.invoke (
             ExtractorLink (
