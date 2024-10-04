@@ -1,10 +1,10 @@
-version = 11
+version = 9
 
 cloudstream {
     language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "Movies and Series upto 4K"
+    description = "High Quality Movie and TV Series"
      authors = listOf("megix")
 
     /**
@@ -20,5 +20,5 @@ cloudstream {
         "Movie",
     )
 
-    iconUrl = "https://cinemaluxe.click/wp-content/uploads/2024/07/fresh-logo-dark-theme-.webp"
+    iconUrl = "https://world4ufree.boston/wp-content/uploads/2021/01/world4ufree-Logo-1.png"
 }
