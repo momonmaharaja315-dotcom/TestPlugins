@@ -149,9 +149,11 @@ open class Driveseed : ExtractorApi() {
         val document = app.get(url).document
         val quality = document.selectFirst("li.list-group-item:contains(Name)")?.text() ?: ""
         val size = document.selectFirst("li.list-group-item:contains(Size)")?.text()?.replace("Size : ", "") ?: ""
-        document.select("div.text-center > a").mapNotNull {
-            if(it.text().contains("Instant Download")) {
-                val instant = instantLink(it.attr("href"))
+        document.select("div.text-center > a").mapNotNull { element ->
+            val text = element.text()
+            when {
+                text.contains("Instant Download") -> {
+                val instant = instantLink(element.attr("href"))
                 if (instant.isNotEmpty()) {
                     callback.invoke(
                         ExtractorLink(
@@ -164,8 +166,8 @@ open class Driveseed : ExtractorApi() {
                     )
                 }
             }
-            else if(it.text().contains("Resume Worker Bot")) {
-                val resumeLink = resumeBot(it.attr("href"))
+            text.contains("Resume Worker Bot") -> {
+                val resumeLink = resumeBot(element.attr("href"))
                 if (resumeLink != null) {
                     callback.invoke(
                         ExtractorLink(
@@ -178,8 +180,8 @@ open class Driveseed : ExtractorApi() {
                     )
                 }
             }
-            else if(it.text().contains("Direct Links")) {
-                val link = mainUrl + it.attr("href")
+            text.contains("Direct Links") -> {
+                val link = mainUrl + element.attr("href")
                 CFType1(link)?.forEach {
                     callback.invoke(
                         ExtractorLink(
@@ -192,8 +194,8 @@ open class Driveseed : ExtractorApi() {
                     )
                 }
             }
-            else if(it.text().contains("Resume Cloud")) {
-                val resumeCloud = resumeCloudLink(it.attr("href"))
+            text.contains("Resume Cloud") -> {
+                val resumeCloud = resumeCloudLink(element.attr("href"))
                 if (resumeCloud != null) {
                     callback.invoke(
                         ExtractorLink(
@@ -205,9 +207,6 @@ open class Driveseed : ExtractorApi() {
                         )
                     )
                 }
-            }
-            else {
-                //nothing
             }
         }
     }
