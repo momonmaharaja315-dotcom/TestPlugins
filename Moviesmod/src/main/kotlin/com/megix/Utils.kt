@@ -84,14 +84,14 @@ open class Driveseed : ExtractorApi() {
         return links ?: null
     }
 
-    private suspend fun resumeCloudLink(url: String): String? {
+    private suspend fun resumeCloudLink(url: String): String {
         val resumeCloudUrl = mainUrl + url
         val document = app.get(resumeCloudUrl).document
-        val link = document.selectFirst("a.btn-success")?.attr("href")
+        val link = document.selectFirst("a.btn-success")?.attr("href").toString()
         return link
     }
 
-    private suspend fun resumeBot(url : String): String? {
+    private suspend fun resumeBot(url : String): String {
         val resumeBotResponse = app.get(url)
         val resumeBotDoc = resumeBotResponse.document.toString()
         val ssid = resumeBotResponse.cookies["PHPSESSID"]
@@ -153,8 +153,7 @@ open class Driveseed : ExtractorApi() {
             val text = element.text()
             when {
                 text.contains("Instant Download") -> {
-                val instant = instantLink(element.attr("href"))
-                if (instant.isNotEmpty()) {
+                    val instant = instantLink(element.attr("href"))
                     callback.invoke(
                         ExtractorLink(
                             "$name Instant(Download)",
@@ -165,10 +164,8 @@ open class Driveseed : ExtractorApi() {
                         )
                     )
                 }
-            }
-            text.contains("Resume Worker Bot") -> {
-                val resumeLink = resumeBot(element.attr("href"))
-                if (resumeLink != null) {
+                text.contains("Resume Worker Bot") -> {
+                    val resumeLink = resumeBot(element.attr("href"))
                     callback.invoke(
                         ExtractorLink(
                             "$name ResumeBot(VLC)",
@@ -179,24 +176,22 @@ open class Driveseed : ExtractorApi() {
                         )
                     )
                 }
-            }
-            text.contains("Direct Links") -> {
-                val link = mainUrl + element.attr("href")
-                CFType1(link)?.forEach {
-                    callback.invoke(
-                        ExtractorLink(
-                            "$name CF Type1",
-                            "$name CF Type1 $size",
-                            it,
-                            "",
-                            getIndexQuality(quality)
+                text.contains("Direct Links") -> {
+                    val link = mainUrl + element.attr("href")
+                    CFType1(link)?.forEach {
+                        callback.invoke(
+                            ExtractorLink(
+                                "$name CF Type1",
+                                "$name CF Type1 $size",
+                                it,
+                                "",
+                                getIndexQuality(quality)
+                            )
                         )
-                    )
+                    }
                 }
-            }
-            text.contains("Resume Cloud") -> {
-                val resumeCloud = resumeCloudLink(element.attr("href"))
-                if (resumeCloud != null) {
+                text.contains("Resume Cloud") -> {
+                    val resumeCloud = resumeCloudLink(element.attr("href"))
                     callback.invoke(
                         ExtractorLink(
                             "$name ResumeCloud",
@@ -206,6 +201,8 @@ open class Driveseed : ExtractorApi() {
                             getIndexQuality(quality)
                         )
                     )
+                }
+                else -> {
                 }
             }
         }
