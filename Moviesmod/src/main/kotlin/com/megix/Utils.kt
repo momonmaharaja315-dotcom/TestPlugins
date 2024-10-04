@@ -149,7 +149,7 @@ open class Driveseed : ExtractorApi() {
         val document = app.get(url).document
         val quality = document.selectFirst("li.list-group-item:contains(Name)")?.text() ?: ""
         val size = document.selectFirst("li.list-group-item:contains(Size)")?.text()?.replace("Size : ", "") ?: ""
-        div.select("div.text-center > a").mapNotNull {
+        document.select("div.text-center > a").mapNotNull {
             if(it.text().contains("Instant Download")) {
                 val instant = instantLink(it.attr("href"))
                 if (instant.isNotEmpty()) {
