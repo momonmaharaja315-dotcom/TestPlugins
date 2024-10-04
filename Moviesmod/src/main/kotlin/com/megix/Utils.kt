@@ -79,7 +79,7 @@ open class Driveseed : ExtractorApi() {
     }
 
     private suspend fun CFType1(url: String): List<String> {
-        val document = app.get(url).document
+        val document = app.get(url+"?type=1").document
         val links = document.select("a.btn-success").mapNotNull { it.attr("href") }
         return links
     }
