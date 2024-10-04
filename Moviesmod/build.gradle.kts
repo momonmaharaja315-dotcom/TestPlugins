@@ -1,10 +1,10 @@
 version = 10
 
 cloudstream {
-    language = "hi"
+    //language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "High Quality Movie and TV Series"
+    description = "Includes Topmovies"
      authors = listOf("megix")
 
     /**
@@ -18,7 +18,9 @@ cloudstream {
     tvTypes = listOf(
         "TvSeries",
         "Movie",
+        "AsianDrama",
+        "Anime"
     )
 
-    iconUrl = "https://world4ufree.boston/wp-content/uploads/2021/01/world4ufree-Logo-1.png"
+    iconUrl = "https://moviesmod.day/wp-content/uploads/2022/12/moviesmodnew-Custom.png"
 }

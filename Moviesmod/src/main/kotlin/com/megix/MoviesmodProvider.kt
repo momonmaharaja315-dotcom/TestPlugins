@@ -4,28 +4,30 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
+import com.lagradost.cloudstream3.base64Decode
 import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.google.gson.Gson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 
-class World4uFreeProvider : MainAPI() { // all providers must be an instance of MainAPI
-    override var mainUrl = "https://world4ufree.boston"
-    override var name = "World4uFree"
+open class MoviesmodProvider : MainAPI() { // all providers must be an instance of MainAPI
+    override var mainUrl = "https://moviesmod.day"
+    override var name = "Moviesmod"
     override val hasMainPage = true
-    override var lang = "hi"
+    override var lang = "en"
     override val hasDownloadSupport = true
     val cinemeta_url = "https://v3-cinemeta.strem.io/meta"
     override val supportedTypes = setOf(
         TvType.Movie,
-        TvType.TvSeries
+        TvType.TvSeries,
+        TvType.AsianDrama,
+        TvType.Anime
     )
 
     override val mainPage = mainPageOf(
         "$mainUrl/page/" to "Home",
-        "$mainUrl/category/bollywood/page" to "Bollywood",
-        "$mainUrl/category/hollywood/page" to "Hollywood",
-        "$mainUrl/category/web-series/page" to "Web Series",
+        "$mainUrl/web-series/on-going/page/" to "Latest Web Series",
+        "$mainUrl/movies/latest-released/page/" to "Latest Movies",
     )
 
     override suspend fun getMainPage(
@@ -33,28 +35,19 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
         request: MainPageRequest
     ): HomePageResponse {
         val document = app.get(request.data + page).document
-        val home = document.select("ul.recent-posts > li").mapNotNull {
+        val home = document.select("div.post-cards > article").mapNotNull {
             it.toSearchResult()
         }
         return newHomePageResponse(request.name, home)
     }
 
-    private fun Element.toSearchResult(): SearchResponse? {
-        val title = this.selectFirst("div > a")?.attr("title")?.replace("Download ", "").toString()
-        val href = this.selectFirst("div > a") ?. attr("href").toString()
-        var posterUrl = this.selectFirst("div > a > img")?.attr("data-src").toString()
-        if(posterUrl.isEmpty()) {
-            posterUrl = this.selectFirst("div > a > img")?.attr("src").toString()
-        }
-        val quality = if(title.contains("HDCAM", ignoreCase = true) || title.contains("CAMRip", ignoreCase = true)) {
-            SearchQuality.CamRip
-        }
-        else {
-            null
-        }
+    fun Element.toSearchResult(): SearchResponse? {
+        val title = this.selectFirst("a")?.attr("title")?.replace("Download ", "").toString()
+        val href = this.selectFirst("a")?.attr("href").toString()
+        val posterUrl = this.selectFirst("a > div > img")?.attr("src").toString()
+
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
-            this.quality = quality
         }
     }
 
@@ -62,9 +55,9 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
         val searchResponse = mutableListOf<SearchResponse>()
 
         for (i in 1..25) {
-            val document = app.get("$mainUrl/page/$i/?s=$query").document
+            val document = app.get("$mainUrl/search/$query/page/$i").document
 
-            val results = document.select("ul.recent-posts > li").mapNotNull { it.toSearchResult() }
+            val results = document.select("div.post-cards > article").mapNotNull { it.toSearchResult() }
 
             if (results.isEmpty()) {
                 break
@@ -75,25 +68,16 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
         return searchResponse
     }
 
+
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
         var title = document.selectFirst("meta[property=og:title]")?.attr("content")?.replace("Download ", "").toString()
         val ogTitle = title
-
-        val div = document.selectFirst("div.entry-content")
-        val imdbUrl = document.selectFirst("div.imdb_left > a")?.attr("href")
-        var description = div?.selectFirst("p:matches((?i)(plot|synopsis|story))")?.text() ?: ""
         var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
-
-        if(posterUrl.isEmpty() || posterUrl.contains("$mainUrl/favicon-32x32.png")) {
-            posterUrl = document.selectFirst("div.separator > a > img")?.attr("data-src").toString()
-        }
-        val tvtype = if (document.select("div.entry-content").text().contains("movie name", ignoreCase = true)) {
-            "movie"
-        }
-        else {
-            "series"
-        }
+        var description = document.selectFirst("div.imdbwp__teaser")?.text()
+        val div = document.selectFirst("div.thecontent")?.text().toString()
+        val tvtype = if (div.contains("season", ignoreCase = true) == true) "series" else "movie"
+        val imdbUrl = document.selectFirst("a.imdbwp__link")?.attr("href")
 
         val responseData = if (!imdbUrl.isNullOrEmpty()) {
             val imdbId = imdbUrl.substringAfter("title/").substringBefore("/")
@@ -127,6 +111,7 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
         }
 
         if(tvtype == "series") {
+
             if(title != ogTitle) {
                 val checkSeason = Regex("""Season\s*\d*1|S\s*\d*1""").find(ogTitle)
                 if (checkSeason == null) {
@@ -136,61 +121,49 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
                     }
                 }
             }
+
             val tvSeriesEpisodes = mutableListOf<Episode>()
-            val buttons = document.select("a.my-button")
-            val episodesMap: MutableMap<Pair<Int, Int>, List<Pair<String, String>>> = mutableMapOf()
+            val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
+            val buttons = document.select("a.maxbutton-episode-links,.maxbutton-g-drive,.maxbutton-af-download")
 
-            buttons.forEach { button ->
-                val titleElement = button.parent()?.parent()?.previousElementSibling()
-                val titleText = titleElement ?. text() ?: ""
+            buttons.mapNotNull {
+                var link = it.attr("href")
+                val seasonText = it.parent()?.previousElementSibling()?.text().toString()
                 val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
-                val realSeason = realSeasonRegex.find(titleText) ?. groupValues ?. get(1) ?.toIntOrNull() ?: 0
-                val qualityRegex = """(1080p|720p|480p|2160p|4K|[0-9]*0p)""".toRegex(RegexOption.IGNORE_CASE)
-                val quality = qualityRegex.find(titleText) ?. groupValues ?. get(1) ?: ""
-                var ep = 1
-                val wlinkz = button.attr("href")
-                if(wlinkz.isNotEmpty()) {
-                    val doc = app.get(wlinkz).document
-                    val elements = doc.select("h3:matches((?i)(episode))")
-                    elements.forEach { element ->
-                        //val epTitle = element.text()
-                        var linkElement = element.nextElementSibling()
-                        while (linkElement != null && linkElement.tagName() != "h4") {
-                            linkElement = linkElement.nextElementSibling()
-                        }
-                        var link = ""
-                        if(linkElement != null) {
-                            val aTag = linkElement.selectFirst("a")
-                            link = aTag ?. attr("href") ?: ""
-                        }
-
-                        if (link.isNotEmpty() && !title.contains("zip", ignoreCase = true)) {
-                            val key = Pair(realSeason, ep)
-                            val episodePair = Pair(link, quality)
-                            if (episodesMap.containsKey(key)) {
-                                val currentList = episodesMap[key] ?: emptyList()
-                                val newList = currentList.toMutableList()
-                                newList.add(episodePair)
-                                episodesMap[key] = newList
-                            } else {
-                                episodesMap[key] = mutableListOf(episodePair)
-                            }
-                            ep++
+                val realSeason = realSeasonRegex.find(seasonText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+                if(link.contains("url=")) {
+                    val base64Value = link.substringAfter("url=")
+                    link = base64Decode(base64Value)
+                }
+                val doc = app.get(fixUrl(link)).document
+                val hTags = doc.select("h3,h4")
+                var e = 1
+                hTags.mapNotNull {
+                    val epUrl = it.selectFirst("a")?.attr("href")
+                    val key = Pair(realSeason, e)
+                    if(epUrl != null) {
+                        if (episodesMap.containsKey(key)) {
+                            // If it exists, create a new list with the existing values plus the new URL
+                            val currentList = episodesMap[key] ?: emptyList()
+                            val newList = currentList.toMutableList() // Create a mutable copy
+                            newList.add(epUrl) // Add the new URL
+                            episodesMap[key] = newList // Put the new list back into the map
+                        } else {
+                            episodesMap[key] = mutableListOf(epUrl)
                         }
                     }
-                    ep = 1
+                    e++
                 }
+                e = 1
             }
 
             for ((key, value) in episodesMap) {
                 val episodeInfo = responseData?.meta?.videos?.find { it.season == key.first && it.episode == key.second }
-                val data = value.map { pair ->
+                val data = value.map { source->
                     EpisodeLink(
-                        pair.first,
-                        pair.second
+                        source
                     )
                 }
-
                 tvSeriesEpisodes.add(
                     newEpisode(data) {
                         this.name = episodeInfo?.name ?: episodeInfo?.title
@@ -214,20 +187,19 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
             }
         }
         else {
-            val links = document.select("a.my-button")
-            val data = links.flatMap {
-                val link = it.attr("href")
-                val quality = it.text()
-                val doc = app.get(link).document
-                val urls = doc.select("a:matches((?i)(instant|download|direct))")
-                urls.mapNotNull {
-                    EpisodeLink(
-                        it.attr("href"),
-                        quality
-                    )
+            val data = document.select("a.maxbutton-download-links").mapNotNull {
+                var link = it.attr("href")
+                if(link.contains("url=")) {
+                    val base64Value = link.substringAfter("url=")
+                    link = base64Decode(base64Value)
                 }
-            }
 
+                val doc = app.get(fixUrl(link)).document
+                val source = doc.selectFirst("a.maxbutton-1, a.maxbutton-5")?.attr("href").toString()
+                EpisodeLink(
+                    source
+                )
+            }
             return newMovieLoadResponse(title, url, TvType.Movie, data) {
                 this.posterUrl = posterUrl
                 this.plot = description
@@ -250,37 +222,10 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
         val sources = parseJson<ArrayList<EpisodeLink>>(data)
         sources.amap {
             val source = it.source
-            val quality = it.quality
-            loadCustomExtractor(source, subtitleCallback, callback, getIndexQuality(quality))
+            val link = bypass(source).toString()
+            loadExtractor(link, subtitleCallback, callback)
         }
-        return true   
-    }
-
-    private fun getIndexQuality(str: String?): Int {
-        return Regex("(\\d{3,4})[pP]").find(str ?: "") ?. groupValues ?. getOrNull(1) ?. toIntOrNull()
-            ?: Qualities.Unknown.value
-    }
-
-    private suspend fun loadCustomExtractor(
-        url: String,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit,
-        quality: Int = Qualities.Unknown.value,
-    ){
-        loadExtractor(url,subtitleCallback) { link ->
-            callback.invoke (
-                ExtractorLink (
-                    link.source,
-                    link.name,
-                    link.url,
-                    link.referer,
-                    if(link.quality == Qualities.Unknown.value) quality else link.quality,
-                    link.type,
-                    link.headers,
-                    link.extractorData
-                )
-            )
-        }
+        return true
     }
 
     data class Meta(
@@ -323,7 +268,7 @@ class World4uFreeProvider : MainAPI() { // all providers must be an instance of 
     )
 
     data class EpisodeLink(
-        val source: String,
-        val quality: String
+        val source: String
     )
 }
+
