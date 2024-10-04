@@ -78,19 +78,11 @@ open class Driveseed : ExtractorApi() {
             ?: Qualities.Unknown.value
     }
 
-    private suspend fun CFType1(url: String): List<String> {
-        val cfWorkersLink = url.replace("/file", "/wfile") + "?type=1"
-        val document = app.get(cfWorkersLink).document
+    private suspend fun CFType1(url: String): List<String>? {
+        val document = app.get(url).document
         val links = document.select("a.btn-success").mapNotNull { it.attr("href") }
-        return links
+        return links ?: null
     }
-
-    // private suspend fun CFType2(url: String): List<String> {
-    //     val cfWorkersLink = url.replace("/file", "/wfile") + "?type=2"
-    //     val document = app.get(cfWorkersLink).document
-    //     val links = document.select("a.btn-success").map { it.attr("href") }
-    //     return links
-    // }
 
     private suspend fun resumeCloudLink(url: String): String? {
         val resumeCloudUrl = mainUrl + url
@@ -122,7 +114,7 @@ open class Driveseed : ExtractorApi() {
         ).text
         val jsonObject = JSONObject(jsonResponse)
         val link = jsonObject.getString("url")
-        return link ?: null
+        return link
     }
 
     private suspend fun instantLink(finallink: String): String {
@@ -156,71 +148,67 @@ open class Driveseed : ExtractorApi() {
     ) {
         val document = app.get(url).document
         val quality = document.selectFirst("li.list-group-item:contains(Name)")?.text() ?: ""
-
-        val resumeCloudUrl = document.selectFirst("a.btn-warning")?.attr("href")
-        val resumeCloud = resumeCloudLink(resumeCloudUrl ?: "")
-        if (resumeCloud != null) {
-            callback.invoke(
-                ExtractorLink(
-                    "$name ResumeCloud",
-                    "$name ResumeCloud",
-                    resumeCloud,
-                    "",
-                    getIndexQuality(quality)
-                )
-            )
+        val size = document.selectFirst("li.list-group-item:contains(Size)")?.text()?.replace("Size : ", "") ?: ""
+        div.select("div.text-center > a").mapNotNull {
+            if(it.text().contains("Instant Download")) {
+                val instant = instantLink(it.attr("href"))
+                if (instant.isNotEmpty()) {
+                    callback.invoke(
+                        ExtractorLink(
+                            "$name Instant(Download)",
+                            "$name Instant(Download) $size",
+                            instant,
+                            "",
+                            getIndexQuality(quality)
+                        )
+                    )
+                }
+            }
+            else if(it.text().contains("Resume Worker Bot")) {
+                val resumeLink = resumeBot(it.attr("href"))
+                if (resumeLink != null) {
+                    callback.invoke(
+                        ExtractorLink(
+                            "$name ResumeBot(VLC)",
+                            "$name ResumeBot(VLC) $size",
+                            resumeLink,
+                            "",
+                            getIndexQuality(quality)
+                        )
+                    )
+                }
+            }
+            else if(it.text().contains("Direct Links")) {
+                val link = mainUrl + it.attr("href")
+                CFType1(link)?.forEach {
+                    callback.invoke(
+                        ExtractorLink(
+                            "$name CF Type1",
+                            "$name CF Type1 $size",
+                            it,
+                            "",
+                            getIndexQuality(quality)
+                        )
+                    )
+                }
+            }
+            else if(it.text().contains("Resume Cloud")) {
+                val resumeCloud = resumeCloudLink(it.attr("href"))
+                if (resumeCloud != null) {
+                    callback.invoke(
+                        ExtractorLink(
+                            "$name ResumeCloud",
+                            "$name ResumeCloud $size",
+                            resumeCloud,
+                            "",
+                            getIndexQuality(quality)
+                        )
+                    )
+                }
+            }
+            else {
+                //nothing
+            }
         }
-
-        val resumeBotUrl = document.selectFirst("a.btn.btn-light")?.attr("href")
-        val resumeLink = resumeBot(resumeBotUrl ?: "")
-        if (resumeLink != null) {
-            callback.invoke(
-                ExtractorLink(
-                    "$name ResumeBot(VLC)",
-                    "$name ResumeBot(VLC)",
-                    resumeLink,
-                    "",
-                    getIndexQuality(quality)
-                )
-            )
-        }
-
-        val instantUrl = document.selectFirst("a.btn-danger")?.attr("href") ?: ""
-        val instant = instantLink(instantUrl)
-        if (instant.isNotEmpty()) {
-            callback.invoke(
-                ExtractorLink(
-                    "$name Instant(Download)",
-                    "$name Instant(Download)",
-                    instant,
-                    "",
-                    getIndexQuality(quality)
-                )
-            )
-        }
-
-
-        CFType1(url)?.forEach {
-            callback.invoke(
-                ExtractorLink(
-                    "$name CF Type1",
-                    "$name CF Type1",
-                    it,
-                    "",
-                    getIndexQuality(quality)
-                )
-            )
-        }
-        // CFType2(url).forEach {
-        //     callback.invoke(
-        //         ExtractorLink(
-        //             "$name CF Type2",
-        //             "$name CF Type2",
-        //             it,
-        //             "",
-        //             getIndexQuality(quality)
-        //         )
-        //     )
-        // }
     }
 }
