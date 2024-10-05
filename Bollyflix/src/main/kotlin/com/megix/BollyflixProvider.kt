@@ -12,6 +12,7 @@ import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import okhttp3.Interceptor
 import okhttp3.Response
 import com.lagradost.cloudstream3.network.CloudflareKiller
+import org.jsoup.Jsoup
 
 class BollyflixProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://bollyflix.beer"
