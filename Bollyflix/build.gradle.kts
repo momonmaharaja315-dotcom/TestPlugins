@@ -1,10 +1,10 @@
-version = 11
+version = 5
 
 cloudstream {
-    //language = "hi"
+    language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "Includes Topmovies"
+    description = "Movies and Series upto 4K"
      authors = listOf("megix")
 
     /**
@@ -22,5 +22,5 @@ cloudstream {
         "Anime"
     )
 
-    iconUrl = "https://moviesmod.day/wp-content/uploads/2022/12/moviesmodnew-Custom.png"
+    iconUrl = "https://bollyflix-cdn.store/wp-content/uploads/2023/05/Bollyflix-movies.png"
 }
