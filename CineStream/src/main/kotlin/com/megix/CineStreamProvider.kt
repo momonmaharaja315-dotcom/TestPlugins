@@ -2,7 +2,7 @@ package com.megix
 
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
-import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
+import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbId
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
@@ -75,15 +75,15 @@ open class CineStreamProvider : MainAPI() {
         val tvtype = movie.type
         val id = movie.id
         val json = app.get("$cinemeta_url/meta/$tvtype/$id.json").text
-        val movieData = AppUtils.parseJson<ResponseData>(json)
+        val movieData = parseJson<ResponseData>(json)
 
         val title = movieData.meta?.name.toString()
         val posterUrl = movieData.meta?.poster.toString()
         val imdbRating = movieData.meta?.imdbRating
         val year = movieData.meta?.year.toString()
         var description = movieData.meta?.description.toString()
-        //val cast = movieData.meta?.cast
-        //val genre = movieData.meta?.genre
+        val cast : List<String> = responseData.meta?.cast ?: emptyList()
+        val genre : List<String> = responseData.meta?.genre ?: emptyList()
         val background = movieData.meta?.background.toString()
 
         if(tvtype == "movie") {
@@ -96,12 +96,12 @@ open class CineStreamProvider : MainAPI() {
             return newMovieLoadResponse(title, url, TvType.Movie, data) {
                 this.posterUrl = posterUrl
                 this.plot = description
-                //this.tags = genre
+                this.tags = genre
                 this.rating = imdbRating.toRatingInt()
                 this.year = year.toIntOrNull()
                 this.backgroundPosterUrl = background
-                //addActors(cast)
-                //addImdbUrl(imdbUrl)
+                addActors(cast)
+                addImdbId(id)
             }
         }
         else {
@@ -127,12 +127,12 @@ open class CineStreamProvider : MainAPI() {
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
                 this.posterUrl = posterUrl
                 this.plot = description
-                //this.tags = genre
+                this.tags = genre
                 this.rating = imdbRating.toRatingInt()
                 this.year = year.toIntOrNull()
                 this.backgroundPosterUrl = background
-                //addActors(cast)
-                //addImdbUrl(imdbUrl)
+                addActors(cast)
+                addImdbId(id)
             }
 
         }
