@@ -96,7 +96,7 @@ class CineStreamProvider : MainAPI() {
             }
         }
         else {
-            val episodes = movieData.meta?.videos.mapNotNull { ep ->
+            val episodes = movieData.meta?.videos?.map { ep ->
                 newEpisode(
                     LoadLinksData(
                         title,
@@ -113,7 +113,7 @@ class CineStreamProvider : MainAPI() {
                     this.posterUrl = ep?.thumbnail
                     this.description = ep?.overview
                 }
-            }
+            } ?: emptyList()
 
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
                 this.posterUrl = posterUrl
