@@ -17,7 +17,6 @@ object CineStreamExtractors : CineStreamProvider() {
             title,
             year,
             season,
-            lastSeason,
             episode,
             subtitleCallback,
             callback,
