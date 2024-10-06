@@ -45,7 +45,7 @@ class CineStreamProvider : MainAPI() {
         val movies = AppUtils.parseJson<SearchResult>(movieJson)
         movies.metas?.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
-                this.posterUrl = it?.poster.toString()
+                this.posterUrl = it.poster.toString()
             })
         }
 
@@ -53,7 +53,7 @@ class CineStreamProvider : MainAPI() {
         val series = AppUtils.parseJson<SearchResult>(seriesJson)
         series.metas?.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
-                this.posterUrl = it?.poster.toString()
+                this.posterUrl = it.poster.toString()
             })
         }
 
@@ -107,11 +107,11 @@ class CineStreamProvider : MainAPI() {
                         ep.episode,
                     ).toJson()
                 ) {
-                    this.name = ep?.name ?: ep?.title
+                    this.name = ep.name ?: ep.title
                     this.season = ep.season
                     this.episode = ep.episode
-                    this.posterUrl = ep?.thumbnail
-                    this.description = ep?.overview
+                    this.posterUrl = ep.thumbnail
+                    this.description = ep.overview
                 }
             } ?: emptyList()
 
@@ -136,13 +136,15 @@ class CineStreamProvider : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val res = parseJson<LoadLinksData>(data)
-        //loadExtractor(data, subtitleCallback, callback)
-        // val sources = parseJson<ArrayList<EpisodeLink>>(data)
-        // sources.amap {
-        //     val source = it.source
-        //     val link = bypass(source).toString()
-        //     loadExtractor(link, subtitleCallback, callback)
-        // }
+        callback.invoke(
+            ExtractorLink(
+                this.name,
+                this.name,
+                res.toString(),
+                "",
+                Qualities.Unknown.value,
+            )
+        )
         return true
     }
 
@@ -153,6 +155,11 @@ class CineStreamProvider : MainAPI() {
         val year: String,
         val season: Int? = null,
         val episode: Int? = null,
+    )
+
+    data class PassData(
+        val id: String,
+        val type: String
     )
 
     data class Meta(
@@ -219,15 +226,6 @@ class CineStreamProvider : MainAPI() {
         val poster: String?,
         val imdbRating: String?,
         val popularity: Int?
-    )
-
-    // data class EpisodeLink(
-    //     val source: String
-    // )
-
-    data class PassData(
-        val id: String,
-        val type: String
     )
 }
 
