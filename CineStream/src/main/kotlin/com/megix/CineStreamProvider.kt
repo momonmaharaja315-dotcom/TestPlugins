@@ -179,11 +179,11 @@ class CineStreamProvider : MainAPI() {
     data class Home(
         val id: String,
         val name: String,
-        val releaseInfo: String,
+        val releaseInfo: String?,
         val type: String,
         val poster: String,
-        val imdbRating: String,
-        val popularity: Int
+        val imdbRating: String?,
+        val popularity: Int?
     )
 
     // data class EpisodeLink(
