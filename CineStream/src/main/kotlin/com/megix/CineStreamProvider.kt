@@ -31,7 +31,6 @@ open class CineStreamProvider : MainAPI() {
     )
 
     override val mainPage = mainPageOf(
-        "$mainUrl/feed.json" to "Home",
         "$mainUrl/top/catalog/movie/top.json" to "Top Movies",
         "$mainUrl/top/catalog/series/top.json" to "Top Series",
         "$mainUrl/imdbRating/catalog/movie/imdbRating.json" to "Top IMDb Movies",
@@ -43,8 +42,9 @@ open class CineStreamProvider : MainAPI() {
         request: MainPageRequest
     ): HomePageResponse {
         val json = app.get(request.data).text
-        val movies = parseJson<ArrayList<Home>>(json)
-        val home = movies.mapNotNull { movie ->
+
+        val movies = parseJson<Home>(json)
+        val home = movies?.metas?.mapNotNull { movie ->
             newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), TvType.Movie) {
                 this.posterUrl = movie.poster.toString()
             }
@@ -249,13 +249,7 @@ open class CineStreamProvider : MainAPI() {
     )
 
     data class Home(
-        val id: String,
-        val name: String,
-        val releaseInfo: String?,
-        val type: String,
-        val poster: String?,
-        val imdbRating: String?,
-        val popularity: Int?
+        val metas: List<Media>?
     )
 }
 
