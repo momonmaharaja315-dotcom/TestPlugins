@@ -44,7 +44,7 @@ open class CineStreamProvider : MainAPI() {
         val json = app.get(request.data).text
 
         val movies = parseJson<Home>(json)
-        val home = movies.metas?.mapNotNull { movie ->
+        val home = movies.metas.mapNotNull { movie ->
             newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), TvType.Movie) {
                 this.posterUrl = movie.poster.toString()
             }
@@ -218,7 +218,7 @@ open class CineStreamProvider : MainAPI() {
         val query: String,
         val rank: Double,
         val cacheMaxAge: Long,
-        val metas: List<Media>?
+        val metas: List<Media>
     )
 
     data class Media(
@@ -249,7 +249,7 @@ open class CineStreamProvider : MainAPI() {
     )
 
     data class Home(
-        val metas: List<Media>?
+        val metas: List<Media>
     )
 }
 
