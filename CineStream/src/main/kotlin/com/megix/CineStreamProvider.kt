@@ -41,25 +41,21 @@ class CineStreamProvider : MainAPI() {
 
     override suspend fun search(query: String): List<SearchResponse> {
         val searchResponse = mutableListOf<SearchResponse>()
-        // val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
-        // val movies = gson.fromJson(movieJson, SearchResult::class.java)
-        // movies.metas.forEach {
-        //     val jsonData = PassData(it.id, it.type)
-        //     val data =  Json.encodeToString(jsonData)
-        //     searchResponse.add(newMovieSearchResponse(it.name, data, TvType.Movie) {
-        //         this.posterUrl = it.poster
-        //     })
-        // }
+        val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
+        val movies = AppUtils.parseJson<SearchResult>(movieJson)
+        movies.metas?.forEach {
+            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
+                this.posterUrl = it?.poster.toString()
+            })
+        }
 
-        // val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
-        // val series = gson.fromJson(seriesJson, SearchResult::class.java)
-        // series.metas.forEach {
-        //     val jsonData = PassData(it.id, it.type)
-        //     val data =  Json.encodeToString(jsonData)
-        //     searchResponse.add(newMovieSearchResponse(it.name, data, TvType.Movie) {
-        //         this.posterUrl = it.poster
-        //     })
-        // }
+        val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
+        val series = AppUtils.parseJson<SearchResult>(seriesJson)
+        series.metas?.forEach {
+            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
+                this.posterUrl = it?.poster.toString()
+            })
+        }
 
         return searchResponse
     }
@@ -133,29 +129,29 @@ class CineStreamProvider : MainAPI() {
         val videos: List<EpisodeDetails>?
     )
 
-    // data class SearchResult(
-    //     val query: String,
-    //     val rank: Double,
-    //     val cacheMaxAge: Long,
-    //     val metas: List<Media>
-    // )
+    data class SearchResult(
+        val query: String,
+        val rank: Double,
+        val cacheMaxAge: Long,
+        val metas: List<Media>?
+    )
 
-    // data class Media(
-    //     val id: String,
-    //     val imdb_id: String?,
-    //     val type: String,
-    //     val name: String,
-    //     val releaseInfo: String?,
-    //     val poster: String,
-    //     val slug: String,
-    // )
+    data class Media(
+        val id: String,
+        val imdb_id: String,
+        val type: String,
+        val name: String,
+        val releaseInfo: String?,
+        val poster: String?,
+        val slug: String?,
+    )
 
-    // data class SearchMeta(
-    //     val id: String,
-    //     val name: String,
-    //     val poster: String,
-    //     val type : String,
-    // )
+    data class SearchMeta(
+        val id: String,
+        val name: String,
+        val poster: String,
+        val type : String,
+    )
 
     data class EpisodeDetails(
         val id: String?,
