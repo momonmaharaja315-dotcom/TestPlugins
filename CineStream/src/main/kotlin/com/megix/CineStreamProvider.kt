@@ -67,33 +67,30 @@ class CineStreamProvider : MainAPI() {
 
     override suspend fun load(url: String): LoadResponse? {
         val movie = parseJson<PassData>(url)
-        // val tvtype = movie.type
-        // val imdbId = movie.id
-        // val jsonResponse = app.get("$cinemeta_url/meta/$tvtype/$imdbId.json").text
-        // val responseData = gson.fromJson(jsonResponse, ResponseData::class.java)
+        val tvtype = movie.type
+        val id = movie.id
+        val json = app.get("$cinemeta_url/meta/$tvtype/$id.json").text
+        val movieData = AppUtils.parseJson<ResponseData>(json)
 
-        // val title = responseData.meta?.name.toString()
-        // val posterUrl = responseData.meta?.poster.toString()
-        // val imdbRating = responseData.meta?.imdbRating
-        // val year = responseData.meta?.year.toString()
-        // var description = responseData.meta?.description.toString()
-        // val cast = responseData.meta?.cast
-        // val genre = responseData.meta?.genre
-        // val background = responseData.meta?.background.toString()
+        val title = movieData.meta?.name.toString()
+        val posterUrl = movieData.meta?.poster.toString()
+        val imdbRating = movieData.meta?.imdbRating
+        val year = movieData.meta?.year.toString()
+        var description = movieData.meta?.description.toString()
+        //val cast = movieData.meta?.cast
+        //val genre = movieData.meta?.genre
+        val background = movieData.meta?.background.toString()
 
 
-        // return newMovieLoadResponse(title, url, TvType.Movie, url) {
-        //     this.posterUrl = posterUrl
-        //     this.plot = description
-        //     this.tags = genre
-        //     this.rating = imdbRating.toRatingInt()
-        //     this.year = year.toIntOrNull()
-        //     this.backgroundPosterUrl = background
-        //     addActors(cast)
-        //     //addImdbUrl(imdbUrl)
-        // }
-
-        return newMovieLoadResponse(movie.id, "", TvType.Movie, "") {
+        return newMovieLoadResponse(title, movie.id, TvType.Movie, movie.title) {
+            this.posterUrl = posterUrl
+            this.plot = description
+            //this.tags = genre
+            this.rating = imdbRating.toRatingInt()
+            this.year = year.toIntOrNull()
+            this.backgroundPosterUrl = background
+            //addActors(cast)
+            //addImdbUrl(imdbUrl)
         }
     }
 
@@ -113,28 +110,28 @@ class CineStreamProvider : MainAPI() {
         return true
     }
 
-    // data class Meta(
-    //     val id: String?,
-    //     val imdb_id: String?,
-    //     val type: String?,
-    //     val poster: String?,
-    //     val logo: String?,
-    //     val background: String?,
-    //     val moviedb_id: Int?,
-    //     val name: String?,
-    //     val description: String?,
-    //     val genre: List<String>?,
-    //     val releaseInfo: String?,
-    //     val status: String?,
-    //     val runtime: String?,
-    //     val cast: List<String>?,
-    //     val language: String?,
-    //     val country: String?,
-    //     val imdbRating: String?,
-    //     val slug: String?,
-    //     val year: String?,
-    //     val videos: List<EpisodeDetails>?
-    // )
+    data class Meta(
+        val id: String?,
+        val imdb_id: String?,
+        val type: String?,
+        val poster: String?,
+        val logo: String?,
+        val background: String?,
+        val moviedb_id: Int?,
+        val name: String?,
+        val description: String?,
+        val genre: List<String>?,
+        val releaseInfo: String?,
+        val status: String?,
+        val runtime: String?,
+        val cast: List<String>?,
+        val language: String?,
+        val country: String?,
+        val imdbRating: String?,
+        val slug: String?,
+        val year: String?,
+        val videos: List<EpisodeDetails>?
+    )
 
     // data class SearchResult(
     //     val query: String,
@@ -160,21 +157,21 @@ class CineStreamProvider : MainAPI() {
     //     val type : String,
     // )
 
-    // data class EpisodeDetails(
-    //     val id: String?,
-    //     val name: String?,
-    //     val title: String?,
-    //     val season: Int?,
-    //     val episode: Int?,
-    //     val released: String?,
-    //     val overview: String?,
-    //     val thumbnail: String?,
-    //     val moviedb_id: Int?
-    // )
+    data class EpisodeDetails(
+        val id: String?,
+        val name: String?,
+        val title: String?,
+        val season: Int?,
+        val episode: Int?,
+        val released: String?,
+        val overview: String?,
+        val thumbnail: String?,
+        val moviedb_id: Int?
+    )
 
-    // data class ResponseData(
-    //     val meta: Meta?,
-    // )
+    data class ResponseData(
+        val meta: Meta?,
+    )
 
     data class Home(
         val id: String,
