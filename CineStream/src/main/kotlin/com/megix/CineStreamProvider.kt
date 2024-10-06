@@ -82,7 +82,7 @@ class CineStreamProvider : MainAPI() {
         val background = movieData.meta?.background.toString()
 
 
-        return newMovieLoadResponse(title, movie.id, TvType.Movie, movie.title) {
+        return newMovieLoadResponse(title, movie.id, TvType.Movie, movie.id) {
             this.posterUrl = posterUrl
             this.plot = description
             //this.tags = genre
