@@ -57,7 +57,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = if (season == null) {
             "$api/search/$fixtitle $year"
         } else {
-            "$api/search/$fixtitle season $season $year"
+            "$api/search/$fixtitle season $season"
         }
         callback.invoke(
             ExtractorLink(

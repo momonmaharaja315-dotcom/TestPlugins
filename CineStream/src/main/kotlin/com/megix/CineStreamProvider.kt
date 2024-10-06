@@ -118,6 +118,7 @@ open class CineStreamProvider : MainAPI() {
                         year,
                         ep.season,
                         ep.episode,
+                        ep.firstAired
                     ).toJson()
                 ) {
                     this.name = ep.name ?: ep.title
@@ -149,7 +150,7 @@ open class CineStreamProvider : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val res = parseJson<LoadLinksData>(data)
-        val year = if(res.tvtype == "movie") res.year.toIntOrNull() else res.year.substringBefore("–").toIntOrNull()
+        val year = if(res.tvtype == "movie") res.year.toIntOrNull() else res.firstAired.substringBefore("-").toIntOrNull()
         argamap(
             {
                 invokeVegamovies(
@@ -182,6 +183,7 @@ open class CineStreamProvider : MainAPI() {
         val year: String,
         val season: Int? = null,
         val episode: Int? = null,
+        val firstAired: String? = null,
     )
 
     data class PassData(
@@ -236,6 +238,7 @@ open class CineStreamProvider : MainAPI() {
         val season: Int,
         val episode: Int,
         val released: String?,
+        val firstAired: String?,
         val overview: String?,
         val thumbnail: String?,
         val moviedb_id: Int?
