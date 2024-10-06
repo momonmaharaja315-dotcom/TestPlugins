@@ -32,8 +32,6 @@ class CineStreamProvider : MainAPI() {
         val json = app.get(request.data).text
         val movies = AppUtils.parseJson<ArrayList<Home>>(json)
         val home = movies.mapNotNull { movie ->
-            val jsonData = PassData(movie.id, movie.type)
-            val data =  Json.encodeToString(jsonData)
             newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), TvType.Movie) {
                 this.posterUrl = movie.poster
             }
