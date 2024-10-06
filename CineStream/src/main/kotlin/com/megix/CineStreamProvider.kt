@@ -4,8 +4,8 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
-import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
+import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 
 class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -29,11 +29,12 @@ class CineStreamProvider : MainAPI() {
         page: Int,
         request: MainPageRequest
     ): HomePageResponse {
-        val movies = app.get(request.data).parsed<List<Home>>()
+        val json = app.get(request.data).text
+        val movies = AppUtils.parseJson<ArrayList<Home>>(json)
         val home = movies.mapNotNull { movie ->
-            //val jsonData = PassData(movie.id, movie.type)
-            //val data =  Json.encodeToString(jsonData)
-            newMovieSearchResponse(movie.name, movie.toJson(), TvType.Movie) {
+            val jsonData = PassData(movie.id, movie.type)
+            val data =  Json.encodeToString(jsonData)
+            newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), TvType.Movie) {
                 this.posterUrl = movie.poster
             }
         }
@@ -67,7 +68,7 @@ class CineStreamProvider : MainAPI() {
 
 
     override suspend fun load(url: String): LoadResponse? {
-        // val movie = parseJson<PassData>(url)
+        val movie = parseJson<PassData>(url)
         // val tvtype = movie.type
         // val imdbId = movie.id
         // val jsonResponse = app.get("$cinemeta_url/meta/$tvtype/$imdbId.json").text
@@ -94,7 +95,7 @@ class CineStreamProvider : MainAPI() {
         //     //addImdbUrl(imdbUrl)
         // }
 
-        return newMovieLoadResponse("", "", TvType.Movie, "") {
+        return newMovieLoadResponse(movie.id, "", TvType.Movie, "") {
         }
     }
 
@@ -190,9 +191,10 @@ class CineStreamProvider : MainAPI() {
     // data class EpisodeLink(
     //     val source: String
     // )
-    // data class PassData(
-    //     val id: String,
-    //     val type: String
-    // )
+
+    data class PassData(
+        val id: String,
+        val type: String
+    )
 }
 
