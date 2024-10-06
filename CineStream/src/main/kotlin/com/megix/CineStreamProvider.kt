@@ -82,8 +82,8 @@ open class CineStreamProvider : MainAPI() {
         val imdbRating = movieData.meta?.imdbRating
         val year = movieData.meta?.year.toString()
         var description = movieData.meta?.description.toString()
-        val cast : List<String> = responseData.meta?.cast ?: emptyList()
-        val genre : List<String> = responseData.meta?.genre ?: emptyList()
+        val cast : List<String> = movieData.meta?.cast ?: emptyList()
+        val genre : List<String> = movieData.meta?.genre ?: emptyList()
         val background = movieData.meta?.background.toString()
 
         if(tvtype == "movie") {
