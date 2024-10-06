@@ -31,7 +31,11 @@ open class CineStreamProvider : MainAPI() {
     )
 
     override val mainPage = mainPageOf(
-        "$mainUrl/feed.json" to "Home"
+        "$mainUrl/feed.json" to "Home",
+        "$mainUrl/catalog/channel/top.json" to "Top Movies",
+        "$mainUrl/catalog/series/top.json" to "Top Series",
+        "$mainUrl/imdbRating/catalog/movie/imdbRating.json" to "Top IMDb Movies",
+        "$mainUrl/imdbRating/catalog/series/imdbRating.json" to "Top IMDb Series",
     )
 
     override suspend fun getMainPage(
@@ -129,7 +133,7 @@ open class CineStreamProvider : MainAPI() {
                 this.plot = description
                 this.tags = genre
                 this.rating = imdbRating.toRatingInt()
-                this.year = year.toIntOrNull()
+                this.year = year.substringBefore("–").toIntOrNull()
                 this.backgroundPosterUrl = background
                 addActors(cast)
                 addImdbId(id)
@@ -145,7 +149,7 @@ open class CineStreamProvider : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val res = parseJson<LoadLinksData>(data)
-        val year = if(res.tvtype == "movie") res.year.toIntOrNull() else res.year.substringBefore("-").toIntOrNull()
+        val year = if(res.tvtype == "movie") res.year.toIntOrNull() else res.year.substringBefore("–").toIntOrNull()
         argamap(
             {
                 invokeVegamovies(
