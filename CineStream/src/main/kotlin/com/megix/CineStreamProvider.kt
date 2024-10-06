@@ -11,7 +11,6 @@ import com.lagradost.cloudstream3.network.CloudflareKiller
 import com.megix.CineStreamExtractors.invokeVegamovies
 import com.megix.CineStreamExtractors.invokeRogmovies
 
-
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
     override var name = "CineStream"
@@ -146,7 +145,7 @@ open class CineStreamProvider : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val res = parseJson<LoadLinksData>(data)
-        val year = if(res.type == "movie") res.year.toIntOrNull() else res.year.substringBefore("-").toIntOrNull()
+        val year = if(res.tvtype == "movie") res.year.toIntOrNull() else res.year.substringBefore("-").toIntOrNull()
         argamap(
             {
                 invokeVegamovies(
@@ -158,16 +157,17 @@ open class CineStreamProvider : MainAPI() {
                     callback
                 )
             },
+            {
+                invokeRogmovies(
+                    res.title,
+                    year,
+                    res.season,
+                    res.episode,
+                    subtitleCallback,
+                    callback
+                )
+            },
         )
-        // callback.invoke(
-        //     ExtractorLink(
-        //         this.name,
-        //         this.name,
-        //         res.toString(),
-        //         "",
-        //         Qualities.Unknown.value,
-        //     )
-        // )
         return true
     }
 
