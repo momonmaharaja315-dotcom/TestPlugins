@@ -44,7 +44,7 @@ open class CineStreamProvider : MainAPI() {
         val json = app.get(request.data).text
 
         val movies = parseJson<Home>(json)
-        val home = movies?.metas?.mapNotNull { movie ->
+        val home = movies.metas?.mapNotNull { movie ->
             newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), TvType.Movie) {
                 this.posterUrl = movie.poster.toString()
             }
@@ -56,7 +56,7 @@ open class CineStreamProvider : MainAPI() {
         val searchResponse = mutableListOf<SearchResponse>()
         val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
         val movies = parseJson<SearchResult>(movieJson)
-        movies.metas?.forEach {
+        movies.metas.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
@@ -64,7 +64,7 @@ open class CineStreamProvider : MainAPI() {
 
         val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
         val series = parseJson<SearchResult>(seriesJson)
-        series.metas?.forEach {
+        series.metas.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
@@ -245,7 +245,7 @@ open class CineStreamProvider : MainAPI() {
     )
 
     data class ResponseData(
-        val meta: Meta?,
+        val meta: Meta,
     )
 
     data class Home(
