@@ -300,7 +300,7 @@ class CineStreamProvider : MainAPI() {
     ) {
         invokeWpredis(
             title,
-            year,
+            year.toIntOrNull,
             season,
             episode,
             subtitleCallback,
