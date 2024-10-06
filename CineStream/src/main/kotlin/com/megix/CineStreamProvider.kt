@@ -96,12 +96,12 @@ class CineStreamProvider : MainAPI() {
             }
         }
         else {
-            val episodes = movieData.meta?.videos?.map { ep ->
+            val episodes = movieData.meta?.videos.mapNotNull { ep ->
                 newEpisode(
                     LoadLinksData(
                         title,
                         id,
-                        type,
+                        tvtype,
                         year,
                         ep.season,
                         ep.episode,
