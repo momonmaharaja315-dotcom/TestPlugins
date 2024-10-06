@@ -81,14 +81,14 @@ open class CineStreamProvider : MainAPI() {
         val json = app.get("$cinemeta_url/meta/$tvtype/$id.json").text
         val movieData = parseJson<ResponseData>(json)
 
-        val title = movieData.meta?.name.toString()
-        val posterUrl = movieData.meta?.poster.toString()
-        val imdbRating = movieData.meta?.imdbRating
-        val year = movieData.meta?.year.toString()
-        var description = movieData.meta?.description.toString()
-        val cast : List<String> = movieData.meta?.cast ?: emptyList()
-        val genre : List<String> = movieData.meta?.genre ?: emptyList()
-        val background = movieData.meta?.background.toString()
+        val title = movieData.meta.name.toString()
+        val posterUrl = movieData.meta.poster.toString()
+        val imdbRating = movieData.meta.imdbRating
+        val year = movieData.meta.year.toString()
+        var description = movieData.meta.description.toString()
+        val cast : List<String> = movieData.meta.cast ?: emptyList()
+        val genre : List<String> = movieData.meta.genre ?: emptyList()
+        val background = movieData.meta.background.toString()
 
         if(tvtype == "movie") {
             val data = LoadLinksData(
@@ -109,7 +109,7 @@ open class CineStreamProvider : MainAPI() {
             }
         }
         else {
-            val episodes = movieData.meta?.videos?.map { ep ->
+            val episodes = movieData.meta.videos?.map { ep ->
                 newEpisode(
                     LoadLinksData(
                         title,

@@ -51,7 +51,7 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
         api: String
     ) {
-        val (seasonSlug, episodeSlug) = getEpisodeSlug(season, episode)
+        //val (seasonSlug, episodeSlug) = getEpisodeSlug(season, episode)
         val cfInterceptor = CloudflareKiller()
         val fixtitle = title?.substringBefore("-")?.substringBefore(":")?.replace("&", " ")
         val url = if (season == null) {
