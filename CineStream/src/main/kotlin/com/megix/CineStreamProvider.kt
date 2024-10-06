@@ -145,7 +145,7 @@ class CineStreamProvider : MainAPI() {
             {
                 invokeVegamovies(
                     res.title,
-                    res.year,
+                    res.year.toIntOrNull(),
                     res.season,
                     res.episode,
                     subtitleCallback,
@@ -300,7 +300,7 @@ class CineStreamProvider : MainAPI() {
     ) {
         invokeWpredis(
             title,
-            year.toIntOrNull,
+            year,
             season,
             episode,
             subtitleCallback,
