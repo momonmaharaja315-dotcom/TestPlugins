@@ -77,16 +77,55 @@ class CineStreamProvider : MainAPI() {
         //val genre = movieData.meta?.genre
         val background = movieData.meta?.background.toString()
 
+        if(tvtype == "movie") {
+            val data = LoadLinksData(
+                title,
+                id,
+                tvtype,
+                year
+            ).toJson()
+            return newMovieLoadResponse(title, url, TvType.Movie, data) {
+                this.posterUrl = posterUrl
+                this.plot = description
+                //this.tags = genre
+                this.rating = imdbRating.toRatingInt()
+                this.year = year.toIntOrNull()
+                this.backgroundPosterUrl = background
+                //addActors(cast)
+                //addImdbUrl(imdbUrl)
+            }
+        }
+        else {
+            val episodes = movieData.meta?.videos?.map { ep ->
+                newEpisode(
+                    LoadLinksData(
+                        title,
+                        id,
+                        type,
+                        year,
+                        ep.season,
+                        ep.episode,
+                    ).toJson()
+                ) {
+                    this.name = ep?.name ?: ep?.title
+                    this.season = ep.season
+                    this.episode = ep.episode
+                    this.posterUrl = ep?.thumbnail
+                    this.description = ep?.overview
+                }
+            }
 
-        return newMovieLoadResponse(title, movie.id, TvType.Movie, movie.id) {
-            this.posterUrl = posterUrl
-            this.plot = description
-            //this.tags = genre
-            this.rating = imdbRating.toRatingInt()
-            this.year = year.toIntOrNull()
-            this.backgroundPosterUrl = background
-            //addActors(cast)
-            //addImdbUrl(imdbUrl)
+            return newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
+                this.posterUrl = posterUrl
+                this.plot = description
+                //this.tags = genre
+                this.rating = imdbRating.toRatingInt()
+                this.year = year.toIntOrNull()
+                this.backgroundPosterUrl = background
+                //addActors(cast)
+                //addImdbUrl(imdbUrl)
+            }
+
         }
     }
 
@@ -96,6 +135,7 @@ class CineStreamProvider : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        val res = parseJson<LoadLinksData>(data)
         //loadExtractor(data, subtitleCallback, callback)
         // val sources = parseJson<ArrayList<EpisodeLink>>(data)
         // sources.amap {
@@ -105,6 +145,15 @@ class CineStreamProvider : MainAPI() {
         // }
         return true
     }
+
+    data class LoadLinksData(
+        val title: String,
+        val id: String,
+        val tvtype: String,
+        val year: String,
+        val season: Int? = null,
+        val episode: Int? = null,
+    )
 
     data class Meta(
         val id: String?,
@@ -146,19 +195,12 @@ class CineStreamProvider : MainAPI() {
         val slug: String?,
     )
 
-    data class SearchMeta(
-        val id: String,
-        val name: String,
-        val poster: String,
-        val type : String,
-    )
-
     data class EpisodeDetails(
         val id: String?,
         val name: String?,
         val title: String?,
-        val season: Int?,
-        val episode: Int?,
+        val season: Int,
+        val episode: Int,
         val released: String?,
         val overview: String?,
         val thumbnail: String?,
