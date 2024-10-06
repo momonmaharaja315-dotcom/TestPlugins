@@ -33,9 +33,9 @@ open class CineStreamProvider : MainAPI() {
     override val mainPage = mainPageOf(
         "$mainUrl/feed.json" to "Home",
         "$mainUrl/top/catalog/movie/top.json" to "Top Movies",
-        "$cinemeta_url/top/catalog/series/top.json" to "Top Series",
-        "$cinemeta_url/imdbRating/catalog/movie/imdbRating.json" to "Top IMDb Movies",
-        "$cinemeta_url/imdbRating/catalog/series/imdbRating.json" to "Top IMDb Series",
+        "$mainUrl/top/catalog/series/top.json" to "Top Series",
+        "$mainUrl/imdbRating/catalog/movie/imdbRating.json" to "Top IMDb Movies",
+        "$mainUrl/imdbRating/catalog/series/imdbRating.json" to "Top IMDb Series",
     )
 
     override suspend fun getMainPage(
