@@ -150,7 +150,7 @@ open class CineStreamProvider : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val res = parseJson<LoadLinksData>(data)
-        val year = if(res.tvtype == "movie") res.year.toIntOrNull() else res.firstAired.substringBefore("-").toIntOrNull()
+        val year = if(res.tvtype == "movie") res.year.toIntOrNull() else res.firstAired?.substringBefore("-")?.toIntOrNull()
         argamap(
             {
                 invokeVegamovies(
