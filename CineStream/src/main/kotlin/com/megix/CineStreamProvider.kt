@@ -33,7 +33,7 @@ class CineStreamProvider : MainAPI() {
         val movies = AppUtils.parseJson<ArrayList<Home>>(json)
         val home = movies.mapNotNull { movie ->
             newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), TvType.Movie) {
-                this.posterUrl = movie.poster
+                this.posterUrl = movie.poster.toString()
             }
         }
         return newHomePageResponse(request.name, home)
@@ -181,7 +181,7 @@ class CineStreamProvider : MainAPI() {
         val name: String,
         val releaseInfo: String?,
         val type: String,
-        val poster: String,
+        val poster: String?,
         val imdbRating: String?,
         val popularity: Int?
     )
