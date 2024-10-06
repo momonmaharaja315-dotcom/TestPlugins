@@ -57,17 +57,8 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = if (season == null) {
             "$api/search/$fixtitle $year"
         } else {
-            "$api/search/$fixtitle season $season"
+            "$api/search/$fixtitle season $season $year"
         }
-        callback.invoke(
-            ExtractorLink(
-                "CineStream",
-                "CineStream",
-                url,
-                "",
-                Qualities.Unknown.value
-            )
-        )
         val domain = api.substringAfter("//").substringBefore(".")
         app.get(url, interceptor = cfInterceptor).document.select("#main-content article")
         .filter { element ->
