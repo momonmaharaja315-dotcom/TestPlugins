@@ -13,7 +13,7 @@ class CineStreamProvider : MainAPI() {
     override val hasMainPage = true
     override var lang = "en"
     override val hasDownloadSupport = true
-    const val cinemeta_url = "https://v3-cinemeta.strem.io"
+    val cinemeta_url = "https://v3-cinemeta.strem.io"
     override val supportedTypes = setOf(
         TvType.Movie,
         TvType.TvSeries,
@@ -33,7 +33,7 @@ class CineStreamProvider : MainAPI() {
         val home = movies.mapNotNull { movie ->
             //val jsonData = PassData(movie.id, movie.type)
             //val data =  Json.encodeToString(jsonData)
-            newMovieSearchResponse(movie.name, Json.encodeToString(movie), TvType.Movie) {
+            newMovieSearchResponse(movie.name, movie.toJson(), TvType.Movie) {
                 this.posterUrl = movie.poster
             }
         }
@@ -93,6 +93,9 @@ class CineStreamProvider : MainAPI() {
         //     addActors(cast)
         //     //addImdbUrl(imdbUrl)
         // }
+
+        return newMovieLoadResponse("", "", TvType.Movie, "") {
+        }
     }
 
     override suspend fun loadLinks(
