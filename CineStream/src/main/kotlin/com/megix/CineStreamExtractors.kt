@@ -21,7 +21,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val document = app.get(url).document
         val text = document.selectFirst("div.content > h2 > a").text().toString()
         val href = document.selectFirst("div.content > h2 > a").attr("href")
-        if (text.contains(title) == true && (season == null || season?.let { text.contains("Season $it") } == true)) {
+        if (text.contains(title.toString()) == true && (season == null || season?.let { text.contains("Season $it") } == true)) {
             val doc2 = app.get(href).document
             val link = if(season == null) {
                 Regex("""<a\s+class="myButton"\s+href="([^"]+)".*?>Watch Online 1<\/a>""").find(doc2.html())?.groupValues?.get(1) ?: ""
