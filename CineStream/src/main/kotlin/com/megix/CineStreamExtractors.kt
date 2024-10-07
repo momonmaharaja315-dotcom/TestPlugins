@@ -23,7 +23,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val href = document.selectFirst("div.content > h2 > a")?.attr("href").toString()
         if (
             text.contains(title.toString()) == true &&
-            year.let { text.contains("$it") } == true) &&
+            year.let { text.contains("$it") } == true &&
             (season == null || season.let { text.contains("Season $it") } == true)
         ) {
             val doc2 = app.get(href).document
