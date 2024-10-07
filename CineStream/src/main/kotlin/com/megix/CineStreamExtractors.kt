@@ -19,12 +19,15 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = if(season == null) "$Full4MoviesAPI/?s=$title $year" else "$Full4MoviesAPI/?s=$title season $season $year"
         val document = app.get(url).document
         val text = document.selectFirst("div.content > h2 > a").text()
+        val href = document.selectFirst("div.content > h2 > a").attr("href")
+
         if(text.contains(title) && (season == null || text.contains("Season $season"))) {
+            val doc2 = app.get(href).document
             val link = if(season == null) {
-                Regex("""<a\s+class="myButton"\s+href="([^"]+)".*?>Watch Online 1<\/a>""").find(document.html())?.groupValues?.get(1) ?: ""
+                Regex("""<a\s+class="myButton"\s+href="([^"]+)".*?>Watch Online 1<\/a>""").find(doc2.html())?.groupValues?.get(1) ?: ""
 
             } else {
-                val urls = Regex("""<a[^>]*href="([^"]*)"[^>]*>(?:WCH|Watch)<\/a>""")..findAll(document.html()).map { it.groupValues[1] }.toList()
+                val urls = Regex("""<a[^>]*href="([^"]*)"[^>]*>(?:WCH|Watch)<\/a>""").findAll(doc2.html()).map { it.groupValues[1] }.toList()
                 urls.elementAtOrNull(${episode-1})?.let { it.groupValues[1] } ?: ""
             }
             val doc = app.get(fixUrl(link)).document

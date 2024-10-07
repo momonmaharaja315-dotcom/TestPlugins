@@ -13,6 +13,7 @@ import com.megix.CineStreamExtractors.invokeRogmovies
 import com.megix.CineStreamExtractors.invokeMoviesmod
 import com.megix.CineStreamExtractors.invokeTopMovies
 import com.megix.CineStreamExtractors.invokeMoviesdrive
+import com.megix.CineStreamExtractors.invokeFull4Movies
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
