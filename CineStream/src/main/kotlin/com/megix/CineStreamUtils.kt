@@ -13,6 +13,20 @@ fun getBaseUrl(url: String): String {
     }
 }
 
+fun String?.createSlug(): String? {
+    return this?.filter { it.isWhitespace() || it.isLetterOrDigit() }
+        ?.trim()
+        ?.replace("\\s+".toRegex(), "-")
+        ?.lowercase()
+}
+
+suspend fun extractMdrive(url: String): List<String> {
+    val doc= app.get(url).document
+    val href=doc.select("h5 > a,h3 > a").map { it.attr("href") }
+    Log.d("Phisher1 it",href.toString())
+    return href
+}
+
 
 fun getEpisodeSlug(
     season: Int? = null,

@@ -187,7 +187,7 @@ open class CineStreamProvider : MainAPI() {
             {
                 invokeTopMovies(
                     res.title,
-                    res.year,
+                    year,
                     res.season,
                     res.episode,
                     subtitleCallback,
@@ -197,7 +197,7 @@ open class CineStreamProvider : MainAPI() {
             {
                 invokeMoviesmod(
                     res.title,
-                    res.year,
+                    year,
                     res.season,
                     res.episode,
                     subtitleCallback,
@@ -209,7 +209,7 @@ open class CineStreamProvider : MainAPI() {
                     res.title,
                     res.season,
                     res.episode,
-                    res.year,
+                    year,
                     subtitleCallback,
                     callback
                 )

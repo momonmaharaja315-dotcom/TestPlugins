@@ -238,7 +238,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     interceptor = wpRedisInterceptor, timeout = 10L
                 ).document.selectFirst(selector)
                     ?.attr("href")?.let {
-                        val link = bypassHrefli(it)
+                        val link = bypassHrefli(it).toString()
                         loadExtractor(link, referer = "", subtitleCallback, callback)
                     }
             }
