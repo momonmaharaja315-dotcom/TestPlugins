@@ -23,7 +23,6 @@ fun String?.createSlug(): String? {
 suspend fun extractMdrive(url: String): List<String> {
     val doc= app.get(url).document
     val href=doc.select("h5 > a,h3 > a").map { it.attr("href") }
-    Log.d("Phisher1 it",href.toString())
     return href
 }
 
