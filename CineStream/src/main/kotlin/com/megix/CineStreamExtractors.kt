@@ -21,15 +21,16 @@ object CineStreamExtractors : CineStreamProvider() {
         val document = app.get(url).document
         val text = document.selectFirst("div.content > h2 > a").text().toString()
         val href = document.selectFirst("div.content > h2 > a").attr("href")
+        val s = season.toInt()
 
-        if (text?.contains(title) == true && (season == null || text?.contains("Season $season") == true)) {
+        if (text.contains(title) == true && (season == null || text.contains("Season $s") == true)) {
             val doc2 = app.get(href).document
             val link = if(season == null) {
                 Regex("""<a\s+class="myButton"\s+href="([^"]+)".*?>Watch Online 1<\/a>""").find(doc2.html())?.groupValues?.get(1) ?: ""
 
             } else {
-                val urls = Regex("""<a[^>]*href="([^"]*)"[^>]*>(?:WCH|Watch)<\/a>""").findAll(doc2.html()).map { it.groupValues[1] }.toList()
-                urls.elementAtOrNull(episode?.minus(1))?.let { it.groupValues[1] } ?: ""
+                val urls = Regex("""<a[^>]*href="([^"]*)"[^>]*>(?:WCH|Watch)<\/a>""").findAll(doc2.html())
+                urls.elementAtOrNull(episode-1 ?: 0)?.groupValues?.get(1) ?: ""
             }
             val doc = app.get(fixUrl(link)).document
             val source = doc.selectFirst("iframe").attr("src") ?: ""
