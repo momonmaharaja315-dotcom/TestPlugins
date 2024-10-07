@@ -27,7 +27,8 @@ open class CineStreamProvider : MainAPI() {
         const val rogMoviesAPI = "https://rogmovies.top"
         const val MovieDrive_API="https://moviesdrive.world"
         const val topmoviesAPI = "https://topmovies.mov"
-        const val MoviesmodAPI= "https://moviesmod.day"
+        const val MoviesmodAPI = "https://moviesmod.day"
+        const val Full4MoviesAPI = "https://www.full4movies.forum"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
@@ -225,6 +226,16 @@ open class CineStreamProvider : MainAPI() {
                     res.season,
                     res.episode,
                     year,
+                    subtitleCallback,
+                    callback
+                )
+            },
+            {
+                invokeFull4Movies(
+                    res.title,
+                    year,
+                    res.season,
+                    res.episode,
                     subtitleCallback,
                     callback
                 )

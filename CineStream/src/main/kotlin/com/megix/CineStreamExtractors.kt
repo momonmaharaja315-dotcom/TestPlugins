@@ -8,6 +8,32 @@ import android.util.Base64
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend fun invokeFull4Movies(
+        title: String? = null,
+        year: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val url = if(season == null) "$Full4MoviesAPI/?s=$title $year" else "$Full4MoviesAPI/?s=$title season $season $year"
+        val document = app.get(url).document
+        val text = document.selectFirst("div.content > h2 > a").text()
+        if(text.contains(title) && (season == null || text.contains("Season $season"))) {
+            val link = if(season == null) {
+                Regex("""<a\s+class="myButton"\s+href="([^"]+)".*?>Watch Online 1<\/a>""").find(document.html())?.groupValues?.get(1) ?: ""
+
+            } else {
+                val urls = Regex("""<a[^>]*href="([^"]*)"[^>]*>(?:WCH|Watch)<\/a>""")..findAll(document.html()).map { it.groupValues[1] }.toList()
+                urls.elementAtOrNull(${episode-1})?.let { it.groupValues[1] } ?: ""
+            }
+            val doc = app.get(fixUrl(link)).document
+            val source = doc.selectFirst("iframe").attr("src") ?: ""
+            loadExtractor(source, referer = link, subtitleCallback, callback)
+        }
+
+    }
+
     suspend fun invokeRogmovies(
         title: String? = null,
         year: Int? = null,
