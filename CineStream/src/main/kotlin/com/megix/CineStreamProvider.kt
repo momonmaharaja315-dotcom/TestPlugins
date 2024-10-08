@@ -31,7 +31,7 @@ open class CineStreamProvider : MainAPI() {
         const val topmoviesAPI = "https://topmovies.mov"
         const val MoviesmodAPI = "https://moviesmod.day"
         const val Full4MoviesAPI = "https://www.full4movies.forum"
-        const val VadapavAPI = "https://veldora.onrender.com"
+        const val VadapavAPI = "https://vadapav.mov"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
@@ -245,7 +245,8 @@ open class CineStreamProvider : MainAPI() {
             },
             {
                 invokeVadaPav(
-                    res.id,
+                    res.title,
+                    year,
                     res.season,
                     res.episode,
                     subtitleCallback,

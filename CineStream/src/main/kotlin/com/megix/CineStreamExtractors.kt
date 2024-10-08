@@ -16,53 +16,45 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val url = if(season != null && episode != null) "$VadapavAPI/$id?ss=$season&ep=$episode" else "$VadapavAPI/$id"
-        callback.invoke(
-            ExtractorLink(
-                "[VadaPav]",
-                "[VadaPav]",
-                url,
-                "",
-                Qualities.Unknown.value
-            )
-        )
-        val json = app.get(url).text
-        val data = tryParseJson<List<VadaPavData>>(json)
-        if (data != null) {
-            data.forEach { it ->
-                if (it.type == "mkv" || it.type == "mp4") {
-                    callback.invoke(
-                        ExtractorLink(
-                            "[VadaPav]",
-                            "[VadaPav] ${it.name}",
-                            it.downloadLink,
-                            "",
-                            getIndexQuality(it.quality),
-                        )
-                    )
-                }
+        val url = if(season != null && episode != null) "$VadapavAPI/s/$title" else "$VadapavAPI/s/$title ($year)"
+        val document = app.get(url).document
+        val result = document.selectFirst("div.directory > ul > li > div > a")
+        val href = VadapavAPI + result.attr("href")
+        if(season != null && episode != null) {
+               val doc = app.get(href).document
+               val seasonLink = VadapavAPI + doc.selectFirst("div.directory > ul > li > div > a.directory-entry:matches((?i)(Season 0${season}|Season ${season}))").attr("href")
+               val seasonDoc = app.get(seasonLink).document
+               val episodeLink = VadapavAPI + seasonDoc.selectFirst("div.directory > ul > li > div > a.file-entry:matches((?i)((.mkv|.mp4)&&(Episode 0${episode}|Episode ${episode}|Ep 0${episode}|Ep ${episode})))").attr("href")
 
-                // if(it.type == "srt"){
-                //     subtitleCallback.invoke(
-                //         SubtitleFile(
-                //             "[Vadapav] ${it.name}",
-                //             it.downloadLink,
-                //         )
-                //     )
-                // }
+               callback.invoke(
+                    ExtractorLink(
+                        "VadaPav",
+                        "VadaPav",
+                        episodeLink,
+                        "",
+                        Qualities.P1080.value
+                   )
+               )
+        }
+        else {
+            val doc = app.get(href).document
+            doc.select("div.directory > ul > li > div > a.file-entry:matches((?i)(.mkv|.mp4))").forEach {
+                val movieLink = VadapavAPI + it.attr("href")
+                callback.invoke(
+                    ExtractorLink(
+                        "VadaPav",
+                        "VadaPav",
+                        movieLink,
+                        "",
+                        Qualities.P1080.value
+                   )
+               )
             }
         }
     }
 
-    data class VadaPavData(
-        val downloadLink: String,
-        val name: String,
-        val quality: String,
-        val type: String
-    )
-
     suspend fun invokeFull4Movies(
-        title: String? = null,
+        title: String,
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
@@ -74,7 +66,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val text = document.selectFirst("div.content > h2 > a")?.text().toString()
         val href = document.selectFirst("div.content > h2 > a")?.attr("href").toString()
         if (
-            text.contains(title.toString(), true) &&
+            text.contains(title, true) &&
             year.let { text.contains("$it") } == true &&
             (season == null || season.let { text.contains("Season $it", true) } == true)
         ) {
