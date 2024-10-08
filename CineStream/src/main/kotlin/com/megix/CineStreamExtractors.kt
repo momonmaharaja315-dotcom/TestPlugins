@@ -5,9 +5,38 @@ import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.network.CloudflareKiller
 import android.util.Log
 import android.util.Base64
-import kotlin.text.MatchGroupCollection
+import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 
 object CineStreamExtractors : CineStreamProvider() {
+
+    suspend fun invokeVadaPav(
+        id: String,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val url = if(season != null && episode != null) "$VadaPav_API/$id?ss=$season&ep=$episode" else "$VadaPav_API/$id"
+        val json = app.get(url).text
+        val data = tryParseJson<VadaPavData>(json)
+        if (data != null) {
+            callback.invoke(
+                ExtractorLink(
+                    "[VadaPav]",
+                    "[VadaPav] ${data.name}",
+                    data.downloadLink,
+                    "",
+                    getIndexQuality(data.quality),
+                )
+            )
+        }
+    }
+
+    data class VadaPavData(
+        val downloadLink: String,
+        val name: String,
+        val quality: String,
+    )
 
     suspend fun invokeFull4Movies(
         title: String? = null,
@@ -22,9 +51,9 @@ object CineStreamExtractors : CineStreamProvider() {
         val text = document.selectFirst("div.content > h2 > a")?.text().toString()
         val href = document.selectFirst("div.content > h2 > a")?.attr("href").toString()
         if (
-            text.contains(title.toString()) == true &&
+            text.contains(title.toString(), true) &&
             year.let { text.contains("$it") } == true &&
-            (season == null || season.let { text.contains("Season $it") } == true)
+            (season == null || season.let { text.contains("Season $it", true) } == true)
         ) {
             val doc2 = app.get(href).document
             val link = if(season == null) {
@@ -273,7 +302,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 ).document.selectFirst(selector)
                     ?.attr("href")?.let {
                         val link = bypassHrefli(it).toString()
-                        loadExtractor(link, referer = "", subtitleCallback, callback)
+                        loadAddSourceExtractor("Topmovies", link, referer = "", subtitleCallback, callback)
                     }
             }
         }
@@ -361,11 +390,11 @@ object CineStreamExtractors : CineStreamProvider() {
                     val file=app.get(link).toString().substringAfter("replace(\"").substringBefore("\")")
                     val domain= getBaseUrl(link)
                     val server="$domain$file"
-                    loadExtractor(server, "", subtitleCallback, callback)
+                    loadAddSourceExtractor("Moviesmod", server, "", subtitleCallback, callback)
                 }
                 val server = bypassHrefli(link) ?: ""
                 if (server.isNotEmpty()) {
-                    loadExtractor(server, "", subtitleCallback, callback)
+                    loadAddSourceExtractor("Moviesmod", server, "", subtitleCallback, callback)
                 }
             }
         }

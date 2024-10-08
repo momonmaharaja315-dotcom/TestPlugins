@@ -1,4 +1,4 @@
-version = 2
+version = 3
 
 cloudstream {
     //language = "en"
@@ -12,5 +12,5 @@ cloudstream {
         "Anime"
     )
 
-    iconUrl = "https://e1.pngegg.com/pngimages/414/683/png-clipart-circular-icon-set-lastfm-red-and-black-cs-ball-icon-thumbnail.png"
+    iconUrl = "https://us.123rf.com/450wm/mrshamsjaman/mrshamsjaman2008/mrshamsjaman200800943/154338064-initial-letter-cs-logo-or-sc-logo-vector-design-template.jpg"
 }
