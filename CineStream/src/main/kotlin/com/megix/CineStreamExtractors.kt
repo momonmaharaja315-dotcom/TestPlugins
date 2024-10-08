@@ -18,17 +18,30 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val url = if(season != null && episode != null) "$VadapavAPI/$id?ss=$season&ep=$episode" else "$VadapavAPI/$id"
         val json = app.get(url).text
-        val data = tryParseJson<VadaPavData>(json)
+        val data = tryParseJson<List<VadaPavData>>(json)
         if (data != null) {
-            callback.invoke(
-                ExtractorLink(
-                    "[VadaPav]",
-                    "[VadaPav] ${data.name}",
-                    data.downloadLink,
-                    "",
-                    getIndexQuality(data.quality),
-                )
-            )
+            data.forEach { it ->
+                if (it.type == "mkv" || it.type == "mp4") {
+                    callback.invoke(
+                        ExtractorLink(
+                            "[VadaPav]",
+                            "[VadaPav] ${it.name}",
+                            it.downloadLink,
+                            "",
+                            getIndexQuality(it.quality),
+                        )
+                    )
+                }
+
+                if(it.type == "srt"){
+                    subtitleCallback.invoke(
+                        SubtitleFile(
+                            "[Vadapav] ${it.name}",
+                            it.downloadLink,
+                        )
+                    )
+                }
+            }
         }
     }
 
@@ -36,6 +49,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val downloadLink: String,
         val name: String,
         val quality: String,
+        val type: String
     )
 
     suspend fun invokeFull4Movies(
