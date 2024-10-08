@@ -33,17 +33,18 @@ object CineStreamExtractors : CineStreamProvider() {
             val seasonLink = VadapavAPI + doc.selectFirst("div.directory > ul > li > div > a.directory-entry:matches((?i)(Season 0${season}|Season ${season}))").attr("href")
             val seasonDoc = app.get(seasonLink).document
             seasonDoc.select("div.directory > ul > li > div > a.file-entry:matches((?i)(Episode 0${episode}|Episode ${episode}|EP 0${episode}|EP ${episode}))").forEach {
-            if(it.text().contains(".mkv", true) || it.text().contains(".mp4", true)) {
-                val episodeLink = VadapavAPI + it.attr("href")
-                callback.invoke(
-                    ExtractorLink(
-                        "VadaPav",
-                        "VadaPav",
-                        episodeLink,
-                        "",
-                        Qualities.P1080.value
+                if(it.text().contains(".mkv", true) || it.text().contains(".mp4", true)) {
+                    val episodeLink = VadapavAPI + it.attr("href")
+                    callback.invoke(
+                        ExtractorLink(
+                            "VadaPav",
+                            "VadaPav",
+                            episodeLink,
+                            "",
+                            Qualities.P1080.value
+                        )
                     )
-                )
+                }
             }
         }
         else {
@@ -63,6 +64,7 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
     }
+
 
     suspend fun invokeFull4Movies(
         title: String,
