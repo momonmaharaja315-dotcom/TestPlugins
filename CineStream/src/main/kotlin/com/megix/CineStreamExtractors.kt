@@ -17,48 +17,49 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
+        val mirrors = listOf(
+            "https://vadapav.mov",
+            "https://dl1.vadapav.mov",
+            "https://dl2.vadapav.mov",
+            "https://dl3.vadapav.mov",
+        )
+
         val url = if(season != null && episode != null) "$VadapavAPI/s/$title" else "$VadapavAPI/s/$title ($year)"
         val document = app.get(url).document
         val result = document.selectFirst("div.directory > ul > li > div > a")
         val href = VadapavAPI + result.attr("href")
         if(season != null && episode != null) {
-               val doc = app.get(href).document
-               val seasonLink = VadapavAPI + doc.selectFirst("div.directory > ul > li > div > a.directory-entry:matches((?i)(Season 0${season}|Season ${season}))").attr("href")
-               callback.invoke(
-                    ExtractorLink(
-                        "Test",
-                        "Test",
-                        seasonLink,
-                        "",
-                        Qualities.P1080.value
-                   )
-               )
-               val seasonDoc = app.get(seasonLink).document
-               val episodeLink = VadapavAPI + seasonDoc.selectFirst("div.directory > ul > li > div > a.file-entry:matches((?i)((.mkv|.mp4)&&(Episode 0${episode}|Episode ${episode}|Ep 0${episode}|Ep ${episode})))").attr("href")
-
-               callback.invoke(
+            val doc = app.get(href).document
+            val seasonLink = VadapavAPI + doc.selectFirst("div.directory > ul > li > div > a.directory-entry:matches((?i)(Season 0${season}|Season ${season}))").attr("href")
+            val seasonDoc = app.get(seasonLink).document
+            seasonDoc.select("div.directory > ul > li > div > a.file-entry:matches((?i)(Episode 0${episode}|Episode ${episode}|EP 0${episode}|EP ${episode}))").forEach {
+            if(it.text().contains(".mkv", true) || it.text().contains(".mp4", true)) {
+                val episodeLink = VadapavAPI + it.attr("href")
+                callback.invoke(
                     ExtractorLink(
                         "VadaPav",
                         "VadaPav",
                         episodeLink,
                         "",
                         Qualities.P1080.value
-                   )
-               )
+                    )
+                )
+            }
         }
         else {
             val doc = app.get(href).document
             doc.select("div.directory > ul > li > div > a.file-entry:matches((?i)(.mkv|.mp4))").forEach {
-                val movieLink = VadapavAPI + it.attr("href")
-                callback.invoke(
-                    ExtractorLink(
-                        "VadaPav",
-                        "VadaPav",
-                        movieLink,
-                        "",
-                        Qualities.P1080.value
-                   )
-               )
+                for((index, mirror) in mirrors.withIndex()) {
+                    callback.invoke(
+                        ExtractorLink(
+                            "VadaPav" + " ${index+1}",
+                            "VadaPav" + " ${index+1}",
+                            mirror + it.attr("href"),
+                            referer = "",
+                            quality = Qualities.P1080.value,
+                        )
+                    )
+                }
             }
         }
     }
