@@ -24,6 +24,15 @@ object CineStreamExtractors : CineStreamProvider() {
         if(season != null && episode != null) {
                val doc = app.get(href).document
                val seasonLink = VadapavAPI + doc.selectFirst("div.directory > ul > li > div > a.directory-entry:matches((?i)(Season 0${season}|Season ${season}))").attr("href")
+               callback.invoke(
+                    ExtractorLink(
+                        "Test",
+                        "Test",
+                        seasonLink,
+                        "",
+                        Qualities.P1080.value
+                   )
+               )
                val seasonDoc = app.get(seasonLink).document
                val episodeLink = VadapavAPI + seasonDoc.selectFirst("div.directory > ul > li > div > a.file-entry:matches((?i)((.mkv|.mp4)&&(Episode 0${episode}|Episode ${episode}|Ep 0${episode}|Ep ${episode})))").attr("href")
 
