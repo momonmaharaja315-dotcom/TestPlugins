@@ -17,6 +17,15 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit
     ) {
         val url = if(season != null && episode != null) "$VadapavAPI/$id?ss=$season&ep=$episode" else "$VadapavAPI/$id"
+        callback.invoke(
+            ExtractorLink(
+                "[VadaPav]",
+                "[VadaPav]",
+                url,
+                "",
+                Qualities.Unknown.value
+            )
+        )
         val json = app.get(url).text
         val data = tryParseJson<List<VadaPavData>>(json)
         if (data != null) {
@@ -33,14 +42,14 @@ object CineStreamExtractors : CineStreamProvider() {
                     )
                 }
 
-                if(it.type == "srt"){
-                    subtitleCallback.invoke(
-                        SubtitleFile(
-                            "[Vadapav] ${it.name}",
-                            it.downloadLink,
-                        )
-                    )
-                }
+                // if(it.type == "srt"){
+                //     subtitleCallback.invoke(
+                //         SubtitleFile(
+                //             "[Vadapav] ${it.name}",
+                //             it.downloadLink,
+                //         )
+                //     )
+                // }
             }
         }
     }
