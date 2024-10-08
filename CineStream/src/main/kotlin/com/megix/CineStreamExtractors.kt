@@ -16,7 +16,7 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val url = if(season != null && episode != null) "$VadaPav_API/$id?ss=$season&ep=$episode" else "$VadaPav_API/$id"
+        val url = if(season != null && episode != null) "$VadapavAPI/$id?ss=$season&ep=$episode" else "$VadapavAPI/$id"
         val json = app.get(url).text
         val data = tryParseJson<VadaPavData>(json)
         if (data != null) {
