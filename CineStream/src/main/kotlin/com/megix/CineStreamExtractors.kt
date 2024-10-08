@@ -10,7 +10,8 @@ import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun invokeVadaPav(
-        id: String,
+        title: String,
+        year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
