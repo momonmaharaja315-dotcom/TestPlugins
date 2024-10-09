@@ -21,12 +21,31 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         val cookie = getNFCookies() ?: return
+        callback.invoke(
+            ExtractorLink(
+                "Cookie",
+                "Cookie",
+                cookie.toString(),
+                "",
+                Qualities.P1080.value
+            )
+        )
         val headers = mapOf("X-Requested-With" to "XMLHttpRequest", "t_hash_t" to cookie, "Cookie" to "hd=on")
         val url = "$netflixAPI/search.php?s=$title&t=${APIHolder.unixTime}"
         val data = app.get(url, headers = headers).parsedSafe<SearchData>()
         val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals(title.trim(), ignoreCase = true) }?.id
 
-        val (title, id) = app.get(
+        callback.invoke(
+            ExtractorLink(
+                "ID",
+                "ID",
+                netflixId.toString(),
+                "",
+                Qualities.P1080.value
+            )
+        )
+
+        val (nfTitle, id) = app.get(
             "$netflixAPI/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
             headers = headers
         ).parsedSafe<NetflixResponse>().let { media ->
@@ -44,8 +63,17 @@ object CineStreamExtractors : CineStreamProvider() {
             }
             else null to null
         }
+        callback.invoke(
+            ExtractorLink(
+                "title",
+                "titlte",
+                nfTitle.toString(),
+                "",
+                Qualities.P1080.value
+            )
+        )
         app.get(
-            "$netflixAPI/playlist.php?id=${id ?: return}&t=${title ?: return}&tm=${APIHolder.unixTime}",
+            "$netflixAPI/playlist.php?id=${id ?: return}&t=${nfTitle ?: return}&tm=${APIHolder.unixTime}",
             headers = headers
         ).text.let {
             tryParseJson<ArrayList<NetflixResponse>>(it)
@@ -124,8 +152,9 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = if(season != null && episode != null) "$VadapavAPI/s/$title" else "$VadapavAPI/s/$title ($year)"
         val document = app.get(url).document
         val result = document.selectFirst("div.directory > ul > li > div > a")
+        val text = result.text().trim()
         val href = VadapavAPI + result.attr("href")
-        if(season != null && episode != null) {
+        if(season != null && episode != null && title.equals(text, true)) {
             val doc = app.get(href).document
             val seasonLink = VadapavAPI + doc.selectFirst("div.directory > ul > li > div > a.directory-entry:matches((?i)(Season 0${season}|Season ${season}))").attr("href")
             val seasonDoc = app.get(seasonLink).document
