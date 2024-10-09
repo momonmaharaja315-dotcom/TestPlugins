@@ -21,24 +21,20 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         val cookie = getNFCookies() ?: return
-        val headers = mapOf("X-Requested-With" to "XMLHttpRequest", "t_hash_t" to cookie, "Cookie" to "hd=on")
-        val url = "$netflixAPI/search.php?s=$title&t=${APIHolder.unixTime}"
-        val data = app.get(url, headers = headers).parsedSafe<NfSearchData>()
-        val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals(title.trim(), ignoreCase = true) }?.id
-
-        callback.invoke(
-            ExtractorLink(
-                "id",
-                "id",
-                "$netflixAPI/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
-                "",
-                Qualities.P1080.value
-            )
+        val cookies = mapOf(
+            "t_hash_t" to cookie,
+            "hd" to "on"
         )
+        val headers = mapOf("X-Requested-With" to "XMLHttpRequest")
+        val url = "$netflixAPI/search.php?s=$title&t=${APIHolder.unixTime}"
+        val data = app.get(url, headers = headers, cookies = cookies).parsedSafe<NfSearchData>()
+        val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals(title.trim(), ignoreCase = true) }?.id
 
         val (nfTitle, id) = app.get(
             "$netflixAPI/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
-            headers = headers
+            headers = headers,
+            cookies = cookies,
+            referer = "$netflixAPI/"
         ).parsedSafe<NetflixResponse>().let { media ->
             if (season == null) {
                 media?.title to netflixId
@@ -47,23 +43,19 @@ object CineStreamExtractors : CineStreamProvider() {
                 val episodeId =
                     app.get(
                         "$netflixAPI/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}",
-                        headers = headers
+                        headers = headers,
+                        cookies = cookies,
+                        referer = "$netflixAPI/"
                     ).parsedSafe<NetflixResponse>()?.episodes?.find { it.ep == "E$episode" }?.id
                 media?.title to episodeId
             }
         }
-        callback.invoke(
-            ExtractorLink(
-                "title",
-                "title",
-                nfTitle.toString(),
-                "",
-                Qualities.P1080.value
-            )
-        )
+
         app.get(
             "$netflixAPI/playlist.php?id=${id ?: return}&t=${nfTitle ?: return}&tm=${APIHolder.unixTime}",
-            headers = headers
+            headers = headers,
+            cookies = cookies,
+            referer = "$netflixAPI/"
         ).text.let {
             tryParseJson<ArrayList<NetflixResponse>>(it)
         }?.firstOrNull()?.sources?.map {
