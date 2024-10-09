@@ -66,7 +66,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     "PrimeVideo",
                     "$netflixAPI/${it.file}",
                     "$netflixAPI/",
-                    getQualityFromName(it.file.substringAfter("q=").substringBefore("&in") ?: return),
+                    getQualityFromName(it.file.substringAfter("q=")?.substringBefore("&in")),
                     INFER_TYPE,
                     headers = mapOf("Cookie" to "hd=on")
                 )
@@ -127,7 +127,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     "Netflix",
                     "$netflixAPI/${it.file}",
                     "$netflixAPI/",
-                    getQualityFromName(it.file.substringAfter("q=").substringBefore("&in") ?: return),
+                    getQualityFromName(it.file.substringAfter("q=")?.substringBefore("&in")),
                     INFER_TYPE,
                     headers = mapOf("Cookie" to "hd=on")
                 )
