@@ -24,7 +24,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val headers = mapOf("X-Requested-With" to "XMLHttpRequest", "t_hash_t" to cookie, "Cookie" to "hd=on")
         val url = "$netflixAPI/search.php?s=$title&t=${APIHolder.unixTime}"
         val data = app.get(url, headers = headers).parsedSafe<SearchData>()
-        val netflixId = data.searchResult.firstOrNull { it.t == title }.id 
+        val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals(title.trim(), ignoreCase = true) }?.id
 
         val (title, id) = app.get(
             "$netflixAPI/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
