@@ -16,6 +16,7 @@ import com.megix.CineStreamExtractors.invokeMoviesdrive
 import com.megix.CineStreamExtractors.invokeFull4Movies
 import com.megix.CineStreamExtractors.invokeVadaPav
 import com.megix.CineStreamExtractors.invokeNetflix
+import com.megix.CineStreamExtractors.invokePrimeVideo
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -258,6 +259,16 @@ open class CineStreamProvider : MainAPI() {
             },
             {
                 invokeNetflix(
+                    res.title,
+                    firstYear,
+                    res.season,
+                    res.episode,
+                    subtitleCallback,
+                    callback
+                )
+            },
+            {
+                invokePrimeVideo(
                     res.title,
                     firstYear,
                     res.season,

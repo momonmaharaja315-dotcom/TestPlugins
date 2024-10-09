@@ -11,6 +11,68 @@ import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.fasterxml.jackson.annotation.JsonProperty
 
 object CineStreamExtractors : CineStreamProvider() {
+
+    suspend fun invokePrimeVideo(
+        title: String,
+        year: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        val cookie = getNFCookies() ?: return
+        val cookies = mapOf(
+            "t_hash_t" to cookie,
+            "ott" to "pv",
+            "hd" to "on"
+        )
+        val headers = mapOf("X-Requested-With" to "XMLHttpRequest")
+        val url = "$netflixAPI/pv/search.php?s=$title&t=${APIHolder.unixTime}"
+        val data = app.get(url, headers = headers, cookies = cookies).parsedSafe<NfSearchData>()
+        val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals(title.trim(), ignoreCase = true) }?.id
+
+        val (nfTitle, id) = app.get(
+            "$netflixAPI/pv/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
+            headers = headers,
+            cookies = cookies,
+            referer = "$netflixAPI/"
+        ).parsedSafe<NetflixResponse>().let { media ->
+            if (season == null) {
+                media?.title to netflixId
+            } else {
+                val seasonId = media?.season?.find { it.s == "$season" }?.id
+                val episodeId =
+                    app.get(
+                        "$netflixAPI/pv/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}",
+                        headers = headers,
+                        cookies = cookies,
+                        referer = "$netflixAPI/"
+                    ).parsedSafe<NetflixResponse>()?.episodes?.find { it.ep == "E$episode" }?.id
+                media?.title to episodeId
+            }
+        }
+
+        app.get(
+            "$netflixAPI/pv/playlist.php?id=${id ?: return}&t=${nfTitle ?: return}&tm=${APIHolder.unixTime}",
+            headers = headers,
+            cookies = cookies,
+            referer = "$netflixAPI/"
+        ).text.let {
+            tryParseJson<ArrayList<NetflixResponse>>(it)
+        }?.firstOrNull()?.sources?.map {
+            callback.invoke(
+                ExtractorLink(
+                    "PrimeVideo",
+                    "PrimeVideo",
+                    "$netflixAPI/${it.file}",
+                    "$netflixAPI/",
+                    getQualityFromName(it.file.substringAfter("q=").substringBefore("&in") ?: return),
+                    INFER_TYPE,
+                    headers = mapOf("Cookie" to "hd=on")
+                )
+            )
+        }
+    }
     
     suspend fun invokeNetflix(
         title: String,
@@ -63,9 +125,9 @@ object CineStreamExtractors : CineStreamProvider() {
                 ExtractorLink(
                     "Netflix",
                     "Netflix",
-                    fixUrl(it.file ?: return),
+                    "$netflixAPI/${it.file}",
                     "$netflixAPI/",
-                    getQualityFromName(it.file.substringAfter("q=") ?: return),
+                    getQualityFromName(it.file.substringAfter("q=").substringBefore("&in") ?: return),
                     INFER_TYPE,
                     headers = mapOf("Cookie" to "hd=on")
                 )
