@@ -21,37 +21,18 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         val cookie = getNFCookies() ?: return
-        callback.invoke(
-            ExtractorLink(
-                "Cookie",
-                "Cookie",
-                cookie.toString(),
-                "",
-                Qualities.P1080.value
-            )
-        )
         val headers = mapOf("X-Requested-With" to "XMLHttpRequest", "t_hash_t" to cookie, "Cookie" to "hd=on")
         val url = "$netflixAPI/search.php?s=$title&t=${APIHolder.unixTime}"
         val data = app.get(url, headers = headers).parsedSafe<SearchData>()
         val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals(title.trim(), ignoreCase = true) }?.id
 
-        callback.invoke(
-            ExtractorLink(
-                "ID",
-                "ID",
-                netflixId.toString(),
-                "",
-                Qualities.P1080.value
-            )
-        )
-
         val (nfTitle, id) = app.get(
             "$netflixAPI/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
             headers = headers
         ).parsedSafe<NetflixResponse>().let { media ->
-            if (season == null && media?.year == year.toString()) {
+            if (season == null) {
                 media?.title to netflixId
-            } else if(media?.year == year.toString()) {
+            } else {
                 val seasonId = media?.season?.find { it.s == "$season" }?.id
                 val episodeId =
                     app.get(
@@ -61,12 +42,11 @@ object CineStreamExtractors : CineStreamProvider() {
                         .parsedSafe<NetflixResponse>()?.episodes?.find { it.ep == "E$episode" }?.id
                 media?.title to episodeId
             }
-            else null to null
         }
         callback.invoke(
             ExtractorLink(
                 "title",
-                "titlte",
+                "titte",
                 nfTitle.toString(),
                 "",
                 Qualities.P1080.value
