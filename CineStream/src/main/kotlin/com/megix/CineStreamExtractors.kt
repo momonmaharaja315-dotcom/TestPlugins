@@ -28,7 +28,7 @@ object CineStreamExtractors : CineStreamProvider() {
             "$netflixAPI/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
             headers = headers
         ).parsedSafe<NetflixResponse>().let { media ->
-            if (season == null && media?.year == year.toString()) {
+            if (season == null) {
                 media?.title to netflixId
             } else if(media?.year == year.toString()) {
                 val seasonId = media?.season?.find { it.s == "$season" }?.id
@@ -61,7 +61,7 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    suspend getNFCookies(): String? {
+    suspend fun getNFCookies(): String? {
         val json = app.get("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/main/NF_Cookie.json").text
         val data = parseJson<Cookie>(json)
         return data.cookie
@@ -240,7 +240,7 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
         api: String
     ) {
-val (seasonSlug, episodeSlug) = getEpisodeSlug(season, episode)
+        val (seasonSlug, episodeSlug) = getEpisodeSlug(season, episode)
         val cfInterceptor = CloudflareKiller()
         val fixtitle = title?.substringBefore("-")?.substringBefore(":")?.replace("&", " ")
         val url = if (season == null) {
@@ -280,7 +280,7 @@ val (seasonSlug, episodeSlug) = getEpisodeSlug(season, episode)
                         val tags =
                             """(?:720p|1080p|2160p)(.*)""".toRegex().find(it.text())?.groupValues?.get(1)
                                 ?.trim()
-                        val tagList = aTag.split(",")  // Changed variable name to tagList
+                        val tagList = aTag.split(",")
                         val href = it.nextElementSibling()?.select("a")?.filter { anchor ->
                             tagList.any { tag ->
                                 anchor.text().contains(tag.trim(), true)
