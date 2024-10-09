@@ -16,6 +16,7 @@ object CineStreamExtractors : CineStreamProvider() {
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
         val cookie = getNFCookies() ?: return
@@ -28,9 +29,9 @@ object CineStreamExtractors : CineStreamProvider() {
             "$netflixAPI/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
             headers = headers
         ).parsedSafe<NetflixResponse>().let { media ->
-            if (season == null) {
+            if (season == null && media?.title == title && media?.year == year.toString()) {
                 media?.title to netflixId
-            } else if(media?.year == year.toString()) {
+            } else if(media?.year == year.toString() && media?.title == title) {
                 val seasonId = media?.season?.find { it.s == "$season" }?.id
                 val episodeId =
                     app.get(
@@ -40,6 +41,7 @@ object CineStreamExtractors : CineStreamProvider() {
                         .parsedSafe<NetflixResponse>()?.episodes?.find { it.ep == "E$episode" }?.id
                 media?.title to episodeId
             }
+            else null to null
         }
         app.get(
             "$netflixAPI/playlist.php?id=${id ?: return}&t=${title ?: return}&tm=${APIHolder.unixTime}",
@@ -51,7 +53,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 ExtractorLink(
                     "Netflix",
                     "Netflix",
-                    fixUrl(it.file ?: return@map, netflixAPI),
+                    fixUrl(it.file),
                     "$netflixAPI/",
                     getQualityFromName(it.file.substringAfter("q=")),
                     INFER_TYPE,
