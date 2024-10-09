@@ -23,15 +23,15 @@ object CineStreamExtractors : CineStreamProvider() {
         val headers = mapOf("X-Requested-With" to "XMLHttpRequest", "t_hash_t" to cookie, "Cookie" to "hd=on")
         val url = "$netflixAPI/search.php?s=$title&t=${APIHolder.unixTime}"
         val data = app.get(url, headers = headers).parsedSafe<SearchData>()
-        val netflixId = data.searchResult.firstOrNull { it.t == title }?.id
+        val netflixId = data.searchResult.firstOrNull { it.t == title }?.id ?: return
 
         val (title, id) = app.get(
             "$netflixAPI/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
             headers = headers
         ).parsedSafe<NetflixResponse>().let { media ->
-            if (season == null && media?.title == title && media?.year == year.toString()) {
+            if (season == null && media?.year == year.toString()) {
                 media?.title to netflixId
-            } else if(media?.year == year.toString() && media?.title == title) {
+            } else if(media?.year == year.toString()) {
                 val seasonId = media?.season?.find { it.s == "$season" }?.id
                 val episodeId =
                     app.get(
@@ -53,9 +53,9 @@ object CineStreamExtractors : CineStreamProvider() {
                 ExtractorLink(
                     "Netflix",
                     "Netflix",
-                    fixUrl(it.file),
+                    fixUrl(it.file ?: return),
                     "$netflixAPI/",
-                    getQualityFromName(it.file.substringAfter("q=")),
+                    getQualityFromName(it.file.substringAfter("q=") ?: return),
                     INFER_TYPE,
                     headers = mapOf("Cookie" to "hd=on")
                 )
@@ -280,7 +280,7 @@ object CineStreamExtractors : CineStreamProvider() {
                             }
                     entries.amap { it ->
                         val tags =
-                            """(?:720p|1080p|2160p)(.*)""".toRegex().find(it.text())?.groupValues?.get(1)
+                            """(?:480p|720p|1080p|2160p)(.*)""".toRegex().find(it.text())?.groupValues?.get(1)
                                 ?.trim()
                         val tagList = aTag.split(",")
                         val href = it.nextElementSibling()?.select("a")?.filter { anchor ->
@@ -498,9 +498,7 @@ object CineStreamExtractors : CineStreamProvider() {
             app.get(url, interceptor = wpRedisInterceptor).document.select("#content_box article")
                 .toString()
         val hrefpattern =
-            Regex("""(?i)<article[^>]*>\s*<a\s+href="([^"]*$searchtitle[^"]*)"""").find(res1)?.groupValues?.get(
-                1
-            )
+            Regex("""(?i)<article[^>]*>\s*<a\s+href="([^"]*$searchtitle[^"]*)"""").find(res1)?.groupValues?.get(1)
         val hTag = if (season == null) "h4" else "h3"
         val aTag = if (season == null) "Download" else "Episode"
         val sTag = if (season == null) "" else "(S0$season|Season $season)"
