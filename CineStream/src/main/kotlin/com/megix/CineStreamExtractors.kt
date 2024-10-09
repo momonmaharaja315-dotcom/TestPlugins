@@ -39,7 +39,7 @@ object CineStreamExtractors : CineStreamProvider() {
         ).parsedSafe<NetflixResponse>().let { media ->
             if (season == null && year.toString() == media?.year.toString()) {
                 media?.title to netflixId
-            } elseif(year.toString() == media?.year.toString()) {
+            } else if(year.toString() == media?.year.toString()) {
                 val seasonId = media?.season?.find { it.s == "$season" }?.id
                 val episodeId =
                     app.get(
