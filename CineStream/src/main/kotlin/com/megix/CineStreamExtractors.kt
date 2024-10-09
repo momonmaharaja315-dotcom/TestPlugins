@@ -37,9 +37,9 @@ object CineStreamExtractors : CineStreamProvider() {
             cookies = cookies,
             referer = "$netflixAPI/"
         ).parsedSafe<NetflixResponse>().let { media ->
-            if (season == null) {
+            if (season == null && year.toString() == media?.year.toString()) {
                 media?.title to netflixId
-            } else {
+            } elseif(year.toString() == media?.year.toString()) {
                 val seasonId = media?.season?.find { it.s == "$season" }?.id
                 val episodeId =
                     app.get(
@@ -49,6 +49,9 @@ object CineStreamExtractors : CineStreamProvider() {
                         referer = "$netflixAPI/"
                     ).parsedSafe<NetflixResponse>()?.episodes?.find { it.ep == "E$episode" }?.id
                 media?.title to episodeId
+            }
+            else {
+                null to null
             }
         }
 
@@ -66,7 +69,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     "PrimeVideo",
                     "$netflixAPI/${it.file}",
                     "$netflixAPI/",
-                    getQualityFromName(it.file.substringAfter("q=")?.substringBefore("&in")),
+                    getQualityFromName(it.file?.substringAfter("q=")?.substringBefore("&in")),
                     INFER_TYPE,
                     headers = mapOf("Cookie" to "hd=on")
                 )
@@ -98,9 +101,9 @@ object CineStreamExtractors : CineStreamProvider() {
             cookies = cookies,
             referer = "$netflixAPI/"
         ).parsedSafe<NetflixResponse>().let { media ->
-            if (season == null) {
+            if (season == null && year.toString() == media?.year.toString()) {
                 media?.title to netflixId
-            } else {
+            } else if(year.toString() == media?.year.toString()) {
                 val seasonId = media?.season?.find { it.s == "$season" }?.id
                 val episodeId =
                     app.get(
@@ -110,6 +113,9 @@ object CineStreamExtractors : CineStreamProvider() {
                         referer = "$netflixAPI/"
                     ).parsedSafe<NetflixResponse>()?.episodes?.find { it.ep == "E$episode" }?.id
                 media?.title to episodeId
+            }
+            else {
+                null to null
             }
         }
 
@@ -127,7 +133,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     "Netflix",
                     "$netflixAPI/${it.file}",
                     "$netflixAPI/",
-                    getQualityFromName(it.file.substringAfter("q=")?.substringBefore("&in")),
+                    getQualityFromName(it.file?.substringAfter("q=")?.substringBefore("&in")),
                     INFER_TYPE,
                     headers = mapOf("Cookie" to "hd=on")
                 )
