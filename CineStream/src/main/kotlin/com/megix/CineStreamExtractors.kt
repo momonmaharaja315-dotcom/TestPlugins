@@ -23,8 +23,17 @@ object CineStreamExtractors : CineStreamProvider() {
         val cookie = getNFCookies() ?: return
         val headers = mapOf("X-Requested-With" to "XMLHttpRequest", "t_hash_t" to cookie, "Cookie" to "hd=on")
         val url = "$netflixAPI/search.php?s=$title&t=${APIHolder.unixTime}"
-        val data = app.get(url, headers = headers).parsedSafe<SearchData>()
-        val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals(title.trim(), ignoreCase = true) }?.id
+        val data = app.get(url, headers = headers).parsedSafe<NfSearchData>()
+        val netflixId = data ?.NfSearchResult ?.firstOrNull { it.t.equals(title.trim(), ignoreCase = true) }?.id
+
+        callback.invoke(
+            ExtractorLink(
+                "id",
+                "id",
+                "$netflixAPI/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
+                "",
+                Qualities.P1080.value
+            )
 
         val (nfTitle, id) = app.get(
             "$netflixAPI/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
@@ -38,15 +47,14 @@ object CineStreamExtractors : CineStreamProvider() {
                     app.get(
                         "$netflixAPI/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}",
                         headers = headers
-                    )
-                        .parsedSafe<NetflixResponse>()?.episodes?.find { it.ep == "E$episode" }?.id
+                    ).parsedSafe<NetflixResponse>()?.episodes?.find { it.ep == "E$episode" }?.id
                 media?.title to episodeId
             }
         }
         callback.invoke(
             ExtractorLink(
                 "title",
-                "titte",
+                "title",
                 nfTitle.toString(),
                 "",
                 Qualities.P1080.value
@@ -74,21 +82,21 @@ object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun getNFCookies(): String? {
         val json = app.get("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/main/NF_Cookie.json").text
-        val data = parseJson<Cookie>(json)
+        val data = parseJson<NfCookie>(json)
         return data.cookie
     }
 
-    data class SearchData(
+    data class NfSearchData(
         val head: String,
-        val searchResult: List<SearchResult>,
+        val searchResult: List<NfSearchResult>,
         val type: Int
     )
-    data class SearchResult(
+    data class NfSearchResult(
         val id: String,
         val t: String
     )
 
-    data class Cookie(
+    data class NfCookie(
         @JsonProperty("cookie") val cookie: String
     )
 
