@@ -12,6 +12,75 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend fun invokeDramaCool(
+        title: String,
+        year: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        val url = if(season == null && episode == null) { 
+            val episodeSlug = "$title episode 1".createSlug()
+            "${MyConsumetAPI}/movies/dramacool/watch?episodeId=$episodeSlug" 
+        }
+        else {
+            val titleSlug = title.createSlug()
+            val episodeSlug = "$titleSlug episode $episode".createSlug()
+            "${MyConsumetAPI}/movies/dramacool/watch?episodeId=$episodeSlug"
+        }
+
+        callback.invoke(
+            ExtractorLink(
+                "URL",
+                "URL",
+                url,
+                referer = "",
+                quality = Qualities.P1080.value,
+            )
+        )
+
+        val json = app.get(url).text
+        val data = json.parsedSafe<ConsumetSources>() ?: return
+        data.sources?.forEach {
+            callback.invoke(
+                ExtractorLink(
+                    "DramaCool",
+                    "DramaCool",
+                    it.url,
+                    referer = "",
+                    quality = Qualities.Unknown.value,
+                    isM3u8 = it.isM3u8
+                )
+            )
+        }
+        
+        data.subtitles?.forEach {
+            subtitleCallback.invoke(
+                SubtitleFile(
+                    it.url,
+                    it.lang
+                )
+            )
+        }
+    }
+
+    data class ConsumetSources {
+        val sources: List<ConsumetSource>?,
+        val subtitles: List<ConsumetSubtitle>?,
+        val download: String?
+    }
+    
+    data class ConsumetSource(
+        val url: String,
+        val isM3u8: Boolean
+    )
+
+    data class ConsumetSubtitle(
+        val url: String,
+        val lang: String
+    )
+
     suspend fun invokePrimeVideo(
         title: String,
         year: Int? = null,
