@@ -22,12 +22,12 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val url = if(season == null && episode == null) { 
             val episodeSlug = "$title episode 1".createSlug()
-            "${MyConsumetAPI}/movies/dramacool/watch?episodeId=$episodeSlug" 
+            "${myConsumetAPI}/movies/dramacool/watch?episodeId=${episodeSlug}" 
         }
         else {
             val titleSlug = title.createSlug()
             val episodeSlug = "$titleSlug episode $episode".createSlug()
-            "${MyConsumetAPI}/movies/dramacool/watch?episodeId=$episodeSlug"
+            "${myConsumetAPI}/movies/dramacool/watch?episodeId=${episodeSlug}"
         }
 
         callback.invoke(
@@ -41,7 +41,7 @@ object CineStreamExtractors : CineStreamProvider() {
         )
 
         val json = app.get(url).text
-        val data = json.parsedSafe<ConsumetSources>() ?: return
+        val data = parseJson<ConsumetSources>(json) ?: return
         data.sources?.forEach {
             callback.invoke(
                 ExtractorLink(
@@ -65,11 +65,11 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    data class ConsumetSources {
+    data class ConsumetSources(
         val sources: List<ConsumetSource>?,
         val subtitles: List<ConsumetSubtitle>?,
         val download: String?
-    }
+    )
     
     data class ConsumetSource(
         val url: String,
