@@ -20,27 +20,43 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        val url = if(season == null && episode == null) { 
-            val episodeSlug = "$title episode 1".createSlug()
-            "${myConsumetAPI}/movies/dramacool/watch?episodeId=${episodeSlug}" 
+        val json = if(season == null && episode == null) { 
+            var episodeSlug = "$title episode 1".createSlug()
+            val url = "${myConsumetAPI}/movies/dramacool/watch?episodeId=${episodeSlug}" 
+            val res = app.get(url).text
+            if(res.contains("Media Not found")) {
+                val newEpisodeSlug = "$title $year episode 1".createSlug()
+                val newUrl = "$myConsumetAPI/movies/dramacool/watch?episodeId=${newEpisodeSlug}"
+                app.get(newUrl).text
+            }
+            else {
+                res
+            }
         }
         else {
-            val titleSlug = title.createSlug()
-            val episodeSlug = "$titleSlug episode $episode".createSlug()
-            "${myConsumetAPI}/movies/dramacool/watch?episodeId=${episodeSlug}"
+            val episodeSlug = "$title episode $episode".createSlug()
+            val url =  "${myConsumetAPI}/movies/dramacool/watch?episodeId=${episodeSlug}"
+            val res = app.get(url).text
+            if(res.contains("Media Not found")) {
+                val newEpisodeSlug = "$title $year episode $episode".createSlug()
+                val newUrl = "$myConsumetAPI/movies/dramacool/watch?episodeId=${newEpisodeSlug}"
+                app.get(newUrl).text
+            }
+            else {
+                res
+            }
         }
 
         callback.invoke(
             ExtractorLink(
                 "URL",
                 "URL",
-                url,
+                json.toString(),
                 referer = "",
                 quality = Qualities.P1080.value,
             )
         )
 
-        val json = app.get(url).text
         val data = parseJson<ConsumetSources>(json) ?: return
         data.sources?.forEach {
             callback.invoke(
@@ -50,7 +66,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     it.url,
                     referer = "",
                     quality = Qualities.Unknown.value,
-                    isM3u8 = it.isM3u8
+                    isM3u8 = true
                 )
             )
         }
@@ -58,8 +74,8 @@ object CineStreamExtractors : CineStreamProvider() {
         data.subtitles?.forEach {
             subtitleCallback.invoke(
                 SubtitleFile(
-                    it.url,
-                    it.lang
+                    it.lang,
+                    it.url
                 )
             )
         }
