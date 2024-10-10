@@ -34,11 +34,12 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
         else {
-            val episodeSlug = "$title episode $episode".createSlug()
+            val seasonText = if(season == 1) "" else "season $season"
+            val episodeSlug = "$title $seasonText episode $episode".createSlug()
             val url =  "${myConsumetAPI}/movies/dramacool/watch?episodeId=${episodeSlug}"
             val res = app.get(url).text
             if(res.contains("Media Not found")) {
-                val newEpisodeSlug = "$title $year episode $episode".createSlug()
+                val newEpisodeSlug = "$title $seasonText $year episode $episode".createSlug()
                 val newUrl = "$myConsumetAPI/movies/dramacool/watch?episodeId=${newEpisodeSlug}"
                 app.get(newUrl).text
             }
