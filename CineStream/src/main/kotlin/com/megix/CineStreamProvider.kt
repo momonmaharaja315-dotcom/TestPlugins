@@ -17,6 +17,7 @@ import com.megix.CineStreamExtractors.invokeFull4Movies
 import com.megix.CineStreamExtractors.invokeVadaPav
 import com.megix.CineStreamExtractors.invokeNetflix
 import com.megix.CineStreamExtractors.invokePrimeVideo
+import com.megix.CineStreamExtractors.invokeDramaCool
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
