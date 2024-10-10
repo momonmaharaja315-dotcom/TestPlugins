@@ -48,16 +48,6 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
 
-        callback.invoke(
-            ExtractorLink(
-                "URL",
-                "URL",
-                json.toString(),
-                referer = "",
-                quality = Qualities.P1080.value,
-            )
-        )
-
         val data = parseJson<ConsumetSources>(json) ?: return
         data.sources?.forEach {
             callback.invoke(
@@ -66,7 +56,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     "DramaCool",
                     it.url,
                     referer = "",
-                    quality = Qualities.Unknown.value,
+                    quality = Qualities.P1080.value,
                     isM3u8 = true
                 )
             )
