@@ -125,9 +125,9 @@ open class CineStreamProvider : MainAPI() {
         val cast : List<String> = movieData.meta.cast ?: emptyList()
         val genre : List<String> = movieData.meta.genre ?: emptyList()
         val background = movieData.meta.background.toString()
-        val isAnime = if(movieData.meta.country?.contains("Japan", true) && genre.any { it.contains("Animation", true) }) true else false
-        val isBollywood = if(movieData.meta.country?.contains("India", true)) true else false
-        val isKorean = if(movieData.meta.country?.contains("Korea", true)) true else false
+        val isAnime = if(movieData.meta.country.toString().contains("Japan", true) && genre.any { it.contains("Animation", true) }) true else false
+        val isBollywood = if(movieData.meta.country.toString().contains("India", true)) true else false
+        val isKorean = if(movieData.meta.country.toString().contains("Korea", true)) true else false
 
         if(tvtype == "movie") {
             val data = LoadLinksData(
