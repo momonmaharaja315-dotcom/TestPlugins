@@ -89,7 +89,8 @@ open class CineStreamProvider : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
-        val allResults = mutableListOf<SearchResult>()
+        val searchResponse = mutableListOf<SearchResponse>()
+        val allResults = mutableListOf<Media>()
         val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
         val movies = parseJson<SearchResult>(movieJson)
         allResults.addAll(movies.metas)
@@ -126,8 +127,8 @@ open class CineStreamProvider : MainAPI() {
         val genre : List<String> = movieData.meta.genre ?: emptyList()
         val background = movieData.meta.background.toString()
         val isCartoon = genre.any { it.contains("Animation", true) }
-        val isAnime = (movieData.meta.country.contains("Japan", true) || 
-            movieData.meta.country.contains("China", true)) && isCartoon
+        val isAnime = (movieData.meta.country.toString().contains("Japan", true) || 
+            movieData.meta.country.toString().contains("China", true)) && isCartoon
         val isBollywood = movieData.meta.country.toString().contains("India", true)
         val isAsian = (movieData.meta.country.toString().contains("Korea", true) ||
                 movieData.meta.country.toString().contains("China", true)) && !isAnime
