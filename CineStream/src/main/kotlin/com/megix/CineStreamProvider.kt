@@ -90,21 +90,21 @@ open class CineStreamProvider : MainAPI() {
 
     override suspend fun search(query: String): List<SearchResponse> {
         val searchResponse = mutableListOf<SearchResponse>()
+
+        val allResults = mutableListOf<SearchResult>()
         val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
         val movies = parseJson<SearchResult>(movieJson)
-        movies.metas.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
-                this.posterUrl = it.poster.toString()
-            })
-        }
+        allResults.addAll(movies.metas)
 
         val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
         val series = parseJson<SearchResult>(seriesJson)
-        series.metas.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
-                this.posterUrl = it.poster.toString()
-            })
-        }
+        allResults.addAll(series.metas)
+
+        searchResponse.addAll(allResults.map { media ->
+            newMovieSearchResponse(media.name, PassData(media.id, media.type).toJson(), TvType.Movie) {
+                this.posterUrl = media.poster.toString()
+            }
+        }.sortedBy { it.rank })
 
         return searchResponse
     }
@@ -121,13 +121,17 @@ open class CineStreamProvider : MainAPI() {
         val posterUrl = movieData.meta.poster.toString()
         val imdbRating = movieData.meta.imdbRating
         val year = movieData.meta.year.toString()
+        val releaseInfo = movieData.meta.releaseInfo.toString()
         var description = movieData.meta.description.toString()
         val cast : List<String> = movieData.meta.cast ?: emptyList()
         val genre : List<String> = movieData.meta.genre ?: emptyList()
         val background = movieData.meta.background.toString()
-        val isAnime = if(movieData.meta.country.toString().contains("Japan", true) && genre.any { it.contains("Animation", true) }) true else false
-        val isBollywood = if(movieData.meta.country.toString().contains("India", true)) true else false
-        val isKorean = if(movieData.meta.country.toString().contains("Korea", true)) true else false
+        val isCartoon = genre.any { it.contains("Animation", true) }
+        val isAnime = (movieData.meta.country.contains("Japan", true) || 
+            movieData.meta.country.contains("China", true)) && isCartoon
+        val isBollywood = movieData.meta.country.toString().contains("India", true)
+        val isAsian = (movieData.meta.country.toString().contains("Korea", true) ||
+                movieData.meta.country.toString().contains("China", true)) && !isAnime
 
         if(tvtype == "movie") {
             val data = LoadLinksData(
@@ -140,14 +144,15 @@ open class CineStreamProvider : MainAPI() {
                 null,
                 isAnime,
                 isBollywood,
-                isKorean    
+                isAsian,
+                isCartoon   
             ).toJson()
             return newMovieLoadResponse(title, url, TvType.Movie, data) {
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
                 this.rating = imdbRating.toRatingInt()
-                this.year = year.toIntOrNull()
+                this.year = year.toIntOrNull() ?: releaseInfo.substringBefore("–").toIntOrNull()
                 this.backgroundPosterUrl = background
                 addActors(cast)
                 addImdbId(id)
@@ -166,7 +171,8 @@ open class CineStreamProvider : MainAPI() {
                         ep.firstAired,
                         isAnime,
                         isBollywood,
-                        isKorean
+                        isAsian,
+                        isCartoon
                     ).toJson()
                 ) {
                     this.name = ep.name ?: ep.title
@@ -182,7 +188,7 @@ open class CineStreamProvider : MainAPI() {
                 this.plot = description
                 this.tags = genre
                 this.rating = imdbRating.toRatingInt()
-                this.year = year.substringBefore("–").toIntOrNull()
+                this.year = year.substringBefore("–").toIntOrNull() ?: releaseInfo.substringBefore("–").toIntOrNull()
                 this.backgroundPosterUrl = background
                 addActors(cast)
                 addImdbId(id)
@@ -202,7 +208,7 @@ open class CineStreamProvider : MainAPI() {
         val firstYear = if(res.tvtype == "movie") res.year.toIntOrNull() else res.year.substringBefore("–").toIntOrNull()
         argamap(
             {
-                invokeVegamovies(
+                if(!res.isBollywood) invokeVegamovies(
                     res.title,
                     year,
                     res.season,
@@ -232,7 +238,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                invokeMoviesmod(
+                if(!res.isBollywood) invokeMoviesmod(
                     res.title,
                     year,
                     res.season,
@@ -252,7 +258,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                invokeFull4Movies(
+                if(!res.isAnime) invokeFull4Movies(
                     res.title,
                     year,
                     res.season,
@@ -292,7 +298,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                if(res.isKorean) invokeDramaCool(
+                if(res.isAsian) invokeDramaCool(
                     res.title,
                     year,
                     res.season,
@@ -315,7 +321,8 @@ open class CineStreamProvider : MainAPI() {
         val firstAired: String? = null,
         val isAnime: Boolean = false,
         val isBollywood: Boolean = false,
-        val isKorean: Boolean = false,
+        val isAsian: Boolean = false,
+        val isCartoon: Boolean = false
     )
 
     data class PassData(
