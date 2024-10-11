@@ -121,7 +121,7 @@ open class CineStreamProvider : MainAPI() {
         val title = movieData.meta.name.toString()
         val posterUrl = movieData.meta.poster.toString()
         val imdbRating = movieData.meta.imdbRating
-        val year = movieData.meta.year.toString()
+        val year = movieData.meta.year
         val releaseInfo = movieData.meta.releaseInfo.toString()
         var description = movieData.meta.description.toString()
         val cast : List<String> = movieData.meta.cast ?: emptyList()
@@ -139,7 +139,7 @@ open class CineStreamProvider : MainAPI() {
                 title,
                 id,
                 tvtype,
-                year,
+                year ?: releaseInfo,
                 null,
                 null,
                 null,
@@ -166,7 +166,7 @@ open class CineStreamProvider : MainAPI() {
                         title,
                         id,
                         tvtype,
-                        year,
+                        year ?: releaseInfo,
                         ep.season,
                         ep.episode,
                         ep.firstAired,
