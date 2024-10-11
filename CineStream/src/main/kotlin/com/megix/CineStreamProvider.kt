@@ -90,20 +90,21 @@ open class CineStreamProvider : MainAPI() {
 
     override suspend fun search(query: String): List<SearchResponse> {
         val searchResponse = mutableListOf<SearchResponse>()
-        val allResults = mutableListOf<Media>()
         val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
         val movies = parseJson<SearchResult>(movieJson)
-        allResults.addAll(movies.metas)
+        movies.metas.forEach {
+            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
+                this.posterUrl = it.poster.toString()
+            })
+        }
 
         val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
         val series = parseJson<SearchResult>(seriesJson)
-        allResults.addAll(series.metas)
-
-        searchResponse.addAll(allResults.map { media ->
-            newMovieSearchResponse(media.name, PassData(media.id, media.type).toJson(), TvType.Movie) {
-                this.posterUrl = media.poster.toString()
-            }
-        }.sortedBy { it.rank })
+        series.metas.forEach {
+            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
+                this.posterUrl = it.poster.toString()
+            })
+        }
 
         return searchResponse
 
