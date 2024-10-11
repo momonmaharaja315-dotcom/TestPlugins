@@ -89,8 +89,6 @@ open class CineStreamProvider : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
-        val searchResponse = mutableListOf<SearchResponse>()
-
         val allResults = mutableListOf<SearchResult>()
         val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
         val movies = parseJson<SearchResult>(movieJson)
@@ -107,6 +105,7 @@ open class CineStreamProvider : MainAPI() {
         }.sortedBy { it.rank })
 
         return searchResponse
+
     }
 
 

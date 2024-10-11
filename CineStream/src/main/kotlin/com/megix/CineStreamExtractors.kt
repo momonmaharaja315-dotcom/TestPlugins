@@ -460,7 +460,7 @@ object CineStreamExtractors : CineStreamProvider() {
                                     url, interceptor = wpRedisInterceptor
                                 ).document.select("div.entry-content > $selector").map { sources ->
                                     val server = sources.attr("href")
-                                    loadSourceNameExtractor(
+                                    loadAddSourceExtractor(
                                         "V-Cloud",
                                         server,
                                         "$api/",
@@ -478,7 +478,7 @@ object CineStreamExtractors : CineStreamProvider() {
                                         while (sibling != null && sibling.tagName() == "p") {
                                             sibling.select("a:matches(V-Cloud|G-Direct)").forEach { sources ->
                                                 val server = sources.attr("href")
-                                                loadSourceNameExtractor(
+                                                loadAddSourceExtractor(
                                                     "V-Cloud",
                                                     server,
                                                     "$api/",
