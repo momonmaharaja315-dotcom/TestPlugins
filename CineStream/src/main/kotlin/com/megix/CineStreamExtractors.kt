@@ -282,14 +282,14 @@ object CineStreamExtractors : CineStreamProvider() {
         if(season != null && episode != null && title.equals(text, true)) {
             val doc = app.get(href).document
             val filteredLink = doc.select("div.directory > ul > li > div > a.directory-entry").firstOrNull { aTag ->
-                val seasonFromText = Regex("""\bSeason\s(\d{1,2})\b""").find(aTag.text())?.groupValues ?. get(1)
+                val seasonFromText = Regex("""Season\s(\d{1,2})""").find(aTag.text())?.groupValues ?. get(1)
                 seasonFromText ?.toInt() == season
             }
             val seasonLink = VadapavAPI + (filteredLink ?. attr("href") ?: return)
             val seasonDoc = app.get(seasonLink).document
             val filteredLinks = seasonDoc.select("div.directory > ul > li > div > a.file-entry")
                 .filter { element ->
-                    val episodeFromText = Regex("""\bE(\d{1,3})\b""").find(element.text())?.groupValues?.get(1)
+                    val episodeFromText = Regex("""E(\d{1,3})""").find(element.text())?.groupValues?.get(1)
                     episodeFromText?.toIntOrNull() ?: return@filter false
                     episodeFromText.toInt() == episode
                 }
