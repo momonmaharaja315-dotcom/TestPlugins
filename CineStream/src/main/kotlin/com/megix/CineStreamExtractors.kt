@@ -287,11 +287,14 @@ object CineStreamExtractors : CineStreamProvider() {
             }
             val seasonLink = VadapavAPI + (filteredLink ?. attr("href") ?: return)
             val seasonDoc = app.get(seasonLink).document
-            seasonDoc.select("div.directory > ul > li > div > a.file-entry").filter {
-                val episodeFromText = Regex("""\bE(\d{1,3})\b""").find(it.text())?.groupValues ?. get(1)
-                episodeFromText ?.toInt() == episode
-            }
-            .forEach {
+            val filteredLinks = seasonDoc.select("div.directory > ul > li > div > a.file-entry")
+                .filter { element ->
+                    val episodeFromText = Regex("""\bE(\d{1,3})\b""").find(element.text())?.groupValues?.get(1)
+                    episodeFromText?.toIntOrNull() ?: return@filter false
+                    episodeFromText.toInt() == episode
+                }
+            
+            filteredLinks.forEach {
                 if(it.text().contains(".mkv", true) || it.text().contains(".mp4", true)) {
                     for((index, mirror) in mirrors.withIndex()) {
                         callback.invoke(
