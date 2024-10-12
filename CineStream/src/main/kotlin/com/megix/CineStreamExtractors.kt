@@ -281,9 +281,16 @@ object CineStreamExtractors : CineStreamProvider() {
         val href = VadapavAPI + result.attr("href")
         if(season != null && episode != null && title.equals(text, true)) {
             val doc = app.get(href).document
-            val seasonLink = VadapavAPI + doc.selectFirst("div.directory > ul > li > div > a.directory-entry:matches((?i)(Season 0${season}|Season ${season}))").attr("href")
+            val filteredLink = doc.select("div.directory > ul > li > div > a.directory-entry").firstOrNull { aTag ->
+                val seasonFromText = Regex("""\bSeason\s(\d{1,2})\b""").find(aTag.text())?.groupValues ?. get(1)
+                seasonFromText ?.toInt() == season
+            }
+            val seasonLink = VadapavAPI + (filteredLink ?. attr("href") ?: return)
             val seasonDoc = app.get(seasonLink).document
-            seasonDoc.select("div.directory > ul > li > div > a.file-entry:matches((?i)(Episode 0${episode}|Episode ${episode}|EP0${episode}|EP${episode}|EP 0${episode}|EP ${episode}|E0${episode}|E${episode}|E 0${episode}|E ${episode}))")
+            seasonDoc.select("div.directory > ul > li > div > a.file-entry:matches").filter {
+                val episodeFromText = Regex("""\bE(\d{1,3})\b""").find(it.text())?.groupValues ?. get(1)
+                episodeFromText ?.toInt() == episode
+            }
             .forEach {
                 if(it.text().contains(".mkv", true) || it.text().contains(".mp4", true)) {
                     for((index, mirror) in mirrors.withIndex()) {
