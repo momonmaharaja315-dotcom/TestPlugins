@@ -287,7 +287,7 @@ object CineStreamExtractors : CineStreamProvider() {
             }
             val seasonLink = VadapavAPI + (filteredLink ?. attr("href") ?: return)
             val seasonDoc = app.get(seasonLink).document
-            seasonDoc.select("div.directory > ul > li > div > a.file-entry:matches").filter {
+            seasonDoc.select("div.directory > ul > li > div > a.file-entry").filter {
                 val episodeFromText = Regex("""\bE(\d{1,3})\b""").find(it.text())?.groupValues ?. get(1)
                 episodeFromText ?.toInt() == episode
             }
@@ -349,7 +349,7 @@ object CineStreamExtractors : CineStreamProvider() {
 
             } else {
                 val urls = Regex("""<a[^>]*href="([^"]*)"[^>]*>(?:WCH|Watch)<\/a>""").findAll(doc2.html())
-                urls.elementAtOrNull(episode?.minus(1) ?: 0)?.groupValues?.get(1) ?: ""
+                urls.elementAtOrNull(episode?.minus(1) ?: return)?.groupValues?.get(1) ?: ""
             }
             if(link.contains("4links.")) {
                 val doc = app.get(fixUrl(link)).document
