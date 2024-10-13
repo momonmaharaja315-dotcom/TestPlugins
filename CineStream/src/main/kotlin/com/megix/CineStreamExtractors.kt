@@ -16,7 +16,7 @@ import java.nio.charset.StandardCharsets
 object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun invoke2embed(
-        imdb_id:  String,
+        id:  String,
         season: Int? = null,
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit,
