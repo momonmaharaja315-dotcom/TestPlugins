@@ -12,6 +12,46 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend fun invokeW4U(
+        title: String,
+        year: Int? = null,
+        id: String,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        val url = if(season == null) "$W4UAPI/?s=$title+$year" else "$W4UAPI/?s=$title++$season"
+        val document = app.get(url).document
+        val link = document.selectFirst("div.post-thumb > a")?.attr("href")
+        val doc = app.get(link ?: return).document
+        val imdbId = doc.selectFirst("div.imdb_left > a")?.attr("href")?.substringAfter("title/")?.substringBefore("/") ?: ""
+        if(id == imdbId) {
+            if(season != null && episode != null) {
+                doc.select("a.my-button").mapNotNull {
+                    val title = it.parent()?.parent()?.previousElementSibling()?.text()?: ""
+                    val qualityRegex = """(1080p|720p|480p|2160p|4K|[0-9]*0p)""".toRegex(RegexOption.IGNORE_CASE)
+                    val quality = qualityRegex.find(title) ?. groupValues ?. get(1) ?: ""
+                    val realSeason = Regex("""(?:Season |S)(\d+)""").find(title) ?. groupValues ?. get(1) ?.toIntOrNull() ?: return @mapNotNull null
+                    if(season == realSeason) {
+                        val doc2 = app.get(it.attr("href")).document
+                        val h3 = doc2.select("h3:matches((?i)(episode))").get(episode-1)
+                        var source = h3.nextElementSibling().selectFirst("a")?.attr("href") ?: ""
+                        loadSourceNameExtractor("W4U", source, "", subtitleCallback, callback)
+                    }
+                }
+            }
+            else {
+                doc.select("a.my-button").mapNotNull {
+                    val doc2 = app.get(it.attr("href")).document
+                    doc2.select("h4 > a").mapNotNull {
+                        loadSourceNameExtractor("W4U", it.attr("href"),"", subtitleCallback, callback)
+                    }
+                }
+            }
+        }
+    }
+
     suspend fun invokeDramaCool(
         title: String,
         year: Int? = null,
@@ -48,7 +88,7 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
 
-        val data = parseJson<ConsumetSources>(json) ?: return
+        val data = parseJson<ConsumetSources>(json)
         data.sources?.forEach {
             callback.invoke(
                 ExtractorLink(
@@ -277,8 +317,8 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = if(season != null && episode != null) "$VadapavAPI/s/$title" else "$VadapavAPI/s/$title ($year)"
         val document = app.get(url).document
         val result = document.selectFirst("div.directory > ul > li > div > a")
-        val text = result.text().trim()
-        val href = VadapavAPI + result.attr("href")
+        val text = result?.text()?.trim().toString()
+        val href = VadapavAPI + (result?.attr("href") ?: return)
         if(season != null && episode != null && title.equals(text, true)) {
             val doc = app.get(href).document
             val filteredLink = doc.select("div.directory > ul > li > div > a.directory-entry").firstOrNull { aTag ->
@@ -357,10 +397,10 @@ object CineStreamExtractors : CineStreamProvider() {
             if(link.contains("4links.")) {
                 val doc = app.get(fixUrl(link)).document
                 val source = doc.selectFirst("iframe").attr("src") ?: ""
-                loadAddSourceExtractor("Full4Movies",source, referer = link, subtitleCallback, callback)
+                loadSourceNameExtractor("Full4Movies",source, referer = link, subtitleCallback, callback)
             }
             else {
-                loadAddSourceExtractor("Full4Movies",link, referer = href, subtitleCallback, callback)
+                loadSourceNameExtractor("Full4Movies",link, referer = href, subtitleCallback, callback)
             }
         }
 
@@ -470,8 +510,8 @@ object CineStreamExtractors : CineStreamProvider() {
                                     url, interceptor = wpRedisInterceptor
                                 ).document.select("div.entry-content > $selector").map { sources ->
                                     val server = sources.attr("href")
-                                    loadAddSourceExtractor(
-                                        "V-Cloud",
+                                    loadSourceNameExtractor(
+                                        "Vega",
                                         server,
                                         "$api/",
                                         subtitleCallback,
@@ -485,11 +525,14 @@ object CineStreamExtractors : CineStreamProvider() {
                                 app.get(url, interceptor = wpRedisInterceptor).document.select("div.entry-content > $selector")
                                     .forEach { h4Element ->
                                         var sibling = h4Element.nextElementSibling()
+                                        while (sibling != null && sibling.tagName() != "p") {
+                                            sibling = sibling.nextElementSibling()
+                                        }
                                         while (sibling != null && sibling.tagName() == "p") {
                                             sibling.select("a:matches(V-Cloud|G-Direct)").forEach { sources ->
                                                 val server = sources.attr("href")
-                                                loadAddSourceExtractor(
-                                                    "V-Cloud",
+                                                loadSourceNameExtractor(
+                                                    "Vega",
                                                     server,
                                                     "$api/",
                                                     subtitleCallback,
@@ -535,7 +578,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 val href = it.attr("href")
                 val server = extractMdrive(href)
                 server.amap {
-                    loadExtractor(it, referer = "", subtitleCallback, callback)
+                    loadSourceNameExtractor("MoviesDrive",it, "", subtitleCallback, callback)
                 }
             }
         } else {
@@ -549,7 +592,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     val fEp = doc.selectFirst("h5:matches((?i)$sep)")?.toString()
                     if (fEp.isNullOrEmpty()) {
                         val furl = doc.select("h5 a:contains(HubCloud)").attr("href")
-                        loadExtractor(furl, referer = "", subtitleCallback, callback)
+                        loadSourceNameExtractor("MoviesDrive",furl, "", subtitleCallback, callback)
                     } else
                         doc.selectFirst("h5:matches((?i)$sep)")?.let { epElement ->
                             val linklist = mutableListOf<String>()
@@ -560,7 +603,7 @@ object CineStreamExtractors : CineStreamProvider() {
                             if (firstLink != null) linklist.add(firstLink)
                             if (secondLink != null) linklist.add(secondLink)
                             linklist.forEach { url ->
-                                loadAddSourceExtractor(
+                                loadSourceNameExtractor(
                                     "MoviesDrive",
                                     url,
                                     referer = "",
@@ -626,7 +669,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 ).document.selectFirst(selector)
                     ?.attr("href")?.let {
                         val link = bypassHrefli(it).toString()
-                        loadAddSourceExtractor("Topmovies", link, referer = "", subtitleCallback, callback)
+                        loadSourceNameExtractor("Topmovies", link, referer = "", subtitleCallback, callback)
                     }
             }
         }
@@ -712,11 +755,11 @@ object CineStreamExtractors : CineStreamProvider() {
                     val file=app.get(link).toString().substringAfter("replace(\"").substringBefore("\")")
                     val domain= getBaseUrl(link)
                     val server="$domain$file"
-                    loadAddSourceExtractor("Moviesmod", server, "", subtitleCallback, callback)
+                    loadSourceNameExtractor("Moviesmod", server, "", subtitleCallback, callback)
                 }
                 val server = bypassHrefli(link) ?: ""
                 if (server.isNotEmpty()) {
-                    loadAddSourceExtractor("Moviesmod", server, "", subtitleCallback, callback)
+                    loadSourceNameExtractor("Moviesmod", server, "", subtitleCallback, callback)
                 }
             }
         }

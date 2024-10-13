@@ -18,6 +18,7 @@ import com.megix.CineStreamExtractors.invokeVadaPav
 import com.megix.CineStreamExtractors.invokeNetflix
 import com.megix.CineStreamExtractors.invokePrimeVideo
 import com.megix.CineStreamExtractors.invokeDramaCool
+import com.megix.CineStreamExtractors.invokeW4U
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -36,7 +37,8 @@ open class CineStreamProvider : MainAPI() {
         const val Full4MoviesAPI = "https://www.full4movies.forum"
         const val VadapavAPI = "https://vadapav.mov"
         const val netflixAPI = "https://iosmirror.cc"
-        const val myConsumetAPI = "https://consumet-seven-ashy.vercel.app"
+        const val myConsumetAPI = "https://conaumet.vercel.app"
+        const val W4UAPI = "https://world4ufree.contact"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
@@ -302,6 +304,17 @@ open class CineStreamProvider : MainAPI() {
                 if(res.isAsian) invokeDramaCool(
                     res.title,
                     year,
+                    res.season,
+                    res.episode,
+                    subtitleCallback,
+                    callback
+                )
+            },
+            {
+                if(!res.isAnime) invokeW4U(
+                    res.title,
+                    year,
+                    res.id,
                     res.season,
                     res.episode,
                     subtitleCallback,
