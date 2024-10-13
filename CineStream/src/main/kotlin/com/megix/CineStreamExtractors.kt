@@ -83,8 +83,8 @@ object CineStreamExtractors : CineStreamProvider() {
     )    
 
     data class WHVX(
-        embedId: String,
-        url: String,
+        val embedId: String,
+        val url: String,
     )
 
     suspend fun invokeAutoembed(
