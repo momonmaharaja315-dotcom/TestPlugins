@@ -12,13 +12,13 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 object CineStreamExtractors : CineStreamProvider() {
 
-    suspend fun invokeSubs(
+    suspend fun invokeWHVXSubs(
         id: String,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
     ) {
-        if(season != null && episode != null) "${SubsAPI}/search?id=${id}&season=${season}&episode=${episode}" else "${SubsAPI}/search?id=${id}" 
+        val url = if(season != null && episode != null) "${WHVXSubsAPI}/search?id=${id}&season=${season}&episode=${episode}" else "${WHVXSubsAPI}/search?id=${id}" 
         val json = app.get(url).text
         val data = parseJson<ArrayList<WHVXSubtitle>>(json)
         data.forEach {
@@ -69,8 +69,11 @@ object CineStreamExtractors : CineStreamProvider() {
             }
             else {
                 doc.select("a.my-button").mapNotNull {
+                    val title = it.parent()?.parent()?.previousElementSibling()?.text()?: ""
+                    val qualityRegex = """(1080p|720p|480p|2160p|4K|[0-9]*0p)""".toRegex(RegexOption.IGNORE_CASE)
+                    val quality = qualityRegex.find(title) ?. groupValues ?. get(1) ?: ""
                     app.get(it.attr("href")).document.select("h4 > a").mapNotNull {
-                        loadSourceNameExtractor("W4U", it.attr("href"),"", subtitleCallback, callback, getIndexQuality(quality))
+                        loadSourceNameExtractor("W4U", it.attr("href"), "", subtitleCallback, callback, getIndexQuality(quality))
                     }
                 }
             }

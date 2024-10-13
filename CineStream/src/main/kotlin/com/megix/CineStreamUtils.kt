@@ -58,7 +58,7 @@ suspend fun loadSourceNameExtractor(
                 "$source[${link.source}]",
                 link.url,
                 link.referer,
-                link.quality ?: quality,
+                quality ?: link.quality ,
                 link.type,
                 link.headers,
                 link.extractorData
