@@ -9,8 +9,83 @@ import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import com.lagradost.cloudstream3.APIHolder.unixTime
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.google.gson.annotations.SerializedName
 
 object CineStreamExtractors : CineStreamProvider() {
+
+    suspend fun invokeNova(
+        title: String,
+        imdb_id: String,
+        tmdb_id: Int,
+        year: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+        subtitleCallback: (SubtitleFile) -> Unit,
+    ) {
+        val query = if (season != null && episode != null) {
+            """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"show","season":"$season","episode":"$episode"}"""
+        } else {
+            """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"movie","season":"","episode":""}"""
+        }
+        val headers = mapOf("Origin" to "https://www.vidbinge.com")
+        val json = app.get("${WHVXAPI}/search?query=${query}&provider=nova", headers = headers).text
+        val data = parseJson<WHVX>(json) ?: return
+        val json2 = app.get("${WHVXAPI}/source?resourceId=${data.url}&provider=nova", headers = headers).text
+        val data2 = parseJson<WHVXVideoData>(json2) ?: return
+        for (stream in data2.stream) {
+            for ((quality, details) in stream.qualities) {
+                callback.invoke(
+                    ExtractorLink(
+                        "Nova",
+                        "Nova",
+                        details.url,
+                        "",
+                        getIndexQuality(quality),
+                        INFER_TYPE,
+                    )
+                )
+            }
+        }
+
+        for (stream in data2.stream) {
+            for (caption in stream.captions) {
+                subtitleCallback.invoke(
+                    SubtitleFile(
+                        caption.language,
+                        caption.url
+                    )
+                )
+            }
+        }
+    }
+    data class WHVXStream(
+        val id: String,
+        val qualities: Map<String, WHVXQuality>,
+        val captions: List<WHVXCaption>
+    )
+
+    data class WHVXQuality(
+        val type: String,
+        val url: String
+    )   
+
+    data class WHVXCaption(
+        val id: String,
+        val url: String,
+        val type: String,
+        val hasCorsRestrictions: Boolean,
+        val language: String
+    )
+
+    data class WHVXVideoData(
+        val stream: List<WHVXStream>
+    )    
+
+    data class WHVX(
+        embedId: String,
+        url: String,
+    )
 
     suspend fun invokeAutoembed(
         id: Int,

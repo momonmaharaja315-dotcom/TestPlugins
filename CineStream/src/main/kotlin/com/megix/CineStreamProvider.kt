@@ -21,6 +21,7 @@ import com.megix.CineStreamExtractors.invokeDramaCool
 import com.megix.CineStreamExtractors.invokeW4U
 import com.megix.CineStreamExtractors.invokeWHVXSubs
 import com.megix.CineStreamExtractors.invokeAutoembed
+import com.megix.CineStreamExtractors.invokeNova
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -43,6 +44,7 @@ open class CineStreamProvider : MainAPI() {
         const val W4UAPI = "https://world4ufree.contact"
         const val WHVXSubsAPI = "https://subs.whvx.net"
         const val AutoembedAPI = "https://autoembed.cc"
+        const val WHVXAPI = "https://api.whvx.net"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
@@ -345,6 +347,18 @@ open class CineStreamProvider : MainAPI() {
                     subtitleCallback
                 )
             },
+            {
+                invokeNova(
+                    res.title,
+                    res.id,
+                    res.tmdbId,
+                    firstYear,
+                    res.season,
+                    res.episode,
+                    subtitleCallback,
+                    callback
+                )
+            }
         )
         return true
     }
