@@ -178,8 +178,17 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
     ) {
         val url = if(season != null && episode != null) "${FilmyxyAPI}/search?id=${id}&s=${season}&e=${episode}" else "${FilmyxyAPI}/search?id=${id}"
-        val json = app.get(url).text
+        val json = app.get(url, timeout = 30L).text
         val data = parseJson<NovaVideoData>(json) ?: return
+        callback.invoke(
+            ExtractorLink(
+                "Test",
+                "Test",
+                data.toString(),
+                "",
+                Qualities.Unknown.value,
+            )
+        )
         for (stream in data.stream) {
             for ((quality, details) in stream.qualities) {
                 callback.invoke(
