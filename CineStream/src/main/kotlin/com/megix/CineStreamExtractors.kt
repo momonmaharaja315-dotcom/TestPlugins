@@ -29,8 +29,26 @@ object CineStreamExtractors : CineStreamProvider() {
             """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"movie","season":"","episode":""}"""
         }
         val headers = mapOf("Origin" to "https://www.vidbinge.com")
+        callback.invoke(
+            ExtractorLink(
+                "Nova",
+                "Nova",
+                "${WHVXAPI}/search?query=${query}&provider=nova",
+                "",
+                Qualities.Unknown.value,
+            )
+        )
         val json = app.get("${WHVXAPI}/search?query=${query}&provider=nova", headers = headers).text
         val data = parseJson<WHVX>(json) ?: return
+        callback.invoke(
+            ExtractorLink(
+                "Nova2",
+                "Nova2",
+                "${WHVXAPI}/source?resourceId=${data.url}&provider=nova",
+                "",
+                Qualities.Unknown.value,
+            )
+        )
         val json2 = app.get("${WHVXAPI}/source?resourceId=${data.url}&provider=nova", headers = headers).text
         val data2 = parseJson<WHVXVideoData>(json2) ?: return
         for (stream in data2.stream) {
@@ -642,12 +660,11 @@ object CineStreamExtractors : CineStreamProvider() {
                                 ).document.select("div.entry-content > $selector").map { sources ->
                                     val server = sources.attr("href")
                                     loadSourceNameExtractor(
-                                        "Vega",
+                                        "VegaMovies",
                                         server,
                                         "$api/",
                                         subtitleCallback,
                                         callback,
-                                        getIndexQuality(sources.text())
                                     )
                                 }
                             }
@@ -663,12 +680,11 @@ object CineStreamExtractors : CineStreamProvider() {
                                             sibling.select("a:matches(V-Cloud|G-Direct)").forEach { sources ->
                                                 val server = sources.attr("href")
                                                 loadSourceNameExtractor(
-                                                    "Vega",
+                                                    "VegaMovies",
                                                     server,
                                                     "$api/",
                                                     subtitleCallback,
-                                                    callback,
-                                                    getIndexQuality(sources.text())
+                                                    callback
                                                 )
                                             }
                                             sibling = sibling.nextElementSibling()
