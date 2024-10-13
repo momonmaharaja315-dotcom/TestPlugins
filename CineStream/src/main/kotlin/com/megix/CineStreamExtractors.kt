@@ -32,12 +32,15 @@ object CineStreamExtractors : CineStreamProvider() {
                     val title = it.parent()?.parent()?.previousElementSibling()?.text()?: ""
                     val qualityRegex = """(1080p|720p|480p|2160p|4K|[0-9]*0p)""".toRegex(RegexOption.IGNORE_CASE)
                     val quality = qualityRegex.find(title) ?. groupValues ?. get(1) ?: ""
-                    val realSeason = Regex("""(?:Season |S)(\d+)""").find(title) ?. groupValues ?. get(1) ?.toIntOrNull() ?: return @mapNotNull null
+                    val realSeason = Regex("""(?:Season |S)(\d+)""").find(title) ?. groupValues ?. get(1) ?.toIntOrNull() ?: return@mapNotNull null
                     if(season == realSeason) {
                         val doc2 = app.get(it.attr("href")).document
                         val h3 = doc2.select("h3:matches((?i)(episode))").get(episode-1)
                         var source = h3.nextElementSibling().selectFirst("a")?.attr("href") ?: ""
                         loadSourceNameExtractor("W4U", source, "", subtitleCallback, callback)
+                    }
+                    else {
+                        
                     }
                 }
             }
