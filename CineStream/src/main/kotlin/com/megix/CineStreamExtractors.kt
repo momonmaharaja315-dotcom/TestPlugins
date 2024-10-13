@@ -21,7 +21,7 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        val url = if(season == null) "$W4UAPI/?s=$title+$year" else "$W4UAPI/?s=$title++$season"
+        val url = if(season == null) "$W4UAPI/?s=$title $year" else "$W4UAPI/?s=$title $season"
         val document = app.get(url).document
         val link = document.selectFirst("div.post-thumb > a")?.attr("href")
         val doc = app.get(link ?: return).document
@@ -30,24 +30,44 @@ object CineStreamExtractors : CineStreamProvider() {
             if(season != null && episode != null) {
                 doc.select("a.my-button").mapNotNull {
                     val title = it.parent()?.parent()?.previousElementSibling()?.text()?: ""
+                    
+                    callback.invoke(
+                        ExtractorLink(
+                            "title",
+                            "title",
+                            title.toString(),
+                            "",
+                            quality = Qualities.P1080.value,
+                        )
+                    )
+
                     val qualityRegex = """(1080p|720p|480p|2160p|4K|[0-9]*0p)""".toRegex(RegexOption.IGNORE_CASE)
                     val quality = qualityRegex.find(title) ?. groupValues ?. get(1) ?: ""
-                    val realSeason = Regex("""(?:Season |S)(\d+)""").find(title) ?. groupValues ?. get(1) ?.toIntOrNull() ?: return@mapNotNull null
+                    val realSeason = Regex("""(?:Season |S)(\d+)""").find(title) ?. groupValues ?. get(1) ?.toIntOrNull() ?: 300
                     if(season == realSeason) {
                         val doc2 = app.get(it.attr("href")).document
+                        
+                        callback.invoke(
+                            ExtractorLink(
+                                "link",
+                                "link",
+                                it.attr("href").toString(),
+                                referer = "",
+                                quality = Qualities.P1080.value,
+                            )
+                        )
+
                         val h3 = doc2.select("h3:matches((?i)(episode))").get(episode-1)
                         var source = h3.nextElementSibling().selectFirst("a")?.attr("href") ?: ""
                         loadSourceNameExtractor("W4U", source, "", subtitleCallback, callback)
                     }
                     else {
-                        
                     }
                 }
             }
             else {
                 doc.select("a.my-button").mapNotNull {
-                    val doc2 = app.get(it.attr("href")).document
-                    doc2.select("h4 > a").mapNotNull {
+                    app.get(it.attr("href")).document.select("h4 > a").mapNotNull {
                         loadSourceNameExtractor("W4U", it.attr("href"),"", subtitleCallback, callback)
                     }
                 }
