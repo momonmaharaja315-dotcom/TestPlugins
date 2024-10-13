@@ -352,7 +352,7 @@ open class CineStreamProvider : MainAPI() {
     data class LoadLinksData(
         val title: String,
         val id: String,
-        val tmdbId: String,
+        val tmdbId: Int,
         val tvtype: String,
         val year: String,
         val season: Int? = null,

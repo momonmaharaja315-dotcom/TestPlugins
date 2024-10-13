@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun invokeAutoembed(
-        id: String,
+        id: Int,
         season: Int? = null,
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit,
