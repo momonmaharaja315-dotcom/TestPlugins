@@ -195,7 +195,7 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
 
-        for (stream in data2.stream) {
+        for (stream in data.stream) {
             for (caption in stream.captions) {
                 subtitleCallback.invoke(
                     SubtitleFile(
