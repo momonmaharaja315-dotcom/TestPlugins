@@ -15,6 +15,86 @@ import java.nio.charset.StandardCharsets
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend fun invoke2embed(
+        imdb_id:  String,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+        subtitleCallback: (SubtitleFile) -> Unit,
+    ) {
+        val url = if(season != null && episode != null) "${TwoEmbedAPI}/scrape?id=${id}&s=${season}&e=${episode}" else "${TwoEmbedAPI}/scrape?id=${id}"
+        val json = app.get(url).text
+        val data = parseJson<TwoEmbedQuery>(json)
+        data.stream.forEach {
+            callback.invoke(
+                ExtractorLink(
+                    "2embed[${it.type}]",
+                    "2embed[${it.type}]",
+                    it.playlist,
+                    referer = "",
+                    quality = Qualities.Unknown.value,
+                    INFER_TYPE,
+                )
+            )
+        }
+    }
+    data class TwoEmbedQuery(
+        val stream: List<TwoEmbedStream>
+    )
+
+    data class TwoEmbedStream(
+        val id: String,
+        val type: String,
+        val playlist: String,
+    )
+
+    suspend fun invokeAstra(
+        title: String,
+        imdb_id: String,
+        tmdb_id: Int,
+        year: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+        subtitleCallback: (SubtitleFile) -> Unit,
+    ) {
+        val query = if (season != null && episode != null) {
+            """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"show","season":"$season","episode":"$episode"}"""
+        } else {
+            """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"movie","season":"","episode":""}"""
+        }
+        val headers = mapOf("Origin" to "https://www.vidbinge.com")
+        val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
+        val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=astra", headers = headers).text
+        val data = parseJson<WHVX>(json) ?: return
+        val encodedUrl = URLEncoder.encode(data.url, StandardCharsets.UTF_8.toString())
+        val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=astra", headers = headers).text
+        val data2 = parseJson<AstraQuery>(json2) ?: return
+        data2.stream.forEach {
+            callback.invoke(
+                ExtractorLink(
+                    "Astra",
+                    "Astra",
+                    it.playlist,
+                    "",
+                    Qualities.Unknown.value,
+                    INFER_TYPE
+                )
+            )    
+        }
+    }
+
+    data class AstraQuery(
+        val stream: List<AstraStream>
+    )
+
+    data class AstraStream(
+        val id: String,
+        val type: String,
+        val playlist: String,
+    )
+
+
     suspend fun invokeNova(
         title: String,
         imdb_id: String,
@@ -32,32 +112,11 @@ object CineStreamExtractors : CineStreamProvider() {
         }
         val headers = mapOf("Origin" to "https://www.vidbinge.com")
         val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
-        
-        callback.invoke(
-            ExtractorLink(
-                "Nova1",
-                "Nova1",
-                "${WHVXAPI}/search?query=${encodedQuery}&provider=nova",
-                "",
-                Qualities.Unknown.value,
-            )
-        )
-
         val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=nova", headers = headers).text
         val data = parseJson<WHVX>(json) ?: return
         val encodedUrl = URLEncoder.encode(data.url, StandardCharsets.UTF_8.toString())
-        callback.invoke(
-            ExtractorLink(
-                "Nova2",
-                "Nova2",
-                "${WHVXAPI}/source?resourceId=${encodedUrl}&provider=nova",
-                "",
-                Qualities.Unknown.value,
-            )
-        )
-
         val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=nova", headers = headers).text
-        val data2 = parseJson<WHVXVideoData>(json2) ?: return
+        val data2 = parseJson<NovaVideoData>(json2) ?: return
         for (stream in data2.stream) {
             for ((quality, details) in stream.qualities) {
                 callback.invoke(
@@ -66,7 +125,7 @@ object CineStreamExtractors : CineStreamProvider() {
                         "Nova",
                         details.url,
                         "",
-                        getIndexQuality(quality),
+                        getQualityFromName(quality),
                         INFER_TYPE,
                     )
                 )
@@ -84,18 +143,18 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
     }
-    data class WHVXStream(
+    data class NovaStream(
         val id: String,
-        val qualities: Map<String, WHVXQuality>,
-        val captions: List<WHVXCaption>
+        val qualities: Map<String, NovaQuality>,
+        val captions: List<NovaCaption>
     )
 
-    data class WHVXQuality(
+    data class NovaQuality(
         val type: String,
         val url: String
     )   
 
-    data class WHVXCaption(
+    data class NovaCaption(
         val id: String,
         val url: String,
         val type: String,
@@ -103,8 +162,8 @@ object CineStreamExtractors : CineStreamProvider() {
         val language: String
     )
 
-    data class WHVXVideoData(
-        val stream: List<WHVXStream>
+    data class NovaVideoData(
+        val stream: List<NovaStream>
     )    
 
     data class WHVX(

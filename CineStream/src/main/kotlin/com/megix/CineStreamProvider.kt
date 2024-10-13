@@ -22,6 +22,8 @@ import com.megix.CineStreamExtractors.invokeW4U
 import com.megix.CineStreamExtractors.invokeWHVXSubs
 import com.megix.CineStreamExtractors.invokeAutoembed
 import com.megix.CineStreamExtractors.invokeNova
+import com.megix.CineStreamExtractors.invokeAstra
+import com.megix.CineStreamExtractors.invoke2embed
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -45,6 +47,7 @@ open class CineStreamProvider : MainAPI() {
         const val WHVXSubsAPI = "https://subs.whvx.net"
         const val AutoembedAPI = "https://autoembed.cc"
         const val WHVXAPI = "https://api.whvx.net"
+        const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
@@ -353,6 +356,27 @@ open class CineStreamProvider : MainAPI() {
                     res.id,
                     res.tmdbId,
                     firstYear,
+                    res.season,
+                    res.episode,
+                    callback,
+                    subtitleCallback
+                )
+            },
+            {
+                invokeAstra(
+                    res.title,
+                    res.id,
+                    res.tmdbId,
+                    firstYear,
+                    res.season,
+                    res.episode,
+                    callback,
+                    subtitleCallback
+                )
+            },
+            {
+                invoke2embed(
+                    res.id,
                     res.season,
                     res.episode,
                     callback,
