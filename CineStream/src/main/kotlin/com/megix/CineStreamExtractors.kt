@@ -10,6 +10,8 @@ import com.lagradost.cloudstream3.APIHolder.unixTime
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.gson.annotations.SerializedName
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 object CineStreamExtractors : CineStreamProvider() {
 
@@ -29,29 +31,32 @@ object CineStreamExtractors : CineStreamProvider() {
             """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"movie","season":"","episode":""}"""
         }
         val headers = mapOf("Origin" to "https://www.vidbinge.com")
+        val encodedString = URLEncoder.encode("${WHVXAPI}/search?query=${query}&provider=nova", StandardCharsets.UTF_8.toString())
+        
         callback.invoke(
             ExtractorLink(
                 "Nova",
                 "Nova",
-                "${WHVXAPI}/search?query=${query}&provider=nova",
+                encodedString,
                 "",
                 Qualities.Unknown.value,
             )
         )
-        val url = "${WHVXAPI}/search?query=${query}&provider=nova"
-        val json = app.get(url, headers = headers).text
+
+        val json = app.get(encodedString, headers = headers).text
         val data = parseJson<WHVX>(json) ?: return
+        val encodedString2 = URLEncoder.encode("${WHVXAPI}/source?resourceId=${data.url}&provider=nova", StandardCharsets.UTF_8.toString())
         callback.invoke(
             ExtractorLink(
                 "Nova2",
                 "Nova2",
-                "${WHVXAPI}/source?resourceId=${data.url}&provider=nova",
+                encodedString2,
                 "",
                 Qualities.Unknown.value,
             )
         )
-        val url2 = "${WHVXAPI}/source?resourceId=${data.url}&provider=nova".replace("+", "%2B").replace("=", "%3D")
-        val json2 = app.get(url2, headers = headers).text
+
+        val json2 = app.get(encodedString2, headers = headers).text
         val data2 = parseJson<WHVXVideoData>(json2) ?: return
         for (stream in data2.stream) {
             for ((quality, details) in stream.qualities) {
