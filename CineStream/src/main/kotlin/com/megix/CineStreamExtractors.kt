@@ -31,32 +31,32 @@ object CineStreamExtractors : CineStreamProvider() {
             """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"movie","season":"","episode":""}"""
         }
         val headers = mapOf("Origin" to "https://www.vidbinge.com")
-        val encodedString = URLEncoder.encode("${WHVXAPI}/search?query=${query}&provider=nova", StandardCharsets.UTF_8.toString())
+        val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
         
         callback.invoke(
             ExtractorLink(
-                "Nova",
-                "Nova",
-                encodedString,
+                "Nova1",
+                "Nova1",
+                "${WHVXAPI}/search?query=${encodedQuery}&provider=nova",
                 "",
                 Qualities.Unknown.value,
             )
         )
 
-        val json = app.get(encodedString, headers = headers).text
+        val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=nova", headers = headers).text
         val data = parseJson<WHVX>(json) ?: return
-        val encodedString2 = URLEncoder.encode("${WHVXAPI}/source?resourceId=${data.url}&provider=nova", StandardCharsets.UTF_8.toString())
+        val encodedUrl = URLEncoder.encode(data.url, StandardCharsets.UTF_8.toString())
         callback.invoke(
             ExtractorLink(
                 "Nova2",
                 "Nova2",
-                encodedString2,
+                "${WHVXAPI}/source?resourceId=${encodedUrl}&provider=nova",
                 "",
                 Qualities.Unknown.value,
             )
         )
 
-        val json2 = app.get(encodedString2, headers = headers).text
+        val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=nova", headers = headers).text
         val data2 = parseJson<WHVXVideoData>(json2) ?: return
         for (stream in data2.stream) {
             for ((quality, details) in stream.qualities) {
