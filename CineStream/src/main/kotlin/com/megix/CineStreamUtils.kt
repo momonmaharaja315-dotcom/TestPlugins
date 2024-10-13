@@ -43,7 +43,6 @@ fun getIndexQuality(str: String?): Int {
         ?: Qualities.Unknown.value
 }
 
-
 suspend fun loadSourceNameExtractor(
     source: String,
     url: String,
@@ -59,7 +58,7 @@ suspend fun loadSourceNameExtractor(
                 "$source[${link.source}]",
                 link.url,
                 link.referer,
-                link.quality,
+                link.quality ?: quality,
                 link.type,
                 link.headers,
                 link.extractorData

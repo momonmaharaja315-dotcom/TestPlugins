@@ -12,6 +12,30 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend fun invokeSubs(
+        id: String,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+    ) {
+        if(season != null && episode != null) "${SubsAPI}/search?id=${id}&season=${season}&episode=${episode}" else "${SubsAPI}/search?id=${id}" 
+        val json = app.get(url).text
+        val data = parseJson<ArrayList<WHVXSubtitle>>(json)
+        data.forEach {
+            subtitleCallback.invoke(
+                SubtitleFile(
+                    it.languageName,
+                    it.url
+                )
+            )
+        }
+    }
+
+    data class WHVXSubtitle(
+        val url: String,
+        val languageName: String,
+    )
+
     suspend fun invokeW4U(
         title: String,
         year: Int? = null,
@@ -30,36 +54,14 @@ object CineStreamExtractors : CineStreamProvider() {
             if(season != null && episode != null) {
                 doc.select("a.my-button").mapNotNull {
                     val title = it.parent()?.parent()?.previousElementSibling()?.text()?: ""
-                    
-                    callback.invoke(
-                        ExtractorLink(
-                            "title",
-                            "title",
-                            title.toString(),
-                            "",
-                            quality = Qualities.P1080.value,
-                        )
-                    )
-
                     val qualityRegex = """(1080p|720p|480p|2160p|4K|[0-9]*0p)""".toRegex(RegexOption.IGNORE_CASE)
                     val quality = qualityRegex.find(title) ?. groupValues ?. get(1) ?: ""
-                    val realSeason = Regex("""(?:Season |S)(\d+)""").find(title) ?. groupValues ?. get(1) ?.toIntOrNull() ?: 300
+                    val realSeason = Regex("""(?:Season |S)(\d+)""").find(title) ?. groupValues ?. get(1) ?. toIntOrNull() ?: 300
                     if(season == realSeason) {
                         val doc2 = app.get(it.attr("href")).document
-                        
-                        callback.invoke(
-                            ExtractorLink(
-                                "link",
-                                "link",
-                                it.attr("href").toString(),
-                                referer = "",
-                                quality = Qualities.P1080.value,
-                            )
-                        )
-
                         val h3 = doc2.select("h3:matches((?i)(episode))").get(episode-1)
                         var source = h3.nextElementSibling().selectFirst("a")?.attr("href") ?: ""
-                        loadSourceNameExtractor("W4U", source, "", subtitleCallback, callback)
+                        loadSourceNameExtractor("W4U", source, "", subtitleCallback, callback, getIndexQuality(quality))
                     }
                     else {
                     }
@@ -68,7 +70,7 @@ object CineStreamExtractors : CineStreamProvider() {
             else {
                 doc.select("a.my-button").mapNotNull {
                     app.get(it.attr("href")).document.select("h4 > a").mapNotNull {
-                        loadSourceNameExtractor("W4U", it.attr("href"),"", subtitleCallback, callback)
+                        loadSourceNameExtractor("W4U", it.attr("href"),"", subtitleCallback, callback, getIndexQuality(quality))
                     }
                 }
             }
