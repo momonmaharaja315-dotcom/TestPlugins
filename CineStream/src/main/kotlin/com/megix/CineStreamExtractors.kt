@@ -38,7 +38,8 @@ object CineStreamExtractors : CineStreamProvider() {
                 Qualities.Unknown.value,
             )
         )
-        val json = app.get("${WHVXAPI}/search?query=${query}&provider=nova", headers = headers).text
+        val url = "${WHVXAPI}/search?query=${query}&provider=nova"
+        val json = app.get(url, headers = headers).text
         val data = parseJson<WHVX>(json) ?: return
         callback.invoke(
             ExtractorLink(
@@ -49,7 +50,8 @@ object CineStreamExtractors : CineStreamProvider() {
                 Qualities.Unknown.value,
             )
         )
-        val json2 = app.get("${WHVXAPI}/source?resourceId=${data.url}&provider=nova", headers = headers).text
+        val url2 = "${WHVXAPI}/source?resourceId=${data.url}&provider=nova".replace("+", "%2B").replace("=", "%3D")
+        val json2 = app.get(url2, headers = headers).text
         val data2 = parseJson<WHVXVideoData>(json2) ?: return
         for (stream in data2.stream) {
             for ((quality, details) in stream.qualities) {
@@ -485,6 +487,8 @@ object CineStreamExtractors : CineStreamProvider() {
             
             filteredLinks.forEach {
                 if(it.text().contains(".mkv", true) || it.text().contains(".mp4", true)) {
+                    val qualityRegex = """(1080p|720p|480p|2160p|4K|[0-9]*0p)""".toRegex(RegexOption.IGNORE_CASE)
+                    val quality = qualityRegex.find(it.text()) ?. groupValues ?. get(1) ?: ""
                     for((index, mirror) in mirrors.withIndex()) {
                         callback.invoke(
                             ExtractorLink(
@@ -492,7 +496,7 @@ object CineStreamExtractors : CineStreamProvider() {
                                 "VadaPav" + " ${index+1}",
                                 mirror + it.attr("href"),
                                 referer = "",
-                                quality = Qualities.P1080.value,
+                                quality = getIndexQuality(quality),
                             )
                         )
                     }
@@ -502,14 +506,16 @@ object CineStreamExtractors : CineStreamProvider() {
         else {
             val doc = app.get(href).document
             doc.select("div.directory > ul > li > div > a.file-entry:matches((?i)(.mkv|.mp4))").forEach {
+                val qualityRegex = """(1080p|720p|480p|2160p|4K|[0-9]*0p)""".toRegex(RegexOption.IGNORE_CASE)
+                val quality = qualityRegex.find(it.text()) ?. groupValues ?. get(1) ?: ""
                 for((index, mirror) in mirrors.withIndex()) {
                     callback.invoke(
                         ExtractorLink(
-                            "VadaPav" + " ${index+1}",
-                            "VadaPav" + " ${index+1}",
+                            "[VadaPav" + " ${index+1}]",
+                            "[VadaPav" + " ${index+1}]",
                             mirror + it.attr("href"),
                             referer = "",
-                            quality = Qualities.P1080.value,
+                            quality = getIndexQuality(quality),
                         )
                     )
                 }
