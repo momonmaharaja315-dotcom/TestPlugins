@@ -60,7 +60,7 @@ open class AnistreamProvider : MainAPI() {
         val anime = parseJson<PassData>(url)
         val mal_id = anime.mal_id
         val json = app.get("$mainUrl/anime/$mal_id").text
-        val animeData = parseJson<AnimeResponse>(json).data.first()
+        val animeData = parseJson<AniResponse>(json).data
         val title = animeData.title
         val posterUrl = animeData.images.jpg.image_url
         val rating = animeData.score
@@ -102,6 +102,10 @@ open class AnistreamProvider : MainAPI() {
 
     data class AnimeResponse(
         val data: List<AnimeData>
+    )
+
+    data class AniResponse(
+        val data : AnimeData
     )
 
     data class AnimeData(
