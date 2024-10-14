@@ -5,7 +5,7 @@ import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 
-open class AnitimestreamProvider : MainAPI() {
+open class AnistreamProvider : MainAPI() {
     override var mainUrl = "https://api.jikan.moe/v4"
     override var name = "Anistream"
     override val hasMainPage = true
@@ -60,13 +60,13 @@ open class AnitimestreamProvider : MainAPI() {
         val anime = parseJson<PassData>(url)
         val malId = anime.malId
         val json = app.get("$mainUrl/anime/$malId").text
-        val animeData = parseJson<AnimeResponse>(json)
-        val title = animeData.data.title
-        val posterUrl = animeData.data.images.jpg.imageUrl
-        val rating = animeData.data.score
-        val year = animeData.data.year
-        val description = animeData.data.synopsis
-        val url = animeData.data.url
+        val animeData = parseJson<AnimeResponse>(json).data.first()
+        val title = animeData.title
+        val posterUrl = animeData.images.jpg.imageUrl
+        val rating = animeData.score
+        val year = animeData.year
+        val description = animeData.synopsis
+        val url = animeData.url
 
         val data = LoadLinksData(
             title,
