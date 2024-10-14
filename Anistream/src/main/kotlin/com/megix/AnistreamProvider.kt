@@ -5,6 +5,7 @@ import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.lagradost.cloudstream3.LoadResponse.Companion.addMalId
+import com.lagradost.cloudstream3.LoadResponse.Companion.addAniListId
 
 open class AnistreamProvider : MainAPI() {
     override var mainUrl = "https://api.jikan.moe/v4"
@@ -46,7 +47,7 @@ open class AnistreamProvider : MainAPI() {
         val searchResponse = mutableListOf<SearchResponse>()
         val animeJson = app.get("$mainUrl/anime?q=$query&sfw").text
         val animes = parseJson<AnimeResponse>(animeJson)
-        animes.data.forEach { anime ->
+        animes.data.mapNotNull { anime ->
             searchResponse.add(newMovieSearchResponse(anime.title, PassData(anime.mal_id).toJson(), TvType.Movie) {
                 this.posterUrl = anime.images.jpg.image_url
             })
@@ -93,6 +94,7 @@ open class AnistreamProvider : MainAPI() {
                 this.plot = description
                 this.year = year
                 addMalId(mal_id)
+                addAniListId(mal_id)
             }
         }
         else {
@@ -107,6 +109,7 @@ open class AnistreamProvider : MainAPI() {
                 this.plot = description
                 this.year = year
                 addMalId(mal_id)
+                addAniListId(mal_id)
             }
         }
     }
@@ -117,7 +120,19 @@ open class AnistreamProvider : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        
+        val res = parseJson<LoadLinksData>(data)
+        // argamap(
+        //     {
+        //         invokeMoviesdrive(
+        //             res.title,
+        //             res.season,
+        //             res.episode,
+        //             year,
+        //             subtitleCallback,
+        //             callback
+        //         )
+        //     },
+        // )
         return true
     }
 
