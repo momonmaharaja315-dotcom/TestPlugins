@@ -76,7 +76,7 @@ open class AnistreamProvider : MainAPI() {
         return newMovieLoadResponse(title, url, TvType.Movie, data) {
             this.posterUrl = posterUrl
             this.plot = description
-            this.rating = rating
+            this.rating = rating.toIntOrNull()
             this.year = year
         }
     }
