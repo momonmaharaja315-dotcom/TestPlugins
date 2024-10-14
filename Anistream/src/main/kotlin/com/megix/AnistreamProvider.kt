@@ -43,7 +43,7 @@ open class AnistreamProvider : MainAPI() {
 
     override suspend fun search(query: String): List<SearchResponse> {
         val searchResponse = mutableListOf<SearchResponse>()
-        val animeJson = app.get("$mainUrl/v4/anime?q=$query&sfw").text
+        val animeJson = app.get("$mainUrl/anime?q=$query&sfw").text
         val animes = parseJson<AnimeResponse>(animeJson)
         animes.data.forEach { anime ->
             searchResponse.add(newMovieSearchResponse(anime.title, PassData(anime.mal_id).toJson(), TvType.Movie) {
@@ -67,16 +67,43 @@ open class AnistreamProvider : MainAPI() {
         val year = animeData.year
         val description = animeData.synopsis
         val url = animeData.url
+        val type = animeData.type
 
-        val data = LoadLinksData(
-            title,
-            mal_id,
-            year,
-        ).toJson()
-        return newMovieLoadResponse(title, url, TvType.Movie, data) {
-            this.posterUrl = posterUrl
-            this.plot = description
-            this.year = year
+        if(type == "TV") {
+            val episodes = mutableListOf<Episode>()
+            for(i in 1..animeData.episodes) {
+                val episode = i
+                episodes.add(
+                    newEpisode(
+                        LoadLinksData(
+                            title,
+                            mal_id,
+                            year,
+                            episode,
+                        ).toJson()
+                    ) {
+                        this.episode = episode
+                    }
+                )
+            }
+
+            return newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
+                this.posterUrl = posterUrl
+                this.plot = description
+                this.year = year..toIntOrNull()
+            }
+        }
+        else {
+            val data = LoadLinksData(
+                title,
+                mal_id,
+                year,
+            ).toJson()
+            return newMovieLoadResponse(title, url, TvType.Movie, data) {
+                this.posterUrl = posterUrl
+                this.plot = description
+                this.year = year
+            }
         }
     }
 
@@ -97,7 +124,8 @@ open class AnistreamProvider : MainAPI() {
     data class LoadLinksData(
         val title: String,
         val mal_id: Int,
-        val year: Int
+        val year: Int,
+        val episode: Int?,
     )
 
     data class AnimeResponse(
@@ -120,6 +148,7 @@ open class AnistreamProvider : MainAPI() {
         val score: Double,
         val synopsis: String,
         val year: Int,
+        val  episodes: Int,
         //val genres: List<Genre>,
     )
 
