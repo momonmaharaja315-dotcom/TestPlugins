@@ -90,7 +90,7 @@ open class AnistreamProvider : MainAPI() {
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
                 this.posterUrl = posterUrl
                 this.plot = description
-                this.year = year..toIntOrNull()
+                this.year = year.toIntOrNull()
             }
         }
         else {
