@@ -100,6 +100,7 @@ open class AnistreamProvider : MainAPI() {
                 title,
                 mal_id,
                 year,
+                null
             ).toJson()
             return newMovieLoadResponse(title, url, TvType.Movie, data) {
                 this.posterUrl = posterUrl
