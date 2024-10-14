@@ -70,7 +70,7 @@ open class AnistreamProvider : MainAPI() {
 
         val data = LoadLinksData(
             title,
-            mal_Id,
+            mal_id,
             year,
         ).toJson()
         return newMovieLoadResponse(title, url, TvType.Movie, data) {
