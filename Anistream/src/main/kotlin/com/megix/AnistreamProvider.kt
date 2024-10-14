@@ -84,7 +84,6 @@ open class AnistreamProvider : MainAPI() {
                         ).toJson()
                     ) {
                         this.episode = episode
-                        addMalId(mal_id)
                     }
                 )
             }
@@ -106,6 +105,7 @@ open class AnistreamProvider : MainAPI() {
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.year = year
+                addMalId(mal_id)
             }
         }
     }
