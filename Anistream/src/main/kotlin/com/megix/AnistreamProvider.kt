@@ -4,6 +4,7 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
+import com.lagradost.cloudstream3.LoadResponse.Companion.addMalId
 
 open class AnistreamProvider : MainAPI() {
     override var mainUrl = "https://api.jikan.moe/v4"
@@ -83,6 +84,7 @@ open class AnistreamProvider : MainAPI() {
                         ).toJson()
                     ) {
                         this.episode = episode
+                        addMalId(mal_id)
                     }
                 )
             }
@@ -90,7 +92,8 @@ open class AnistreamProvider : MainAPI() {
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
                 this.posterUrl = posterUrl
                 this.plot = description
-                this.year = year.toIntOrNull()
+                this.year = year
+                addMalId(mal_id)
             }
         }
         else {
