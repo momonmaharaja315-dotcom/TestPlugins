@@ -29,7 +29,7 @@ open class AnistreamProvider : MainAPI() {
         val animes = parseJson<AnimeResponse>(json)
         val home = animes.data.mapNotNull { anime ->
             newMovieSearchResponse(anime.title, PassData(anime.malId).toJson(), TvType.Movie) {
-                this.posterUrl = anime.images.jpg.imageUrl
+                //this.posterUrl = anime.images.jpg.imageUrl
             }
         }
         return newHomePageResponse(
@@ -47,7 +47,7 @@ open class AnistreamProvider : MainAPI() {
         val animes = parseJson<AnimeResponse>(animeJson)
         animes.data.forEach { anime ->
             searchResponse.add(newMovieSearchResponse(anime.title, PassData(anime.malId).toJson(), TvType.Movie) {
-                this.posterUrl = anime.images.jpg.imageUrl
+                //this.posterUrl = anime.images.jpg.imageUrl
             })
         }
 
@@ -62,7 +62,7 @@ open class AnistreamProvider : MainAPI() {
         val json = app.get("$mainUrl/anime/$malId").text
         val animeData = parseJson<AnimeResponse>(json).data.first()
         val title = animeData.title
-        val posterUrl = animeData.images.jpg.imageUrl
+        //val posterUrl = animeData.images.jpg.imageUrl
         val rating = animeData.score
         val year = animeData.year
         val description = animeData.synopsis
@@ -74,7 +74,7 @@ open class AnistreamProvider : MainAPI() {
             year,
         ).toJson()
         return newMovieLoadResponse(title, url, TvType.Movie, data) {
-            this.posterUrl = posterUrl
+            //this.posterUrl = posterUrl
             this.plot = description
             this.year = year
         }
