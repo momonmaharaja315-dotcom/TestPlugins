@@ -109,16 +109,14 @@ open class AnistreamProvider : MainAPI() {
         val url: String,
         val images: Images,
         val title: String,
-        val title_english: String,
         val type: String,
         val status: String,
         val airing: Boolean,
-        val duration: String,
+        //val duration: String,
         val score: Double,
         val synopsis: String,
-        val background: String,
         val year: Int,
-        val genres: List<Genre>,
+        //val genres: List<Genre>,
     )
 
     data class Images(
@@ -132,10 +130,10 @@ open class AnistreamProvider : MainAPI() {
         val large_image_url: String
     )
 
-    data class Genre(
-        val mal_id: Int,
-        val type: String,
-        val name: String,
-        val url: String
-    )
+    // data class Genre(
+    //     val mal_id: Int,
+    //     val type: String,
+    //     val name: String,
+    //     val url: String
+    // )
 }
