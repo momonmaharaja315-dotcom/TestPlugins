@@ -224,7 +224,42 @@ object CineStreamExtractors : CineStreamProvider() {
                 link,
                 "",
                 Qualities.Unknown.value,
-                INFER_TYPE,
+                isM3u8 = true,
+            )
+        )
+    }
+
+    suspend fun invokeAutoembedAnime(
+        title: String,
+        year: Int,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        val seasonRank = integerToRank(season ?: 0)
+        val titleSlug = title.createSlug()
+        val url = if(season != null && episode != null) "${AutoembedAnimeAPI}/embed/${titleSlug}-${seasonRank}-season-${year}-episode-${episode}" else "${AutoembedAnimeAPI}/embed/${titleSlug}-${year}"
+        
+        callback.invoke(
+            ExtractorLink(
+                "Autoembed Anime[Test]",
+                "Autoembed Anime[Test]",
+                url,
+                "",
+                Qualities.Unknown.value,
+            )
+        )
+        val document = app.get(url).document
+        val link = Regex("""file:\s*"(https?:\/\/[^"]+)\"""").find(document.toString())?.groupValues?.get(1) ?: return
+
+        callback.invoke(
+            ExtractorLink(
+                "Autoembed Anime",
+                "Autoembed Anime",
+                link,
+                "",
+                Qualities.Unknown.value,
+                isM3u8 = true,
             )
         )
     }
