@@ -209,7 +209,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeCatflix(
-        id: Int,
+        id: String,
         season: Int? = null,
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit,
@@ -223,6 +223,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 "Catflix",
                 link,
                 "",
+                Qualities.Unknown.value,
                 INFER_TYPE,
             )
         )
