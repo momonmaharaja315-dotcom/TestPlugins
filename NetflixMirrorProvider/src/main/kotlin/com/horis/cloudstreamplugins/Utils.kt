@@ -9,6 +9,7 @@ import com.lagradost.nicehttp.Requests
 import com.lagradost.nicehttp.ResponseParser
 import kotlin.reflect.KClass
 import com.lagradost.cloudstream3.APIHolder.unixTime
+import okhttp3.FormBody
 
 val JSONParser = object : ResponseParser {
     val mapper: ObjectMapper = jacksonObjectMapper().configure(
