@@ -1,5 +1,7 @@
 package com.horis.cloudstreamplugins
 
+import com.lagradost.cloudstream3.*
+import com.lagradost.cloudstream3.utils.*
 import com.fasterxml.jackson.core.json.JsonReadFeature
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
