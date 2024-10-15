@@ -231,7 +231,7 @@ object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun invokeAutoembedAnime(
         title: String,
-        year: Int,
+        year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit,
