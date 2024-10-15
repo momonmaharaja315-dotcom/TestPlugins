@@ -29,7 +29,6 @@ class NetflixMirrorProvider : MainAPI() {
 
     override val hasMainPage = true
     private var time = ""
-    private var addhash = ""
     private var cookie_value = ""
     private val headers = mapOf(
         "X-Requested-With" to "XMLHttpRequest"
@@ -37,7 +36,7 @@ class NetflixMirrorProvider : MainAPI() {
 
     private suspend fun bypass(): String {
         val document = app.get("$mainUrl/home").document
-        addhash = document.selectFirst("body").attr("data-addhash").toString()
+        val addhash = document.selectFirst("body").attr("data-addhash").toString()
         time = document.selectFirst("body").attr("data-time").toString()
         val verify = app.get("https://userverify.netmirror.app/verify?hash=${addhash}&t=${time}") //just make request to verify
         val requestBody = FormBody.Builder().add("verify", addhash).build()
@@ -76,28 +75,8 @@ class NetflixMirrorProvider : MainAPI() {
         }
     }
 
-    private fun convertRuntimeToMinutes(runtime: String): Int {
-        var totalMinutes = 0
-
-        val parts = runtime.split(" ")
-
-        for (part in parts) {
-            when {
-                part.endsWith("h") -> {
-                    val hours = part.removeSuffix("h").trim().toIntOrNull() ?: 0
-                    totalMinutes += hours * 60
-                }
-                part.endsWith("m") -> {
-                    val minutes = part.removeSuffix("m").trim().toIntOrNull() ?: 0
-                    totalMinutes += minutes
-                }
-            }
-        }
-
-        return totalMinutes
-    }
-
     override suspend fun search(query: String): List<SearchResponse> {
+        cookie_value = if(cookie_value.isEmpty()) bypass() else cookie_value
         val cookies = mapOf(
             "t_hash_t" to cookie_value,
             "hd" to "on"
@@ -114,6 +93,7 @@ class NetflixMirrorProvider : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse? {
+        cookie_value = if(cookie_value.isEmpty()) bypass() else cookie_value
         val id = parseJson<Id>(url).id
         val cookies = mapOf(
             "t_hash_t" to cookie_value,

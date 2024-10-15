@@ -49,3 +49,24 @@ inline fun <reified T : Any> tryParseJson(text: String): T? {
         null
     }
 }
+
+fun convertRuntimeToMinutes(runtime: String): Int {
+    var totalMinutes = 0
+
+    val parts = runtime.split(" ")
+
+    for (part in parts) {
+        when {
+            part.endsWith("h") -> {
+                val hours = part.removeSuffix("h").trim().toIntOrNull() ?: 0
+                totalMinutes += hours * 60
+            }
+            part.endsWith("m") -> {
+                val minutes = part.removeSuffix("m").trim().toIntOrNull() ?: 0
+                totalMinutes += minutes
+            }
+        }
+    }
+
+    return totalMinutes
+}
