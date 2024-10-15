@@ -38,9 +38,9 @@ class NetflixMirrorProvider : MainAPI() {
     private suspend fun bypass(): String {
         val document = app.get("$mainUrl/home").document
         addhash = document.selectFirst("body").attr("data-addhash").toString()
-        time = document.select("body").attr("data-time").toString()
-        val verify = app.get("https://userverify.netmirror.app/verify?hash=${addhash}&t=${time}")
-        val requestBody = FormBody.Builder().add("addhash", addhash).build()
+        time = document.selectFirst("body").attr("data-time").toString()
+        val verify = app.get("https://userverify.netmirror.app/verify?hash=${addhash}&t=${time}") //just make request to verify
+        val requestBody = FormBody.Builder().add("verify", addhash).build()
         return app.post("$mainUrl/verify2.php", requestBody = requestBody).cookies["t_hash_t"].toString()
     }
 
