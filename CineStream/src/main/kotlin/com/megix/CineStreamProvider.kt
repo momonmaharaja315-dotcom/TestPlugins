@@ -25,8 +25,8 @@ import com.megix.CineStreamExtractors.invokeNova
 import com.megix.CineStreamExtractors.invokeAstra
 import com.megix.CineStreamExtractors.invoke2embed
 import com.megix.CineStreamExtractors.invokeFilmyxy
-import com.megix.CineStreamExtractors.invokeUhdmovies
 import com.megix.CineStreamExtractors.invokeCatflix
+import com.megix.CineStreamExtractors.invokeUhdmovies
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
