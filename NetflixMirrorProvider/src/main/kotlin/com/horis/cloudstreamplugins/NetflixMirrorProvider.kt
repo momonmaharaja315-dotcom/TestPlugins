@@ -14,6 +14,7 @@ import com.lagradost.cloudstream3.utils.getQualityFromName
 import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.Response
+import okhttp3.FormBody
 import org.jsoup.nodes.Element
 
 class NetflixMirrorProvider : MainAPI() {
@@ -37,8 +38,8 @@ class NetflixMirrorProvider : MainAPI() {
     private suspend fun bypass(): String {
         val document = app.get("$mainUrl/home").document
         addhash = document.selectFirst("body").attr("data-addhash").toString()
-        val formBody = mapOf("verify" to addhash)
-        return app.post("$mainUrl/verify2.php", requestBody = formBody).cookies["t_hash_t"].toString()
+        val requestBody = FormBody.Builder().add("addhash", addhash)
+        return app.post("$mainUrl/verify2.php", requestBody = requestBody).cookies["t_hash_t"].toString()
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse? {
