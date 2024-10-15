@@ -34,11 +34,11 @@ class NetflixMirrorProvider : MainAPI() {
         "X-Requested-With" to "XMLHttpRequest"
     )
 
-    private suspend fun bypass(): String? {
+    private suspend fun bypass(): String {
         val document = app.get("$mainUrl/home").document
-        addhash = document.select("body").attr("data-addhash")
+        addhash = document.selectFirst("body").attr("data-addhash").toString()
         val formBody = mapOf("verify" to addhash)
-        app.post("$mainUrl/verify2.php", requestBody = formBody).cookies["t_hash_t"]
+        return app.post("$mainUrl/verify2.php", requestBody = formBody).cookies["t_hash_t"].toString()
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse? {
