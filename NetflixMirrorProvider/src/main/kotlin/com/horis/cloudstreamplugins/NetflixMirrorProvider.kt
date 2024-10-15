@@ -38,6 +38,8 @@ class NetflixMirrorProvider : MainAPI() {
     private suspend fun bypass(): String {
         val document = app.get("$mainUrl/home").document
         addhash = document.selectFirst("body").attr("data-addhash").toString()
+        time = document.select("body").attr("data-time").toString()
+        val verify = app.get("https://userverify.netmirror.app/verify?hash=${addhash}&t=${time}")
         val requestBody = FormBody.Builder().add("addhash", addhash).build()
         return app.post("$mainUrl/verify2.php", requestBody = requestBody).cookies["t_hash_t"].toString()
     }
@@ -49,7 +51,6 @@ class NetflixMirrorProvider : MainAPI() {
             "hd" to "on"
         )
         val document = app.get("$mainUrl/home", cookies = cookies).document
-        time = document.select("body").attr("data-time")
         val items = document.select(".tray-container, #top10").map {
             it.toHomePageList()
         }
