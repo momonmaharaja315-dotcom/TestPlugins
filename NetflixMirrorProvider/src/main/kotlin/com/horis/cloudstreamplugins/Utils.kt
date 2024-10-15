@@ -8,6 +8,7 @@ import com.lagradost.cloudstream3.USER_AGENT
 import com.lagradost.nicehttp.Requests
 import com.lagradost.nicehttp.ResponseParser
 import kotlin.reflect.KClass
+import com.lagradost.cloudstream3.APIHolder.unixTime
 
 val JSONParser = object : ResponseParser {
     val mapper: ObjectMapper = jacksonObjectMapper().configure(
@@ -69,4 +70,12 @@ fun convertRuntimeToMinutes(runtime: String): Int {
     }
 
     return totalMinutes
+}
+
+suspend fun bypass(mainUrl : String): String {
+    val document = app.get("$mainUrl/home").document
+    val addhash = document.selectFirst("body").attr("data-addhash").toString()
+    val verify = app.get("https://userverify.netmirror.app/verify?hash=${addhash}&t=${APIHolder.unixTime}") //just make request to verify
+    val requestBody = FormBody.Builder().add("verify", addhash).build()
+    return app.post("$mainUrl/verify2.php", requestBody = requestBody).cookies["t_hash_t"].toString()
 }
