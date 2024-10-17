@@ -46,7 +46,6 @@ open class CineStreamProvider : MainAPI() {
         const val Full4MoviesAPI = "https://www.full4movies.forum"
         const val VadapavAPI = "https://vadapav.mov"
         const val netflixAPI = "https://iosmirror.cc"
-        const val myConsumetAPI = BuildConfig.CONSUMET_API
         const val W4UAPI = "https://world4ufree.contact"
         const val WHVXSubsAPI = "https://subs.whvx.net"
         const val AutoembedAPI = "https://autoembed.cc"
@@ -55,6 +54,7 @@ open class CineStreamProvider : MainAPI() {
         const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
         const val FilmyxyAPI = "https://filmxy.wafflehacker.io"
         const val uhdmoviesAPI = "https://uhdmovies.mov"
+        const val myConsumetAPI = BuildConfig.CONSUMET_API
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
