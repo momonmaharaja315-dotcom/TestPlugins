@@ -172,7 +172,6 @@ open class CineStreamProvider : MainAPI() {
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
-                this.comingSoon = if(movieData.meta.status == "Continuing") true else false
                 this.rating = imdbRating.toRatingInt()
                 this.year = year?.toIntOrNull() ?: releaseInfo.toIntOrNull()
                 this.backgroundPosterUrl = background
@@ -205,6 +204,7 @@ open class CineStreamProvider : MainAPI() {
                     this.episode = ep.episode
                     this.posterUrl = ep.thumbnail
                     this.description = ep.overview
+                    addDate(ep.firstAired?.substringBefore("T"))
                 }
             } ?: emptyList()
 
@@ -212,7 +212,6 @@ open class CineStreamProvider : MainAPI() {
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
-                this.comingSoon = if(movieData.meta.status == "Continuing") true else false
                 this.rating = imdbRating.toRatingInt()
                 this.year = year?.substringBefore("–")?.toIntOrNull() ?: releaseInfo.substringBefore("–").toIntOrNull()
                 this.backgroundPosterUrl = background
