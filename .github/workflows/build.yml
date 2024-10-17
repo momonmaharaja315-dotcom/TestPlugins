@@ -43,6 +43,7 @@ jobs:
       env:
         CONSUMET_API: ${{ secrets.CONSUMET_API }}
       run: |
+        cd $GITHUB_WORKSPACE/src
         echo CONSUMET_API=$CONSUMET_API >> local.properties
 
       - name: Build Plugins
