@@ -179,7 +179,7 @@ open class CineStreamProvider : MainAPI() {
                 this.duration = movieData.meta.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
                 addImdbId(id)
-                addTMDbId(tmdbId)
+                addTMDbId(tmdbId.toString())
             }
         }
         else {
@@ -220,7 +220,7 @@ open class CineStreamProvider : MainAPI() {
                 this.duration = movieData.meta.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
                 addImdbId(id)
-                addTMDbId(tmdbId)
+                addTMDbId(tmdbId.toString())
             }
 
         }
