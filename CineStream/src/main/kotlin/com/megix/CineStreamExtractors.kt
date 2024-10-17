@@ -21,11 +21,11 @@ object CineStreamExtractors : CineStreamProvider() {
         episode: Int?= null,
         callback: (ExtractorLink) -> Unit,
     ) {
-        val sources = ["vidcloud", "upstream", "hindi", "english"]
+        val sources = listOf("vidcloud", "upstream", "hindi", "english")
         sources.forEach { source ->
             val url = if(season != null) "https://${source}.vidsrc.nl/stream/tv/${id}/${season}/{episode}" else "https://${source}.vidsrc.nl/stream/movie/${id}"
             val doc = app.get(url).document
-            val link = doc.selectFirst("div#player-container > media-player")?.attr("src") ?: return
+            val link = doc.selectFirst("div#player-container > media-player")?.attr("src").toString()
             callback.invoke(
                 ExtractorLink(
                     "VidSrcNL[${source}]",
@@ -35,6 +35,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     quality = Qualities.Unknown.value,
                     isM3u8 = true,
                 )
+            )
 
         }
     }
