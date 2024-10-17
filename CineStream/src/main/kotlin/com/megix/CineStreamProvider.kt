@@ -46,7 +46,7 @@ open class CineStreamProvider : MainAPI() {
         const val Full4MoviesAPI = "https://www.full4movies.forum"
         const val VadapavAPI = "https://vadapav.mov"
         const val netflixAPI = "https://iosmirror.cc"
-        const val myConsumetAPI = "https://conaumet.vercel.app"
+        const val myConsumetAPI = BuildConfig.CONSUMET_API
         const val W4UAPI = "https://world4ufree.contact"
         const val WHVXSubsAPI = "https://subs.whvx.net"
         const val AutoembedAPI = "https://autoembed.cc"
