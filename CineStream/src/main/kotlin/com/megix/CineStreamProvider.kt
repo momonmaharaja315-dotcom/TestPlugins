@@ -205,7 +205,7 @@ open class CineStreamProvider : MainAPI() {
                     this.episode = ep.episode
                     this.posterUrl = ep.thumbnail
                     this.description = ep.overview
-                    addDate(ep.firstAired, format = "yyyy-MM-dd'T'HH:mm:sss'Z'")
+                    addDate(ep.firstAired?.substringBefore("T"))
                 }
             } ?: emptyList()
 
