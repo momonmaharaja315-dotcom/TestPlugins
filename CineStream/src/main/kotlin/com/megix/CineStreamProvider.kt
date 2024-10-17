@@ -26,8 +26,8 @@ import com.megix.CineStreamExtractors.invokeNova
 import com.megix.CineStreamExtractors.invokeAstra
 import com.megix.CineStreamExtractors.invoke2embed
 import com.megix.CineStreamExtractors.invokeFilmyxy
-import com.megix.CineStreamExtractors.invokeCatflix
 import com.megix.CineStreamExtractors.invokeUhdmovies
+import com.megix.CineStreamExtractors.invokeVidSrcNL
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -47,9 +47,8 @@ open class CineStreamProvider : MainAPI() {
         const val VadapavAPI = "https://vadapav.mov"
         const val netflixAPI = "https://iosmirror.cc"
         const val W4UAPI = "https://world4ufree.contact"
-        const val WHVXSubsAPI = "https://subs.whvx.net"
+        const val WHVXSubsAPI = "https://subs.wyzie.ru"
         const val AutoembedAPI = "https://autoembed.cc"
-        const val AutoembedCatflixAPI = "https://abc.autoembed.cc/catflix"
         const val WHVXAPI = "https://api.whvx.net"
         const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
         const val FilmyxyAPI = "https://filmxy.wafflehacker.io"
@@ -415,11 +414,11 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                invokeCatflix(
-                    res.id,
+                invokeVidSrcNL(
+                    res.tmdbId,
                     res.season,
                     res.episode,
-                    callback
+                    callback,
                 )
             },
         )

@@ -15,6 +15,30 @@ import java.nio.charset.StandardCharsets
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend invokeVidSrcNL(
+        id: Int,
+        season: Int? = null,
+        episode: Int?= null,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        val sources = ["vidcloud", "upstream", "hindi", "english"]
+        sources.forEach { source ->
+            val url = if(season != null) "https://${source}.vidsrc.nl/stream/tv/${id}/${season}/{episode}" else "https://${source}.vidsrc.nl/stream/movie/${id}"
+            val doc = app.get(url).document
+            val link = doc.selectFirst("div#player-container > media-player")?.attr("src") ?: return
+            callback.invoke(
+                ExtractorLink(
+                    "VidSrcNL[${source}]",
+                    "VidSrcNL[${source}]",
+                    link,
+                    referer = "",
+                    quality = Qualities.Unknown.value,
+                    isM3u8 = true,
+                )
+
+        }
+    }
+
     suspend fun invoke2embed(
         id:  String,
         season: Int? = null,
@@ -208,27 +232,6 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    suspend fun invokeCatflix(
-        id: String,
-        season: Int? = null,
-        episode: Int? = null,
-        callback: (ExtractorLink) -> Unit,
-    ) {
-        val url = if(season != null && episode != null) "${AutoembedCatflixAPI}/player.php?id=${id}&s=${season}&e=${episode}" else "${AutoembedCatflixAPI}/player.php?id=${id}"
-        val document = app.get(url).document
-        val link = Regex("""file:\s*'([^']+)'""").find(document.toString())?.groupValues?.get(1) ?: return
-        callback.invoke(
-            ExtractorLink(
-                "Catflix",
-                "Catflix",
-                link,
-                "",
-                Qualities.Unknown.value,
-                isM3u8 = true,
-            )
-        )
-    }
-
     suspend fun invokeAutoembed(
         id: Int,
         season: Int? = null,
@@ -269,7 +272,7 @@ object CineStreamExtractors : CineStreamProvider() {
         data.forEach {
             subtitleCallback.invoke(
                 SubtitleFile(
-                    it.languageName,
+                    it.display,
                     it.url
                 )
             )
@@ -278,7 +281,7 @@ object CineStreamExtractors : CineStreamProvider() {
 
     data class WHVXSubtitle(
         val url: String,
-        val languageName: String,
+        val display: String,
     )
 
     suspend fun invokeW4U(
