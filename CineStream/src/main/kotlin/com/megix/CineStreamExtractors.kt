@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets
 
 object CineStreamExtractors : CineStreamProvider() {
 
-    suspend invokeVidSrcNL(
+    suspend fun invokeVidSrcNL(
         id: Int,
         season: Int? = null,
         episode: Int?= null,
