@@ -205,7 +205,7 @@ open class CineStreamProvider : MainAPI() {
                     this.episode = ep.episode
                     this.posterUrl = ep.thumbnail
                     this.description = ep.overview
-                    addDate(ep.firstAired?.substringBefore("T"))
+                    addDate(ep.firstAired?.substringBefore("T"), format = "yyyy-MM-dd'T'HH:mm:sss'Z'")
                 }
             } ?: emptyList()
 
@@ -493,7 +493,6 @@ open class CineStreamProvider : MainAPI() {
         val id: String?,
         val name: String?,
         val title: String?,
-        val tvdb_id: Int?,
         val season: Int,
         val episode: Int,
         val released: String?,
