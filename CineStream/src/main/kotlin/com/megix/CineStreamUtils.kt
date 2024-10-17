@@ -144,15 +144,3 @@ suspend fun bypassHrefli(url: String): String? {
     if (path == "/404") return null
     return fixUrl(path, getBaseUrl(driveUrl))
 }
-
-
-fun integerToRank(number: Int): String {
-    val suffix = when (number % 10) {
-        1 -> "st"
-        2 -> "nd"
-        3 -> "rd"
-        else -> "th"
-    }
-    return "$number$suffix"
-}
-

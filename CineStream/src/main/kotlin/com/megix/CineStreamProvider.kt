@@ -3,6 +3,7 @@ package com.megix
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbId
+import com.lagradost.cloudstream3.LoadResponse.Companion.addTMDbId
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
@@ -27,7 +28,6 @@ import com.megix.CineStreamExtractors.invoke2embed
 import com.megix.CineStreamExtractors.invokeFilmyxy
 import com.megix.CineStreamExtractors.invokeCatflix
 import com.megix.CineStreamExtractors.invokeUhdmovies
-import com.megix.CineStreamExtractors.invokeAutoembedAnime
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -51,7 +51,6 @@ open class CineStreamProvider : MainAPI() {
         const val WHVXSubsAPI = "https://subs.whvx.net"
         const val AutoembedAPI = "https://autoembed.cc"
         const val AutoembedCatflixAPI = "https://abc.autoembed.cc/catflix"
-        const val AutoembedAnimeAPI = "https://anime-player.autoembed.cc"
         const val WHVXAPI = "https://api.whvx.net"
         const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
         const val FilmyxyAPI = "https://filmxy.wafflehacker.io"
@@ -167,17 +166,20 @@ open class CineStreamProvider : MainAPI() {
                 isAnime,
                 isBollywood,
                 isAsian,
-                isCartoon   
+                isCartoon 
             ).toJson()
             return newMovieLoadResponse(title, url, TvType.Movie, data) {
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
+                this.comingSoon = if(movieData.meta.status == "Continuing") true else false
                 this.rating = imdbRating.toRatingInt()
                 this.year = year?.toIntOrNull() ?: releaseInfo.toIntOrNull()
                 this.backgroundPosterUrl = background
+                this.duration = movieData.meta.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
                 addImdbId(id)
+                addTMDbId(tmdbId)
             }
         }
         else {
@@ -203,6 +205,7 @@ open class CineStreamProvider : MainAPI() {
                     this.episode = ep.episode
                     this.posterUrl = ep.thumbnail
                     this.description = ep.overview
+                    addDate(ep.firstAired, format = "yyyy-MM-dd'T'HH:mm:sss'Z'")
                 }
             } ?: emptyList()
 
@@ -210,11 +213,14 @@ open class CineStreamProvider : MainAPI() {
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
+                this.comingSoon = if(movieData.meta.status == "Continuing") true else false
                 this.rating = imdbRating.toRatingInt()
                 this.year = year?.substringBefore("–")?.toIntOrNull() ?: releaseInfo.substringBefore("–").toIntOrNull()
                 this.backgroundPosterUrl = background
+                this.duration = movieData.meta.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
                 addImdbId(id)
+                addTMDbId(tmdbId)
             }
 
         }
@@ -418,15 +424,6 @@ open class CineStreamProvider : MainAPI() {
                     callback
                 )
             },
-            {
-                if(res.isAnime) invokeAutoembedAnime(
-                    res.title,
-                    year,
-                    res.season,
-                    res.episode,
-                    callback
-                )
-            },
         )
         return true
     }
@@ -454,6 +451,7 @@ open class CineStreamProvider : MainAPI() {
     data class Meta(
         val id: String?,
         val imdb_id: String?,
+        val tvdb_id: Int,
         val type: String?,
         val poster: String?,
         val logo: String?,
@@ -495,6 +493,7 @@ open class CineStreamProvider : MainAPI() {
         val id: String?,
         val name: String?,
         val title: String?,
+        val tvdb_id: Int?,
         val season: Int,
         val episode: Int,
         val released: String?,
