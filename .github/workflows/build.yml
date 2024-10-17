@@ -39,6 +39,7 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v2
+        
       - name: Access Secrets
         env:
           CONSUMET_API: ${{ secrets.CONSUMET_API }}
