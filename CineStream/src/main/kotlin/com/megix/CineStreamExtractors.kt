@@ -18,7 +18,7 @@ object CineStreamExtractors : CineStreamProvider() {
     suspend fun invokeVidSrcNL(
         id: Int,
         season: Int? = null,
-        episode: Int?= null,
+        episode: Int? = null,
         callback: (ExtractorLink) -> Unit,
     ) {
         val sources = listOf("vidcloud", "upstream", "hindi", "english")
@@ -36,7 +36,6 @@ object CineStreamExtractors : CineStreamProvider() {
                     isM3u8 = true,
                 )
             )
-
         }
     }
 
@@ -135,7 +134,24 @@ object CineStreamExtractors : CineStreamProvider() {
         } else {
             """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"movie","season":"","episode":""}"""
         }
-        val headers = mapOf("Origin" to "https://www.vidbinge.com")
+        val headers = mapOf(
+            "Host" to "api.whvx.net",
+            "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; rv:128.0) Gecko/20100101 Firefox/128.0",
+            "Accept" to "*/*",
+            "Accept-Language" to "en-US,en;q=0.5",
+            "Accept-Encoding" to "gzip, deflate, br, zstd",
+            "Origin" to "https://www.vidbinge.com",
+            "DNT" to "1",
+            "Sec-Fetch-Dest" to "empty",
+            "Sec-Fetch-Mode" to "cors",
+            "Sec-Fetch-Site" to "cross-site",
+            "Connection" to "keep-alive",
+            "Priority" to "u=4",
+            "Pragma" to "no-cache",
+            "Cache-Control" to "no-cache",
+            "TE" to "trailers"
+        )
+        
         val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
         val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=nova", headers = headers).text
         val data = parseJson<WHVX>(json) ?: return
@@ -261,6 +277,30 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
+    suspend fun invokeWYZIESubs(
+        id: String,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+    ) {
+        val url = if(season != null && episode != null) "${WYZIESubsAPI}/search?id=${id}&season=${season}&episode=${episode}" else "${WYZIESubsAPI}/search?id=${id}" 
+        val json = app.get(url).text
+        val data = parseJson<ArrayList<WYZIESubtitle>>(json)
+        data.forEach {
+            subtitleCallback.invoke(
+                SubtitleFile(
+                    it.display,
+                    it.url
+                )
+            )
+        }
+    }
+
+    data class WYZIESubtitle(
+        val url: String,
+        val display: String,
+    )
+
     suspend fun invokeWHVXSubs(
         id: String,
         season: Int? = null,
@@ -273,7 +313,7 @@ object CineStreamExtractors : CineStreamProvider() {
         data.forEach {
             subtitleCallback.invoke(
                 SubtitleFile(
-                    it.display,
+                    it.languageName,
                     it.url
                 )
             )
@@ -282,7 +322,7 @@ object CineStreamExtractors : CineStreamProvider() {
 
     data class WHVXSubtitle(
         val url: String,
-        val display: String,
+        val languageName: String,
     )
 
     suspend fun invokeW4U(

@@ -21,6 +21,7 @@ import com.megix.CineStreamExtractors.invokePrimeVideo
 import com.megix.CineStreamExtractors.invokeDramaCool
 import com.megix.CineStreamExtractors.invokeW4U
 import com.megix.CineStreamExtractors.invokeWHVXSubs
+import com.megix.CineStreamExtractors.invokeWYZIESubs
 import com.megix.CineStreamExtractors.invokeAutoembed
 import com.megix.CineStreamExtractors.invokeNova
 import com.megix.CineStreamExtractors.invokeAstra
@@ -47,7 +48,8 @@ open class CineStreamProvider : MainAPI() {
         const val VadapavAPI = "https://vadapav.mov"
         const val netflixAPI = "https://iosmirror.cc"
         const val W4UAPI = "https://world4ufree.contact"
-        const val WHVXSubsAPI = "https://subs.wyzie.ru"
+        const val WHVXSubsAPI = "https://subs.whvx.net"
+        const val WYZIESubsAPI = "https://subs.wyzie.ru"
         const val AutoembedAPI = "https://autoembed.cc"
         const val WHVXAPI = "https://api.whvx.net"
         const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
@@ -346,6 +348,14 @@ open class CineStreamProvider : MainAPI() {
             },
             {
                 invokeWHVXSubs(
+                    res.id,
+                    res.season,
+                    res.episode,
+                    subtitleCallback
+                )
+            },
+            {
+                invokeWYZIESubs(
                     res.id,
                     res.season,
                     res.episode,
