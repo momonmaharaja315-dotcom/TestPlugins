@@ -39,39 +39,6 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    suspend fun invoke2embed(
-        id:  String,
-        season: Int? = null,
-        episode: Int? = null,
-        callback: (ExtractorLink) -> Unit,
-        subtitleCallback: (SubtitleFile) -> Unit,
-    ) {
-        val url = if(season != null && episode != null) "${TwoEmbedAPI}/scrape?id=${id}&s=${season}&e=${episode}" else "${TwoEmbedAPI}/scrape?id=${id}"
-        val json = app.get(url).text
-        val data = parseJson<TwoEmbedQuery>(json)
-        data.stream.forEach {
-            callback.invoke(
-                ExtractorLink(
-                    "2embed[${it.type}]",
-                    "2embed[${it.type}]",
-                    it.playlist,
-                    referer = "",
-                    quality = Qualities.Unknown.value,
-                    INFER_TYPE,
-                )
-            )
-        }
-    }
-    data class TwoEmbedQuery(
-        val stream: List<TwoEmbedStream>
-    )
-
-    data class TwoEmbedStream(
-        val id: String,
-        val type: String,
-        val playlist: String,
-    )
-
     suspend fun invokeAstra(
         title: String,
         imdb_id: String,
@@ -135,23 +102,9 @@ object CineStreamExtractors : CineStreamProvider() {
             """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"movie","season":"","episode":""}"""
         }
         val headers = mapOf(
-            "Host" to "api.whvx.net",
-            "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; rv:128.0) Gecko/20100101 Firefox/128.0",
-            "Accept" to "*/*",
-            "Accept-Language" to "en-US,en;q=0.5",
-            "Accept-Encoding" to "gzip, deflate, br, zstd",
             "Origin" to "https://www.vidbinge.com",
-            "DNT" to "1",
-            "Sec-Fetch-Dest" to "empty",
-            "Sec-Fetch-Mode" to "cors",
-            "Sec-Fetch-Site" to "cross-site",
-            "Connection" to "keep-alive",
-            "Priority" to "u=4",
-            "Pragma" to "no-cache",
-            "Cache-Control" to "no-cache",
-            "TE" to "trailers"
         )
-        
+
         val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
         val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=nova", headers = headers).text
         val data = parseJson<WHVX>(json) ?: return
@@ -211,43 +164,6 @@ object CineStreamExtractors : CineStreamProvider() {
         val embedId: String,
         val url: String,
     )
-
-    suspend fun invokeFilmyxy(
-        id: String,
-        season: Int? = null,
-        episode: Int? = null,
-        callback: (ExtractorLink) -> Unit,
-        subtitleCallback: (SubtitleFile) -> Unit,
-    ) {
-        val url = if(season != null && episode != null) "${FilmyxyAPI}/search?id=${id}&s=${season}&e=${episode}" else "${FilmyxyAPI}/search?id=${id}"
-        val json = app.get(url, timeout = 20L).text
-        val data = parseJson<NovaVideoData>(json) ?: return
-        for (stream in data.stream) {
-            for ((quality, details) in stream.qualities) {
-                callback.invoke(
-                    ExtractorLink(
-                        "Filmyxy",
-                        "Filmyxy",
-                        details.url,
-                        "",
-                        getQualityFromName(quality),
-                        INFER_TYPE,
-                    )
-                )
-            }
-        }
-
-        for (stream in data.stream) {
-            for (caption in stream.captions) {
-                subtitleCallback.invoke(
-                    SubtitleFile(
-                        caption.language,
-                        caption.url
-                    )
-                )
-            }
-        }
-    }
 
     suspend fun invokeAutoembed(
         id: Int,
