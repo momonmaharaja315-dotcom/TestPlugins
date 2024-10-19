@@ -19,9 +19,9 @@ open class AnistreamProvider : MainAPI() {
     )
 
     override val mainPage = mainPageOf(
-        "meta/anilist/latest" to "Latest Anime",
+        //"meta/anilist/latest" to "Latest Anime",
         "meta/anilist/trending" to "Trending Anime",
-        "meta/anilist/popular" to "Popular Anime",
+        //"meta/anilist/popular" to "Popular Anime",
     )
 
     override suspend fun getMainPage(
