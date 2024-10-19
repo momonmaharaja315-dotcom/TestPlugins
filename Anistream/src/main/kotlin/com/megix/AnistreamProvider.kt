@@ -81,7 +81,7 @@ open class AnistreamProvider : MainAPI() {
             this.posterUrl = posterUrl
             this.plot = description
             this.year = year
-            addAniListId(id)
+            addAniListId(id.toInt())
         }
     }
 
@@ -140,9 +140,9 @@ open class AnistreamProvider : MainAPI() {
         var type          : String
     )
     data class Title (
-        var romaji        : String,
-        var english       : String,
-        var native        : String,
+        var romaji        : String = "",
+        var english       : String = "",
+        var native        : String = "",
     )
 
 }
