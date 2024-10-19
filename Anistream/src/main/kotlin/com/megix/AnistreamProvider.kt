@@ -70,7 +70,7 @@ open class AnistreamProvider : MainAPI() {
         val description = animeData.description
         val type = animeData.type
         if(type == "TV") {
-            val episode = animeData.episodes.map {
+            val episodes = animeData.episodes.map {
                 newEpisode(
                     LoadLinksData(
                         it.id,
