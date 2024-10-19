@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.konan.properties.Properties
 
-version = 16
+version = 1
 
 android {
     defaultConfig {
@@ -22,5 +22,5 @@ cloudstream {
         "Anime"
     )
 
-    iconUrl = "https://us.123rf.com/450wm/mrshamsjaman/mrshamsjaman2008/mrshamsjaman200800943/154338064-initial-letter-cs-logo-or-sc-logo-vector-design-template.jpg"
+    iconUrl = "https://cdn.vectorstock.com/i/1000x1000/45/88/at-letter-logo-design-with-simple-style-vector-32194588.jpg"
 }
