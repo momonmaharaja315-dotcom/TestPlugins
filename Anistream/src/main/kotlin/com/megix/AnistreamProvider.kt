@@ -108,41 +108,41 @@ open class AnistreamProvider : MainAPI() {
     }
 
     data class PassData(
-        val id: Int
+        val id: String
     )
 
     data class LoadLinksData(
         val title: String,
-        val id: Int,
+        val id: String,
         val year: Int,
         val type: String,
     )
 
     data class AnistreamResponse (
-        var currentPage : Int = null,
-        var hasNextPage : Boolean = null,
+        var currentPage : Int,
+        var hasNextPage : Boolean,
         var results     : ArrayList<Results> = arrayListOf()
     )
     data class Results (
-        var id            : String          = null,
-        var malId         : Int              = null,
-        var title         : Title           = Title(),
-        var image         : String           = null,
-        var description   : String           = null,
-        var status        : String           = null,
-        var cover         : String           = null,
-        var rating        : Int              = null,
-        var releaseDate   : Int              = null,
-        var color         : String           = null,
+        var id            : String,
+        var malId         : Int,
+        var title         : Title = Title(),
+        var image         : String,
+        var description   : String,
+        var status        : String,
+        var cover         : String,
+        var rating        : Int,
+        var releaseDate   : Int,
+        var color         : String,
         var genres        : ArrayList<String> = arrayListOf(),
-        var totalEpisodes : Int              = null,
-        var duration      : Int              = null,
-        var type          : String           = null
+        var totalEpisodes : Int,
+        var duration      : Int,
+        var type          : String
     )
     data class Title (
-        var romaji        : String = null,
-        var english       : String = null,
-        var native        : String = null,
+        var romaji        : String,
+        var english       : String,
+        var native        : String,
     )
 
 }
