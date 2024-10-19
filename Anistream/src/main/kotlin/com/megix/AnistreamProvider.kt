@@ -19,7 +19,9 @@ open class AnistreamProvider : MainAPI() {
     )
 
     override val mainPage = mainPageOf(
+        "meta/anilist/latest" to "Latest Anime",
         "meta/anilist/trending" to "Trending Anime",
+        "meta/anilist/popular" to "Popular Anime",
     )
 
     override suspend fun getMainPage(
@@ -45,14 +47,12 @@ open class AnistreamProvider : MainAPI() {
 
     override suspend fun search(query: String): List<SearchResponse> {
         val searchResponse = mutableListOf<SearchResponse>()
-        for(i in 1..7) {
-            val json = app.get("$mainUrl/meta/anilist/${query}?page=${i}").text
-            val animes = parseJson<AnistreamResponse>(json)
-            animes.results.mapNotNull { result ->
-                searchResponse.add(newMovieSearchResponse(result.title.romaji, PassData(result.id).toJson(), TvType.Movie) {
-                    this.posterUrl = result.image
-                })
-            }
+        val json = app.get("$mainUrl/meta/anilist/${query}").text
+        val animes = parseJson<AnistreamResponse>(json)
+        animes.results.mapNotNull { result ->
+            searchResponse.add(newMovieSearchResponse(result.title.romaji, PassData(result.id).toJson(), TvType.Movie) {
+                this.posterUrl = result.image
+            })
         }
         return searchResponse
     }
@@ -69,19 +69,50 @@ open class AnistreamProvider : MainAPI() {
         val year = animeData.releaseDate
         val description = animeData.description
         val type = animeData.type
+        if(type == "TV") {
+            val episode = animeData.episodes.map {
+                newEpisode(
+                    LoadLinksData(
+                        it.id,
+                        title,
+                        id,
+                        year,
+                        type,
+                    ).toJson()
+                ) {
+                    this.name = it.title
+                    this.episode = it.number
+                    this.posterUrl = it.image
+                }
+            } ?: emptyList()
 
-        val data = LoadLinksData(
-            title,
-            id,
-            year,
-            type,
-        ).toJson()
+            return newTvSeriesLoadResponse(title, url, TvType.TvSeries, episodes) {
+                this.posterUrl = posterUrl
+                this.plot = description
+                this.rating = rating
+                this.year = year
+                this.backgroundPosterUrl = animeData.cover
+                addAniListId(id.toInt())
+            }
+        }
+        else {
+            val epId = animeData.episodes[0].id
+            val data = LoadLinksData(
+                epId,
+                title,
+                id,
+                year,
+                type,
+            ).toJson()
 
-        return newMovieLoadResponse(title, url, TvType.Movie, data) {
-            this.posterUrl = posterUrl
-            this.plot = description
-            this.year = year
-            addAniListId(id.toInt())
+            return newMovieLoadResponse(title, url, TvType.Movie, data) {
+                this.posterUrl = posterUrl
+                this.plot = description
+                this.rating = rating
+                this.year = year
+                this.backgroundPosterUrl = animeData.cover
+                addAniListId(id.toInt())
+            }
         }
     }
 
@@ -92,6 +123,21 @@ open class AnistreamProvider : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val res = parseJson<LoadLinksData>(data)
+        val json = app.get("$mainUrl/meta/anilist/watch/${res.epId}").text
+        val animeData = parseJson<GetSources>(json)
+        val referer = animeData.headers.Referer
+        animeData.sources.map {
+            callback.invoke(
+                ExtractorLink(
+                    this.name,
+                    this.name,
+                    it.url,
+                    referer,
+                    getQualityFromName(it.quality),
+                    it.isM3U8 ?: false
+                )
+            )
+        }
         // argamap(
         //     {
         //         invokeMoviesdrive(
@@ -112,6 +158,7 @@ open class AnistreamProvider : MainAPI() {
     )
 
     data class LoadLinksData(
+        val epId: String,
         val title: String,
         val id: String,
         val year: Int,
@@ -137,12 +184,38 @@ open class AnistreamProvider : MainAPI() {
         var genres        : ArrayList<String> = arrayListOf(),
         var totalEpisodes : Int,
         var duration      : Int,
-        var type          : String
+        var type          : String,
+        var episodes      : ArrayList<Episodes> = arrayListOf()
     )
+
+    data class Episodes (
+        var id          : String,
+        var title       : String,
+        var description : String? = null,
+        var number      : Int,
+        var image       : String? = null,
+    )
+
     data class Title (
         var romaji        : String = "",
         var english       : String = "",
         var native        : String = "",
+    )
+
+    data class GetSources (
+        var headers  : Headers           = Headers(),
+        var sources  : ArrayList<Sources> = arrayListOf(),
+        var download : String,
+    )
+
+    data class Headers (
+        var Referer : String = ""
+    )
+
+    data class Sources (
+        var url     : String,
+        var isM3U8  : Boolean,
+        var quality : String
     )
 
 }
