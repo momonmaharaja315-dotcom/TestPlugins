@@ -19,9 +19,9 @@ open class AnistreamProvider : MainAPI() {
     )
 
     override val mainPage = mainPageOf(
-        //"meta/anilist/latest" to "Latest Anime",
+        "meta/anilist/latest" to "Latest Anime",
         "meta/anilist/trending" to "Trending Anime",
-        //"meta/anilist/popular" to "Popular Anime",
+        "meta/anilist/popular" to "Popular Anime",
     )
 
     override suspend fun getMainPage(
@@ -41,7 +41,7 @@ open class AnistreamProvider : MainAPI() {
                 name = request.name,
                 list = home
             ),
-            hasNext = true
+            hasNext = animes.hasNextPage
         )
     }
 
@@ -70,7 +70,7 @@ open class AnistreamProvider : MainAPI() {
         val description = animeData.description
         val type = animeData.type
         if(type == "TV") {
-            val episodes = animeData.episodes.map {
+            val episodes = animeData.episodes?.map {
                 newEpisode(
                     LoadLinksData(
                         it.id,
@@ -96,7 +96,7 @@ open class AnistreamProvider : MainAPI() {
             }
         }
         else {
-            val epId = animeData.episodes[0].id
+            val epId = animeData.episodes[0]?.id
             val data = LoadLinksData(
                 epId,
                 title,
@@ -158,7 +158,7 @@ open class AnistreamProvider : MainAPI() {
     )
 
     data class LoadLinksData(
-        val epId: String,
+        val epId: String? = null,
         val title: String,
         val id: String,
         val year: Int,
@@ -180,12 +180,11 @@ open class AnistreamProvider : MainAPI() {
         var cover         : String,
         var rating        : Int,
         var releaseDate   : Int,
-        var color         : String,
         var genres        : ArrayList<String> = arrayListOf(),
         var totalEpisodes : Int,
-        var duration      : Int,
+        var duration      : Int? = null,
         var type          : String,
-        var episodes      : ArrayList<Episodes> = arrayListOf()
+        var episodes      : ArrayList<Episodes>? = arrayListOf()
     )
 
     data class Episodes (
