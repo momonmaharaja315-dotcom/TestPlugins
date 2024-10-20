@@ -28,7 +28,6 @@ import com.megix.CineStreamExtractors.invokeAstra
 import com.megix.CineStreamExtractors.invokeUhdmovies
 import com.megix.CineStreamExtractors.invokeVidSrcNL
 import com.megix.CineStreamExtractors.invokeNinetv
-import com.megix.CineStreamExtractors.invokeRidomovies
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -54,7 +53,6 @@ open class CineStreamProvider : MainAPI() {
         const val WHVXAPI = "https://api.whvx.net"
         const val uhdmoviesAPI = "https://uhdmovies.mov"
         const val myConsumetAPI = BuildConfig.CONSUMET_API
-        const val ridomoviesAPI = "https://ridomovies.tv"
         const val nineTvAPI = "https://moviesapi.club"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
@@ -411,16 +409,6 @@ open class CineStreamProvider : MainAPI() {
                     res.season,
                     res.episode,
                     callback,
-                )
-            },
-            {
-            if (!res.isAnime) invokeRidomovies(
-                    res.tmdbId,
-                    res.id,
-                    res.season,
-                    res.episode,
-                    subtitleCallback,
-                    callback
                 )
             },
             {

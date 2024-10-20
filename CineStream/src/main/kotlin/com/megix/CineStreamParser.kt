@@ -2,29 +2,6 @@ package com.megix
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class RidoContentable(
-    @JsonProperty("imdbId") var imdbId: String? = null,
-    @JsonProperty("tmdbId") var tmdbId: Int? = null,
-)
-
-data class RidoItems(
-    @JsonProperty("slug") var slug: String? = null,
-    @JsonProperty("contentable") var contentable: RidoContentable? = null,
-)
-
-data class RidoData(
-    @JsonProperty("url") var url: String? = null,
-    @JsonProperty("items") var items: ArrayList<RidoItems>? = arrayListOf(),
-)
-
-data class RidoResponses(
-    @JsonProperty("data") var data: ArrayList<RidoData>? = arrayListOf(),
-)
-
-data class RidoSearch(
-    @JsonProperty("data") var data: RidoData? = null,
-)
-
 data class AstraQuery(
     val stream: List<AstraStream>
 )

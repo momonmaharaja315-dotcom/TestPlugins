@@ -34,17 +34,6 @@ object CineStreamExtractors : CineStreamProvider() {
                 referer = "https://pressplay.top/"
             ).document.selectFirst("iframe")
                 ?.attr("src")
-        
-        callback.invoke(
-            ExtractorLink(
-                "Ninetv[Test]",
-                "Ninetv[Test]",
-                iframe ?: return,
-                referer = "",
-                quality = Qualities.Unknown.value,
-                INFER_TYPE,
-            )
-        )
 
         loadExtractor(iframe ?: return, "$nineTvAPI/", subtitleCallback, callback)
     }
@@ -979,62 +968,6 @@ object CineStreamExtractors : CineStreamProvider() {
                 if (server.isNotEmpty()) {
                     loadSourceNameExtractor("Moviesmod", server, "", subtitleCallback, callback)
                 }
-            }
-        }
-    }
-
-     suspend fun invokeRidomovies(
-        tmdbId: Int? = null,
-        imdbId: String? = null,
-        season: Int? = null,
-        episode: Int? = null,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit,
-    ) {
-        val mediaSlug = app.get("$ridomoviesAPI/core/api/search?q=$imdbId")
-            .parsedSafe<RidoSearch>()?.data?.items?.find {
-                it.contentable?.tmdbId == tmdbId || it.contentable?.imdbId == imdbId
-            }?.slug ?: return
-
-        val id = season?.let {
-            val episodeUrl = "$ridomoviesAPI/tv/$mediaSlug/season-$it/episode-$episode"
-            app.get(episodeUrl).text.substringAfterLast("""postid\":\"""")
-                .substringBefore("""\""")
-        } ?: mediaSlug
-
-        val url =
-            "$ridomoviesAPI/core/api/${if (season == null) "movies" else "episodes"}/$id/videos"
-        app.get(url).parsedSafe<RidoResponses>()?.data?.apmap { link ->
-            val iframe =
-                Jsoup.parse(link.url ?: return@apmap).select("iframe").attr("data-src")
-            if (iframe.startsWith("https://closeload.top")) {
-                val unpacked =
-                    getAndUnpack(app.get(iframe, referer = "$ridomoviesAPI/").text)
-                val video = Regex("=\"(aHR.*?)\";").find(unpacked)?.groupValues?.get(1)
-                callback.invoke(
-                    ExtractorLink(
-                        "Ridomovies",
-                        "Ridomovies",
-                        base64Decode(video ?: return@apmap),
-                        "${getBaseUrl(iframe)}/",
-                        Qualities.P1080.value,
-                        isM3u8 = true
-                    )
-                )
-            } else {
-                
-                callback.invoke(
-                    ExtractorLink(
-                        "Ninetv[Test]",
-                        "Ninetv[Test]",
-                        iframe,
-                        referer = "",
-                        quality = Qualities.Unknown.value,
-                        INFER_TYPE,
-                    )
-                )
-
-                loadExtractor(iframe, "$ridomoviesAPI/", subtitleCallback, callback)
             }
         }
     }
