@@ -11,6 +11,7 @@ import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import java.net.URLEncoder
 import okhttp3.FormBody
 import java.nio.charset.StandardCharsets
+import org.jsoup.Jsoup
 
 object CineStreamExtractors : CineStreamProvider() {
 
@@ -59,7 +60,7 @@ object CineStreamExtractors : CineStreamProvider() {
             val url = if(season != null) "https://${source}.vidsrc.nl/stream/tv/${id}/${season}/{episode}" else "https://${source}.vidsrc.nl/stream/movie/${id}"
             val doc = app.get(url).document
             val link = doc.selectFirst("div#player-container > media-player")?.attr("src").toString()
-            if (link.isNotNullOrEmpty()) {
+            if (!link.isNullOrEmpty()) {
                 callback.invoke(
                     ExtractorLink(
                         "VidSrcNL[${source}]",
