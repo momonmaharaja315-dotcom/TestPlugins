@@ -2,6 +2,15 @@ package com.megix
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
+data class TwoEmbedQuery(
+    val stream: List<TwoEmbedStream>
+)
+data class TwoEmbedStream(
+    val id: String,
+    val type: String,
+    val playlist: String,
+)
+
 data class AstraQuery(
     val stream: List<AstraStream>
 )

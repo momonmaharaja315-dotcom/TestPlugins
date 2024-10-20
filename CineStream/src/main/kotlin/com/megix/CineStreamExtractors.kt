@@ -15,7 +15,67 @@ import org.jsoup.Jsoup
 
 object CineStreamExtractors : CineStreamProvider() {
 
-    suspend fun invokeNinetv(
+    suspend fun invoke2embed(
+        id:  String,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+        subtitleCallback: (SubtitleFile) -> Unit,
+    ) {
+        val url = if(season != null && episode != null) "${TwoEmbedAPI}/scrape?id=${id}&s=${season}&e=${episode}" else "${TwoEmbedAPI}/scrape?id=${id}"
+        val json = app.get(url).text
+        val data = parseJson<TwoEmbedQuery>(json)
+        data.stream.forEach {
+            callback.invoke(
+                ExtractorLink(
+                    "2embed[${it.type}]",
+                    "2embed[${it.type}]",
+                    it.playlist,
+                    referer = "",
+                    quality = Qualities.Unknown.value,
+                    INFER_TYPE,
+                )
+            )
+        }
+    }
+
+    suspend fun invokeFilmyxy(
+        id: String,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+        subtitleCallback: (SubtitleFile) -> Unit,
+    ) {
+        val url = if(season != null && episode != null) "${FilmyxyAPI}/search?id=${id}&s=${season}&e=${episode}" else "${FilmyxyAPI}/search?id=${id}"
+        val json = app.get(url, timeout = 20L).text
+        val data = parseJson<NovaVideoData>(json) ?: return
+        for (stream in data.stream) {
+            for ((quality, details) in stream.qualities) {
+                callback.invoke(
+                    ExtractorLink(
+                        "Filmyxy",
+                        "Filmyxy",
+                        details.url,
+                        "",
+                        getQualityFromName(quality),
+                        INFER_TYPE,
+                    )
+                )
+            }
+        }
+        for (stream in data.stream) {
+            for (caption in stream.captions) {
+                subtitleCallback.invoke(
+                    SubtitleFile(
+                        caption.language,
+                        caption.url
+                    )
+                )
+            }
+        }
+    }
+
+    suspend fun invokeMovies(
         tmdbId: Int? = null,
         season: Int? = null,
         episode: Int? = null,
@@ -23,9 +83,9 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit
     ) {
         val url = if (season == null) {
-            "$nineTvAPI/movie/$tmdbId"
+            "$moviesAPI/movie/$tmdbId"
         } else {
-            "$nineTvAPI/tv/$tmdbId-$season-$episode"
+            "$moviesAPI/tv/$tmdbId-$season-$episode"
         }
 
         val iframe =
@@ -35,7 +95,7 @@ object CineStreamExtractors : CineStreamProvider() {
             ).document.selectFirst("iframe")
                 ?.attr("src")
 
-        loadExtractor(iframe ?: return, "$nineTvAPI/", subtitleCallback, callback)
+        loadExtractor(iframe ?: return, "$moviesAPI/", subtitleCallback, callback)
     }
 
     suspend fun invokeVidSrcNL(

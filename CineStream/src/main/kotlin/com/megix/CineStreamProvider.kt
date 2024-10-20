@@ -27,7 +27,7 @@ import com.megix.CineStreamExtractors.invokeNova
 import com.megix.CineStreamExtractors.invokeAstra
 import com.megix.CineStreamExtractors.invokeUhdmovies
 import com.megix.CineStreamExtractors.invokeVidSrcNL
-import com.megix.CineStreamExtractors.invokeNinetv
+import com.megix.CineStreamExtractors.invokeMovies
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -53,7 +53,9 @@ open class CineStreamProvider : MainAPI() {
         const val WHVXAPI = "https://api.whvx.net"
         const val uhdmoviesAPI = "https://uhdmovies.mov"
         const val myConsumetAPI = BuildConfig.CONSUMET_API
-        const val nineTvAPI = "https://moviesapi.club"
+        const val moviesAPI = "https://moviesapi.club"
+        const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
+        const val FilmyxyAPI = "https://filmxy.wafflehacker.io"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
@@ -412,13 +414,31 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                if (!res.isAnime) invokeNinetv(
+                if (!res.isAnime) invokeMovies(
                     res.tmdbId,
                     res.season,
                     res.episode,
                     subtitleCallback,
                     callback
                 )
+            },
+            {
+                invoke2embed(
+                    res.id,
+                    res.season,
+                    res.episode,
+                    callback,
+                    subtitleCallback
+                )
+            },
+            {
+                invokeFilmyxy(
+                    res.id,
+                    res.season,
+                    res.episode,
+                    callback,
+                    subtitleCallback
+                )   
             },
         )
         return true
