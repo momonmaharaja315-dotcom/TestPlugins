@@ -28,6 +28,9 @@ import com.megix.CineStreamExtractors.invokeAstra
 import com.megix.CineStreamExtractors.invokeUhdmovies
 import com.megix.CineStreamExtractors.invokeVidSrcNL
 import com.megix.CineStreamExtractors.invokeMovies
+import com.megix.CineStreamExtractors.invoke2embed
+import com.megix.CineStreamExtractors.invokeFilmyxy
+import com.megix.CineStreamExtractors.invokeMultimovies
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -56,6 +59,7 @@ open class CineStreamProvider : MainAPI() {
         const val moviesAPI = "https://moviesapi.club"
         const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
         const val FilmyxyAPI = "https://filmxy.wafflehacker.io"
+        const val multimoviesAPI = "https://multimovies.bond"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
@@ -439,6 +443,16 @@ open class CineStreamProvider : MainAPI() {
                     callback,
                     subtitleCallback
                 )   
+            },
+            {
+                invokeMultimovies(
+                    multimoviesAPI,
+                    res.title,
+                    res.season,
+                    res.episode,
+                    subtitleCallback,
+                    callback
+                )
             },
         )
         return true
