@@ -13,7 +13,7 @@ android {
 cloudstream {
     //language = "en"
     description = "Multi API Extension"
-    authors = listOf("megix")
+    authors = listOf("megix", "phisher")
     status = 1
     tvTypes = listOf(
         "TvSeries",
