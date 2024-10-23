@@ -15,51 +15,6 @@ import org.jsoup.Jsoup
 
 object CineStreamExtractors : CineStreamProvider() {
 
-    suspend fun invokeAutoembedDrama(
-        title: String,
-        year: Int? = null,
-        season: Int? = null,
-        episode: Int? = null,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit,
-    ) {
-        val url = if(season == null) {
-            val episodeSlug = "$title $year episode 1".createSlug()
-            "$AutoembedDramaAPI/embed/${episodeSlug}"
-        }
-        else {
-            val seasonText = if(season == 1) "" else "season $season"
-            val episodeSlug = "$title $seasonText $year episode $episode".createSlug()
-            "$AutoembedDramaAPI/embed/${episodeSlug}"
-        }
-
-        callback.invoke(
-            ExtractorLink(
-                "AutoembedDrama",
-                "AutoembedDrama",
-                url,
-                "",
-                Qualities.P1080.value,
-                isM3u8 = true,
-            )
-        )        
-
-        val document = app.get(url).document
-        val regex = Regex("""file:\s*"(https?:\/\/[^"]+)""")
-        val link = regex.find(document.toString())?.groupValues?.get(1) ?: return
-        callback.invoke(
-            ExtractorLink(
-                "AutoembedDrama",
-                "AutoembedDrama",
-                link,
-                "",
-                Qualities.P1080.value,
-                isM3u8 = true,
-            )
-        )
-
-    }
-
      suspend fun invokeMultimovies(
         apiUrl: String,
         title: String? = null,
@@ -1120,5 +1075,37 @@ object CineStreamExtractors : CineStreamProvider() {
                 }
             }
         }
+    }
+    suspend fun invokeAutoembedDrama(
+        title: String,
+        year: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        val url = if(season == null) {
+            val episodeSlug = "$title $year episode 1".createSlug()
+            "$AutoembedDramaAPI/embed/${episodeSlug}"
+        }
+        else {
+            val seasonText = if(season == 1) "" else "season $season"
+            val episodeSlug = "$title $seasonText $year episode $episode".createSlug()
+            "$AutoembedDramaAPI/embed/${episodeSlug}"
+        }
+
+        val document = app.get(url).document
+        val regex = Regex("""file:\s*"(https?:\/\/[^"]+)"""")
+        val link = regex.find(document.toString())?.groupValues?.get(1) ?: ""
+        callback.invoke(
+            ExtractorLink(
+                "AutoembedDrama",
+                "AutoembedDrama",
+                link,
+                "",
+                Qualities.P1080.value,
+                isM3u8 = true,
+            )
+        )
     }
 }
