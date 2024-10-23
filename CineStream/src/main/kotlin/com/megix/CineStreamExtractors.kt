@@ -33,6 +33,17 @@ object CineStreamExtractors : CineStreamProvider() {
             "$AutoembedDramaAPI/embed/{episodeSlug}"
         }
 
+        callback.invoke(
+            ExtractorLink(
+                "AutoembedDrama",
+                "AutoembedDrama",
+                url,
+                "",
+                Qualities.P1080.value,
+                isM3u8 = true,
+            )
+        )        
+
         val document = app.get(url).document
         val regex = Regex("""file:\s*"(https?:\/\/[^"]+)\"""")
         val link = regex.find(document.toString())?.groupValues?.get(1) ?: return
