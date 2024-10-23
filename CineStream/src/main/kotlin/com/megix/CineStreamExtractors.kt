@@ -30,7 +30,7 @@ object CineStreamExtractors : CineStreamProvider() {
         else {
             val seasonText = if(season == 1) "" else "season $season"
             val episodeSlug = "$title $seasonText $year episode $episode".createSlug()
-            "$AutoembedDramaAPI/embed/{episodeSlug}"
+            "$AutoembedDramaAPI/embed/${episodeSlug}"
         }
 
         callback.invoke(
@@ -45,7 +45,7 @@ object CineStreamExtractors : CineStreamProvider() {
         )        
 
         val document = app.get(url).document
-        val regex = Regex("""file:\s*"(https?:\/\/[^"]+)\"""")
+        val regex = Regex("""file:\s*"(https?:\/\/[^"]+)""")
         val link = regex.find(document.toString())?.groupValues?.get(1) ?: return
         callback.invoke(
             ExtractorLink(
@@ -198,7 +198,7 @@ object CineStreamExtractors : CineStreamProvider() {
         sources.forEach { source ->
             val url = if(season != null) "https://${source}.vidsrc.nl/stream/tv/${id}/${season}/{episode}" else "https://${source}.vidsrc.nl/stream/movie/${id}"
             val doc = app.get(url).document
-            val link = doc.selectFirst("div#player-container > media-player")?.attr("src").toString()
+            val link = doc.selectFirst("div#player-container > media-player")?.attr("src")
             if (!link.isNullOrBlank()) {
                 callback.invoke(
                     ExtractorLink(

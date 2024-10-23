@@ -135,6 +135,11 @@ open class CineStreamProvider : MainAPI() {
 
     }
 
+    private fun String.isAsianCountry(): Boolean {
+        return this.contains("Japan", true) ||
+           this.contains("China", true) ||
+           this.contains("Korea", true)
+    }
 
     override suspend fun load(url: String): LoadResponse? {
         val movie = parseJson<PassData>(url)
@@ -153,12 +158,11 @@ open class CineStreamProvider : MainAPI() {
         val cast : List<String> = movieData.meta.cast ?: emptyList()
         val genre : List<String> = movieData.meta.genre ?: emptyList()
         val background = movieData.meta.background.toString()
+        
         val isCartoon = genre.any { it.contains("Animation", true) }
-        val isAnime = (movieData.meta.country.toString().contains("Japan", true) || 
-            movieData.meta.country.toString().contains("China", true)) && isCartoon
+        val isAnime = movieData.meta.country.toString().isAsianCountry() && isCartoon
         val isBollywood = movieData.meta.country.toString().contains("India", true)
-        val isAsian = (movieData.meta.country.toString().contains("Korea", true) ||
-                movieData.meta.country.toString().contains("China", true)) && !isAnime
+        val isAsian = movieData.meta.country.toString().isAsianCountry() && !isAnime
 
         if(tvtype == "movie") {
             val data = LoadLinksData(
