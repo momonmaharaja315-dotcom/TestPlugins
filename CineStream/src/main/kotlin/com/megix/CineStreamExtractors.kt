@@ -23,6 +23,15 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         val json = app.get("$RarAPI/ajax/posts?q=$title ($year)").text
+        callback.invoke(
+            ExtractorLink(
+                "Rar[JSON]",
+                "Rar[JSON]",
+                "$RarAPI/ajax/posts?q=$title ($year)",
+                referer = "",
+                Qualities.P1080.value,
+            )
+        )
         val responseData = parseJson<RarResponseData>(json)
         val id = responseData.data?.firstOrNull()?.id ?: return
         val slug = "$title $year $id".createSlug()
@@ -34,7 +43,6 @@ object CineStreamExtractors : CineStreamProvider() {
                 url,
                 referer = "",
                 Qualities.P1080.value,
-                true
             )
         )
         val embedId = app.get(url).document.selectFirst("btn-service")?.attr("data-embed") ?: return
