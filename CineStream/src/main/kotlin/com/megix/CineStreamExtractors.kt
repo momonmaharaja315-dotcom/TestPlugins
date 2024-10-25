@@ -23,29 +23,13 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         val json = app.get("$RarAPI/ajax/posts?q=$title ($year)").text
-        callback.invoke(
-            ExtractorLink(
-                "Rar[JSON]",
-                "Rar[JSON]",
-                "$RarAPI/ajax/posts?q=$title ($year)",
-                referer = "",
-                Qualities.P1080.value,
-            )
-        )
         val responseData = parseJson<RarResponseData>(json)
-        val id = responseData.data?.firstOrNull()?.id ?: return
+        val id = responseData.data?.firstOrNull { 
+            it.second_name == title 
+        }?.id ?: return
         val slug = "$title $year $id".createSlug()
         val url = if(season != null) "$RarAPI/show/$slug/season/$season/episode/$episode" else "$RarAPI/movie/$slug"
-        callback.invoke(
-            ExtractorLink(
-                "Rar[Slug]",
-                "Rar[SLug]",
-                url,
-                referer = "",
-                Qualities.P1080.value,
-            )
-        )
-        val embedId = app.get(url).document.selectFirst("btn-service")?.attr("data-embed") ?: return
+        val embedId = app.get(url).document.selectFirst("a.btn-service")?.attr("data-embed") ?: return
         val body = FormBody.Builder().add("id", embedId).build()
         val document = app.post("$RarAPI/ajax/embed", requestBody = body).document
         val regex = Regex("""(https?:\/\/[^\"']+\.m3u8)""")
