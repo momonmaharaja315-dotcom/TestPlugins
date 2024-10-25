@@ -15,49 +15,33 @@ import org.jsoup.Jsoup
 
 object CineStreamExtractors : CineStreamProvider() {
 
-     suspend fun invokeMultimovies(
-        apiUrl: String,
-        title: String? = null,
+    suspend fun invokeRar(
+        title: String,
+        year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
+        callback: (ExtractorLink) -> Unit,
     ) {
-        val fixTitle = title.createSlug()
-        val url = if (season == null) {
-            "$apiUrl/movies/$fixTitle"
-        } else {
-            "$apiUrl/episodes/$fixTitle-${season}x${episode}"
-        }
-        val req = app.get(url).document
-        req.select("ul#playeroptionsul li").map {
-            Triple(
-                it.attr("data-post"),
-                it.attr("data-nume"),
-                it.attr("data-type")
+        val json = app.get("$RarAPI/ajax/posts?q=$title ($year)").text
+        val responseData = parseJson<RarResponseData>(json)
+        val id = responseData.data.firstOrNull()?.id ?: return
+        val slug = "$title $year $id".createSlug()
+        val url = if(season != null) "$RarAPI/show/$slug/season/$season/episode/$episode" else "$RarAPI/movie/$slug"
+        val embedId = app.get(url).document.selectFirst("btn-service")?.attr("data-embed") ?: return
+        val body = FormBody.Builder().add("id", embedId).build()
+        val document = app.post("$RarAPI/ajax/embed", requestBody = body).document
+        val regex = ("""https?:\/\/[^\"']+\.m3u8""")
+        val link = regex.find(document.toString())?.value ?: return
+        callback.invoke(
+            ExtractorLink(
+                "Rar",
+                "Rar",
+                link,
+                referer = "",
+                Qualities.P1080.value,
+                true
             )
-        }.amap { (id, nume, type) ->
-            if (!nume.contains("trailer")) {
-                val source = app.post(
-                    url = "$apiUrl/wp-admin/admin-ajax.php",
-                    data = mapOf(
-                        "action" to "doo_player_ajax",
-                        "post" to id,
-                        "nume" to nume,
-                        "type" to type
-                    ),
-                    referer = url,
-                    headers = mapOf("X-Requested-With" to "XMLHttpRequest")
-                ).parsed<ResponseHash>().embed_url
-                val link = source.substringAfter("\"").substringBefore("\"")
-                when {
-                    !link.contains("youtube") -> {
-                        loadExtractor(link, referer = apiUrl, subtitleCallback, callback)
-                    }
-                    else -> ""
-                }
-            }
-        }
+        )
     }
 
     suspend fun invoke2embed(
@@ -154,7 +138,7 @@ object CineStreamExtractors : CineStreamProvider() {
             val url = if(season != null) "https://${source}.vidsrc.nl/stream/tv/${id}/${season}/{episode}" else "https://${source}.vidsrc.nl/stream/movie/${id}"
             val doc = app.get(url).document
             val link = doc.selectFirst("div#player-container > media-player")?.attr("src")
-            if (!link.isNullOrBlank()) {
+            if (!link.isNullOrEmpty()) {
                 callback.invoke(
                     ExtractorLink(
                         "VidSrcNL[${source}]",

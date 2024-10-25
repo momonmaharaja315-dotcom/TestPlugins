@@ -30,8 +30,8 @@ import com.megix.CineStreamExtractors.invokeVidSrcNL
 import com.megix.CineStreamExtractors.invokeMovies
 import com.megix.CineStreamExtractors.invoke2embed
 import com.megix.CineStreamExtractors.invokeFilmyxy
-import com.megix.CineStreamExtractors.invokeMultimovies
 import com.megix.CineStreamExtractors.invokeAutoembedDrama
+import com.megix.CineStreamExtractors.invokeRar
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -60,8 +60,8 @@ open class CineStreamProvider : MainAPI() {
         const val moviesAPI = "https://moviesapi.club"
         const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
         const val FilmyxyAPI = "https://filmxy.wafflehacker.io"
-        const val multimoviesAPI = "https://multimovies.bond"
         const val AutoembedDramaAPI = "https://asian-drama.autoembed.cc"
+        const val RarAPI = "https://rar.to"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
@@ -135,11 +135,6 @@ open class CineStreamProvider : MainAPI() {
 
     }
 
-    private fun String.isAsianCountry(): Boolean {
-        return this.contains("Japan", true) ||
-           this.contains("China", true) ||
-           this.contains("Korea", true)
-    }
 
     override suspend fun load(url: String): LoadResponse? {
         val movie = parseJson<PassData>(url)
@@ -158,11 +153,12 @@ open class CineStreamProvider : MainAPI() {
         val cast : List<String> = movieData.meta.cast ?: emptyList()
         val genre : List<String> = movieData.meta.genre ?: emptyList()
         val background = movieData.meta.background.toString()
-        
         val isCartoon = genre.any { it.contains("Animation", true) }
-        val isAnime = movieData.meta.country.toString().isAsianCountry() && isCartoon
+        val isAnime = (movieData.meta.country.toString().contains("Japan", true) || 
+            movieData.meta.country.toString().contains("China", true)) && isCartoon
         val isBollywood = movieData.meta.country.toString().contains("India", true)
-        val isAsian = movieData.meta.country.toString().isAsianCountry() && !isAnime
+        val isAsian = (movieData.meta.country.toString().contains("Korea", true) ||
+                movieData.meta.country.toString().contains("China", true)) && !isAnime
 
         if(tvtype == "movie") {
             val data = LoadLinksData(
@@ -296,6 +292,15 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
+                invokeRar(
+                    res.title,
+                    firstYear,
+                    res.season,
+                    res.episode,
+                    callback
+                )
+            },
+            {
                 if(!res.isAnime) invokeFull4Movies(
                     res.title,
                     year,
@@ -337,16 +342,6 @@ open class CineStreamProvider : MainAPI() {
             },
             {
                 if(res.isAsian) invokeDramaCool(
-                    res.title,
-                    year,
-                    res.season,
-                    res.episode,
-                    subtitleCallback,
-                    callback
-                )
-            },
-            {
-                if(res.isAsian) invokeAutoembedDrama(
                     res.title,
                     year,
                     res.season,
@@ -461,9 +456,9 @@ open class CineStreamProvider : MainAPI() {
                 )   
             },
             {
-                invokeMultimovies(
-                    multimoviesAPI,
+                if(res.isAsian) invokeAutoembedDrama(
                     res.title,
+                    year,
                     res.season,
                     res.episode,
                     subtitleCallback,

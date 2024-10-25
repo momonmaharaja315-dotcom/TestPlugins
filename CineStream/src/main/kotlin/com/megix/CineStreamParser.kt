@@ -2,10 +2,17 @@ package com.megix
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class ResponseHash(
-    @JsonProperty("embed_url") val embed_url: String,
-    @JsonProperty("key") val key: String? = null,
-    @JsonProperty("type") val type: String? = null,
+data class RarResponseData(
+    val data: List<RarItem>?
+)
+
+data class RarItem(
+    val id: Int,
+    val name: String,
+    val second_name: String,
+    val image: String,
+    val url: String,
+    val type: String
 )
 
 data class TwoEmbedQuery(
