@@ -31,7 +31,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val body = FormBody.Builder().add("id", embedId).build()
         val document = app.post("$RarAPI/ajax/embed", requestBody = body).document
         val regex = Regex("""(https?:\/\/[^\"']+\.m3u8)""")
-        val link = regex.find(document.toString())?.groupValues?.get(1)?.value ?: return
+        val link = regex.find(document.toString())?.groupValues?.get(1) ?: return
         callback.invoke(
             ExtractorLink(
                 "Rar",
