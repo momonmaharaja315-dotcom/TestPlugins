@@ -133,7 +133,9 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
             val tvSeriesEpisodes = mutableListOf<Episode>()
             val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
             var buttons = document.select("a:has(button.btn.btn-sm.btn-outline:matches((?i)(V-Cloud)))")
-
+            if(buttons.isEmpty()) {
+                buttons = document.select("a:has(button.dwd-button)")
+            }
             buttons.forEach { button ->
                 val titleElement = button.parent()?.previousElementSibling()?.text()
                 val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
@@ -227,7 +229,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
             val doc = app.get(source).document
             val quality = doc.selectFirst("tbody > tr > td:matches((?i)(Name:))")?.nextElementSibling()?.text() ?: ""
             val size = doc.selectFirst("tbody > tr > td:matches((?i)(Size))")?.nextElementSibling()?.text() ?: ""
-            val value = doc.selectFirst("form")?.attr("value") ?: ""
+            val value = doc.selectFirst("form > input")?.attr("value") ?: ""
             callback.invoke(
                 ExtractorLink(
                     "Movies4u",
