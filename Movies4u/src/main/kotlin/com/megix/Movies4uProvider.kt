@@ -219,7 +219,14 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
             val size = doc.selectFirst("tbody > tr > td:matches((?i)(Size))")?.nextElementSibling()?.text() ?: ""
             val value = doc.selectFirst("form > input")?.attr("value") ?: ""
             val body = FormBody.Builder().addEncoded("hash", value).build()
-            val doc2 = app.post(source, requestBody = body).document
+            val headers= mapOf(
+                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; rv:128.0) Gecko/20100101 Firefox/128.0",
+                "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8",
+                "Content-Type" to "application/x-www-form-urlencoded",
+                "Origin" to "https://link.ilink.lol",
+                "Referer" to source
+            )
+            val doc2 = app.post(source, headers = headers ,requestBody = body).document
             callback.invoke(
                 ExtractorLink(
                     "Movies4u",
