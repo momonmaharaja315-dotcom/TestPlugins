@@ -220,6 +220,15 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
             val value = doc.selectFirst("form > input")?.attr("value") ?: ""
             val body = FormBody.Builder().addEncoded("hash", value).build()
             val doc2 = app.post(source, requestBody = body).document
+            callback.invoke(
+                ExtractorLink(
+                    "Movies4u",
+                    "Movies4u $size",
+                    doc2.toString(),
+                    "",
+                    getIndexQuality(quality),
+                )
+            )
             doc2.select("a:has(button:matches((?i)(Download Server)))").mapNotNull { aTag->
                 val link = aTag.attr("href")
                 callback.invoke(
