@@ -218,7 +218,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
             val quality = doc.selectFirst("tbody > tr > td:matches((?i)(Name:))")?.nextElementSibling()?.text() ?: ""
             val size = doc.selectFirst("tbody > tr > td:matches((?i)(Size))")?.nextElementSibling()?.text() ?: ""
             val value = doc.selectFirst("form > input")?.attr("value") ?: ""
-            val body = FormBody.Builder().add("hash", value).build()
+            val body = FormBody.Builder().addEncoded("hash", value).build()
             val doc2 = app.post(source, requestBody = body).document
             doc2.select("a:has(button:matches((?i)(Download Server)))").mapNotNull { aTag->
                 val link = aTag.attr("href")
