@@ -69,7 +69,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
     override suspend fun search(query: String): List<SearchResponse> {
         val searchResponse = mutableListOf<SearchResponse>()
 
-        for (i in 1..10) {
+        for (i in 1..5) {
             val document = app.get("$mainUrl/page/$i/?s=$query").document
 
             val results = document.select("article.post").mapNotNull { it.toSearchResult2() }
@@ -228,6 +228,15 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
             val quality = doc.selectFirst("tbody > tr > td:matches((?i)(Name:))")?.nextElementSibling()?.text() ?: ""
             val size = doc.selectFirst("tbody > tr > td:matches((?i)(Size))")?.nextElementSibling()?.text() ?: ""
             val value = doc.selectFirst("form")?.attr("value") ?: ""
+            callback.invoke(
+                ExtractorLink(
+                    "Movies4u",
+                    "Movies4u $size",
+                    value,
+                    "",
+                    getIndexQuality(quality),
+                )
+            )
             val body = FormBody.Builder().add("hash", value).build()
             val doc2 = app.post(source, requestBody = body).document
             doc2.select("a:matches((?i)(Download Server))").mapNotNull { aTag->
@@ -235,7 +244,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
                 callback.invoke(
                     ExtractorLink(
                         "Movies4u",
-                        "Movies4u",
+                        "Movies4u $size",
                         link,
                         "",
                         getIndexQuality(quality),
