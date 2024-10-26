@@ -8,6 +8,7 @@ import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.google.gson.Gson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
+import okhttp3.FormBody
 
 class Movies4uProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://www.movies4u.com.vc"
@@ -209,6 +210,11 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
         }
     }
 
+    private fun getIndexQuality(str: String?): Int {
+        return Regex("(\\d{3,4})[pP]").find(str ?: "") ?. groupValues ?. getOrNull(1) ?. toIntOrNull()
+            ?: Qualities.Unknown.value
+    }
+
     override suspend fun loadLinks(
         data: String,
         isCasting: Boolean,
@@ -219,8 +225,10 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
         sources.mapNotNull {
             val source = it.source
             val doc = app.get(source).document
+            val quality = doc.selectFirst("tbody > tr > td:matches((?i)(Name:))")?.nextElementSibling()?.text() ?: ""
+            val size = doc.selectFirst("tbody > tr > td:matches((?i)(Size))")?.nextElementSibling()?.text() ?: ""
             val value = doc.selectFirst("form")?.attr("value") ?: ""
-            val body = mapOf("hash" to value)
+            val body = FormBody.Builder().add("hash", value).build()
             val doc2 = app.post(source, requestBody = body).document
             doc2.select("a:matches((?i)(Download Server))").mapNotNull { aTag->
                 val link = aTag.attr("href")
@@ -230,7 +238,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
                         "Movies4u",
                         link,
                         "",
-                        Qualities.Unknown.value,
+                        getIndexQuality(quality),
                     )
                 )
             }
