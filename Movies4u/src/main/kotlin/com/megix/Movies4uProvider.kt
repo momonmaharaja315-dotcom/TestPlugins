@@ -44,22 +44,10 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
 
     private fun Element.toSearchResult(): SearchResponse? {
         val title = this.selectFirst("h3 > a")?.text().toString()
-        val href = this.selectFirst("figure > a")?.attr("href").toString()
+        val href = fixUrl(this.selectFirst("figure > a")?.attr("href").toString())
         val posterUrl = this.selectFirst("figure > a > img")?.attr("src").toString()
-        val quality = getQualityFromString(this.selectFirst("figure > div > a > span.video-label")?.text().toString())
+        val quality = getQualityFromString(this.selectFirst("figure > a > span.video-label")?.text().toString())
     
-        return newMovieSearchResponse(title, href, TvType.Movie) {
-            this.posterUrl = posterUrl
-            this.quality = quality
-        }
-    }
-
-    private fun Element.toSearchResult2(): SearchResponse? {
-        val title = this.selectFirst("h3 > a")?.text().toString()
-        val href = this.selectFirst("figure > div > a")?.attr("href").toString()
-        val posterUrl = this.selectFirst("figure > div > a > img")?.attr("src").toString()
-        val quality = getQualityFromString(this.selectFirst("figure > div > a > span.video-label")?.text().toString())
-
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
             this.quality = quality
@@ -70,9 +58,9 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
         val searchResponse = mutableListOf<SearchResponse>()
 
         for (i in 1..5) {
-            val document = app.get("$mainUrl/page/$i/?s=$query").document
+            val document = app.get("$mainUrl/search.php?q=$query&page=$i/").document
 
-            val results = document.select("article.post").mapNotNull { it.toSearchResult2() }
+            val results = document.select("article.post").mapNotNull { it.toSearchResult() }
 
             if (results.isEmpty()) {
                 break
@@ -88,7 +76,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
         var title = document.selectFirst("title")?.text().toString()
         var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
 
-        val checkType = document.selectFirst("h3 > strong").text().toString()
+        val checkType = document.selectFirst("h3 > strong")?.text().toString()
         val imdbUrl = document.selectFirst("strong > a:matches((?i)(IMDb))")?.attr("href")
         var description = ""
 
@@ -230,18 +218,9 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
             val quality = doc.selectFirst("tbody > tr > td:matches((?i)(Name:))")?.nextElementSibling()?.text() ?: ""
             val size = doc.selectFirst("tbody > tr > td:matches((?i)(Size))")?.nextElementSibling()?.text() ?: ""
             val value = doc.selectFirst("form > input")?.attr("value") ?: ""
-            callback.invoke(
-                ExtractorLink(
-                    "Movies4u",
-                    "Movies4u $size",
-                    value,
-                    "",
-                    getIndexQuality(quality),
-                )
-            )
             val body = FormBody.Builder().add("hash", value).build()
             val doc2 = app.post(source, requestBody = body).document
-            doc2.select("a:matches((?i)(Download Server))").mapNotNull { aTag->
+            doc2.select("a:has(button:matches((?i)(Download Server)))").mapNotNull { aTag->
                 val link = aTag.attr("href")
                 callback.invoke(
                     ExtractorLink(
