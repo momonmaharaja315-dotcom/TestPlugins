@@ -26,7 +26,6 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
     override val mainPage = mainPageOf(
         "$mainUrl/page/" to "Home",
         "$mainUrl/category/bollywood/page/" to "Bollywood",
-        "$mainUrl/category/hollywood/page/" to "Hollywood",
         "$mainUrl/category/web-series/page/" to "Web Series",
         "$mainUrl/category/anime/page/" to "Anime"
     )
@@ -217,22 +216,25 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val sources = parseJson<ArrayList<EpisodeLink>>(data)
-        sources.amap {
+        sources.mapNotNull {
             val source = it.source
-            callback.invoke(
-                ExtractorLink(
-                    "Movies4u",
-                    "Movies4u",
-                    source,
-                    "",
-                    Qualities.Unknown.value,
+            val doc = app.get(source).document
+            val value = doc.selectFirst("form")?.attr("value") ?: ""
+            val body = mapOf("hash" to value)
+            val doc2 = app.post(source, requestBody = body).document
+            doc2.select("a:matches((?i)(Download Server))").mapNotNull { aTag->
+                val link = aTag.attr("href")
+                callback.invoke(
+                    ExtractorLink(
+                        "Movies4u",
+                        "Movies4u",
+                        link,
+                        "",
+                        Qualities.Unknown.value,
+                    )
                 )
-            )
+            }
         }
-        // sources.amap {
-        //     val source = it.source
-        //     loadExtractor(source, subtitleCallback, callback)
-        // }
         return true   
     }
 
