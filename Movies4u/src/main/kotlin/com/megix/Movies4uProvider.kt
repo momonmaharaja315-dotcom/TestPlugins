@@ -142,7 +142,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
                 val episodes = doc.select("button.btn.btn-sm.btn-outline:matches((?i)(VCloud))")
                 var e = 1
 
-                episodeDiv.forEach { element ->
+                episodes.forEach { element ->
                     val epUrl = element.parent()?.attr("href")
                     if(epUrl != null) {
                         val key = Pair(realSeason, e)
@@ -191,9 +191,9 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
         else {
             val data = document.select("a:has(button.dwd-button)").mapNotNull {
                 val doc = app.get(it.attr("href")).document  
-                val link = doc.selectFirst("p > a:matches((?i)(VCloud))")
+                val link = doc.selectFirst("p > a:matches((?i)(VCloud))")?.attr("href") ?: ""
                 EpisodeLink(
-                    it.attr("href")
+                    link
                 )
             }
 
