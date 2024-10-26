@@ -86,7 +86,6 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
         var title = document.selectFirst("title")?.text().toString()
-        val ogTitle = title
         var posterUrl = document.selectFirst("meta[property=og:image]")?.attr("content").toString()
 
         val checkType = document.selectFirst("h3 > strong").text().toString()
@@ -130,36 +129,21 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
             background = responseData.meta?.background ?: background
         }
 
-        val checkSeriesComplete = document.selectFirst("div.download-links-div > div.downloads-btns-div")?.previousElementSibling()?.text().toString()
-        if(checkSeriesComplete.contains("Complete")) {
-            tvtype = "complete-series"
-        }
-        if(title != ogTitle) {
-            val checkSeason = Regex("""Season\s*\d*1|S\s*\d*1""").find(ogTitle)
-            if (checkSeason == null) {
-                val seasonText = Regex("""Season\s*\d+|S\s*\d+""").find(ogTitle)?.value
-                if(seasonText != null) {
-                    title = title + " " + seasonText.toString()
-                }
-            }
-        }
-
         if(tvtype == "series") {
             val tvSeriesEpisodes = mutableListOf<Episode>()
             val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
-            var buttons = document.select("div.downloads-btns-div")
+            var buttons = document.select("a:has(button.btn.btn-sm.btn-outline:matches((?i)(V-Cloud)))")
 
             buttons.forEach { button ->
-                val titleElement = button.previousElementSibling()?.text()
+                val titleElement = button.parent()?.previousElementSibling()?.text()
                 val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
                 val realSeason = realSeasonRegex.find(titleElement.toString()) ?. groupValues ?. get(1) ?.toInt() ?: 0
-                val seasonLink = fixUrl(button.selectFirst("a")?.attr("href").toString())
-                val doc = app.get(seasonLink).document
-                val episodeDiv = doc.select("div.downloads-btns-div")
+                val doc = app.get(button.attr("href")).document
+                val episodes = doc.select("button.btn.btn-sm.btn-outline:matches((?i)(VCloud))")
                 var e = 1
 
                 episodeDiv.forEach { element ->
-                    val epUrl = element.selectFirst("a[href~=(?i)hubcloud|vcloud]")?.attr("href")
+                    val epUrl = element.parent()?.attr("href")
                     if(epUrl != null) {
                         val key = Pair(realSeason, e)
                         if (episodesMap.containsKey(key)) {
