@@ -214,21 +214,27 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
         val sources = parseJson<ArrayList<EpisodeLink>>(data)
         sources.mapNotNull {
             val source = it.source
-            val res = app.get(source)
-            val doc = res.document
-            val cookies = res.cookies
+            var res = app.get(source)
+            var doc = res.document
+            var cookies = res.cookies
             val quality = doc.selectFirst("tbody > tr > td:matches((?i)(Name:))")?.nextElementSibling()?.text() ?: ""
             val size = doc.selectFirst("tbody > tr > td:matches((?i)(Size))")?.nextElementSibling()?.text() ?: ""
-            val value = doc.selectFirst("form > input")?.attr("value") ?: ""
-            val body = FormBody.Builder().addEncoded("hash", value).build()
-            val headers= mapOf(
+            var value = doc.selectFirst("form > input")?.attr("value") ?: ""
+            var body = FormBody.Builder().addEncoded("hash", value).build()
+            val headers = mapOf(
                 "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; rv:128.0) Gecko/20100101 Firefox/128.0",
                 "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8",
                 "Content-Type" to "application/x-www-form-urlencoded",
                 "Origin" to "https://link.ilink.lol",
                 "Referer" to source
             )
-            val doc2 = app.post(source, headers = headers , cookies = cookies ,requestBody = body).document
+            res = app.post(source, headers = headers , cookies = cookies ,requestBody = body)
+            doc = res.document
+            cookies = res.cookies
+            value = doc.selectFirst("form > input")?.attr("value") ?: ""
+            body = FormBody.Builder().addEncoded("hash", value).build()
+            res = app.post(source, headers = headers , cookies = cookies ,requestBody = body)
+
             callback.invoke(
                 ExtractorLink(
                     "Movies4u",
@@ -238,7 +244,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
                     getIndexQuality(quality),
                 )
             )
-            doc2.select("a:has(button:matches((?i)(Download Server)))").mapNotNull { aTag->
+            doc.select("a:has(button:matches((?i)(Download Server)))").mapNotNull { aTag->
                 val link = aTag.attr("href")
                 callback.invoke(
                     ExtractorLink(
