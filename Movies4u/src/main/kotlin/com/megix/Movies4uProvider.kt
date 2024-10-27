@@ -234,12 +234,13 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
             value = doc.selectFirst("form > input")?.attr("value") ?: ""
             body = FormBody.Builder().addEncoded("hash", value).build()
             res = app.post(source, headers = headers , cookies = cookies ,requestBody = body)
+            doc = res.document
 
             callback.invoke(
                 ExtractorLink(
                     "Movies4u",
                     "Movies4u $size",
-                    doc2.toString(),
+                    doc.toString(),
                     "",
                     getIndexQuality(quality),
                 )
