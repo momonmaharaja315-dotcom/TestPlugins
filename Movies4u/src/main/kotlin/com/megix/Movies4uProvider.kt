@@ -214,7 +214,9 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
         val sources = parseJson<ArrayList<EpisodeLink>>(data)
         sources.mapNotNull {
             val source = it.source
-            val doc = app.get(source).document
+            val res = app.get(source)
+            val doc = res.document
+            val cookies = res.cookies
             val quality = doc.selectFirst("tbody > tr > td:matches((?i)(Name:))")?.nextElementSibling()?.text() ?: ""
             val size = doc.selectFirst("tbody > tr > td:matches((?i)(Size))")?.nextElementSibling()?.text() ?: ""
             val value = doc.selectFirst("form > input")?.attr("value") ?: ""
@@ -226,7 +228,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
                 "Origin" to "https://link.ilink.lol",
                 "Referer" to source
             )
-            val doc2 = app.post(source, headers = headers ,requestBody = body).document
+            val doc2 = app.post(source, headers = headers , cookies = cookies ,requestBody = body).document
             callback.invoke(
                 ExtractorLink(
                     "Movies4u",
