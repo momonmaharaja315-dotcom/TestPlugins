@@ -214,32 +214,35 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
         val sources = parseJson<ArrayList<EpisodeLink>>(data)
         sources.mapNotNull {
             val source = it.source
-            var res = app.get(source)
-            var doc = res.document
-            var cookies = res.cookies
+            var doc = app.get(source).document
+            callback.invoke(
+                ExtractorLink(
+                    "Movies4u1",
+                    "Movies4u1 $size",
+                    doc.toString(),
+                    "",
+                    getIndexQuality(quality),
+                )
+            )
             val quality = doc.selectFirst("tbody > tr > td:matches((?i)(Name:))")?.nextElementSibling()?.text() ?: ""
             val size = doc.selectFirst("tbody > tr > td:matches((?i)(Size))")?.nextElementSibling()?.text() ?: ""
-            var value = doc.selectFirst("form > input")?.attr("value") ?: ""
-            var body = FormBody.Builder().addEncoded("hash", value).build()
-            val headers = mapOf(
-                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; rv:128.0) Gecko/20100101 Firefox/128.0",
-                "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8",
-                "Content-Type" to "application/x-www-form-urlencoded",
-                "Origin" to "https://link.ilink.lol",
-                "Referer" to source
+            val value = doc.selectFirst("form > input")?.attr("value") ?: ""
+            callback.invoke(
+                ExtractorLink(
+                    "Movies4u2",
+                    "Movies4u2 $size",
+                    value,
+                    "",
+                    getIndexQuality(quality),
+                )
             )
-            res = app.post(source, headers = headers , cookies = cookies ,requestBody = body)
-            doc = res.document
-            cookies = res.cookies
-            value = doc.selectFirst("form > input")?.attr("value") ?: ""
-            body = FormBody.Builder().addEncoded("hash", value).build()
-            res = app.post(source, headers = headers , cookies = cookies ,requestBody = body)
-            doc = res.document
+            val body = FormBody.Builder().add("hash", value).build()
+            doc = app.post(source ,requestBody = body).document
 
             callback.invoke(
                 ExtractorLink(
-                    "Movies4u",
-                    "Movies4u $size",
+                    "Movies4u3",
+                    "Movies4u3 $size",
                     doc.toString(),
                     "",
                     getIndexQuality(quality),
