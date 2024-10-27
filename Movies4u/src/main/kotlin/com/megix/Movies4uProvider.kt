@@ -217,25 +217,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
             var doc = app.get(source).document
             val quality = doc.selectFirst("tbody > tr > td:matches((?i)(Name:))")?.nextElementSibling()?.text() ?: ""
             val size = doc.selectFirst("tbody > tr > td:matches((?i)(Size))")?.nextElementSibling()?.text() ?: ""
-            callback.invoke(
-                ExtractorLink(
-                    "Movies4u1",
-                    "Movies4u1 $size",
-                    doc.toString(),
-                    "",
-                    getIndexQuality(quality),
-                )
-            )
             val value = doc.selectFirst("form > input")?.attr("value") ?: ""
-            callback.invoke(
-                ExtractorLink(
-                    "Movies4u2",
-                    "Movies4u2 $size",
-                    value,
-                    "",
-                    getIndexQuality(quality),
-                )
-            )
             val body = FormBody.Builder().add("hash", value).build()
             doc = app.post(source ,requestBody = body).document
 
@@ -248,7 +230,7 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
                     getIndexQuality(quality),
                 )
             )
-            doc.select("a:has(button:matches((?i)(Download Server)))").mapNotNull { aTag->
+            doc.select("a:has(button:matches((?i)(Download)))").mapNotNull { aTag->
                 val link = aTag.attr("href")
                 callback.invoke(
                     ExtractorLink(
