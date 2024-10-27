@@ -215,6 +215,8 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
         sources.mapNotNull {
             val source = it.source
             var doc = app.get(source).document
+            val quality = doc.selectFirst("tbody > tr > td:matches((?i)(Name:))")?.nextElementSibling()?.text() ?: ""
+            val size = doc.selectFirst("tbody > tr > td:matches((?i)(Size))")?.nextElementSibling()?.text() ?: ""
             callback.invoke(
                 ExtractorLink(
                     "Movies4u1",
@@ -224,8 +226,6 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
                     getIndexQuality(quality),
                 )
             )
-            val quality = doc.selectFirst("tbody > tr > td:matches((?i)(Name:))")?.nextElementSibling()?.text() ?: ""
-            val size = doc.selectFirst("tbody > tr > td:matches((?i)(Size))")?.nextElementSibling()?.text() ?: ""
             val value = doc.selectFirst("form > input")?.attr("value") ?: ""
             callback.invoke(
                 ExtractorLink(
