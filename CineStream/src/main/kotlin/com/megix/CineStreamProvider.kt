@@ -163,7 +163,7 @@ open class CineStreamProvider : MainAPI() {
         val genre : List<String> = movieData.meta.genre ?: emptyList()
         val background = movieData.meta.background.toString()
         val isCartoon = genre.any { it.contains("Animation", true) }
-        val isAnime = (movieData.meta.country.toString().contains("Japan", true) || 
+        var isAnime = (movieData.meta.country.toString().contains("Japan", true) ||
             movieData.meta.country.toString().contains("China", true)) && isCartoon
         isAnime = if(meta_url == kitsu_url) true else isAnime
         val isBollywood = movieData.meta.country.toString().contains("India", true)
@@ -498,7 +498,7 @@ open class CineStreamProvider : MainAPI() {
         val isBollywood: Boolean = false,
         val isAsian: Boolean = false,
         val isCartoon: Boolean = false,
-        val imdb_id : String? = null
+        val imdb_id : String? = null,
         val imdbSeason : Int? = null,
         val imdbEpisode : Int? = null
     )
