@@ -3,7 +3,7 @@ package com.megix
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbId
-import com.lagradost.cloudstream3.LoadResponse.Companion.addAnilistId
+import com.lagradost.cloudstream3.LoadResponse.Companion.addAniListId
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
@@ -201,7 +201,7 @@ open class CineStreamProvider : MainAPI() {
                 this.backgroundPosterUrl = background
                 this.duration = movieData.meta.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
-                if(isKitsu) addAnilistId(tmdbToAnimeId(title, year?.toIntOrNull(), TvType.AnimeMovie)?.id) else addImdbId(id)
+                if(isKitsu) addAniListId(tmdbToAnimeId(title, year?.toIntOrNull(), TvType.AnimeMovie)?.id) else addImdbId(id)
             }
         }
         else {
@@ -243,7 +243,7 @@ open class CineStreamProvider : MainAPI() {
                 this.backgroundPosterUrl = background
                 this.duration = movieData.meta.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
-                if(isKitsu) addAnilistId(tmdbToAnimeId(title, year?.toIntOrNull(), TvType.Anime)?.id) else addImdbId(id)
+                if(isKitsu) addAniListId(tmdbToAnimeId(title, year?.toIntOrNull(), TvType.Anime)?.id) else addImdbId(id)
             }
 
         }
