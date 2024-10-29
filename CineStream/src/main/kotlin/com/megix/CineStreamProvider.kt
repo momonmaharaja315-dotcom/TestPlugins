@@ -584,11 +584,11 @@ open class CineStreamProvider : MainAPI() {
         return when(needId) {
             "imdb" -> data.imdb
             "anilist" -> data.anilist.toString()
+            "anidb" -> data.anidb.toString()
             "myanimelist" -> data.myanimelist.toString()
             "kitsu" -> data.kitsu.toString()
             "anisearch" -> data.anisearch.toString()
             "livechart" -> data.livechart.toString()
-            "thetvdb" -> data.thetvdb.toString()
             "themoviedb" -> data.themoviedb.toString()
             else -> ""
         }
