@@ -8,9 +8,6 @@ import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.lagradost.cloudstream3.argamap
-import com.lagradost.nicehttp.RequestBodyTypes
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.RequestBody.Companion.toRequestBody
 import com.lagradost.cloudstream3.network.CloudflareKiller
 import com.megix.CineStreamExtractors.invokeVegamovies
 import com.megix.CineStreamExtractors.invokeRogmovies
@@ -45,7 +42,7 @@ open class CineStreamProvider : MainAPI() {
     val cinemeta_url = "https://v3-cinemeta.strem.io"
     val cyberflix_url = "https://cyberflix.elfhosted.com/c/catalogs"
     val kitsu_url = "https://anime-kitsu.strem.fun"
-    val anilistAPI = "https://graphql.anilist.co"
+    val haglund_url = "https://arm.haglund.dev/api/v2"
     companion object {
         const val vegaMoviesAPI = "https://vegamovies.si"
         const val rogMoviesAPI = "https://rogmovies.fun"
@@ -201,7 +198,7 @@ open class CineStreamProvider : MainAPI() {
                 this.backgroundPosterUrl = background
                 this.duration = movieData.meta.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
-                if(isKitsu) addAniListId(tmdbToAnimeId(title, year?.toIntOrNull(), TvType.AnimeMovie)?.id) else addImdbId(id)
+                if(isKitsu) addAniListId(getExternalIds(id,"kitsu","anilist").toIntOrNull()) else addImdbId(id)
             }
         }
         else {
@@ -243,7 +240,7 @@ open class CineStreamProvider : MainAPI() {
                 this.backgroundPosterUrl = background
                 this.duration = movieData.meta.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
-                if(isKitsu) addAniListId(tmdbToAnimeId(title, year?.toIntOrNull(), TvType.Anime)?.id) else addImdbId(id)
+                if(isKitsu) addAniListId(getExternalIds(id,"kitsu","anilist").toIntOrNull()) else addImdbId(id)
             }
 
         }
@@ -569,58 +566,37 @@ open class CineStreamProvider : MainAPI() {
         val metas: List<Media>
     )
 
-    data class AniIds(var id: Int? = null, var idMal: Int? = null)
-
-    data class AniMedia(
-        var id: Int? = null,
-        var idMal: Int? = null
+    data class ExtenalIds(
+        val anilist: Int,
+        val anidb: Int,
+        val myanimelist: Int,
+        val kitsu: Int,
+        val animePlanet: String,
+        val anisearch: Int,
+        val imdb: String,
+        val livechart: Int,
+        val notifyMoe: String,
+        val theMovieDb: Int,
+        val theTvDb: Int
     )
 
-    data class AniPage(var media: java.util.ArrayList<AniMedia> = arrayListOf())
-
-    data class AniData(var Page: AniPage? = AniPage())
-
-    data class AniSearch(var data: AniData? = AniData())
-
-    suspend fun tmdbToAnimeId(title: String?, year: Int?, type: TvType): AniIds {
-        val query = """
-            query (
-            ${'$'}page: Int = 1
-            ${'$'}search: String
-            ${'$'}sort: [MediaSort] = [POPULARITY_DESC, SCORE_DESC]
-            ${'$'}type: MediaType
-            ${'$'}seasonYear: Int
-            ${'$'}format: [MediaFormat]
-            ) {
-            Page(page: ${'$'}page, perPage: 20) {
-                media(
-                search: ${'$'}search
-                sort: ${'$'}sort
-                type: ${'$'}type
-                seasonYear: ${'$'}seasonYear
-                format_in: ${'$'}format
-                ) {
-                id
-                idMal
-                }
-            }
-            }
-        """.trimIndent().trim()
-
-        val variables = mapOf(
-            "search" to title,
-            "sort" to "SEARCH_MATCH",
-            "type" to "ANIME",
-            "seasonYear" to year,
-            "format" to listOf(if (type == TvType.AnimeMovie) "MOVIE" else "TV", "ONA")
-        ).filterValues { value -> value != null && value.toString().isNotEmpty() }
-        val data = mapOf(
-            "query" to query,
-            "variables" to variables
-        ).toJson().toRequestBody(RequestBodyTypes.JSON.toMediaTypeOrNull())
-        val res = app.post(anilistAPI, requestBody = data)
-            .parsedSafe<AniSearch>()?.data?.Page?.media?.firstOrNull()
-        return AniIds(res?.id, res?.idMal)
+    suspend fun getExternalIds(id: String, type: String, needId: String) : String {
+        val url = "$haglund_url/ids?source=$type&id=$id"
+        val json = app.get(url).text
+        val data = parseJson<ExtenalIds>(json)
+        return when(needId) {
+            "imdb" -> data.imdb
+            "anilist" -> data.anilist.toString()
+            "myanimelist" -> data.myanimelist.toString()
+            "kitsu" -> data.kitsu.toString()
+            "anisearch" -> data.anisearch.toString()
+            "livechart" -> data.livechart.toString()
+            "notifymoe" -> data.notifyMoe
+            "thetvdb" -> data.theTvDb.toString()
+            "themoviedb" -> data.theMovieDb.toString()
+            "animeplanet" -> data.animePlanet
+            else -> ""
+        }
     }
 }
 
