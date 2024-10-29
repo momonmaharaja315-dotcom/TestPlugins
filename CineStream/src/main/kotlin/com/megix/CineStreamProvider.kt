@@ -572,7 +572,6 @@ open class CineStreamProvider : MainAPI() {
         val myanimelist: Int,
         val kitsu: Int,
         val anisearch: Int,
-        val imdb: String,
         val livechart: Int,
         val themoviedb: Int,
     )
@@ -582,7 +581,6 @@ open class CineStreamProvider : MainAPI() {
         val json = app.get(url).text
         val data = parseJson<ExtenalIds>(json)
         return when(needId) {
-            "imdb" -> data.imdb
             "anilist" -> data.anilist.toString()
             "anidb" -> data.anidb.toString()
             "myanimelist" -> data.myanimelist.toString()
