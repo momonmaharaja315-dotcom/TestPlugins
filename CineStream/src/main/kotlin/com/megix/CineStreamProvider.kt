@@ -80,10 +80,6 @@ open class CineStreamProvider : MainAPI() {
         "$mainUrl/imdbRating/catalog/series/imdbRating.json" to "Top IMDb Series",
         "$cyberflix_url/catalog/Indian/indian.new.movie.json" to "New Indian Movie",
         "$cyberflix_url/catalog/Indian/indian.new.series.json" to "New Indian Series",
-        "$cyberflix_url/catalog/Anime/anime.new.movie.json" to "New Anime Movie",
-        "$cyberflix_url/catalog/Anime/anime.trending.movie.json" to "Trending Anime Movie",
-        "$cyberflix_url/catalog/Anime/anime.new.series.json" to "New Anime Series",
-        "$cyberflix_url/catalog/Anime/anime.trending.series.json" to "Trending Anime Series",
         "$cyberflix_url/catalog/Netflix/netflix.new.series.json" to "Netflix Series",
         "$cyberflix_url/catalog/Netflix/netflix.new.movie.json" to "Netflix Movie",
         "$cyberflix_url/catalog/Amazon%20Prime/amazon_prime.new.movie.json" to "Amazon Prime Movie",
@@ -92,6 +88,8 @@ open class CineStreamProvider : MainAPI() {
         "$cyberflix_url/catalog/Disney%20Plus/disney_plus.new.series.json" to "Disney Plus Series",
         "$cyberflix_url/catalog/Asian/asian.new.movie.json" to "New Asian Movie",
         "$cyberflix_url/catalog/Asian/asian.new.series.json" to "New Asian Series",
+        BuildConfig.ANILIST_POPULAR to "AniList Popular",
+        BuildConfig.ANILIST_TRENDING to "AniList Trending",
     )
 
     override suspend fun getMainPage(
