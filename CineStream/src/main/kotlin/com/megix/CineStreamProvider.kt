@@ -96,11 +96,12 @@ open class CineStreamProvider : MainAPI() {
         page: Int,
         request: MainPageRequest
     ): HomePageResponse {
+        val metaType = if(request.name == "AniList") "kitsu" else "cinemeta"
         val json = app.get(request.data).text
 
         val movies = parseJson<Home>(json)
         val home = movies.metas.mapNotNull { movie ->
-            newMovieSearchResponse(movie.name, PassData(movie.id, movie.type, "cinemeta").toJson(), TvType.Movie) {
+            newMovieSearchResponse(movie.name, PassData(movie.id, movie.type, metaType).toJson(), TvType.Movie) {
                 this.posterUrl = movie.poster.toString()
             }
         }
