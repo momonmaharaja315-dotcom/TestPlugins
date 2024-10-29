@@ -198,7 +198,7 @@ open class CineStreamProvider : MainAPI() {
                 this.backgroundPosterUrl = background
                 this.duration = movieData.meta.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
-                if(isKitsu) addAniListId(getExternalIds(id,"kitsu","anilist").toIntOrNull()) else addImdbId(id)
+                if(isKitsu) addAniListId(getExternalIds(id.substringAfter("kitsu:"),"kitsu","anilist").toIntOrNull()) else addImdbId(id)
             }
         }
         else {
@@ -240,7 +240,7 @@ open class CineStreamProvider : MainAPI() {
                 this.backgroundPosterUrl = background
                 this.duration = movieData.meta.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
-                if(isKitsu) addAniListId(getExternalIds(id,"kitsu","anilist").toIntOrNull()) else addImdbId(id)
+                if(isKitsu) addAniListId(getExternalIds(id.substringAfter("kitsu:"),"kitsu","anilist").toIntOrNull()) else addImdbId(id)
             }
 
         }
@@ -255,18 +255,6 @@ open class CineStreamProvider : MainAPI() {
         val res = parseJson<LoadLinksData>(data)
         val year = if(res.tvtype == "movie") res.year.toIntOrNull() else res.firstAired?.substringBefore("-")?.toIntOrNull()
         val firstYear = if(res.tvtype == "movie") res.year.toIntOrNull() else res.year.substringBefore("–").toIntOrNull()
-        val url = "https://arm.haglund.dev/api/v2/ids?source=kitsu&id=41982"
-        val json = app.get(url).text
-        val data2 = parseJson<ExtenalIds>(json)
-        callback.invoke(
-            ExtractorLink(
-                "CineStream",
-                "CineStream",
-                "Id : ${data2.anilist}",
-                "",
-                Qualities.Unknown.value,
-            )
-        )
         argamap(
             {
                 if(!res.isBollywood) invokeVegamovies(
