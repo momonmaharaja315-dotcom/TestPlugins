@@ -4,6 +4,7 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbId
 import com.lagradost.cloudstream3.LoadResponse.Companion.addAniListId
+import com.lagradost.cloudstream3.LoadResponse.Companion.addMalId
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
@@ -96,7 +97,7 @@ open class CineStreamProvider : MainAPI() {
         page: Int,
         request: MainPageRequest
     ): HomePageResponse {
-        val metaType = if(request.name == "AniList") "kitsu" else "cinemeta"
+        val metaType = if(request.name.contains("AniList")) "kitsu" else "cinemeta"
         val json = app.get(request.data).text
 
         val movies = parseJson<Home>(json)
@@ -150,6 +151,9 @@ open class CineStreamProvider : MainAPI() {
         val id = movie.id
         val meta_url = if(movie.metaProvider == "cinemeta") cinemeta_url else kitsu_url
         val isKitsu = if(meta_url == kitsu_url) true else false
+        val externalIds = if(isKitsu) getExternalIds(id.substringAfter("kitsu:"),"kitsu") else null
+        val malId = if(externalIds != null) externalIds.myanimelist else null
+        val anilistId = if(externalIds != null) externalIds.anilist else null
         val json = app.get("$meta_url/meta/$tvtype/$id.json").text
         val movieData = parseJson<ResponseData>(json)
         val title = movieData.meta.name.toString()
@@ -186,7 +190,10 @@ open class CineStreamProvider : MainAPI() {
                 isCartoon,
                 null,
                 null,
-                null
+                null,
+                isKitsu,
+                anilistId,
+                malId
             ).toJson()
             return newMovieLoadResponse(title, url, if(isAnime) TvType.AnimeMovie  else TvType.Movie, data) {
                 this.posterUrl = posterUrl
@@ -197,7 +204,9 @@ open class CineStreamProvider : MainAPI() {
                 this.backgroundPosterUrl = background
                 this.duration = movieData.meta.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
-                if(isKitsu) addAniListId(getExternalIds(id.substringAfter("kitsu:"),"kitsu","anilist").toIntOrNull()) else addImdbId(id)
+                addAniListId(anilistId)
+                addMalId(malId)
+                addImdbId(id)
             }
         }
         else {
@@ -218,7 +227,10 @@ open class CineStreamProvider : MainAPI() {
                         isCartoon,
                         ep.imdb_id,
                         ep.imdbSeason,
-                        ep.imdbEpisode
+                        ep.imdbEpisode,
+                        isKitsu,
+                        anilistId,
+                        malId
                     ).toJson()
                 ) {
                     this.name = ep.name ?: ep.title
@@ -239,7 +251,9 @@ open class CineStreamProvider : MainAPI() {
                 this.backgroundPosterUrl = background
                 this.duration = movieData.meta.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
-                if(isKitsu) addAniListId(getExternalIds(id.substringAfter("kitsu:"),"kitsu","anilist").toIntOrNull()) else addImdbId(id)
+                addAniListId(anilistId)
+                addImdbId(id)
+                addMalId(malId)
             }
 
         }
@@ -498,7 +512,10 @@ open class CineStreamProvider : MainAPI() {
         val isCartoon: Boolean = false,
         val imdb_id : String? = null,
         val imdbSeason : Int? = null,
-        val imdbEpisode : Int? = null
+        val imdbEpisode : Int? = null,
+        val isKitsu : Boolean = false,
+        val anilistId : Int? = null,
+        val malId : Int? = null,
     )
 
     data class PassData(
@@ -575,20 +592,10 @@ open class CineStreamProvider : MainAPI() {
         val themoviedb: Int,
     )
 
-    suspend fun getExternalIds(id: String, type: String, needId: String) : String {
+    suspend fun getExternalIds(id: String, type: String) : ExtenalIds? {
         val url = "$haglund_url/ids?source=$type&id=$id"
         val json = app.get(url).text
-        val data = parseJson<ExtenalIds>(json)
-        return when(needId) {
-            "anilist" -> data.anilist.toString()
-            "anidb" -> data.anidb.toString()
-            "myanimelist" -> data.myanimelist.toString()
-            "kitsu" -> data.kitsu.toString()
-            "anisearch" -> data.anisearch.toString()
-            "livechart" -> data.livechart.toString()
-            "themoviedb" -> data.themoviedb.toString()
-            else -> ""
-        }
+        return tryParseJson<ExtenalIds>(json) ?: return null
     }
 }
 
