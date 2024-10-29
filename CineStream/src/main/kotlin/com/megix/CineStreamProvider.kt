@@ -571,13 +571,13 @@ open class CineStreamProvider : MainAPI() {
         val anidb: Int,
         val myanimelist: Int,
         val kitsu: Int,
-        val animePlanet: String,
+        val anime-planet: String,
         val anisearch: Int,
         val imdb: String,
         val livechart: Int,
-        val notifyMoe: String,
-        val theMovieDb: Int,
-        val theTvDb: Int
+        val notify-moe: String,
+        val themoviedb: Int,
+        val thetvdb: Int
     )
 
     suspend fun getExternalIds(id: String, type: String, needId: String) : String {
@@ -591,10 +591,10 @@ open class CineStreamProvider : MainAPI() {
             "kitsu" -> data.kitsu.toString()
             "anisearch" -> data.anisearch.toString()
             "livechart" -> data.livechart.toString()
-            "notifymoe" -> data.notifyMoe
-            "thetvdb" -> data.theTvDb.toString()
-            "themoviedb" -> data.theMovieDb.toString()
-            "animeplanet" -> data.animePlanet
+            "notify-moe" -> data.notify-moe
+            "thetvdb" -> data.thetvdb.toString()
+            "themoviedb" -> data.themoviedb.toString()
+            "animeplanet" -> data.anime-planet
             else -> ""
         }
     }
