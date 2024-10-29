@@ -45,6 +45,7 @@ open class CineStreamProvider : MainAPI() {
     val cyberflix_url = "https://cyberflix.elfhosted.com/c/catalogs"
     val kitsu_url = "https://anime-kitsu.strem.fun"
     val haglund_url = "https://arm.haglund.dev/api/v2"
+    val jikan_url = "https://api.jikan.moe/v4"
     companion object {
         const val vegaMoviesAPI = "https://vegamovies.si"
         const val rogMoviesAPI = "https://rogmovies.fun"
@@ -103,7 +104,7 @@ open class CineStreamProvider : MainAPI() {
 
         val movies = parseJson<Home>(json)
         val home = movies.metas.mapNotNull { movie ->
-            newMovieSearchResponse(movie.name, PassData(movie.id, movie.type, metaType).toJson(), TvType.Movie) {
+            newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), TvType.Movie) {
                 this.posterUrl = movie.poster.toString()
             }
         }
@@ -121,14 +122,14 @@ open class CineStreamProvider : MainAPI() {
         val animeJson = app.get("$kitsu_url/catalog/anime/kitsu-anime-list/search=$query.json").text
         val animes = parseJson<SearchResult>(animeJson)
         animes.metas.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type, "kitsu").toJson(), TvType.Movie) {
+            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
         }
         val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
         val movies = parseJson<SearchResult>(movieJson)
         movies.metas.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type, "cinemeta").toJson(), TvType.Movie) {
+            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
         }
@@ -136,13 +137,12 @@ open class CineStreamProvider : MainAPI() {
         val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
         val series = parseJson<SearchResult>(seriesJson)
         series.metas.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type, "cinemeta").toJson(), TvType.Movie) {
+            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
         }
 
         return searchResponse
-
     }
 
 
@@ -150,7 +150,7 @@ open class CineStreamProvider : MainAPI() {
         val movie = parseJson<PassData>(url)
         val tvtype = movie.type
         val id = movie.id
-        val meta_url = if(movie.metaProvider == "cinemeta") cinemeta_url else kitsu_url
+        val meta_url = if(movie.id.contains("kitsu")) kitsu_url else cinemeta_url
         val isKitsu = if(meta_url == kitsu_url) true else false
         val externalIds = if(isKitsu) getExternalIds(id.substringAfter("kitsu:"),"kitsu") else null
         val malId = if(externalIds != null) externalIds.myanimelist else null
@@ -522,7 +522,6 @@ open class CineStreamProvider : MainAPI() {
     data class PassData(
         val id: String,
         val type: String,
-        val metaProvider : String,
     )
 
     data class Meta(
