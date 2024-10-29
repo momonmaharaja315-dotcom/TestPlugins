@@ -255,6 +255,18 @@ open class CineStreamProvider : MainAPI() {
         val res = parseJson<LoadLinksData>(data)
         val year = if(res.tvtype == "movie") res.year.toIntOrNull() else res.firstAired?.substringBefore("-")?.toIntOrNull()
         val firstYear = if(res.tvtype == "movie") res.year.toIntOrNull() else res.year.substringBefore("–").toIntOrNull()
+        val url = "https://arm.haglund.dev/api/v2/ids?source=kitsu&id=41982"
+        val json = app.get(url).text
+        val data = parseJson<ExtenalIds>(json)
+        callback.invoke(
+            ExtractorLink(
+                "CineStream",
+                "CineStream",
+                "Id : ${data.anilist}",
+                ""
+                Qualities.Unknown.value
+            )
+        )
         argamap(
             {
                 if(!res.isBollywood) invokeVegamovies(
