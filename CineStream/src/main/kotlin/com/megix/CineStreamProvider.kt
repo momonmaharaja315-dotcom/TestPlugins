@@ -34,6 +34,7 @@ import com.megix.CineStreamExtractors.invoke2embed
 import com.megix.CineStreamExtractors.invokeFilmyxy
 import com.megix.CineStreamExtractors.invokeAutoembedDrama
 import com.megix.CineStreamExtractors.invokeRar
+import com.megix.CineStreamExtractors.invokeAnimes
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -274,7 +275,7 @@ open class CineStreamProvider : MainAPI() {
         val firstYear = if(res.tvtype == "movie") res.year.toIntOrNull() else res.year.substringBefore("–").toIntOrNull()
         argamap(
             {
-                if(!res.isBollywood) invokeVegamovies(
+                if(!res.isBollywood && !res.isKitsu) invokeVegamovies(
                     res.title,
                     year,
                     res.season,
@@ -284,7 +285,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                if(res.isBollywood) invokeRogmovies(
+                if(res.isBollywood && !res.isKitsu) invokeRogmovies(
                     res.title,
                     year,
                     res.season,
@@ -294,7 +295,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                if(res.isBollywood) invokeTopMovies(
+                if(res.isBollywood && !res.isKitsu) invokeTopMovies(
                     res.title,
                     year,
                     res.season,
@@ -304,7 +305,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                if(!res.isBollywood) invokeMoviesmod(
+                if(!res.isBollywood && !res.isKitsu) invokeMoviesmod(
                     res.title,
                     year,
                     res.season,
@@ -314,7 +315,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                invokeMoviesdrive(
+                if(!res.isKitsu) invokeMoviesdrive(
                     res.title,
                     res.season,
                     res.episode,
@@ -324,7 +325,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                invokeRar(
+                iif(!res.isKitsu) nvokeRar(
                     res.title,
                     firstYear,
                     res.season,
@@ -333,7 +334,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                if(!res.isAnime) invokeFull4Movies(
+                if(!res.isAnime && !res.isKitsu) invokeFull4Movies(
                     res.title,
                     year,
                     res.season,
@@ -343,7 +344,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                invokeVadaPav(
+                if(!res.isKitsu) invokeVadaPav(
                     res.title,
                     year,
                     res.season,
@@ -353,17 +354,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                invokeNetflix(
-                    res.title,
-                    firstYear,
-                    res.season,
-                    res.episode,
-                    subtitleCallback,
-                    callback
-                )
-            },
-            {
-                invokePrimeVideo(
+                if(!res.isKitsu) invokeNetflix(
                     res.title,
                     firstYear,
                     res.season,
@@ -373,7 +364,17 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                if(res.isAsian) invokeDramaCool(
+                if(!res.isKitsu) invokePrimeVideo(
+                    res.title,
+                    firstYear,
+                    res.season,
+                    res.episode,
+                    subtitleCallback,
+                    callback
+                )
+            },
+            {
+                if(res.isAsian && !res.isKitsu) invokeDramaCool(
                     res.title,
                     year,
                     res.season,
@@ -383,7 +384,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                if(!res.isAnime) invokeW4U(
+                if(!res.isAnime && !res.isKitsu) invokeW4U(
                     res.title,
                     year,
                     res.id,
@@ -394,15 +395,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                invokeWHVXSubs(
-                    res.id,
-                    res.season,
-                    res.episode,
-                    subtitleCallback
-                )
-            },
-            {
-                invokeWYZIESubs(
+                if(!res.isKitsu) invokeWHVXSubs(
                     res.id,
                     res.season,
                     res.episode,
@@ -410,7 +403,15 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                invokeAutoembed(
+                if(!res.isKitsu) invokeWYZIESubs(
+                    res.id,
+                    res.season,
+                    res.episode,
+                    subtitleCallback
+                )
+            },
+            {
+                if(!res.isKitsu) invokeAutoembed(
                     res.tmdbId,
                     res.season,
                     res.episode,
@@ -419,19 +420,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                invokeNova(
-                    res.title,
-                    res.id,
-                    res.tmdbId,
-                    firstYear,
-                    res.season,
-                    res.episode,
-                    callback,
-                    subtitleCallback
-                )
-            },
-            {
-                invokeAstra(
+                if(!res.isKitsu) invokeNova(
                     res.title,
                     res.id,
                     res.tmdbId,
@@ -443,7 +432,19 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                invokeUhdmovies(
+                if(!res.isKitsu) invokeAstra(
+                    res.title,
+                    res.id,
+                    res.tmdbId,
+                    firstYear,
+                    res.season,
+                    res.episode,
+                    callback,
+                    subtitleCallback
+                )
+            },
+            {
+                if(!res.isKitsu) invokeUhdmovies(
                     res.title,
                     year,
                     res.season,
@@ -453,7 +454,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                invokeVidSrcNL(
+                if(!res.isKitsu) invokeVidSrcNL(
                     res.tmdbId,
                     res.season,
                     res.episode,
@@ -461,7 +462,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                if (!res.isAnime) invokeMovies(
+                if (!res.isAnime && !res.isKitsu) invokeMovies(
                     res.tmdbId,
                     res.season,
                     res.episode,
@@ -470,7 +471,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                invoke2embed(
+                if(!res.isKitsu) invoke2embed(
                     res.id,
                     res.season,
                     res.episode,
@@ -479,7 +480,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                invokeFilmyxy(
+                if(!res.isKitsu) invokeFilmyxy(
                     res.id,
                     res.season,
                     res.episode,
@@ -488,9 +489,19 @@ open class CineStreamProvider : MainAPI() {
                 )   
             },
             {
-                if(res.isAsian) invokeAutoembedDrama(
+                if(res.isAsian && !res.isKitsu) invokeAutoembedDrama(
                     res.title,
                     year,
+                    res.season,
+                    res.episode,
+                    subtitleCallback,
+                    callback
+                )
+            },
+            {
+                if(res.isKitsu) invokeAnimes(
+                    res.malId,
+                    res.anilistId,
                     res.season,
                     res.episode,
                     subtitleCallback,

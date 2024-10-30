@@ -12,6 +12,7 @@ import java.net.URLEncoder
 import okhttp3.FormBody
 import java.nio.charset.StandardCharsets
 import org.jsoup.Jsoup
+import com.lagradost.cloudstream3.argamap
 
 object CineStreamExtractors : CineStreamProvider() {
 
@@ -20,6 +21,8 @@ object CineStreamExtractors : CineStreamProvider() {
         aniId: Int? = null,
         season: Int? = null,
         episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
     ) {
         val malsync = app.get("$malsyncAPI/mal/anime/${malId ?: return}")
             .parsedSafe<MALSyncResponses>()?.sites
