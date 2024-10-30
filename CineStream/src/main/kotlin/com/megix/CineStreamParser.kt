@@ -2,6 +2,17 @@ package com.megix
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
+data class MALSyncSites(
+    @JsonProperty("Zoro") val zoro: HashMap<String?, HashMap<String, String?>>? = hashMapOf(),
+    @JsonProperty("9anime") val nineAnime: HashMap<String?, HashMap<String, String?>>? = hashMapOf(),
+    @JsonProperty("animepahe") val animepahe: HashMap<String?, HashMap<String, String?>>? = hashMapOf(),
+)
+
+
+data class MALSyncResponses(
+    @JsonProperty("Sites") val sites: MALSyncSites? = null,
+)
+
 data class RarResponseData(
     val data: List<RarItem>?
 )

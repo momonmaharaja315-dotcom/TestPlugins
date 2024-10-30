@@ -45,8 +45,10 @@ open class CineStreamProvider : MainAPI() {
     val cyberflix_url = "https://cyberflix.elfhosted.com/c/catalogs"
     val kitsu_url = "https://anime-kitsu.strem.fun"
     val haglund_url = "https://arm.haglund.dev/api/v2"
-    val jikan_url = "https://api.jikan.moe/v4"
+    //val jikan_url = "https://api.jikan.moe/v4"
     companion object {
+        const val malsyncAPI = "https://api.malsync.moe"
+
         const val vegaMoviesAPI = "https://vegamovies.si"
         const val rogMoviesAPI = "https://rogmovies.fun"
         const val MovieDrive_API="https://moviesdrive.world"
@@ -67,6 +69,7 @@ open class CineStreamProvider : MainAPI() {
         const val FilmyxyAPI = "https://filmxy.wafflehacker.io"
         const val AutoembedDramaAPI = "https://asian-drama.autoembed.cc"
         const val RarAPI = "https://rar.to"
+        const val hianimeAPI = "https://hianime.to"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
