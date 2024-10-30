@@ -16,7 +16,7 @@ import com.lagradost.cloudstream3.argamap
 
 object CineStreamExtractors : CineStreamProvider() {
 
-    suspend fun Animes(
+    suspend fun invokeAnimes(
         malId: Int? = null,
         aniId: Int? = null,
         season: Int? = null,
@@ -72,7 +72,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 ).parsedSafe<HianimeResponses>()?.link
                     ?: return@servers
                 val audio = if (server.third == "sub") "Raw" else "English Dub"
-                loadCustomExtractor(
+                loadCustomTagExtractor(
                     "HiAnime ${server.first} [$audio]",
                     iframe,
                     "$hianimeAPI/",

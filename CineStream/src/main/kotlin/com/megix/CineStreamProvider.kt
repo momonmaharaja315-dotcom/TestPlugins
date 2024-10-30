@@ -325,7 +325,7 @@ open class CineStreamProvider : MainAPI() {
                 )
             },
             {
-                iif(!res.isKitsu) nvokeRar(
+                if(!res.isKitsu) invokeRar(
                     res.title,
                     firstYear,
                     res.season,
