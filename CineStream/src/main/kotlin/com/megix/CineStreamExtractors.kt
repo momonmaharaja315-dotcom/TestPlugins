@@ -42,43 +42,6 @@ object CineStreamExtractors : CineStreamProvider() {
 
     }
 
-    private suspend fun invokeMiruroanimeGogo(
-        animeIds: List<String?>? = null,
-        title:String? = null,
-        episode: Int? = null,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
-    ) {
-        val api="https://gamma.miruro.tv/?url=https://api.miruro.tv"
-        val header= mapOf("x-atx" to "12RmYtJexlqnNym38z4ahwy+g1g0la/El8nkkMOVtiQ=")
-        val fixtitle=title.createSlug()
-        val sub="$api/meta/anilist/watch/$fixtitle-episode-$episode"
-        val dub="$api/meta/anilist/watch/$fixtitle-dub-episode-$episode"
-        val list = listOf(sub, dub)
-        for(url in list) {
-            val json = app.get(url, header).parsedSafe<MiruroanimeGogo>()?.sources
-            json?.amap {
-                val href = it.url
-                var quality = it.quality
-                if (quality.contains("backup"))
-                {
-                    quality="Master"
-                }
-                val type= if (url.contains("-dub-")) "DUB" else "SUB"
-                if (quality!="Master")
-                loadCustomTagExtractor(
-                    "Miruro Gogo [$type]",
-                    href,
-                    "",
-                    subtitleCallback,
-                    callback,
-                    getIndexQuality(quality)
-                )
-            }
-        }
-    }
-
-
     private suspend fun invokeAnimepahe(
         url: String? = null,
         episode: Int? = null,
