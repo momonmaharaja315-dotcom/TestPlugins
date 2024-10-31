@@ -2,17 +2,6 @@ package com.megix
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class MiruroanimeGogo(
-    val sources: List<MiruroSource>,
-    val download: String,
-)
-
-data class MiruroSource(
-    val url: String,
-    val isM3U8: Boolean,
-    val quality: String,
-)
-
 data class animepahe(
     val total: Long,
     @JsonProperty("per_page")

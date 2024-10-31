@@ -170,7 +170,7 @@ open class CineStreamProvider : MainAPI() {
         val releaseInfo = movieData.meta.releaseInfo.toString()
         var description = movieData.meta.description.toString()
         val cast : List<String> = movieData.meta.cast ?: emptyList()
-        val genre : List<String> = movieData.meta.genre ?: movieData.meta.genre ?: emptyList()
+        val genre : List<String> = movieData.meta.genre ?: movieData.meta.genres ?: emptyList()
         val background = movieData.meta.background.toString()
         val isCartoon = genre.any { it.contains("Animation", true) }
         var isAnime = (movieData.meta.country.toString().contains("Japan", true) ||
@@ -540,27 +540,27 @@ open class CineStreamProvider : MainAPI() {
     )
 
     data class Meta(
-        val id: String?,
-        val imdb_id: String?,
-        val type: String?,
-        val poster: String?,
-        val logo: String?,
-        val background: String?,
-        val moviedb_id: Int?,
-        val name: String?,
-        val description: String?,
-        val genre: List<String>?,
-        val genres: List<String>?,
-        val releaseInfo: String?,
-        val status: String?,
-        val runtime: String?,
-        val cast: List<String>?,
-        val language: String?,
-        val country: String?,
-        val imdbRating: String?,
-        val slug: String?,
-        val year: String?,
-        val videos: List<EpisodeDetails>?,
+        val id: String? = null,
+        val imdb_id: String? = null,
+        val type: String? = null,
+        val poster: String? = null,
+        val logo: String? = null,
+        val background: String? = null,
+        val moviedb_id: Int? = null,
+        val name: String? = null,
+        val description: String? = null,
+        val genre: List<String>? = null,
+        val genres: List<String>? = null,
+        val releaseInfo: String? = null,
+        val status: String? = null,
+        val runtime: String? = null,
+        val cast: List<String>? = null,
+        val language: String? = null,
+        val country: String? = null,
+        val imdbRating: String? = null,
+        val slug: String? = null,
+        val year: String? = null,
+        val videos: List<EpisodeDetails>? = null,
     )
 
     data class SearchResult(

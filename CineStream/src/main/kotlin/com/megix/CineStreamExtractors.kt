@@ -37,10 +37,7 @@ object CineStreamExtractors : CineStreamProvider() {
             },
             {
                 invokeAnimepahe(animepahe, episode, subtitleCallback, callback)
-            },
-            {
-                invokeMiruroanimeGogo(zoroIds,animepahetitle, episode, subtitleCallback, callback)
-            },
+            }
         )
 
     }
