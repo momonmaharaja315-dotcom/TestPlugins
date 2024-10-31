@@ -276,7 +276,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeVidSrcNL(
-        id: Int,
+        id: Int? = null,
         season: Int? = null,
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit,
@@ -304,7 +304,7 @@ object CineStreamExtractors : CineStreamProvider() {
     suspend fun invokeAstra(
         title: String,
         imdb_id: String,
-        tmdb_id: Int,
+        tmdb_id: Int? = null,
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
@@ -340,7 +340,7 @@ object CineStreamExtractors : CineStreamProvider() {
     suspend fun invokeNova(
         title: String,
         imdb_id: String,
-        tmdb_id: Int,
+        tmdb_id: Int? = null,
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
@@ -390,7 +390,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeAutoembed(
-        id: Int,
+        id: Int?,
         season: Int? = null,
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit,
