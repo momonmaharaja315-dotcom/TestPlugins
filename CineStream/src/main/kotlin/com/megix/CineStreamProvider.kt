@@ -71,6 +71,7 @@ open class CineStreamProvider : MainAPI() {
         const val AutoembedDramaAPI = "https://asian-drama.autoembed.cc"
         const val RarAPI = "https://rar.to"
         const val hianimeAPI = "https://hianime.to"
+        const val animepaheAPI = "https://animepahe.ru"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
@@ -124,8 +125,8 @@ open class CineStreamProvider : MainAPI() {
     override suspend fun search(query: String): List<SearchResponse> {
         val searchResponse = mutableListOf<SearchResponse>()
         val animeJson = app.get("$kitsu_url/catalog/anime/kitsu-anime-list/search=$query.json").text
-        val animes = parseJson<SearchResult>(animeJson)
-        animes.metas.forEach {
+        val animes = tryParseJson<SearchResult>(animeJson)
+        animes?.metas.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
@@ -169,7 +170,7 @@ open class CineStreamProvider : MainAPI() {
         val releaseInfo = movieData.meta.releaseInfo.toString()
         var description = movieData.meta.description.toString()
         val cast : List<String> = movieData.meta.cast ?: emptyList()
-        val genre : List<String> = movieData.meta.genre ?: emptyList()
+        val genre : List<String> = movieData.meta.genre ?: movieData.meta.genre ?: emptyList()
         val background = movieData.meta.background.toString()
         val isCartoon = genre.any { it.contains("Animation", true) }
         var isAnime = (movieData.meta.country.toString().contains("Japan", true) ||
@@ -545,10 +546,11 @@ open class CineStreamProvider : MainAPI() {
         val poster: String?,
         val logo: String?,
         val background: String?,
-        val moviedb_id: Int,
+        val moviedb_id: Int?,
         val name: String?,
         val description: String?,
         val genre: List<String>?,
+        val genres: List<String>?,
         val releaseInfo: String?,
         val status: String?,
         val runtime: String?,
@@ -558,7 +560,7 @@ open class CineStreamProvider : MainAPI() {
         val imdbRating: String?,
         val slug: String?,
         val year: String?,
-        val videos: List<EpisodeDetails>?
+        val videos: List<EpisodeDetails>?,
     )
 
     data class SearchResult(

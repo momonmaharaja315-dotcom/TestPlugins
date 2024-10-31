@@ -24,14 +24,92 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
+        //val Season = app.get("$jikanAPI/anime/${malId ?: return}").parsedSafe<JikanResponse>()?.data?.season ?:""
         val malsync = app.get("$malsyncAPI/mal/anime/${malId ?: return}")
             .parsedSafe<MALSyncResponses>()?.sites
         val zoroIds = malsync?.zoro?.keys?.map { it }
+        val animepahe = malsync?.animepahe?.firstNotNullOf { it.value["url"] }
+        val animepahetitle = malsync?.animepahe?.firstNotNullOf { it.value["title"] }
+
         argamap(
             {
                 invokeHianime(zoroIds, episode, subtitleCallback, callback)
-            }
+            },
+            {
+                invokeAnimepahe(animepahe, episode, subtitleCallback, callback)
+            },
+            {
+                invokeMiruroanimeGogo(zoroIds,animepahetitle, episode, subtitleCallback, callback)
+            },
         )
+
+    }
+
+    private suspend fun invokeMiruroanimeGogo(
+        animeIds: List<String?>? = null,
+        title:String? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val api="https://gamma.miruro.tv/?url=https://api.miruro.tv"
+        val header= mapOf("x-atx" to "12RmYtJexlqnNym38z4ahwy+g1g0la/El8nkkMOVtiQ=")
+        val fixtitle=title.createSlug()
+        val sub="$api/meta/anilist/watch/$fixtitle-episode-$episode"
+        val dub="$api/meta/anilist/watch/$fixtitle-dub-episode-$episode"
+        val list = listOf(sub, dub)
+        for(url in list) {
+            val json = app.get(url, header).parsedSafe<MiruroanimeGogo>()?.sources
+            json?.amap {
+                val href = it.url
+                var quality = it.quality
+                if (quality.contains("backup"))
+                {
+                    quality="Master"
+                }
+                val type= if (url.contains("-dub-")) "DUB" else "SUB"
+                if (quality!="Master")
+                loadNameExtractor(
+                    "Miruro Gogo [$type]",
+                    href,
+                    "",
+                    subtitleCallback,
+                    callback,
+                    getIndexQuality(quality)
+                )
+            }
+        }
+    }
+
+
+    private suspend fun invokeAnimepahe(
+        url: String? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val headers = mapOf("Cookie" to "__ddg2_=1234567890")
+        val id = app.get(url ?: "", headers).document.selectFirst("meta[property=og:url]")
+            ?.attr("content").toString().substringAfterLast("/")
+        val animeData =
+            app.get("$animepaheAPI/api?m=release&id=$id&sort=episode_desc&page=1", headers)
+                .parsedSafe<animepahe>()?.data
+        val session = animeData?.find { it.episode == episode }?.session ?: ""
+        app.get("$animepaheAPI/play/$id/$session", headers).document.select("div.dropup button")
+            .map {
+                val quality = it.attr("data-resolution").toString()
+                val href = it.attr("data-src")
+                if (href.contains("kwik.si")) {
+                    loadCustomExtractor(
+                        "Animepahe [SUB] $quality",
+                        href,
+                        "",
+                        subtitleCallback,
+                        callback,
+                        getIndexQuality(quality)
+                    )
+                }
+            }
     }
 
     private suspend fun invokeHianime(
