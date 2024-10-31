@@ -69,7 +69,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 }
                 val type= if (url.contains("-dub-")) "DUB" else "SUB"
                 if (quality!="Master")
-                loadNameExtractor(
+                loadCustomTagExtractor(
                     "Miruro Gogo [$type]",
                     href,
                     "",
@@ -100,7 +100,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 val quality = it.attr("data-resolution").toString()
                 val href = it.attr("data-src")
                 if (href.contains("kwik.si")) {
-                    loadCustomExtractor(
+                    loadCustomTagExtractor(
                         "Animepahe [SUB] $quality",
                         href,
                         "",

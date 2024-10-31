@@ -126,7 +126,7 @@ open class CineStreamProvider : MainAPI() {
         val searchResponse = mutableListOf<SearchResponse>()
         val animeJson = app.get("$kitsu_url/catalog/anime/kitsu-anime-list/search=$query.json").text
         val animes = tryParseJson<SearchResult>(animeJson)
-        animes?.metas.forEach {
+        animes?.metas?.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
@@ -516,7 +516,7 @@ open class CineStreamProvider : MainAPI() {
     data class LoadLinksData(
         val title: String,
         val id: String,
-        val tmdbId: Int,
+        val tmdbId: Int?,
         val tvtype: String,
         val year: String,
         val season: Int? = null,
