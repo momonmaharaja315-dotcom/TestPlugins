@@ -142,7 +142,7 @@ open class CineStreamProvider : MainAPI() {
         val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
         val series = parseJson<SearchResult>(seriesJson)
         series.metas.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
+            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id.replace(":", "%3A"), it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
         }
@@ -157,7 +157,7 @@ open class CineStreamProvider : MainAPI() {
         val id = movie.id
         val meta_url = if(movie.id.contains("kitsu")) kitsu_url else cinemeta_url
         val isKitsu = if(meta_url == kitsu_url) true else false
-        val externalIds = if(isKitsu) getExternalIds(id.substringAfter("kitsu:"),"kitsu") else null
+        val externalIds = if(isKitsu) getExternalIds(id.substringAfter("kitsu%3A"),"kitsu") else null
         val malId = if(externalIds != null) externalIds?.myanimelist else null
         val anilistId = if(externalIds != null) externalIds?.anilist else null
         val json = app.get("$meta_url/meta/$tvtype/$id.json").text
