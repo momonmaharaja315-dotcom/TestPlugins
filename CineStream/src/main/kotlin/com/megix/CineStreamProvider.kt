@@ -126,7 +126,7 @@ open class CineStreamProvider : MainAPI() {
         val searchResponse = mutableListOf<SearchResponse>()
         val animeJson = app.get("$kitsu_url/catalog/anime/kitsu-anime-list/search=$query.json").text
         val animes = tryParseJson<SearchResult>(animeJson)
-        animes?.metas?.forEach {
+        animes?.metas ?.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
@@ -161,24 +161,24 @@ open class CineStreamProvider : MainAPI() {
         val malId = if(externalIds != null) externalIds?.myanimelist else null
         val anilistId = if(externalIds != null) externalIds?.anilist else null
         val json = app.get("$meta_url/meta/$tvtype/$id.json").text
-        val movieData = parseJson<ResponseData>(json)
-        val title = movieData.meta.name.toString()
-        val posterUrl = movieData.meta.poster.toString()
-        val imdbRating = movieData.meta.imdbRating
-        val year = movieData.meta.year
-        val tmdbId = movieData.meta.moviedb_id
-        val releaseInfo = movieData.meta.releaseInfo.toString()
-        var description = movieData.meta.description.toString()
-        val cast : List<String> = movieData.meta.cast ?: emptyList()
-        val genre : List<String> = movieData.meta.genre ?: emptyList()
-        val background = movieData.meta.background.toString()
+        val movieData = tryParseJson<ResponseData>(json)
+        val title = movieData ?.meta ?.name.toString()
+        val posterUrl = movieData ?.meta?.poster.toString()
+        val imdbRating = movieData?.meta?.imdbRating
+        val year = movieData?.meta?.year
+        val tmdbId = movieData?.meta?.moviedb_id
+        val releaseInfo = movieData?.meta?.releaseInfo.toString()
+        var description = movieData?.meta?.description.toString()
+        val cast : List<String> = movieData?.meta?.cast ?: emptyList()
+        val genre : List<String> = movieData?.meta?.genre ?: emptyList()
+        val background = movieData?.meta?.background.toString()
         val isCartoon = genre.any { it.contains("Animation", true) }
-        var isAnime = (movieData.meta.country.toString().contains("Japan", true) ||
-            movieData.meta.country.toString().contains("China", true)) && isCartoon
+        var isAnime = (movieData?.meta?.country.toString().contains("Japan", true) ||
+            movieData?.meta?.country.toString().contains("China", true)) && isCartoon
         isAnime = if(isKitsu) true else isAnime
-        val isBollywood = movieData.meta.country.toString().contains("India", true)
-        val isAsian = (movieData.meta.country.toString().contains("Korea", true) ||
-                movieData.meta.country.toString().contains("China", true)) && !isAnime
+        val isBollywood = movieData?.meta?.country.toString().contains("India", true)
+        val isAsian = (movieData?.meta?.country.toString().contains("Korea", true) ||
+                movieData?.meta?.country.toString().contains("China", true)) && !isAnime
 
         if(tvtype == "movie") {
             val data = LoadLinksData(
@@ -544,7 +544,6 @@ open class CineStreamProvider : MainAPI() {
         val imdb_id: String?,
         val type: String?,
         val poster: String?,
-        val logo: String?,
         val background: String?,
         val moviedb_id: Int?,
         val name: String?,
