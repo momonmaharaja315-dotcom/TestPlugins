@@ -5,6 +5,7 @@ import com.lagradost.cloudstream3.plugins.Plugin
 import android.content.Context
 import com.lagradost.cloudstream3.extractors.Chillx
 import com.lagradost.cloudstream3.extractors.Moviesapi
+import com.lagradost.cloudstream3.extractors.Rabbitstream
 
 @CloudstreamPlugin
 class CineStream: Plugin() {
@@ -12,5 +13,7 @@ class CineStream: Plugin() {
         registerMainAPI(CineStreamProvider())
         registerExtractorAPI(Chillx())
         registerExtractorAPI(Moviesapi())
+        registerExtractorAPI(Kwik())
+        registerExtractorAPI(Rabbitstream())
     }
 }
