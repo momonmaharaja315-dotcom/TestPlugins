@@ -8,7 +8,7 @@ import com.lagradost.cloudstream3.extractors.Moviesapi
 import com.lagradost.cloudstream3.extractors.Rabbitstream
 
 @CloudstreamPlugin
-class CineStream: Plugin() {
+open class CineStream: Plugin() {
     override fun load(context: Context) {
         registerMainAPI(CineStreamProvider())
         registerExtractorAPI(Chillx())
