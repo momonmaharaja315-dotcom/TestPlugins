@@ -208,7 +208,7 @@ open class CineStreamProvider : MainAPI() {
                 this.rating = imdbRating.toRatingInt()
                 this.year = year?.toIntOrNull() ?: releaseInfo.toIntOrNull()
                 this.backgroundPosterUrl = background
-                this.duration = movieData.meta.runtime?.replace(" min", "")?.toIntOrNull()
+                this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
                 addAniListId(anilistId)
                 addMalId(malId)
@@ -216,7 +216,7 @@ open class CineStreamProvider : MainAPI() {
             }
         }
         else {
-            val episodes = movieData.meta.videos?.map { ep ->
+            val episodes = movieData?.meta?.videos?.map { ep ->
                 newEpisode(
                     LoadLinksData(
                         title,
@@ -255,7 +255,7 @@ open class CineStreamProvider : MainAPI() {
                 this.rating = imdbRating.toRatingInt()
                 this.year = year?.substringBefore("–")?.toIntOrNull() ?: releaseInfo.substringBefore("–").toIntOrNull()
                 this.backgroundPosterUrl = background
-                this.duration = movieData.meta.runtime?.replace(" min", "")?.toIntOrNull()
+                this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
                 addAniListId(anilistId)
                 addImdbId(id)
