@@ -72,55 +72,6 @@ object CineStreamExtractors : CineStreamProvider() {
             }
     }
 
-    private suspend fun invokeHianime(
-        animeIds: List<String?>? = null,
-        episode: Int? = null,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
-    ) {
-        val headers = mapOf(
-            "X-Requested-With" to "XMLHttpRequest",
-        )
-        animeIds?.apmap { id ->
-            val episodeId = app.get(
-                "$hianimeAPI/ajax/v2/episode/list/${id ?: return@apmap}",
-                headers = headers
-            ).parsedSafe<HianimeResponses>()?.html?.let {
-                Jsoup.parse(it)
-            }?.select("div.ss-list a")
-                ?.find { it.attr("data-number") == "${episode ?: 1}" }
-                ?.attr("data-id")
-
-            val servers = app.get(
-                "$hianimeAPI/ajax/v2/episode/servers?episodeId=${episodeId ?: return@apmap}",
-                headers = headers
-            ).parsedSafe<HianimeResponses>()?.html?.let { Jsoup.parse(it) }
-                ?.select("div.item.server-item")?.map {
-                    Triple(
-                        it.text(),
-                        it.attr("data-id"),
-                        it.attr("data-type"),
-                    )
-                }
-
-            servers?.map servers@{ server ->
-                val iframe = app.get(
-                    "$hianimeAPI/ajax/v2/episode/sources?id=${server.second ?: return@servers}",
-                    headers = headers
-                ).parsedSafe<HianimeResponses>()?.link
-                    ?: return@servers
-                val audio = if (server.third == "sub") "Raw" else "English Dub"
-                loadCustomTagExtractor(
-                    "HiAnime ${server.first} [$audio]",
-                    iframe,
-                    "$hianimeAPI/",
-                    subtitleCallback,
-                    callback,
-                )
-            }
-        }
-    }
-
     suspend fun invokeRar(
         title: String,
         year: Int? = null,
@@ -1202,5 +1153,54 @@ object CineStreamExtractors : CineStreamProvider() {
                 isM3u8 = true,
             )
         )
+    }
+
+    private suspend fun invokeHianime(
+        animeIds: List<String?>? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val headers = mapOf(
+            "X-Requested-With" to "XMLHttpRequest",
+        )
+        animeIds?.apmap { id ->
+            val episodeId = app.get(
+                "$hianimeAPI/ajax/v2/episode/list/${id ?: return@apmap}",
+                headers = headers
+            ).parsedSafe<HianimeResponses>()?.html?.let {
+                Jsoup.parse(it)
+            }?.select("div.ss-list a")
+                ?.find { it.attr("data-number") == "${episode ?: 1}" }
+                ?.attr("data-id")
+
+            val servers = app.get(
+                "$hianimeAPI/ajax/v2/episode/servers?episodeId=${episodeId ?: return@apmap}",
+                headers = headers
+            ).parsedSafe<HianimeResponses>()?.html?.let { Jsoup.parse(it) }
+                ?.select("div.item.server-item")?.map {
+                    Triple(
+                        it.text(),
+                        it.attr("data-id"),
+                        it.attr("data-type"),
+                    )
+                }
+
+            servers?.map servers@{ server ->
+                val iframe = app.get(
+                    "$hianimeAPI/ajax/v2/episode/sources?id=${server.second ?: return@servers}",
+                    headers = headers
+                ).parsedSafe<HianimeResponses>()?.link
+                    ?: return@servers
+                val audio = if (server.third == "sub") "Raw" else "English Dub"
+                loadCustomTagExtractor(
+                    "HiAnime ${server.first} [$audio]",
+                    iframe,
+                    "$hianimeAPI/",
+                    subtitleCallback,
+                    callback,
+                )
+            }
+        }
     }
 }

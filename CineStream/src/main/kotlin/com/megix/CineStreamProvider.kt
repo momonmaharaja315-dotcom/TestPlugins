@@ -158,8 +158,8 @@ open class CineStreamProvider : MainAPI() {
         val meta_url = if(movie.id.contains("kitsu")) kitsu_url else cinemeta_url
         val isKitsu = if(meta_url == kitsu_url) true else false
         val externalIds = if(isKitsu) getExternalIds(id.substringAfter("kitsu:"),"kitsu") else null
-        val malId = if(externalIds != null) externalIds.myanimelist else null
-        val anilistId = if(externalIds != null) externalIds.anilist else null
+        val malId = if(externalIds != null) externalIds?.myanimelist else null
+        val anilistId = if(externalIds != null) externalIds?.anilist else null
         val json = app.get("$meta_url/meta/$tvtype/$id.json").text
         val movieData = parseJson<ResponseData>(json)
         val title = movieData.meta.name.toString()
@@ -170,7 +170,7 @@ open class CineStreamProvider : MainAPI() {
         val releaseInfo = movieData.meta.releaseInfo.toString()
         var description = movieData.meta.description.toString()
         val cast : List<String> = movieData.meta.cast ?: emptyList()
-        val genre : List<String> = movieData.meta.genres ?: emptyList()
+        val genre : List<String> = movieData.meta.genre ?: emptyList()
         val background = movieData.meta.background.toString()
         val isCartoon = genre.any { it.contains("Animation", true) }
         var isAnime = (movieData.meta.country.toString().contains("Japan", true) ||
@@ -549,6 +549,7 @@ open class CineStreamProvider : MainAPI() {
         val moviedb_id: Int?,
         val name: String?,
         val description: String?,
+        val genre: List<String>?,
         val genres: List<String>?,
         val releaseInfo: String?,
         val status: String?,
@@ -597,13 +598,13 @@ open class CineStreamProvider : MainAPI() {
     )
 
     data class ExtenalIds(
-        val anilist: Int,
-        val anidb: Int,
-        val myanimelist: Int,
-        val kitsu: Int,
-        val anisearch: Int,
-        val livechart: Int,
-        val themoviedb: Int,
+        val anilist: Int?,
+        val anidb: Int?,
+        val myanimelist: Int?,
+        val kitsu: Int?,
+        val anisearch: Int?,
+        val livechart: Int?,
+        val themoviedb: Int?,
     )
 
     suspend fun getExternalIds(id: String, type: String) : ExtenalIds? {
