@@ -142,7 +142,7 @@ open class CineStreamProvider : MainAPI() {
         val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
         val series = parseJson<SearchResult>(seriesJson)
         series.metas.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id.replace(":", "%3A"), it.type).toJson(), TvType.Movie) {
+            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
         }
@@ -154,12 +154,13 @@ open class CineStreamProvider : MainAPI() {
     override suspend fun load(url: String): LoadResponse? {
         val movie = parseJson<PassData>(url)
         val tvtype = movie.type
-        val id = movie.id
+        var id = movie.id
         val meta_url = if(movie.id.contains("kitsu")) kitsu_url else cinemeta_url
         val isKitsu = if(meta_url == kitsu_url) true else false
-        val externalIds = if(isKitsu) getExternalIds(id.substringAfter("kitsu%3A"),"kitsu") else null
+        val externalIds = if(isKitsu) getExternalIds(id.substringAfter("kitsu:"),"kitsu") else null
         val malId = if(externalIds != null) externalIds?.myanimelist else null
         val anilistId = if(externalIds != null) externalIds?.anilist else null
+        id = if(isKitsu) id.replace(":", "%3A") else id
         val json = app.get("$meta_url/meta/$tvtype/$id.json").text
         val movieData = tryParseJson<ResponseData>(json)
         val title = movieData ?.meta ?.name.toString()
