@@ -165,7 +165,7 @@ open class CineStreamProvider : MainAPI() {
         val title = movieData ?.meta ?.name.toString()
         val posterUrl = movieData ?.meta?.poster.toString()
         val imdbRating = movieData?.meta?.imdbRating
-        val year = movieData?.meta?.year
+        val year = movieData?.meta?.year.toString()
         val tmdbId = movieData?.meta?.moviedb_id
         val releaseInfo = movieData?.meta?.releaseInfo.toString()
         var description = movieData?.meta?.description.toString()
