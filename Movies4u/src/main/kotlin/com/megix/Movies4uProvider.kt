@@ -242,13 +242,13 @@ class Movies4uProvider : MainAPI() { // all providers must be an instance of Mai
                 "TE" to "trailers"
             )
 
-            val body = FormBody.Builder().addEncoded("hash", value).build()
-            val doc2 = app.post(source ,requestBody = body).document
+            val body = FormBody.Builder().add("hash", value).build()
+            val doc2 = app.post(source ,requestBody = body, allowRedirects = false).document
 
             callback.invoke(
                 ExtractorLink(
                     "Movies4u3",
-                    "Movies4u3 $size",
+                    "Movies4u3 $value $size",
                     doc2.toString(),
                     "",
                     getIndexQuality(quality),
