@@ -14,7 +14,7 @@ import com.lagradost.cloudstream3.extractors.VidHidePro6
 import com.lagradost.cloudstream3.extractors.Filesim
 import com.lagradost.cloudstream3.extractors.StreamWishExtractor
 import com.lagradost.cloudstream3.extractors.VidhideExtractor
-import com.lagradost.cloudstream3.extractors.Vidhstream
+import com.lagradost.cloudstream3.extractors.Vidstream
 
 @CloudstreamPlugin
 open class CineStream: Plugin() {
@@ -38,5 +38,6 @@ open class CineStream: Plugin() {
         registerExtractorAPI(CdnwishCom())
         registerExtractorAPI(Asnwish())
         registerExtractorAPI(Multimovies())
+        registerExtractorAPI(Vidstream())
     }
 }
