@@ -16,6 +16,99 @@ import com.lagradost.cloudstream3.argamap
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend fun invokeMultimovies(
+        apiUrl: String,
+        title: String? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val fixTitle = title.createSlug()
+        val url = if (season == null) {
+            "$apiUrl/movies/$fixTitle"
+        } else {
+            "$apiUrl/episodes/$fixTitle-${season}x${episode}"
+        }
+        val req = app.get(url).document
+        req.select("ul#playeroptionsul li").map {
+            Triple(
+                it.attr("data-post"),
+                it.attr("data-nume"),
+                it.attr("data-type")
+            )
+        }.amap { (id, nume, type) ->
+            if (!nume.contains("trailer")) {
+                val source = app.post(
+                    url = "$apiUrl/wp-admin/admin-ajax.php",
+                    data = mapOf(
+                        "action" to "doo_player_ajax",
+                        "post" to id,
+                        "nume" to nume,
+                        "type" to type
+                    ),
+                    referer = url,
+                    headers = mapOf("X-Requested-With" to "XMLHttpRequest")
+                ).parsed<ResponseHash>().embed_url
+                val link = source.substringAfter("\"").substringBefore("\"")
+                when {
+                    !link.contains("youtube") -> {
+                        loadExtractor(link, referer = apiUrl, subtitleCallback, callback)
+                    }
+                    else -> ""
+                }
+            }
+        }
+    }
+
+    suspend fun invokeMultiAutoembed(
+        id: Int?,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        val url = if(season != null && episode != null) "${AutoembedAPI}/embed/oplayer.php?id=${id}&s=${season}&e=${episode}" else "${AutoembedAPI}/embed/oplayer.php?id=${id}"
+        val document = app.get(url).document
+        val regex = Regex("""(?:"title":\s*"([^"]*)",\s*"file":\s*"([^"]*)")""")
+        val matches = regex.findAll(document.toString())
+
+        matches.forEach { match ->
+            val title = match.groups?.get(1)?.value ?: ""
+            val file = match.groups?.get(2)?.value ?: ""
+            callback.invoke(
+                ExtractorLink(
+                    "MultiAutoembed[${title}]",
+                    "MultiAutoembed[${title}]",
+                    file,
+                    referer = "",
+                    quality = Qualities.Unknown.value,
+                    true,
+                )
+            )
+        }
+    }
+
+    suspend fun invokeVite(
+        id: String,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        val url = if(season != null) "$viteAPI/tv/$id/$season/$episode" else "$viteAPI/movie/$id"
+        val str = app.get(url).text
+        val link = Regex("""file:\s*"([^"]+)\"""").find(str)?.groupValues?.get(1) ?: return
+        callback.invoke(
+            ExtractorLink(
+                "Vite",
+                "Vite",
+                link,
+                "",
+                Qualities.P1080.value,
+                true
+            )
+        )
+    }
+
     suspend fun invokeAnimes(
         malId: Int? = null,
         aniId: Int? = null,
@@ -305,7 +398,6 @@ object CineStreamExtractors : CineStreamProvider() {
         season: Int? = null,
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit,
-        subtitleCallback: (SubtitleFile) -> Unit,
     ) {
         val url = if(season != null && episode != null) "${AutoembedAPI}/embed/player.php?id=${id}&s=${season}&e=${episode}" else "${AutoembedAPI}/embed/player.php?id=${id}"
         val document = app.get(url).document
@@ -322,7 +414,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     file,
                     referer = "",
                     quality = Qualities.Unknown.value,
-                    INFER_TYPE,
+                    true,
                 )
             )
         }
