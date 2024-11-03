@@ -33,5 +33,9 @@ open class CineStream: Plugin() {
         registerExtractorAPI(VidHidePro6())
         registerExtractorAPI(VidhideExtractor())
         registerExtractorAPI(StreamWishExtractor())
+        registerExtractorAPI(Strwishcom())
+        registerExtractorAPI(CdnwishCom())
+        registerExtractorAPI(Asnwish())
+        registerExtractorAPI(Multimovies())
     }
 }

@@ -214,7 +214,7 @@ open class CineStreamProvider : MainAPI() {
                 this.plot = description
                 this.tags = genre
                 this.rating = imdbRating.toRatingInt()
-                this.year = year?.toIntOrNull() ?: releaseInfo.toIntOrNull()
+                this.year = year ?.toIntOrNull() ?: releaseInfo.toIntOrNull() ?: year.substringBefore("-").toIntOrNull()
                 this.backgroundPosterUrl = background
                 this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
@@ -261,7 +261,7 @@ open class CineStreamProvider : MainAPI() {
                 this.plot = description
                 this.tags = genre
                 this.rating = imdbRating.toRatingInt()
-                this.year = year?.substringBefore("–")?.toIntOrNull() ?: releaseInfo.substringBefore("–").toIntOrNull()
+                this.year = year?.substringBefore("–")?.toIntOrNull() ?: releaseInfo.substringBefore("–").toIntOrNull() ?: year.substringBefore("-").toIntOrNull()
                 this.backgroundPosterUrl = background
                 this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
                 addActors(cast)
