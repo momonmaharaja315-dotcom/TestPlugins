@@ -50,7 +50,7 @@ open class CineStreamProvider : MainAPI() {
     val kitsu_url = "https://anime-kitsu.strem.fun"
     val kitsu_stremio_url = "https://1fe84bc728af-stremio-anime-catalogs.baby-beamup.club"
     val haglund_url = "https://arm.haglund.dev/api/v2"
-    //val jikan_url = "https://api.jikan.moe/v4"
+    val jikanAPI = "https://api.jikan.moe/v4"
     companion object {
         const val malsyncAPI = "https://api.malsync.moe"
 
@@ -78,6 +78,7 @@ open class CineStreamProvider : MainAPI() {
         const val animepaheAPI = "https://animepahe.ru"
         const val viteAPI = "https://viet.autoembed.cc"
         const val multimoviesAPI = "https://multimovies.bond"
+        const val anitaku = "https://anitaku.pe"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
