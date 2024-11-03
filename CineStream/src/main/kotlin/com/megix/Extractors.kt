@@ -22,7 +22,7 @@ class Animezia : VidhideExtractor() {
     override var name = "Animezia"
     override var mainUrl = "https://animezia.cloud"
     override var requiresReferer = true
-}Asnwish
+}
 
 class server2 : VidhideExtractor() {
     override var name = "Multimovies Vidhide"
