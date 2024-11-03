@@ -20,7 +20,7 @@ object CineStreamExtractors : CineStreamProvider() {
     suspend fun invokeAnitaku(
         title: String? = null,
         Season: String? = null,
-        year: String?,
+        year: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
@@ -163,6 +163,7 @@ object CineStreamExtractors : CineStreamProvider() {
         aniId: Int? = null,
         season: Int? = null,
         episode: Int? = null,
+        year: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {

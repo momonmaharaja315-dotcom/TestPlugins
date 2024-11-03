@@ -280,9 +280,10 @@ open class CineStreamProvider : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val res = parseJson<LoadLinksData>(data)
-        val year = if(res.tvtype == "movie") res.year.toIntOrNull() else res.firstAired?.substringBefore("-")?.toIntOrNull()
+        var year = if(res.tvtype == "movie") res.year.toIntOrNull() else res.firstAired?.substringBefore("-")?.toIntOrNull()
         val firstYear = if(res.tvtype == "movie") res.year.toIntOrNull() else res.year.substringBefore("–").toIntOrNull()
         if(res.isKitsu) {
+            year = res.year.toIntOrNull() ?: res.year.substringBefore("-").toIntOrNull()
             argamap(
                 {
                     invokeAnimes(
@@ -290,6 +291,7 @@ open class CineStreamProvider : MainAPI() {
                         res.anilistId,
                         res.season,
                         res.episode,
+                        year,
                         subtitleCallback,
                         callback
                     )
