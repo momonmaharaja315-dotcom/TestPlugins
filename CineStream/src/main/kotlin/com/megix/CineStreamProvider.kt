@@ -89,22 +89,22 @@ open class CineStreamProvider : MainAPI() {
     )
 
     override val mainPage = mainPageOf(
-        "$mainUrl/top/catalog/movie/top.json" to "Top Movies",
-        "$mainUrl/top/catalog/series/top.json" to "Top Series",
-        "$mainUrl/imdbRating/catalog/movie/imdbRating.json" to "Top IMDb Movies",
-        "$mainUrl/imdbRating/catalog/series/imdbRating.json" to "Top IMDb Series",
-        "$cyberflix_url/catalog/Indian/indian.new.movie.json" to "New Indian Movie",
-        "$cyberflix_url/catalog/Indian/indian.new.series.json" to "New Indian Series",
-        "$cyberflix_url/catalog/Netflix/netflix.new.series.json" to "Netflix Series",
-        "$cyberflix_url/catalog/Netflix/netflix.new.movie.json" to "Netflix Movie",
-        "$cyberflix_url/catalog/Amazon%20Prime/amazon_prime.new.movie.json" to "Amazon Prime Movie",
-        "$cyberflix_url/catalog/Amazon%20Prime/amazon_prime.new.series.json" to "Amazon Prime Series",
-        "$cyberflix_url/catalog/Disney%20Plus/disney_plus.new.movie.json" to "Disney Plus Movie",
-        "$cyberflix_url/catalog/Disney%20Plus/disney_plus.new.series.json" to "Disney Plus Series",
-        "$cyberflix_url/catalog/Asian/asian.new.movie.json" to "New Asian Movie",
-        "$cyberflix_url/catalog/Asian/asian.new.series.json" to "New Asian Series",
-        "$kitsu_url/catalog/anime/kitsu-anime-airing.json" to "Kitsu Top Airing",
-        """$anime_catalogs_url/{ "anidb_latest-started": "on" }/catalog/anime/anidb_latest-started.json""" to "AniDB Latest Started",
+        "$mainUrl/top/catalog/movie/top" to "Top Movies",
+        "$mainUrl/top/catalog/series/top" to "Top Series",
+        "$mainUrl/imdbRating/catalog/movie/imdbRating" to "Top IMDb Movies",
+        "$mainUrl/imdbRating/catalog/series/imdbRating" to "Top IMDb Series",
+        "$cyberflix_url/catalog/Indian/indian.new.movie" to "New Indian Movie",
+        "$cyberflix_url/catalog/Indian/indian.new.series" to "New Indian Series",
+        "$cyberflix_url/catalog/Netflix/netflix.new.series" to "Netflix Series",
+        "$cyberflix_url/catalog/Netflix/netflix.new.movie" to "Netflix Movie",
+        "$cyberflix_url/catalog/Amazon%20Prime/amazon_prime.new.movie" to "Amazon Prime Movie",
+        "$cyberflix_url/catalog/Amazon%20Prime/amazon_prime.new.series" to "Amazon Prime Series",
+        "$cyberflix_url/catalog/Disney%20Plus/disney_plus.new.movie" to "Disney Plus Movie",
+        "$cyberflix_url/catalog/Disney%20Plus/disney_plus.new.series" to "Disney Plus Series",
+        "$cyberflix_url/catalog/Asian/asian.new.movie" to "New Asian Movie",
+        "$cyberflix_url/catalog/Asian/asian.new.series" to "New Asian Series",
+        "$kitsu_url/catalog/anime/kitsu-anime-airing" to "Kitsu Top Airing",
+        """$anime_catalogs_url/{ "anidb_latest-started": "on" }/catalog/anime/anidb_latest-started""" to "AniDB Latest Started",
     )
 
     override suspend fun getMainPage(
@@ -112,7 +112,7 @@ open class CineStreamProvider : MainAPI() {
         request: MainPageRequest
     ): HomePageResponse {
         val skip = skipMap[request.name] ?: 0
-        val json = app.get(request.data + "/skip=$skip").text
+        val json = app.get("${request.data}/skip=$skip.json").text
         val movies = parseJson<Home>(json)
         val movieCount = movies.metas.size
         skipMap[request.name] = skip + movieCount
