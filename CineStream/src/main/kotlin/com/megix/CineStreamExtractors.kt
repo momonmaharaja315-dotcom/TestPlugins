@@ -17,7 +17,7 @@ import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 
 object CineStreamExtractors : CineStreamProvider() {
 
-    suspend fun invokeStremify(
+    suspend fun invokeStreamify(
         id: String,
         season: Int? = null,
         episode: Int? = null,
