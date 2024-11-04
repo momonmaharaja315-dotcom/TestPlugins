@@ -45,15 +45,15 @@ open class CineStreamProvider : MainAPI() {
     override val hasMainPage = true
     override var lang = "en"
     override val hasDownloadSupport = true
+    val skipMap: MutableMap<String, Int> = mutableMapOf()
     val cinemeta_url = "https://v3-cinemeta.strem.io"
     val cyberflix_url = "https://cyberflix.elfhosted.com/c/catalogs"
     val kitsu_url = "https://anime-kitsu.strem.fun"
-    val kitsu_stremio_url = "https://1fe84bc728af-stremio-anime-catalogs.baby-beamup.club"
+    val anime_catalogs_url = "https://1fe84bc728af-stremio-anime-catalogs.baby-beamup.club"
     val haglund_url = "https://arm.haglund.dev/api/v2"
     val jikanAPI = "https://api.jikan.moe/v4"
     companion object {
         const val malsyncAPI = "https://api.malsync.moe"
-
         const val vegaMoviesAPI = "https://vegamovies.si"
         const val rogMoviesAPI = "https://rogmovies.fun"
         const val MovieDrive_API="https://moviesdrive.world"
@@ -103,18 +103,19 @@ open class CineStreamProvider : MainAPI() {
         "$cyberflix_url/catalog/Disney%20Plus/disney_plus.new.series.json" to "Disney Plus Series",
         "$cyberflix_url/catalog/Asian/asian.new.movie.json" to "New Asian Movie",
         "$cyberflix_url/catalog/Asian/asian.new.series.json" to "New Asian Series",
-        """$kitsu_stremio_url/{ "kitsu_top-airing": "on" }/catalog/anime/kitsu_top-airing.json""" to "Kitsu Top Airing",
-        """$kitsu_stremio_url/{ "anilist_trending-now": "on" }/catalog/anime/anilist_trending-now.json""" to "Anilist Trending Now"
+        "$kitsu_url/catalog/anime/kitsu-anime-airing.json" to "Kitsu Top Airing",
+        """$anime_catalogs_url/{ "anidb_latest-started": "on" }/catalog/anime/anidb_latest-started.json""" to "AniDB Latest Started",
     )
 
     override suspend fun getMainPage(
         page: Int,
         request: MainPageRequest
     ): HomePageResponse {
-        val metaType = if(request.name.contains("Kitsu") || request.name.contains("Anilist")) "kitsu" else "cinemeta"
-        val json = app.get(request.data).text
-
+        val skip = skipMap[request.name] ?: 0
+        val json = app.get(request.data + "/skip=$skip").text
         val movies = parseJson<Home>(json)
+        val movieCount = movies.metas.size
+        skipMap[request.name] = skip + movieCount
         val home = movies.metas.mapNotNull { movie ->
             newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), TvType.Movie) {
                 this.posterUrl = movie.poster.toString()
@@ -125,7 +126,7 @@ open class CineStreamProvider : MainAPI() {
                 name = request.name,
                 list = home
             ),
-            hasNext = false
+            hasNext = true
         )
     }
 
@@ -178,7 +179,7 @@ open class CineStreamProvider : MainAPI() {
         val releaseInfo = movieData?.meta?.releaseInfo.toString()
         var description = movieData?.meta?.description.toString()
         val cast : List<String> = movieData?.meta?.cast ?: emptyList()
-        val genre : List<String> = movieData?.meta?.genre ?: emptyList()
+        val genre : List<String> = movieData?.meta?.genre ?: movieData?.meta?.genres ?: emptyList()
         val background = movieData?.meta?.background.toString()
         val isCartoon = genre.any { it.contains("Animation", true) }
         var isAnime = (movieData?.meta?.country.toString().contains("Japan", true) ||
