@@ -6,6 +6,8 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.getQualityFromName
 import okhttp3.FormBody
+import com.lagradost.cloudstream3.utils.AppUtils.toJson
+import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 
 class Porn11 : MainAPI() {
     override var mainUrl              = "https://pornken.com"
@@ -21,7 +23,6 @@ class Porn11 : MainAPI() {
     override val mainPage = mainPageOf(
             "" to "Home",
             "playlist/naughty-america-brazzers-realitykings-bangbros/331131-565969" to "Brazzers",
-            "playlist/realitykings/246080-197043" to "Realitykings",
             "playlist/bangbros/248746-327137" to "Bangbros",
             "playlist/japan/215132-126095" to "Japan",
             "playlist/brazzers/229889-170657" to "Milf"
@@ -46,7 +47,7 @@ class Porn11 : MainAPI() {
         val href      = fixUrl(this.select("a").attr("href"))
         val posterUrl = fixUrlNull(this.select("a > img").attr("src"))
 
-        return newMovieSearchResponse(title, href, TvType.Movie) {
+        return newMovieSearchResponse(title, PassData(href, posterUrl).toJson(), TvType.Movie) {
             this.posterUrl = posterUrl
         }
     }
@@ -73,14 +74,14 @@ class Porn11 : MainAPI() {
 
 
     override suspend fun load(url: String): LoadResponse {
-        val document = app.get(url).document
+        val data = parseJson<PassData>(url)
+        val document = app.get(data.url).document
 
         val title       = document.selectFirst("meta[property=og:title]")?.attr("content")?.trim().toString()
-        val poster      = fixUrlNull(document.selectFirst("meta[property=og:image]")?.attr("content").toString())
         val description = document.selectFirst("meta[property=og:description]")?.attr("content")?.trim()
 
-        return newMovieLoadResponse(title, url, TvType.NSFW, url) {
-            this.posterUrl = poster
+        return newMovieLoadResponse(title, data.url, TvType.NSFW, data.url) {
+            this.posterUrl = data.posterUrl
             this.plot      = description
         }
     }
@@ -122,4 +123,9 @@ class Porn11 : MainAPI() {
         Log.d("Test120","$source")
         return true
     }
+
+    data class PassData(
+        url: String,
+        posterUrl: String,
+    )
 }
