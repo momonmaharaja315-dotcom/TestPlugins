@@ -75,13 +75,14 @@ class Porn11 : MainAPI() {
 
     override suspend fun load(url: String): LoadResponse {
         val data = parseJson<PassData>(url)
-        val document = app.get(data.url).document
-
+        val link = data?.url.toString()
+        val posterUrl = data?.posterUrl
+        val document = app.get(link).document
         val title       = document.selectFirst("meta[property=og:title]")?.attr("content")?.trim().toString()
         val description = document.selectFirst("meta[property=og:description]")?.attr("content")?.trim()
 
-        return newMovieLoadResponse(title, data.url, TvType.NSFW, data.url) {
-            this.posterUrl = data.posterUrl
+        return newMovieLoadResponse(title, link, TvType.NSFW, link) {
+            this.posterUrl = posterUrl
             this.plot      = description
         }
     }
@@ -125,7 +126,7 @@ class Porn11 : MainAPI() {
     }
 
     data class PassData(
-        var url: String,
-        var posterUrl: String,
+        var url: String?,
+        var posterUrl: String?,
     )
 }
