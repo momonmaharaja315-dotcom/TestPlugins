@@ -59,7 +59,7 @@ class Pornhits : MainAPI() {
         val title = this.selectFirst("div.item-info h2.title")?.text() ?: return null
         val href = fixUrl(this.selectFirst("a")!!.attr("href"))
         var posterUrl = fixUrlNull(this.select("a div.img img").attr("data-original"))
-        if(posterUrl.isNull()) posterUrl = fixUrlNull(this.select("a div.img img").attr("src"))
+        if(posterUrl.isNullOrEmpty()) posterUrl = fixUrlNull(this.select("a div.img img").attr("src"))
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
         }
