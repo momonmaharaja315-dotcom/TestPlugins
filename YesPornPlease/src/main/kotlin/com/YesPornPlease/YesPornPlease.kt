@@ -36,11 +36,11 @@ class YesPornPlease : MainAPI() {
     }
 
     private fun Element.toSearchResult(): SearchResponse {
-        val title = this.selectFirst("a").attr("title")
-        val href = this.selectFirst("a").attr("href")
-        var posterUrl = this.selectFirst("a > img").attr("data-src") ?: ""
+        val title = this.select("a").attr("title")
+        val href = this.select("a").attr("href")
+        var posterUrl = this.select("a > img").attr("data-src") ?: ""
         if(posterUrl.isEmpty()) {
-            posterUrl = this.selectFirst("a > img").attr("src")
+            posterUrl = this.select("a > img").attr("src")
         }
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
@@ -65,8 +65,8 @@ class YesPornPlease : MainAPI() {
 
     override suspend fun load(url: String): LoadResponse {
         val document = app.get(url).document
-        val title = document.selectFirst("meta[property=og:title]").attr("content")
-        val posterUrl = document.selectFirst("meta[property=og:image]").attr("content")
+        val title = document.select("meta[property=og:title]").attr("content")
+        val posterUrl = document.select("meta[property=og:image]").attr("content")
         return newMovieLoadResponse(title, url, TvType.NSFW, url) {
             this.posterUrl = posterUrl
         }
@@ -80,7 +80,7 @@ class YesPornPlease : MainAPI() {
         ): Boolean {
 
         val document = app.get(data).document
-        val source = document.selectFirst("video > source").attr("src")
+        val source = document.select("video > source").attr("src")
         callback.invoke(
             ExtractorLink(
                 this.name,

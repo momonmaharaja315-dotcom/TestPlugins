@@ -45,7 +45,7 @@ class Porn11 : MainAPI() {
     private fun Element.toSearchResult(): SearchResponse {
         val title     = fixTitle(this.select("a > img").attr("alt"))
         val href      = fixUrl(this.select("a").attr("href"))
-        val posterUrl = fixUrlNull(this.select("a > img").attr("src"))
+        val posterUrl = fixUrl(this.select("a > img").attr("src"))
 
         return newMovieSearchResponse(title, PassData(href, posterUrl).toJson(), TvType.Movie) {
             this.posterUrl = posterUrl
@@ -125,7 +125,7 @@ class Porn11 : MainAPI() {
     }
 
     data class PassData(
-        url: String,
-        posterUrl: String,
+        var url: String,
+        var posterUrl: String,
     )
 }
