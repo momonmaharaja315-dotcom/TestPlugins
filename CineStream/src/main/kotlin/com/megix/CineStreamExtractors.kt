@@ -23,7 +23,9 @@ object CineStreamExtractors : CineStreamProvider() {
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit
     ) {
-        val url = if(season != null) "$GDRIVEAPI/stream/series/$id:$season:$episode.json" else "$GDRIVEAPI/stream/movie/$id.json"
+        val query = if(season != null) "$id:$season:$episode" else "$id"
+        val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
+        val url = if(season != null) "$GDRIVEAPI/stream/series/$encodedQuery.json" else "$GDRIVEAPI/stream/movie/$encodedQuery.json"
         Log.d("GDRIVE", url)
         callback.invoke(
             ExtractorLink(
@@ -54,7 +56,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     "GDrive[${it.title}]",
                     it.url,
                     referer = "",
-                    quality = Qualities.Unknown.value,
+                    quality = getIndexQuality(it.behaviorHints.bingeGroup),
                     false,
                     headers = mapOf("Authorization" to key)
                 )
@@ -93,7 +95,9 @@ object CineStreamExtractors : CineStreamProvider() {
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit
     ) {
-        val url = if(season != null) "$stremifyAPI/series/$id:$season:$episode.json" else "$stremifyAPI/movie/$id.json"
+        val query = if(season != null) "$id:$season:$episode" else "$id"
+        val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
+        val url = if(season != null) "$stremifyAPI/series/$encodedQuery.json" else "$stremifyAPI/movie/$encodedQuery.json"
         val json = app.get(url).text
         val data = tryParseJson<StreamifyResponse>(json) ?: return
         data.streams.amap {
