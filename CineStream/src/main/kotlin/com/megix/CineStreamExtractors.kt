@@ -31,7 +31,7 @@ object CineStreamExtractors : CineStreamProvider() {
             callback.invoke(
                 ExtractorLink(
                     "GDrive",
-                    "GDrive[${it.name}]",
+                    "GDrive[${it.title}]",
                     it.url,
                     referer = "",
                     quality = Qualities.Unknown.value,
