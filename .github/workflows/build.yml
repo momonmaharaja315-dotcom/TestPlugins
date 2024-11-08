@@ -43,11 +43,13 @@ jobs:
       - name: Access Secrets
         env:
           CONSUMET_API: ${{ secrets.CONSUMET_API }}
-          GDRIVEAPI: ${{ secrets.GDRIVEAPI }}
+          GDRIVE_API: ${{ secrets.GDRIVE_API }}
+          GDRIVE_KEY_API: ${{ secrets.GDRIVE_KEY_API }}
         run: |
           cd $GITHUB_WORKSPACE/src
           echo CONSUMET_API=$CONSUMET_API >> local.properties
-          echo GDRIVEAPI=$GDRIVEAPI >> local.properties
+          echo GDRIVE_API=$GDRIVE_API >> local.properties
+          echo GDRIVE_KEY_API=$GDRIVE_KEY_API >> local.properties
 
       - name: Build Plugins
         run: |

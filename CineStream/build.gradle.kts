@@ -7,7 +7,8 @@ android {
         val properties = Properties()
         properties.load(project.rootProject.file("local.properties").inputStream())
         buildConfigField("String", "CONSUMET_API", "\"${properties.getProperty("CONSUMET_API")}\"")
-        buildConfigField("String", "GDRIVEAPI", "\"${properties.getProperty("GDRIVEAPI")}\"")
+        buildConfigField("String", "GDRIVE_API", "\"${properties.getProperty("GDRIVE_API")}\"")
+        buildConfigField("String", "GDRIVE_KEY_API", "\"${properties.getProperty("GDRIVE_KEY_API")}\"")
     }
 }
 

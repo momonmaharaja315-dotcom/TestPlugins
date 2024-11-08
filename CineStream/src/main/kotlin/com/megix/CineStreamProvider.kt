@@ -72,7 +72,8 @@ open class CineStreamProvider : MainAPI() {
         //const val WHVXAPI = "https://api.whvx.net"
         const val uhdmoviesAPI = "https://uhdmovies.icu"
         const val myConsumetAPI = BuildConfig.CONSUMET_API
-        const val GDRIVEAPI = BuildConfig.GDRIVEAPI
+        const val GDRIVEAPI = BuildConfig.GDRIVE_API
+        const val GDRIVE_KEY_API = BuildConfig.GDRIVE_KEY_API
         const val moviesAPI = "https://moviesapi.club"
         const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
         //const val FilmyxyAPI = "https://filmxy.wafflehacker.io"

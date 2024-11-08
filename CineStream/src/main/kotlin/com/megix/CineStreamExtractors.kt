@@ -25,31 +25,11 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val query = if(season != null) "$id:$season:$episode" else "$id"
         val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
-        val url = if(season != null) "$GDRIVEAPI/stream/series/$encodedQuery.json" else "$GDRIVEAPI/stream/movie/$encodedQuery.json"
-        Log.d("GDRIVE", url)
-        callback.invoke(
-            ExtractorLink(
-                "GDrive",
-                "GDrive",
-                url,
-                referer = "",
-                quality = Qualities.Unknown.value,
-            )
-        )
+        val url = if(season != null) "$GDRIVE_API/stream/series/$encodedQuery.json" else "$GDRIVE_API/stream/movie/$encodedQuery.json"
         val json = app.get(url).text
-        Log.d("GDRIVE", json.toString())
-        callback.invoke(
-            ExtractorLink(
-                "GDrive",
-                "GDrive",
-                json.toString(),
-                referer = "",
-                quality = Qualities.Unknown.value,
-            )
-        )
         val data = tryParseJson<GDriveResponse>(json) ?: return
+        val key = GDRIVE_KEY_API
         data.streams.map {
-            val key ="test"
             callback.invoke(
                 ExtractorLink(
                     "GDrive",
