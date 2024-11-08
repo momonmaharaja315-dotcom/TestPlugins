@@ -51,6 +51,7 @@ open class CineStreamProvider : MainAPI() {
     val cinemeta_url = "https://v3-cinemeta.strem.io"
     val cyberflix_url = "https://cyberflix.elfhosted.com/c/catalogs"
     val kitsu_url = "https://anime-kitsu.strem.fun"
+    val stremio_tmdb = "https://94c8cb9f702d-tmdb-addon.baby-beamup.club"
     //val anime_catalogs_url = "https://1fe84bc728af-stremio-anime-catalogs.baby-beamup.club"
     val haglund_url = "https://arm.haglund.dev/api/v2"
     val jikanAPI = "https://api.jikan.moe/v4"
@@ -72,7 +73,7 @@ open class CineStreamProvider : MainAPI() {
         //const val WHVXAPI = "https://api.whvx.net"
         const val uhdmoviesAPI = "https://uhdmovies.icu"
         const val myConsumetAPI = BuildConfig.CONSUMET_API
-        const val GDRIVEAPI = BuildConfig.GDRIVE_API
+        const val GDRIVE_API = BuildConfig.GDRIVE_API
         const val GDRIVE_KEY_API = BuildConfig.GDRIVE_KEY_API
         const val moviesAPI = "https://moviesapi.club"
         const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
@@ -94,6 +95,8 @@ open class CineStreamProvider : MainAPI() {
     )
 
     override val mainPage = mainPageOf(
+        "$stremio_tmdb/catalog/movie/tmdb.top" to "Trending TMDB Movies",
+        "$stremio_tmdb/catalog/series/tmdb.top" to "Trending TMDB Series",
         "$mainUrl/top/catalog/movie/top" to "Top Movies",
         "$mainUrl/top/catalog/series/top" to "Top Series",
         "$mainUrl/imdbRating/catalog/movie/imdbRating" to "Top IMDb Movies",
