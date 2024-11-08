@@ -49,7 +49,7 @@ object CineStreamExtractors : CineStreamProvider() {
         )
         val data = tryParseJson<GDriveResponse>(json) ?: return
         data.streams.map {
-            val key = ="test"
+            val key ="test"
             callback.invoke(
                 ExtractorLink(
                     "GDrive",
