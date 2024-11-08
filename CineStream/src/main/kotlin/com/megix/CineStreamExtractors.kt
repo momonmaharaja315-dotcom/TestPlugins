@@ -47,16 +47,16 @@ object CineStreamExtractors : CineStreamProvider() {
                 quality = Qualities.Unknown.value,
             )
         )
-        val data = parseJson<GDriveResponse>(json)
+        val data = tryParseJson<GDriveResponse>(json) ?: return
         data.streams.map {
-            val key = it.behaviorHints?.proxyHeaders?.request?.Authorization ?: return
+            val key = ="test"
             callback.invoke(
                 ExtractorLink(
                     "GDrive",
                     "GDrive[${it.title}]",
-                    it?.url ?: return@map,
+                    it.url,
                     referer = "",
-                    quality = getIndexQuality(it.behaviorHints?.bingeGroup ?: return@map),
+                    quality = getIndexQuality(it.name),
                     false,
                     headers = mapOf("Authorization" to key)
                 )
@@ -76,7 +76,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = if(season != null) "$stremifyAPI/series/$encodedQuery.json" else "$stremifyAPI/movie/$encodedQuery.json"
         val json = app.get(url).text
         val data = tryParseJson<StreamifyResponse>(json) ?: return
-        data.streams.amap {
+        data.streams.map {
             callback.invoke(
                 ExtractorLink(
                     it.name,

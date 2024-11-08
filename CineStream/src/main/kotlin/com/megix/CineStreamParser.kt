@@ -7,25 +7,24 @@ data class GDriveResponse(
 )
 
 data class GDriveStream(
-    val behaviorHints: GDriveBehaviorHints?,
-    val url: String?,
-    val name: String?,
-    val title: String?
+    val url: String,
+    val name: String,
+    val title: String
 )
 
-data class GDriveBehaviorHints(
-    val notWebReady: Boolean?,
-    val bingeGroup: String?,
-    val proxyHeaders: GDriveProxyHeaders?
-)
+// data class GDriveBehaviorHints(
+//     val notWebReady: Boolean,
+//     val bingeGroup: String,
+//     val proxyHeaders: GDriveProxyHeaders
+// )
 
-data class GDriveProxyHeaders(
-    val request: GDriveRequest?
-)
+// data class GDriveProxyHeaders(
+//     val request: GDriveRequest
+// )
 
-data class GDriveRequest(
-    val Authorization: String?
-)
+// data class GDriveRequest(
+//     val Authorization: String
+// )
 
 data class StreamifyResponse(
     val streams: List<Streamify>
@@ -53,7 +52,6 @@ data class JikanResponse(
     @JsonProperty("data") val data: JikanData? = null,
 )
 
-
 data class ResponseHash(
     @JsonProperty("embed_url") val embed_url: String,
     @JsonProperty("key") val key: String? = null,
@@ -62,16 +60,11 @@ data class ResponseHash(
 
 data class animepahe(
     val total: Long,
-    @JsonProperty("per_page")
-    val perPage: Long,
-    @JsonProperty("current_page")
-    val currentPage: Long,
-    @JsonProperty("last_page")
-    val lastPage: Long,
-    @JsonProperty("next_page_url")
-    val nextPageUrl: Any?,
-    @JsonProperty("prev_page_url")
-    val prevPageUrl: Any?,
+    @JsonProperty("per_page") val perPage: Long,
+    @JsonProperty("current_page") val currentPage: Long,
+    @JsonProperty("last_page") val lastPage: Long,
+    @JsonProperty("next_page_url") val nextPageUrl: Any?,
+    @JsonProperty("prev_page_url") val prevPageUrl: Any?,
     val from: Long,
     val to: Long,
     val data: List<Daum>,
@@ -79,8 +72,7 @@ data class animepahe(
 
 data class Daum(
     val id: Long,
-    @JsonProperty("anime_id")
-    val animeId: Long,
+    @JsonProperty("anime_id") val animeId: Long,
     val episode: Int,
     val episode2: Long,
     val edition: String,
@@ -91,8 +83,7 @@ data class Daum(
     val duration: String,
     val session: String,
     val filler: Long,
-    @JsonProperty("created_at")
-    val createdAt: String,
+    @JsonProperty("created_at") val createdAt: String,
 )
 
 data class MALSyncSites(
