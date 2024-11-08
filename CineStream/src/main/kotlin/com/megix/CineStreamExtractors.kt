@@ -24,7 +24,27 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit
     ) {
         val url = if(season != null) "$GDRIVEAPI/stream/series/$id:$season:$episode.json" else "$GDRIVEAPI/stream/movie/$id.json"
+        Log.d("GDRIVE", url)
+        callback.invoke(
+            ExtractorLink(
+                "GDrive",
+                "GDrive",
+                url,
+                referer = "",
+                quality = Qualities.Unknown.value,
+            )
+        )
         val json = app.get(url).text
+        Log.d("GDRIVE", json.toString())
+        callback.invoke(
+            ExtractorLink(
+                "GDrive",
+                "GDrive",
+                json.toString(),
+                referer = "",
+                quality = Qualities.Unknown.value,
+            )
+        )
         val data = tryParseJson<GDriveResponse>(json) ?: return
         data.streams.map {
             val key = it.behaviorHints.proxyHeaders.request.Authorization
