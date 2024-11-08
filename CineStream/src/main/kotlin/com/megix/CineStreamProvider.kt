@@ -95,8 +95,8 @@ open class CineStreamProvider : MainAPI() {
     )
 
     override val mainPage = mainPageOf(
-        "$stremio_tmdb/catalog/movie/tmdb.top" to "Trending TMDB Movies",
-        "$stremio_tmdb/catalog/series/tmdb.top" to "Trending TMDB Series",
+        //"$stremio_tmdb/catalog/movie/tmdb.top" to "Trending TMDB Movies",
+        //"$stremio_tmdb/catalog/series/tmdb.top" to "Trending TMDB Series",
         "$mainUrl/top/catalog/movie/top" to "Top Movies",
         "$mainUrl/top/catalog/series/top" to "Top Series",
         "$mainUrl/imdbRating/catalog/movie/imdbRating" to "Top IMDb Movies",
