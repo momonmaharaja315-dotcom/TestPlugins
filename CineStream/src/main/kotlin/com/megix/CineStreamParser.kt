@@ -2,6 +2,31 @@ package com.megix
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
+data class GDriveResponse(
+    val streams: List<GDriveStream>
+)
+
+data class GDriveStream(
+    val behaviorHints: GDriveBehaviorHints?,
+    val url: String?,
+    val name: String?,
+    val title: String?
+)
+
+data class GDriveBehaviorHints(
+    val notWebReady: Boolean?,
+    val bingeGroup: String?,
+    val proxyHeaders: GDriveProxyHeaders?
+)
+
+data class GDriveProxyHeaders(
+    val request: GDriveRequest?
+)
+
+data class GDriveRequest(
+    val Authorization: String?
+)
+
 data class StreamifyResponse(
     val streams: List<Streamify>
 )
@@ -107,43 +132,43 @@ data class TwoEmbedStream(
     val playlist: String,
 )
 
-data class AstraQuery(
-    val stream: List<AstraStream>
-)
+// data class AstraQuery(
+//     val stream: List<AstraStream>
+// )
 
-data class AstraStream(
-    val id: String,
-    val type: String,
-    val playlist: String,
-)
+// data class AstraStream(
+//     val id: String,
+//     val type: String,
+//     val playlist: String,
+// )
 
-data class NovaStream(
-    val id: String,
-    val qualities: Map<String, NovaQuality>,
-    val captions: List<NovaCaption>
-)
+// data class NovaStream(
+//     val id: String,
+//     val qualities: Map<String, NovaQuality>,
+//     val captions: List<NovaCaption>
+// )
 
-data class NovaQuality(
-    val type: String,
-    val url: String
-)   
+// data class NovaQuality(
+//     val type: String,
+//     val url: String
+// )
 
-data class NovaCaption(
-    val id: String,
-    val url: String,
-    val type: String,
-    val hasCorsRestrictions: Boolean,
-    val language: String
-)
+// data class NovaCaption(
+//     val id: String,
+//     val url: String,
+//     val type: String,
+//     val hasCorsRestrictions: Boolean,
+//     val language: String
+// )
 
-data class NovaVideoData(
-    val stream: List<NovaStream>
-)    
+// data class NovaVideoData(
+//     val stream: List<NovaStream>
+// )
 
-data class WHVX(
-    val embedId: String,
-    val url: String,
-)
+// data class WHVX(
+//     val embedId: String,
+//     val url: String,
+// )
 
 data class WYZIESubtitle(
     val url: String,

@@ -47,16 +47,16 @@ object CineStreamExtractors : CineStreamProvider() {
                 quality = Qualities.Unknown.value,
             )
         )
-        val data = tryParseJson<GDriveResponse>(json) ?: return
+        val data = parseJson<GDriveResponse>(json)
         data.streams.map {
-            val key = it.behaviorHints.proxyHeaders.request.Authorization
+            val key = it.behaviorHints?.proxyHeaders?.request?.Authorization ?: return
             callback.invoke(
                 ExtractorLink(
                     "GDrive",
                     "GDrive[${it.title}]",
-                    it.url,
+                    it?.url ?: return@map,
                     referer = "",
-                    quality = getIndexQuality(it.behaviorHints.bingeGroup),
+                    quality = getIndexQuality(it.behaviorHints?.bingeGroup ?: return@map),
                     false,
                     headers = mapOf("Authorization" to key)
                 )
@@ -64,30 +64,6 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    data class GDriveResponse(
-        val streams: List<GDriveStream>
-    )
-
-    data class GDriveStream(
-        val behaviorHints: GDriveBehaviorHints,
-        val url: String,
-        val name: String,
-        val title: String
-    )
-
-    data class GDriveBehaviorHints(
-        val notWebReady: Boolean,
-        val bingeGroup: String,
-        val proxyHeaders: GDriveProxyHeaders
-    )
-
-    data class GDriveProxyHeaders(
-        val request: GDriveRequest
-    )
-
-    data class GDriveRequest(
-        val Authorization: String
-    )
 
     suspend fun invokeStreamify(
         id: String,
