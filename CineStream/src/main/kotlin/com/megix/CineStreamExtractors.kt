@@ -47,7 +47,7 @@ object CineStreamExtractors : CineStreamProvider() {
     )
 
     data class GDriveStream(
-        val behaviorHints: BehaviorHints,
+        val behaviorHints: GDriveBehaviorHints,
         val url: String,
         val name: String,
         val title: String
@@ -56,11 +56,11 @@ object CineStreamExtractors : CineStreamProvider() {
     data class GDriveBehaviorHints(
         val notWebReady: Boolean,
         val bingeGroup: String,
-        val proxyHeaders: ProxyHeaders
+        val proxyHeaders: GDriveProxyHeaders
     )
 
     data class GDriveProxyHeaders(
-        val request: Request
+        val request: GDriveRequest
     )
 
     data class GDriveRequest(
