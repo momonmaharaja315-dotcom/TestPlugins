@@ -180,7 +180,7 @@ open class CineStreamProvider : MainAPI() {
         val posterUrl = movieData ?.meta?.poster.toString()
         val imdbRating = movieData?.meta?.imdbRating
         val year = movieData?.meta?.year.toString()
-        val tmdbId = if(!isKitsu && id.contains("tmdb")) id else movieData?.meta?.moviedb_id
+        val tmdbId = if(!isKitsu && id.contains("tmdb")) id.replace("tmdb:", "").toIntOrNull() else movieData?.meta?.moviedb_id
         id = if(!isKitsu && id.contains("tmdb")) movieData?.meta?.imdb_id.toString() else id
         val releaseInfo = movieData?.meta?.releaseInfo.toString()
         var description = movieData?.meta?.description.toString()
