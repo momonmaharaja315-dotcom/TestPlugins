@@ -92,24 +92,22 @@ open class CineStreamProvider : MainAPI() {
     )
 
     override val mainPage = mainPageOf(
-        "$streamio_TMDB/catalog/movie/tmdb.trending/skip=###&genre=Day" to "Trending Movies",
-        "$streamio_TMDB/catalog/series/tmdb.trending/skip=###&genre=Day" to "Trending Series",
+        "$streamio_TMDB/catalog/movie/tmdb.trending/skip=###&genre=Day" to "Trending Movies Today",
+        "$streamio_TMDB/catalog/series/tmdb.trending/skip=###&genre=Day" to "Trending Series Today",
         "$mainUrl/top/catalog/movie/top/skip=###" to "Top Movies",
         "$mainUrl/top/catalog/series/top/skip=###" to "Top Series",
-        "$mainUrl/imdbRating/catalog/movie/imdbRating/skip=###" to "Top IMDb Movies",
-        "$mainUrl/imdbRating/catalog/series/imdbRating/skip=###" to "Top IMDb Series",
         "$streamio_TMDB/catalog/movie/tmdb.language/skip=###&genre=Hindi" to "Trending Indian Movie",
         "$streamio_TMDB/catalog/series/tmdb.language/skip=###&genre=Hindi" to "Trending Indian Series",
+        "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
+        "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Trending Anime",
+        "$cyberflix_url/catalog/Asian/asian.new.movie" to "New Asian Movie",
+        "$cyberflix_url/catalog/Asian/asian.new.series" to "New Asian Series",
         "$cyberflix_url/catalog/Netflix/netflix.new.series" to "Netflix Series",
         "$cyberflix_url/catalog/Netflix/netflix.new.movie" to "Netflix Movie",
         "$cyberflix_url/catalog/Amazon%20Prime/amazon_prime.new.movie" to "Amazon Prime Movie",
         "$cyberflix_url/catalog/Amazon%20Prime/amazon_prime.new.series" to "Amazon Prime Series",
         "$cyberflix_url/catalog/Disney%20Plus/disney_plus.new.movie" to "Disney Plus Movie",
         "$cyberflix_url/catalog/Disney%20Plus/disney_plus.new.series" to "Disney Plus Series",
-        "$cyberflix_url/catalog/Asian/asian.new.movie" to "New Asian Movie",
-        "$cyberflix_url/catalog/Asian/asian.new.series" to "New Asian Series",
-        "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
-        "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Trending Anime",
     )
 
     override suspend fun getMainPage(
@@ -289,7 +287,7 @@ open class CineStreamProvider : MainAPI() {
     ): Boolean {
         val res = parseJson<LoadLinksData>(data)
         var year = if(res.tvtype == "movie") res.year.toIntOrNull() else res.firstAired?.substringBefore("-")?.toIntOrNull()
-        val firstYear = if(res.tvtype == "movie") res.year.toIntOrNull() else res.year.substringBefore("–").toIntOrNull()
+        val firstYear = if(res.tvtype == "movie") res.year.toIntOrNull() else res.year.substringBefore("–").toIntOrNull() ?: res.year.substringBefore("-").toIntOrNull()
         if(res.isKitsu) {
             year = res.year.toIntOrNull() ?: res.year.substringBefore("-").toIntOrNull()
             argamap(
