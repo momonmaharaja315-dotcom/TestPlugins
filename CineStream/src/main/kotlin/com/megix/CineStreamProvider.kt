@@ -39,7 +39,6 @@ import com.megix.CineStreamExtractors.invokeVite
 import com.megix.CineStreamExtractors.invokeMultiAutoembed
 import com.megix.CineStreamExtractors.invokeMultimovies
 import com.megix.CineStreamExtractors.invokeStreamify
-import com.megix.CineStreamExtractors.invokeGDrive
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -51,10 +50,10 @@ open class CineStreamProvider : MainAPI() {
     val cinemeta_url = "https://v3-cinemeta.strem.io"
     val cyberflix_url = "https://cyberflix.elfhosted.com/c/catalogs"
     val kitsu_url = "https://anime-kitsu.strem.fun"
-    val stremio_tmdb = "https://94c8cb9f702d-tmdb-addon.baby-beamup.club"
     //val anime_catalogs_url = "https://1fe84bc728af-stremio-anime-catalogs.baby-beamup.club"
     val haglund_url = "https://arm.haglund.dev/api/v2"
     val jikanAPI = "https://api.jikan.moe/v4"
+    val streamio_TMDB = "https://94c8cb9f702d-tmdb-addon.baby-beamup.club"
     companion object {
         const val malsyncAPI = "https://api.malsync.moe"
         const val vegaMoviesAPI = "https://vegamovies.si"
@@ -73,8 +72,6 @@ open class CineStreamProvider : MainAPI() {
         //const val WHVXAPI = "https://api.whvx.net"
         const val uhdmoviesAPI = "https://uhdmovies.icu"
         const val myConsumetAPI = BuildConfig.CONSUMET_API
-        const val GDRIVE_API = BuildConfig.GDRIVE_API
-        const val GDRIVE_KEY_API = BuildConfig.GDRIVE_KEY_API
         const val moviesAPI = "https://moviesapi.club"
         const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
         //const val FilmyxyAPI = "https://filmxy.wafflehacker.io"
@@ -95,8 +92,8 @@ open class CineStreamProvider : MainAPI() {
     )
 
     override val mainPage = mainPageOf(
-        //"$stremio_tmdb/catalog/movie/tmdb.top" to "Trending TMDB Movies",
-        //"$stremio_tmdb/catalog/series/tmdb.top" to "Trending TMDB Series",
+        "$streamio_TMDB/catalog/movie/tmdb.trending/genre=Day" to "Trending Movies",
+        "$streamio_TMDB/catalog/series/tmdb.trending/genre=Day" to "Trending Series",
         "$mainUrl/top/catalog/movie/top" to "Top Movies",
         "$mainUrl/top/catalog/series/top" to "Top Series",
         "$mainUrl/imdbRating/catalog/movie/imdbRating" to "Top IMDb Movies",
@@ -171,7 +168,7 @@ open class CineStreamProvider : MainAPI() {
         val movie = parseJson<PassData>(url)
         val tvtype = movie.type
         var id = movie.id
-        val meta_url = if(movie.id.contains("kitsu")) kitsu_url else cinemeta_url
+        val meta_url = if(id.contains("kitsu")) kitsu_url else if(id.contains("tmdb")) streamio_TMDB else cinemeta_url
         val isKitsu = if(meta_url == kitsu_url) true else false
         val externalIds = if(isKitsu) getExternalIds(id.substringAfter("kitsu:"),"kitsu") else null
         val malId = if(externalIds != null) externalIds?.myanimelist else null
@@ -180,10 +177,11 @@ open class CineStreamProvider : MainAPI() {
         val json = app.get("$meta_url/meta/$tvtype/$id.json").text
         val movieData = tryParseJson<ResponseData>(json)
         val title = movieData ?.meta ?.name.toString()
+        id = if(!isKitsu && id.contains("tmdb")) movieData?.meta?.imdb_id.toString() else id
         val posterUrl = movieData ?.meta?.poster.toString()
         val imdbRating = movieData?.meta?.imdbRating
         val year = movieData?.meta?.year.toString()
-        val tmdbId = movieData?.meta?.moviedb_id
+        val tmdbId = if(!isKitsu && id.contains("tmdb")) id else movieData?.meta?.moviedb_id
         val releaseInfo = movieData?.meta?.releaseInfo.toString()
         var description = movieData?.meta?.description.toString()
         val cast : List<String> = movieData?.meta?.cast ?: emptyList()
@@ -337,14 +335,6 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     invokeStreamify(
-                        res.id,
-                        res.season,
-                        res.episode,
-                        callback
-                    )
-                },
-                {
-                    invokeGDrive(
                         res.id,
                         res.season,
                         res.episode,

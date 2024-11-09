@@ -17,46 +17,16 @@ import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 
 object CineStreamExtractors : CineStreamProvider() {
 
-    suspend fun invokeGDrive(
-        id: String,
-        season: Int? = null,
-        episode: Int? = null,
-        callback: (ExtractorLink) -> Unit
-    ) {
-        val query = if(season != null) "$id:$season:$episode" else "$id"
-        val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
-        val url = if(season != null) "$GDRIVE_API/stream/series/$encodedQuery.json" else "$GDRIVE_API/stream/movie/$encodedQuery.json"
-        val json = app.get(url).text
-        val data = tryParseJson<GDriveResponse>(json) ?: return
-        val key = GDRIVE_KEY_API
-        data.streams.map {
-            callback.invoke(
-                ExtractorLink(
-                    "GDrive",
-                    "GDrive[${it.title}]",
-                    it.url,
-                    referer = "",
-                    quality = getIndexQuality(it.name),
-                    false,
-                    headers = mapOf("Authorization" to key)
-                )
-            )
-        }
-    }
-
-
     suspend fun invokeStreamify(
         id: String,
         season: Int? = null,
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit
     ) {
-        val query = if(season != null) "$id:$season:$episode" else "$id"
-        val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
-        val url = if(season != null) "$stremifyAPI/series/$encodedQuery.json" else "$stremifyAPI/movie/$encodedQuery.json"
+        val url = if(season != null) "$stremifyAPI/series/$id:$season:$episode.json" else "$stremifyAPI/movie/$id.json"
         val json = app.get(url).text
         val data = tryParseJson<StreamifyResponse>(json) ?: return
-        data.streams.map {
+        data.streams.amap {
             callback.invoke(
                 ExtractorLink(
                     it.name,
