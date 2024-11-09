@@ -92,14 +92,14 @@ open class CineStreamProvider : MainAPI() {
     )
 
     override val mainPage = mainPageOf(
-        "$streamio_TMDB/catalog/movie/tmdb.trending/genre=Day" to "Trending Movies",
-        "$streamio_TMDB/catalog/series/tmdb.trending/genre=Day" to "Trending Series",
-        "$mainUrl/top/catalog/movie/top" to "Top Movies",
-        "$mainUrl/top/catalog/series/top" to "Top Series",
-        "$mainUrl/imdbRating/catalog/movie/imdbRating" to "Top IMDb Movies",
-        "$mainUrl/imdbRating/catalog/series/imdbRating" to "Top IMDb Series",
-        "$cyberflix_url/catalog/Indian/indian.new.movie" to "New Indian Movie",
-        "$cyberflix_url/catalog/Indian/indian.new.series" to "New Indian Series",
+        "$streamio_TMDB/catalog/movie/tmdb.trending/skip=###&genre=Day" to "Trending Movies",
+        "$streamio_TMDB/catalog/series/tmdb.trending/skip=###&genre=Day" to "Trending Series",
+        "$mainUrl/top/catalog/movie/top/skip=###" to "Top Movies",
+        "$mainUrl/top/catalog/series/top/skip=###" to "Top Series",
+        "$mainUrl/imdbRating/catalog/movie/imdbRating/skip=###" to "Top IMDb Movies",
+        "$mainUrl/imdbRating/catalog/series/imdbRating/skip=###" to "Top IMDb Series",
+        "$streamio_TMDB/catalog/movie/tmdb.language/skip=###&genre=Hindi" to "Trending Indian Movie",
+        "$streamio_TMDB/catalog/series/tmdb.language/skip=###&genre=Hindi" to "Trending Indian Series",
         "$cyberflix_url/catalog/Netflix/netflix.new.series" to "Netflix Series",
         "$cyberflix_url/catalog/Netflix/netflix.new.movie" to "Netflix Movie",
         "$cyberflix_url/catalog/Amazon%20Prime/amazon_prime.new.movie" to "Amazon Prime Movie",
@@ -108,8 +108,8 @@ open class CineStreamProvider : MainAPI() {
         "$cyberflix_url/catalog/Disney%20Plus/disney_plus.new.series" to "Disney Plus Series",
         "$cyberflix_url/catalog/Asian/asian.new.movie" to "New Asian Movie",
         "$cyberflix_url/catalog/Asian/asian.new.series" to "New Asian Series",
-        "$kitsu_url/catalog/anime/kitsu-anime-airing" to "Top Airing Anime",
-        "$kitsu_url/catalog/anime/kitsu-anime-trending" to "Trending Anime",
+        "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
+        "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Trending Anime",
     )
 
     override suspend fun getMainPage(
@@ -117,7 +117,7 @@ open class CineStreamProvider : MainAPI() {
         request: MainPageRequest
     ): HomePageResponse {
         val skip = skipMap[request.name] ?: 0
-        val json = app.get("${request.data}/skip=$skip.json").text
+        val json = app.get("""${request.data.replace("###", skip)}.json""").text
         val movies = parseJson<Home>(json)
         val movieCount = movies.metas.size
         skipMap[request.name] = skip + movieCount
@@ -131,7 +131,7 @@ open class CineStreamProvider : MainAPI() {
                 name = request.name,
                 list = home
             ),
-            hasNext = true
+            hasNext = if(request.data.contains("skip=###")) true else false
         )
     }
 
