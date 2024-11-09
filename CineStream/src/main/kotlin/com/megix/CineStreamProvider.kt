@@ -177,11 +177,11 @@ open class CineStreamProvider : MainAPI() {
         val json = app.get("$meta_url/meta/$tvtype/$id.json").text
         val movieData = tryParseJson<ResponseData>(json)
         val title = movieData ?.meta ?.name.toString()
-        id = if(!isKitsu && id.contains("tmdb")) movieData?.meta?.imdb_id.toString() else id
         val posterUrl = movieData ?.meta?.poster.toString()
         val imdbRating = movieData?.meta?.imdbRating
         val year = movieData?.meta?.year.toString()
         val tmdbId = if(!isKitsu && id.contains("tmdb")) id else movieData?.meta?.moviedb_id
+        id = if(!isKitsu && id.contains("tmdb")) movieData?.meta?.imdb_id.toString() else id
         val releaseInfo = movieData?.meta?.releaseInfo.toString()
         var description = movieData?.meta?.description.toString()
         val cast : List<String> = movieData?.meta?.cast ?: emptyList()
