@@ -39,8 +39,8 @@ import com.megix.CineStreamExtractors.invokeVite
 import com.megix.CineStreamExtractors.invokeMultiAutoembed
 import com.megix.CineStreamExtractors.invokeMultimovies
 import com.megix.CineStreamExtractors.invokeStreamify
-import com.megix.CineStreamExtractors.invokeStarkflix
 import com.megix.CineStreamExtractors.invokeCinemaluxe
+import com.megix.CineStreamExtractors.invokeBollyflix
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -84,8 +84,8 @@ open class CineStreamProvider : MainAPI() {
         const val viteAPI = "https://viet.autoembed.cc"
         const val multimoviesAPI = "https://multimovies.bond"
         const val anitaku = "https://anitaku.pe"
-        const val starkflixAPI = "https://scloud.starkflix.cloud"
         const val cinemaluxeAPI = "https://cinemaluxe.click"
+        const val bollyflixAPI = "https://bollyflix.ninja"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
@@ -404,16 +404,17 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
-                    if(!res.isAnime) invokeStarkflix(
+                    invokeCinemaluxe(
                         res.title,
                         firstYear,
                         res.season,
                         res.episode,
-                        callback
+                        callback,
+                        subtitleCallback,
                     )
                 },
                 {
-                    invokeCinemaluxe(
+                    invokeBollyflix(
                         res.title,
                         firstYear,
                         res.season,
