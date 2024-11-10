@@ -17,6 +17,78 @@ import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend fun invokeCinemaluxe(
+        title: String? = null,
+        year: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val type = if(season != null) "tvshow" else "movie"
+        val titleSlug = "$title $year".createSlug()
+        val document = app.get("$cinemaluxeAPI/$type/$titleSlug").document
+        if(type =="movie") {
+            document.select("a.maxbutton").map {
+                val link = cinemaluxeBypass(it.attr("href"))
+                app.get(link).document.select("a.maxbutton").map {
+                    loadSourceNameExtractor(
+                        "Cinemaluxe",
+                        it.attr("href"),
+                        "",
+                        subtitleCallback,
+                        callback,
+                    )
+                }
+            }
+        }
+        else {
+            document.select("div.wp-content > div").map { div ->
+                val matchResult = Regex("""(?:Season |S)(\d+)""").find(div.toString())
+                val realSeason = matchResult?.groupValues?.get(1)?.toIntOrNull() ?: -5
+                if(season == realSeason) {
+                    val link = cinemaluxeBypass(div.select("a").attr("href"))
+                    app.get(link).document.select("a:matches((?i)(Episode ${episode}))").map {
+                        loadSourceNameExtractor(
+                            "Cinemaluxe",
+                            it.attr("href"),
+                            "",
+                            subtitleCallback,
+                            callback,
+                        )
+                    }
+                }
+
+            }
+        }
+    }
+
+    suspend fun invokeStarkflix(
+        title: String? = null,
+        year: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val newTitle = title.replace(Regex("[^\\w]+"), " ").trim()
+        val (newSeason, newEpisode) = getEpisodeSlug(season, episode)
+        val url = if(season != null) "$starkflixAPI/$newTitle s${newSeason}e${newEpisode}" else "$starkflixAPI/?search=$newTitle $year"
+        app.get(url).document.select("tbody > tr").map { tr ->
+            val name = tr.select("td.title").attr("data-title")
+            val link = starkflixAPI + tr.select("td.details > a").attr("href")
+            val source = app.get(link).document.select("div > a").attr("href")
+            callback.invoke(
+                ExtractorLink(
+                    "Strakflix",
+                    "[Strakflix] $name",
+                    source,
+                    "",
+                    getIndexQuality(name),
+                )
+            )
+        }
+
+    }
+
     suspend fun invokeStreamify(
         id: String,
         season: Int? = null,
