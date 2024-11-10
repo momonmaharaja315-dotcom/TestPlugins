@@ -27,6 +27,15 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val type = if(season != null) "tvshow" else "movie"
         val titleSlug = "$title $year".createSlug()
+        callback.invoke(
+            ExtractorLink(
+                "Test",
+                "Test",
+                "$cinemaluxeAPI/$type/$titleSlug",
+                "",
+                Qualities.Unknown.value,
+            )
+        )
         val document = app.get("$cinemaluxeAPI/$type/$titleSlug").document
         if(type =="movie") {
             document.select("a.maxbutton").map {
@@ -43,22 +52,17 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
         else {
-            document.select("div.wp-content > div").map { div ->
-                val matchResult = Regex("""(?:Season |S)(\d+)""").find(div.toString())
-                val realSeason = matchResult?.groupValues?.get(1)?.toIntOrNull() ?: -5
-                if(season == realSeason) {
-                    val link = cinemaluxeBypass(div.select("a").attr("href"))
-                    app.get(link).document.select("a:matches((?i)(Episode ${episode}))").map {
-                        loadSourceNameExtractor(
-                            "Cinemaluxe",
-                            it.attr("href"),
-                            "",
-                            subtitleCallback,
-                            callback,
-                        )
-                    }
+            document.select("div.wp-content > div:matches((?i)(Season ${season}))").map { div ->
+                val link = cinemaluxeBypass(div.select("a").attr("href"))
+                 app.get(link).document.select("a:matches((?i)(Episode ${episode}))").map {
+                    loadSourceNameExtractor(
+                        "Cinemaluxe",
+                        it.attr("href"),
+                        "",
+                        subtitleCallback,
+                        callback,
+                    )
                 }
-
             }
         }
     }
@@ -82,7 +86,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     "Strakflix",
                     "[Strakflix] $name",
                     source,
-                    "",
+                    "$starkflixAPI/",
                     getIndexQuality(name),
                 )
             )
