@@ -22,7 +22,8 @@ object CineStreamExtractors : CineStreamProvider() {
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
-        callback: (ExtractorLink) -> Unit
+        callback: (ExtractorLink) -> Unit,
+        subtitleCallback: (SubtitleFile) -> Unit
     ) {
         val type = if(season != null) "tvshow" else "movie"
         val titleSlug = "$title $year".createSlug()
@@ -69,7 +70,7 @@ object CineStreamExtractors : CineStreamProvider() {
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit
     ) {
-        val newTitle = title.replace(Regex("[^\\w]+"), " ").trim()
+        val newTitle = title?.replace(Regex("[^\\w]+"), " ")?.trim()
         val (newSeason, newEpisode) = getEpisodeSlug(season, episode)
         val url = if(season != null) "$starkflixAPI/$newTitle s${newSeason}e${newEpisode}" else "$starkflixAPI/?search=$newTitle $year"
         app.get(url).document.select("tbody > tr").map { tr ->
