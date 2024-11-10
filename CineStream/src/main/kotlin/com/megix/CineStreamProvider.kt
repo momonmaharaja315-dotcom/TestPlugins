@@ -419,8 +419,8 @@ open class CineStreamProvider : MainAPI() {
                         firstYear,
                         res.season,
                         res.episode,
-                        callback,
                         subtitleCallback,
+                        callback,
                     )
                 },
                 {
