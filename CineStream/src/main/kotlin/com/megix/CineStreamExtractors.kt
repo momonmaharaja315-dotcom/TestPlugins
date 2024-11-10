@@ -25,8 +25,7 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
-        val titleSlug = "$title $year".createSlug()
-        val searchDocument = app.get("$cinemaluxeAPI/?s=$titleSlug").document
+        val searchDocument = app.get("$cinemaluxeAPI/?s=$title $year").document
         val url = searchDocument.select("div.title > a:matches((?i)($title $year))").attr("href")
         val document = app.get(url).document
         if(season == null) {
