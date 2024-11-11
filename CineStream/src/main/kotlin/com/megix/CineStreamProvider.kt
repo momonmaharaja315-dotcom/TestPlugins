@@ -114,7 +114,7 @@ open class CineStreamProvider : MainAPI() {
         val skip = skipMap[request.name] ?: 0
         val newRequestData = request.data.replace("###", skip.toString())
         val json = app.get("$newRequestData.json").text
-        val movies = tryParseJson<Home>(json)
+        val movies = parseJson<Home>(json)
         val movieCount = movies.metas.size
         skipMap[request.name] = skip + movieCount
         val home = movies.metas.mapNotNull { movie ->
@@ -697,6 +697,12 @@ open class CineStreamProvider : MainAPI() {
         val livechart: Int?,
         val themoviedb: Int?,
     )
+
+    suspend fun getExternalIds(id: String, type: String) : ExtenalIds? {
+        val url = "$haglund_url/ids?source=$type&id=$id"
+        val json = app.get(url).text
+        return tryParseJson<ExtenalIds>(json) ?: return null
+    }
 
     private fun calculateRelevanceScore(name: String, query: String): Int {
         val lowerCaseName = name.lowercase()
