@@ -105,6 +105,24 @@ open class CineStreamProvider : MainAPI() {
         "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
         "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Trending Anime",
         "$streamio_TMDB/catalog/series/tmdb.language/skip=###&genre=Korean" to "Trending Korean Series",
+        "$mainUrl/imdbRating/catalog/movie/imdbRating/skip=###&genre=Action" to "Top Action Movies",
+        "$mainUrl/imdbRating/catalog/series/imdbRating/skip=###&genre=Action" to "Top Action Series",
+        "$mainUrl/imdbRating/catalog/movie/imdbRating/skip=###&genre=Comedy" to "Top Comedy Movies",
+        "$mainUrl/imdbRating/catalog/series/imdbRating/skip=###&genre=Comedy" to "Top Comedy Series",
+        "$mainUrl/imdbRating/catalog/movie/imdbRating/skip=###&genre=Romance" to "Top Romance Movies",
+        "$mainUrl/imdbRating/catalog/series/imdbRating/skip=###&genre=Romance" to "Top Romance Series",
+        "$mainUrl/imdbRating/catalog/movie/imdbRating/skip=###&genre=Horror" to "Top Horror Movies",
+        "$mainUrl/imdbRating/catalog/series/imdbRating/skip=###&genre=Horror" to "Top Horror Series",
+        "$mainUrl/imdbRating/catalog/movie/imdbRating/skip=###&genre=Thriller" to "Top Thriller Movies",
+        "$mainUrl/imdbRating/catalog/series/imdbRating/skip=###&genre=Thriller" to "Top Thriller Series",
+        "$mainUrl/imdbRating/catalog/movie/imdbRating/skip=###&genre=Sci-Fi" to "Top Sci-Fi Movies",
+        "$mainUrl/imdbRating/catalog/series/imdbRating/skip=###&genre=Sci-Fi" to "Top Sci-Fi Series",
+        "$mainUrl/imdbRating/catalog/movie/imdbRating/skip=###&genre=Fantasy" to "Top Fantasy Movies",
+        "$mainUrl/imdbRating/catalog/series/imdbRating/skip=###&genre=Fantasy" to "Top Fantasy Series",
+        "$mainUrl/imdbRating/catalog/movie/imdbRating/skip=###&genre=Mystery" to "Top Mystery Movies",
+        "$mainUrl/imdbRating/catalog/series/imdbRating/skip=###&genre=Mystery" to "Top Mystery Series",
+        "$mainUrl/imdbRating/catalog/movie/imdbRating/skip=###&genre=Crime" to "Top Crime Movies",
+        "$mainUrl/imdbRating/catalog/series/imdbRating/skip=###&genre=Crime" to "Top Crime Series",
     )
 
     override suspend fun getMainPage(
@@ -127,7 +145,7 @@ open class CineStreamProvider : MainAPI() {
                 name = request.name,
                 list = home
             ),
-            hasNext = if(request.data.contains("skip=###")) true else false
+            hasNext = true
         )
     }
 
@@ -168,6 +186,7 @@ open class CineStreamProvider : MainAPI() {
         var id = movie.id
         val meta_url = if(id.contains("kitsu")) kitsu_url else if(id.contains("tmdb")) streamio_TMDB else cinemeta_url
         val isKitsu = if(meta_url == kitsu_url) true else false
+        val isTMDB = if(meta_url == streamio_TMDB) true else false
         val externalIds = if(isKitsu) getExternalIds(id.substringAfter("kitsu:"),"kitsu") else null
         val malId = if(externalIds != null) externalIds?.myanimelist else null
         val anilistId = if(externalIds != null) externalIds?.anilist else null
@@ -177,10 +196,10 @@ open class CineStreamProvider : MainAPI() {
         val title = movieData ?.meta ?.name.toString()
         val posterUrl = movieData ?.meta?.poster.toString()
         val imdbRating = movieData?.meta?.imdbRating
-        val year = movieData?.meta?.year.toString()
-        val tmdbId = if(!isKitsu && id.contains("tmdb")) id.replace("tmdb:", "").toIntOrNull() else movieData?.meta?.moviedb_id
-        id = if(!isKitsu && id.contains("tmdb")) movieData?.meta?.imdb_id.toString() else id
-        val releaseInfo = movieData?.meta?.releaseInfo.toString()
+        val year = movieData?.meta?.year
+        val releaseInfo = movieData?.meta?.releaseInfo
+        val tmdbId = if(!isKitsu && isTMDB) id.replace("tmdb:", "").toIntOrNull() else movieData?.meta?.moviedb_id
+        id = if(!isKitsu && isTMDB) movieData?.meta?.imdb_id.toString() else id
         var description = movieData?.meta?.description.toString()
         val cast : List<String> = movieData?.meta?.cast ?: emptyList()
         val genre : List<String> = movieData?.meta?.genre ?: movieData?.meta?.genres ?: emptyList()
@@ -222,6 +241,7 @@ open class CineStreamProvider : MainAPI() {
                 this.year = year ?.toIntOrNull() ?: releaseInfo.toIntOrNull() ?: year.substringBefore("-").toIntOrNull()
                 this.backgroundPosterUrl = background
                 this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
+                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else "Cinemeta"
                 addActors(cast)
                 addAniListId(anilistId)
                 addMalId(malId)
@@ -269,6 +289,7 @@ open class CineStreamProvider : MainAPI() {
                 this.year = year?.substringBefore("–")?.toIntOrNull() ?: releaseInfo.substringBefore("–").toIntOrNull() ?: year.substringBefore("-").toIntOrNull()
                 this.backgroundPosterUrl = background
                 this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
+                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else "Cinemeta"
                 addActors(cast)
                 addAniListId(anilistId)
                 addImdbId(id)
@@ -285,8 +306,10 @@ open class CineStreamProvider : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val res = parseJson<LoadLinksData>(data)
-        var year = if(res.tvtype == "movie") res.year.toIntOrNull() else res.firstAired?.substringBefore("-")?.toIntOrNull()
-        val firstYear = if(res.tvtype == "movie") res.year.toIntOrNull() else res.year.substringBefore("–").toIntOrNull() ?: res.year.substringBefore("-").toIntOrNull()
+        var year = if(res.tvtype == "movie") res.year.toIntOrNull() else res.year.substringBefore("-")?.toIntOrNull() ?: res.year.substringBefore("–")?.toIntOrNull()
+        val lastYear = if(res.tvtype == "movie") year else res.year.substringAfter("-")?.toIntOrNull() ?: res.year.substringAfter("–")?.toIntOrNull()
+        val seasonYear = if(res.tvtype == "movie") year else res.firstAired?.substringBefore("-")?.toIntOrNull() ?: res.firstAired?.substringBefore("–")?.toIntOrNull()
+
         callback.invoke(
             ExtractorLink(
             "test1",
@@ -300,7 +323,7 @@ open class CineStreamProvider : MainAPI() {
             ExtractorLink(
             "year",
             "year",
-            "year : $year  firstYear : $firstYear",
+            "year : $year  lastYear : $lastYear seasonYear: $seasonYear",
             "",
             Qualities.Unknown.value,
             )
@@ -400,7 +423,7 @@ open class CineStreamProvider : MainAPI() {
                 {
                     invokeRar(
                         res.title,
-                        firstYear,
+                        year,
                         res.season,
                         res.episode,
                         callback
@@ -419,7 +442,7 @@ open class CineStreamProvider : MainAPI() {
                 {
                     invokeCinemaluxe(
                         res.title,
-                        firstYear,
+                        year,
                         res.season,
                         res.episode,
                         callback,
@@ -429,7 +452,7 @@ open class CineStreamProvider : MainAPI() {
                 {
                     invokeBollyflix(
                         res.title,
-                        firstYear,
+                        year,
                         res.season,
                         res.episode,
                         subtitleCallback,
@@ -459,7 +482,7 @@ open class CineStreamProvider : MainAPI() {
                 {
                     invokeNetflix(
                         res.title,
-                        firstYear,
+                        year,
                         res.season,
                         res.episode,
                         subtitleCallback,
@@ -469,7 +492,7 @@ open class CineStreamProvider : MainAPI() {
                 {
                     invokePrimeVideo(
                         res.title,
-                        firstYear,
+                        year,
                         res.season,
                         res.episode,
                         subtitleCallback,
@@ -526,7 +549,7 @@ open class CineStreamProvider : MainAPI() {
                 //         res.title,
                 //         res.id,
                 //         res.tmdbId,
-                //         firstYear,
+                //         year,
                 //         res.season,
                 //         res.episode,
                 //         callback,
@@ -538,7 +561,7 @@ open class CineStreamProvider : MainAPI() {
                 //         res.title,
                 //         res.id,
                 //         res.tmdbId,
-                //         firstYear,
+                //         year,
                 //         res.season,
                 //         res.episode,
                 //         callback,
