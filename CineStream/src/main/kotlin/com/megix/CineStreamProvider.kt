@@ -156,7 +156,9 @@ open class CineStreamProvider : MainAPI() {
             })
         }
 
-        return searchResponse
+        return searchResponse.sortedByDescending { response ->
+            calculateRelevanceScore(response.name, query)
+        }
     }
 
 
@@ -286,18 +288,22 @@ open class CineStreamProvider : MainAPI() {
         var year = if(res.tvtype == "movie") res.year.toIntOrNull() else res.firstAired?.substringBefore("-")?.toIntOrNull()
         val firstYear = if(res.tvtype == "movie") res.year.toIntOrNull() else res.year.substringBefore("–").toIntOrNull() ?: res.year.substringBefore("-").toIntOrNull()
         callback.invoke(
+            ExtractorLink(
             "test1",
             "test1",
             res.toString(),
             "",
             Qualities.Unknown.value,
+            )
         )
         callback.invoke(
+            ExtractorLink(
             "year",
             "year",
             "year : $year  firstYear : $firstYear",
             "",
             Qualities.Unknown.value,
+            )
         )
         if(res.isKitsu) {
             year = res.year.toIntOrNull() ?: res.year.substringBefore("-").toIntOrNull()
@@ -692,10 +698,38 @@ open class CineStreamProvider : MainAPI() {
         val themoviedb: Int?,
     )
 
-    suspend fun getExternalIds(id: String, type: String) : ExtenalIds? {
-        val url = "$haglund_url/ids?source=$type&id=$id"
-        val json = app.get(url).text
-        return tryParseJson<ExtenalIds>(json) ?: return null
+    private fun calculateRelevanceScore(name: String, query: String): Int {
+        val lowerCaseName = name.lowercase()
+        val lowerCaseQuery = query.lowercase()
+
+        var score = 0
+
+        // Exact match gives the highest score
+        if (lowerCaseName == lowerCaseQuery) {
+            score += 100
+        }
+
+        // Check for partial matches and their positions
+        if (lowerCaseName.contains(lowerCaseQuery)) {
+            score += 50 // Base score for containing the query
+
+            // Increase score based on position of the match
+            val index = lowerCaseName.indexOf(lowerCaseQuery)
+            if (index == 0) {
+                score += 20 // Higher score if match is at the start
+            } else if (index > 0 && index < 5) {
+                score += 10 // Slightly higher score if match is near the start
+            }
+
+            // Count how many words match (for multi-word queries)
+            lowerCaseQuery.split(" ").forEach { word ->
+                if (lowerCaseName.contains(word)) {
+                    score += 5 // Incremental score for each matched word
+                }
+            }
+        }
+
+        return score
     }
 }
 
