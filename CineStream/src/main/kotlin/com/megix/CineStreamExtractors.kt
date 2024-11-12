@@ -49,6 +49,15 @@ object CineStreamExtractors : CineStreamProvider() {
                             .head()
                             .build()
             val source = client.newCall(request).execute().request.url.toString()
+            callback.invoke(
+                ExtractorLink(
+                    "Primewire",
+                    "Primewire",
+                    "source = $source",
+                    "",
+                    Qualities.Unknown.value
+                )
+            )
 
             if(source.isNotEmpty()) {
                 loadSourceNameExtractor(
