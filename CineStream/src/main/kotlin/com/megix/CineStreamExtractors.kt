@@ -35,7 +35,19 @@ object CineStreamExtractors : CineStreamProvider() {
             "$primewireAPI/${data.type}/${data.id}/$slug"
         }
 
-        app.get(link).document.select(".wp-menu-btn").map {
+        val doc = app.get(link).document
+
+        callback.invoke(
+                ExtractorLink(
+                    "Test1",
+                    "Test1",
+                    doc.toString(),
+                    "",
+                    Qualities.Unknown.value,
+                )
+            )
+
+        doc.select("a.wp-menu-btn").map {
             val wp_id = it.attr("data-wp-menu")
             callback.invoke(
                 ExtractorLink(
