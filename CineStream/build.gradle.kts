@@ -7,6 +7,7 @@ android {
         val properties = Properties()
         properties.load(project.rootProject.file("local.properties").inputStream())
         buildConfigField("String", "CONSUMET_API", "\"${properties.getProperty("CONSUMET_API")}\"")
+        buildConfigField("String", "PRIMEWIRE_KEY", "\"${properties.getProperty("PRIMEWIRE_KEY")}\"")
     }
 }
 

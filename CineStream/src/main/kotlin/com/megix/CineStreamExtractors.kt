@@ -18,12 +18,6 @@ import java.security.MessageDigest
 
 object CineStreamExtractors : CineStreamProvider() {
 
-    suspend fun getSHA256ofJSON(input: String): String {
-        val digest = MessageDigest.getInstance("SHA-256")
-        val hashBytes = digest.digest(input.toByteArray(Charsets.UTF_8))
-        return hashBytes.joinToString("") { "%02x".format(it) }
-    }
-
     suspend fun invokePrimewire(
         id: String,
         season: Int? = null,
@@ -31,8 +25,7 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
-        val hash = getSHA256ofJSON("${id}JyjId97F9PVqUPuMO0")
-        val url = "${primewireAPI}/filter?s=${id}&ds=${hash.take(10)}"
+        val url = "${primewireAPI}/api/v1/show/?key=${PRIMEWIRE_KEY}&imdb_id=${id}"
         callback.invoke(
             ExtractorLink(
                 "Primewire",
