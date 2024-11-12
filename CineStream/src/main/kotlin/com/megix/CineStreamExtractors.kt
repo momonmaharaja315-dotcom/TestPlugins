@@ -28,7 +28,8 @@ object CineStreamExtractors : CineStreamProvider() {
         val json = app.get(url).text
         val data = tryParseJson<PrimewireResponse>(json) ?: return
         val link = if(data.type == "movie") {
-            "$primewireAPI/${data.type}/${data.id}"
+            val slug = "${data.id} ${data.title}".createSlug()
+            "$primewireAPI/${data.type}/$slug"
         }
         else {
             val slug = "${data.title} season ${season} episode ${episode}".createSlug()
@@ -40,7 +41,16 @@ object CineStreamExtractors : CineStreamProvider() {
         doc.select("a.wp-menu-btn").map {
             val wp_id = it.attr("data-wp-menu")
             val source = app.get("$primewireAPI/links/go/$wp_id",
-                allowRedirects = false).headers["X-Final-Destination"] ?: ""
+                allowRedirects = false, referer = link).headers["location"] ?: ""
+            callback.invoke(
+                ExtractorLink(
+                    "Test1",
+                    "Test1",
+                    "source : $source",
+                    "",
+                    Qualities.Unknown.value
+                )
+            )
             if(source.isNotEmpty()) {
                 loadSourceNameExtractor(
                     "Primewire",
