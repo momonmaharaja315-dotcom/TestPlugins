@@ -41,7 +41,7 @@ object CineStreamExtractors : CineStreamProvider() {
         doc.select(".wp-menu-btn").map {
             val wp_id = it.attr("data-wp-menu")
             val res = app.get("$primewireAPI/links/go/$wp_id",
-                referer = link)
+                referer = link, allowRedirects = false)
             callback.invoke(
                 ExtractorLink(
                     "Testdoc",
@@ -52,15 +52,15 @@ object CineStreamExtractors : CineStreamProvider() {
                 )
             )
 
-            if(source.isNotEmpty()) {
-                loadSourceNameExtractor(
-                    "Primewire",
-                    source,
-                    "",
-                    subtitleCallback,
-                    callback
-                )
-            }
+            // if(source.isNotEmpty()) {
+            //     loadSourceNameExtractor(
+            //         "Primewire",
+            //         source,
+            //         "",
+            //         subtitleCallback,
+            //         callback
+            //     )
+            // }
         }
     }
 
