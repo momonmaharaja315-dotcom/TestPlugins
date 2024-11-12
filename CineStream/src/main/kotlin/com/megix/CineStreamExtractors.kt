@@ -49,16 +49,17 @@ object CineStreamExtractors : CineStreamProvider() {
         val matches = regex.findAll(doc.toString())
         val values = matches.map { it.groups[1]?.value }.filterNotNull()
         values.forEach { value ->
-            val res = app.head("$primewireAPI/links/go/$value")
             callback.invoke(
                 ExtractorLink(
                     "Primewire",
                     "Primewire",
-                    "source = ${res.text.toString()}",
+                    "$primewireAPI/links/go/$value",
                     "",
                     Qualities.Unknown.value
                 )
             )
+            val res = app.get("$primewireAPI/links/go/$value")
+
             val source = res.headers["location"].toString()
 
             if(source.isNotEmpty()) {
