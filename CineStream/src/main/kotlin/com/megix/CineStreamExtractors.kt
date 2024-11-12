@@ -10,9 +10,6 @@ import com.lagradost.cloudstream3.APIHolder.unixTime
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import java.net.URLEncoder
 import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
 import java.nio.charset.StandardCharsets
 import org.jsoup.Jsoup
 import com.lagradost.cloudstream3.argamap
@@ -39,25 +36,19 @@ object CineStreamExtractors : CineStreamProvider() {
             "$primewireAPI/${data.type}/${data.id}/$slug"
         }
 
-        val doc = app.get(link).document
-        val client = OkHttpClient()
-
-        doc.select(".wp-menu-btn").map {
+        app.get(link).document.select(".wp-menu-btn").map {
             val wp_id = it.attr("data-wp-menu")
-            val request = Request.Builder()
-                            .url("$primewireAPI/links/go/$wp_id")
-                            .head()
-                            .build()
-            val source = client.newCall(request).execute().request.url.toString()
+            val res = app.head("$primewireAPI/links/go/$wp_id", referer = link)
             callback.invoke(
                 ExtractorLink(
                     "Primewire",
                     "Primewire",
-                    "source = $source",
+                    "source = ${res.headers}",
                     "",
                     Qualities.Unknown.value
                 )
             )
+            val source = res.headers["location"].toString()
 
             if(source.isNotEmpty()) {
                 loadSourceNameExtractor(
