@@ -14,8 +14,35 @@ import java.nio.charset.StandardCharsets
 import org.jsoup.Jsoup
 import com.lagradost.cloudstream3.argamap
 import com.lagradost.cloudstream3.extractors.helper.GogoHelper
+import java.security.MessageDigest
 
 object CineStreamExtractors : CineStreamProvider() {
+
+    suspend fun getSHA256ofJSON(input: String): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        val hashBytes = digest.digest(input.toByteArray())
+        return hashBytes.joinToString("") { "%02x".format(it) }
+    }
+
+    suspend fun invokePrimewire(
+        id: String,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+        subtitleCallback: (SubtitleFile) -> Unit
+    ) {
+        val hash = getSHA256ofJSON("${id}JyjId97F9PVqUPuMO0")
+        val url = "${primewireAPI}/filter?s=${id}&ds=${hash.take(10)}"
+        callback.invoke(
+            ExtractorLink(
+                "Primewire",
+                "Primewire",
+                url,
+                "",
+                Qualities.Unknown.value,
+            )
+        )
+    }
 
     suspend fun invokeCinemaluxe(
         title: String? = null,

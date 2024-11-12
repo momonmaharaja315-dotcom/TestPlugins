@@ -86,6 +86,7 @@ open class CineStreamProvider : MainAPI() {
         const val anitaku = "https://anitaku.pe"
         const val cinemaluxeAPI = "https://cinemaluxe.click"
         const val bollyflixAPI = "https://bollyflix.ninja"
+        const val primewireAPI = "https://primewire.tf"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
@@ -241,7 +242,7 @@ open class CineStreamProvider : MainAPI() {
                 this.year = year ?.toIntOrNull() ?: releaseInfo?.toIntOrNull() ?: year?.substringBefore("-")?.toIntOrNull()
                 this.backgroundPosterUrl = background
                 this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
-                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else "Cinemeta"
+                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else "IMDB"
                 addActors(cast)
                 addAniListId(anilistId)
                 addMalId(malId)
@@ -289,7 +290,7 @@ open class CineStreamProvider : MainAPI() {
                 this.year = year?.substringBefore("–")?.toIntOrNull() ?: releaseInfo?.substringBefore("–")?.toIntOrNull() ?: year?.substringBefore("-")?.toIntOrNull()
                 this.backgroundPosterUrl = background
                 this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
-                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else "Cinemeta"
+                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else "IMDB"
                 addActors(cast)
                 addAniListId(anilistId)
                 addImdbId(id)
@@ -307,27 +308,9 @@ open class CineStreamProvider : MainAPI() {
     ): Boolean {
         val res = parseJson<LoadLinksData>(data)
         val year = if(res.tvtype == "movie") res.year?.toIntOrNull() else res.year?.substringBefore("-")?.toIntOrNull() ?: res.year?.substringBefore("–")?.toIntOrNull()
-        val lastYear = if(res.tvtype == "movie") year else res.year?.substringAfter("-")?.toIntOrNull() ?: res.year?.substringAfter("–")?.toIntOrNull()
+        //to get season year
         val seasonYear = if(res.tvtype == "movie") year else res.firstAired?.substringBefore("-")?.toIntOrNull() ?: res.firstAired?.substringBefore("–")?.toIntOrNull()
 
-        callback.invoke(
-            ExtractorLink(
-            "test1",
-            "test1",
-            res.toString(),
-            "",
-            Qualities.Unknown.value,
-            )
-        )
-        callback.invoke(
-            ExtractorLink(
-            "year",
-            "year",
-            "year : $year  lastYear : $lastYear seasonYear: $seasonYear",
-            "",
-            Qualities.Unknown.value,
-            )
-        )
         if(res.isKitsu) {
             argamap(
                 {
