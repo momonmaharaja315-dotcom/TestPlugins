@@ -48,7 +48,7 @@ object CineStreamExtractors : CineStreamProvider() {
                             .url("$primewireAPI/links/go/$wp_id")
                             .head()
                             .build()
-            val source = client.newCall(request).execute().header("Location").toString()
+            val source = client.newCall(request).execute().request.url.toString()
 
             if(source.isNotEmpty()) {
                 loadSourceNameExtractor(
