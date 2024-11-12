@@ -51,7 +51,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 ExtractorLink(
                     "Test2",
                     "Test2",
-                    "$primewireAPI/links/go/$wp_id,
+                    "$primewireAPI/links/go/$wp_id",
                     "",
                     Qualities.Unknown.value,
                 )
