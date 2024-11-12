@@ -348,7 +348,7 @@ open class CineStreamProvider : MainAPI() {
                     )   
                 },
                 {
-                    invokeVite(
+                    invokePrimewire(
                         res.id,
                         res.season,
                         res.episode,
