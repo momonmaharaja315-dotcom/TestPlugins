@@ -46,7 +46,7 @@ object CineStreamExtractors : CineStreamProvider() {
             )
         val doc = app.get(link).document
 
-        doc.select(".wp-menu-btn").map {
+        doc.select("tr > a.wp-menu-btn").map {
             callback.invoke(
                 ExtractorLink(
                     "Enter",
