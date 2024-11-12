@@ -14,7 +14,6 @@ import java.nio.charset.StandardCharsets
 import org.jsoup.Jsoup
 import com.lagradost.cloudstream3.argamap
 import com.lagradost.cloudstream3.extractors.helper.GogoHelper
-import java.security.MessageDigest
 
 object CineStreamExtractors : CineStreamProvider() {
 
@@ -29,11 +28,11 @@ object CineStreamExtractors : CineStreamProvider() {
         val json = app.get(url).text
         val data = tryParseJson<PrimewireResponse>(json) ?: return
         val link = if(data.type == "movie") {
-            "$primewireAPI/${data.type}/${data-id}"
+            "$primewireAPI/${data.type}/${data.id}"
         }
         else {
             val slug = "${data.title} season ${season} episode ${episode}".createSlug()
-            "$primewireAPI/${data.type}/${data-id}/$slug"
+            "$primewireAPI/${data.type}/${data.id}/$slug"
         }
 
         app.get(link).document.select("a.wp-menu-btn").map {
@@ -50,7 +49,6 @@ object CineStreamExtractors : CineStreamProvider() {
                 )
             }
         }
-
     }
 
     suspend fun invokeCinemaluxe(
