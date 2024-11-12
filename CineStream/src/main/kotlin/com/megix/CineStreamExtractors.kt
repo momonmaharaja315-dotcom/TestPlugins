@@ -28,13 +28,20 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = "${primewireAPI}/api/v1/show/?key=${PRIMEWIRE_KEY}&imdb_id=${id}"
         val json = app.get(url).text
         val data = tryParseJson<PrimewireResponse>(json) ?: return
-        val doc = app.get("${primewireAPI}/${data.type}/${data-id}").document
+        val link = if(data.type == "movie") {
+            "$primewireAPI/${data.type}/${data-id}"
+        }
+        else {
+            val slug = "${data.title} season ${season} episode ${episode}".createSlug()
+            "$primewireAPI/${data.type}/${data-id}/$slug"
+        }
+        val doc = app.get(link).document
 
         callback.invoke(
             ExtractorLink(
                 "Primewire",
                 "Primewire",
-                "${primewireAPI}/${data.type}/${data-id}",
+                link,
                 "",
                 Qualities.Unknown.value,
             )
@@ -42,8 +49,9 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     data class PrimewireResponse(
-        id: String,
-        type: String
+        val id: String,
+        val type: String,
+        val title: String
     )
 
     suspend fun invokeCinemaluxe(
