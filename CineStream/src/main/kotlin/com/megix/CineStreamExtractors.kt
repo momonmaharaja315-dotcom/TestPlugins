@@ -35,8 +35,18 @@ object CineStreamExtractors : CineStreamProvider() {
             val slug = "${data.title} season ${season} episode ${episode}".createSlug()
             "$primewireAPI/${data.type}/${data.id}/$slug"
         }
+        callback.invoke(
+                ExtractorLink(
+                    "Test",
+                    "Test",
+                    link,
+                    "",
+                    Qualities.Unknown.value
+                )
+            )
+        val doc = app.get(link).document
 
-        app.get(link).document.select(".wp-menu-btn").map {
+        doc.select(".wp-menu-btn").map {
             callback.invoke(
                 ExtractorLink(
                     "Enter",
