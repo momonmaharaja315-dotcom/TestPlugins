@@ -26,16 +26,25 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
         val url = "${primewireAPI}/api/v1/show/?key=${PRIMEWIRE_KEY}&imdb_id=${id}"
+        val json = app.get(url).text
+        val data = tryParseJson<PrimewireResponse>(json) ?: return
+        val doc = app.get("${primewireAPI}/${data.type}/${data-id}").document
+
         callback.invoke(
             ExtractorLink(
                 "Primewire",
                 "Primewire",
-                url,
+                "${primewireAPI}/${data.type}/${data-id}",
                 "",
                 Qualities.Unknown.value,
             )
         )
     }
+
+    data class PrimewireResponse(
+        id: String,
+        type: String
+    )
 
     suspend fun invokeCinemaluxe(
         title: String? = null,
