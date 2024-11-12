@@ -41,6 +41,7 @@ import com.megix.CineStreamExtractors.invokeMultimovies
 import com.megix.CineStreamExtractors.invokeStreamify
 import com.megix.CineStreamExtractors.invokeCinemaluxe
 import com.megix.CineStreamExtractors.invokeBollyflix
+import com.megix.CineStreamExtractors.invokePrimewire
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -345,6 +346,15 @@ open class CineStreamProvider : MainAPI() {
                         res.episode,
                         callback
                     )   
+                },
+                {
+                    invokeVite(
+                        res.id,
+                        res.season,
+                        res.episode,
+                        callback,
+                        subtitleCallback
+                    )
                 },
                 {
                     invokeVite(
