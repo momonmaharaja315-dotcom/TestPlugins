@@ -2,6 +2,12 @@ package com.megix
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
+data class PrimewireResponse(
+    val id: String,
+    val type: String,
+    val title: String
+)
+
 data class StreamifyResponse(
     val streams: List<Streamify>
 )
