@@ -36,28 +36,20 @@ object CineStreamExtractors : CineStreamProvider() {
             "$primewireAPI/${data.type}/${data.id}/$slug"
         }
         callback.invoke(
-                ExtractorLink(
-                    "Test",
-                    "Test",
-                    link,
-                    "",
-                    Qualities.Unknown.value
-                )
+            ExtractorLink(
+                "Test",
+                "Test",
+                link,
+                "",
+                Qualities.Unknown.value
             )
+        )
         val doc = app.get(link).document
-
-        doc.select("tr > a.wp-menu-btn").map {
-            callback.invoke(
-                ExtractorLink(
-                    "Enter",
-                    "Enter",
-                    link,
-                    "",
-                    Qualities.Unknown.value
-                )
-            )
-            val wp_id = it.attr("data-wp-menu")
-            val res = app.head("$primewireAPI/links/go/$wp_id", referer = link)
+        val regex = Regex("""data-wp-menu="([^"]+)\"""")
+        val matches = regex.findAll(doc.toString())
+        val values = matches.map { it.groups[1]?.value }.filterNotNull()
+        values.forEach { value ->
+            val res = app.head("$primewireAPI/links/go/$value")
             callback.invoke(
                 ExtractorLink(
                     "Primewire",
@@ -78,6 +70,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     callback
                 )
             }
+
         }
     }
 

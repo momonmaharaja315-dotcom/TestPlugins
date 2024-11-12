@@ -88,7 +88,7 @@ open class CineStreamProvider : MainAPI() {
         const val anitaku = "https://anitaku.pe"
         const val cinemaluxeAPI = "https://cinemaluxe.click"
         const val bollyflixAPI = "https://bollyflix.ninja"
-        const val primewireAPI = "https://primewire.tf"
+        const val primewireAPI = "https://primewire.li"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
