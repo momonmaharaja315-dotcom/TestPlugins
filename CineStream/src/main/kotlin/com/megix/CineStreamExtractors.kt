@@ -14,6 +14,9 @@ import java.nio.charset.StandardCharsets
 import org.jsoup.Jsoup
 import com.lagradost.cloudstream3.argamap
 import com.lagradost.cloudstream3.extractors.helper.GogoHelper
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
 
 object CineStreamExtractors : CineStreamProvider() {
 
@@ -58,29 +61,34 @@ object CineStreamExtractors : CineStreamProvider() {
                     Qualities.Unknown.value
                 )
             )
-            val res = app.get("$primewireAPI/links/go/$value")
+            val client = OkHttpClient.Builder()
+                .followRedirects(true)
+                .build()
+            val request = Request.Builder()
+                            .url("$primewireAPI/links/go/$value")
+                            .build()
+
+            val response: Response = client.newCall(request).execute()
+            val source = response.request.url.toString()
             callback.invoke(
                 ExtractorLink(
                     "Primewire",
                     "Primewire",
-                    "headers : ${res.headers}",
+                    source,
                     "",
                     Qualities.Unknown.value
                 )
             )
 
-            //val source = res.headers["location"].toString()
-
-            // if(source.isNotEmpty()) {
-            //     loadSourceNameExtractor(
-            //         "Primewire",
-            //         source,
-            //         "",
-            //         subtitleCallback,
-            //         callback
-            //     )
-            // }
-
+            if(source.isNotEmpty()) {
+                loadSourceNameExtractor(
+                    "Primewire",
+                    source,
+                    "",
+                    subtitleCallback,
+                    callback
+                )
+            }
         }
     }
 
