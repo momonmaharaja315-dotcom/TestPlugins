@@ -59,18 +59,27 @@ object CineStreamExtractors : CineStreamProvider() {
                 )
             )
             val res = app.get("$primewireAPI/links/go/$value")
-
-            val source = res.headers["location"].toString()
-
-            if(source.isNotEmpty()) {
-                loadSourceNameExtractor(
+            callback.invoke(
+                ExtractorLink(
                     "Primewire",
-                    source,
+                    "Primewire",
+                    "headers : ${res.headers}",
                     "",
-                    subtitleCallback,
-                    callback
+                    Qualities.Unknown.value
                 )
-            }
+            )
+
+            //val source = res.headers["location"].toString()
+
+            // if(source.isNotEmpty()) {
+            //     loadSourceNameExtractor(
+            //         "Primewire",
+            //         source,
+            //         "",
+            //         subtitleCallback,
+            //         callback
+            //     )
+            // }
 
         }
     }
