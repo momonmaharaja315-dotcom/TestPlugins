@@ -4,15 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.gson.annotations.SerializedName
 
 data class TomResponse (
-  var videoSource    : String?              = null,
+  var videoSource    : String,
   var subtitles      : ArrayList<TomSubtitles> = arrayListOf(),
 )
 
 data class TomSubtitles (
-  var file    : String?  = null,
-  var kind    : String?  = null,
-  var label   : String?  = null,
-  var default : Boolean? = null
+  var file    : String,
+  var label   : String
 )
 
 data class NFVerifyUrl(

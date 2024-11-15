@@ -18,9 +18,9 @@ import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun invokeTom(
-        val id: Int? = null,
-        val season: Int? = null,
-        val episode: Int? = null,
+        id: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
         callback: (ExtractorLink) -> Unit,
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
@@ -43,7 +43,7 @@ object CineStreamExtractors : CineStreamProvider() {
             subtitleCallback.invoke(
                 SubtitleFile(
                     it.label,
-                    it.file
+                    it.file,
                 )
             )
         }
