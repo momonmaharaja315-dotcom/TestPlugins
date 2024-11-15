@@ -78,8 +78,7 @@ class YesPornPlease : MainAPI() {
         ): Boolean {
 
         val document = app.get(data).document
-        val source = document.select("video#video > a").attr("href")
-        val source2 = document.select("video#video > a").text()
+        val source = document.select("a:contains(.mp4)").attr("href")
         callback.invoke(
             ExtractorLink(
                 this.name,
@@ -89,16 +88,6 @@ class YesPornPlease : MainAPI() {
                 quality = Qualities.Unknown.value,
             )
         )
-        callback.invoke(
-            ExtractorLink(
-                this.name,
-                "2",
-                source2,
-                referer = "$mainUrl/",
-                quality = Qualities.Unknown.value,
-            )
-        )
-
         return true
     }
 }
