@@ -17,6 +17,38 @@ import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend fun invokeTom(
+        val id: Int? = null,
+        val season: Int? = null,
+        val episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+        subtitleCallback: (SubtitleFile) -> Unit
+    ) {
+        val url = if(season == null) "$TomAPI/api/getVideoSource?type=movie&id=$id" else "$TomAPI/api/getVideoSource?type=tv&id=$id/$season/$episode"
+        val json = app.get(url).text
+        val data = tryParseJson<TomResponse>(json) ?: return
+
+        callback.invoke(
+            ExtractorLink(
+                "Tom",
+                "Tom",
+                data.videoSource,
+                "",
+                Qualities.Unknown.value,
+                true
+            )
+        )
+
+        data.subtitles.map {
+            subtitleCallback.invoke(
+                SubtitleFile(
+                    it.label,
+                    it.file
+                )
+            )
+        }
+    }
+
     suspend fun invokeCinemaluxe(
         title: String? = null,
         year: Int? = null,

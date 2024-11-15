@@ -1,6 +1,19 @@
 package com.megix
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.google.gson.annotations.SerializedName
+
+data class TomResponse (
+  var videoSource    : String?              = null,
+  var subtitles      : ArrayList<TomSubtitles> = arrayListOf(),
+)
+
+data class TomSubtitles (
+  var file    : String?  = null,
+  var kind    : String?  = null,
+  var label   : String?  = null,
+  var default : Boolean? = null
+)
 
 data class NFVerifyUrl(
     val url: String
