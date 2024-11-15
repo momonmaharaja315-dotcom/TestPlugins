@@ -6,6 +6,7 @@ import android.util.Base64
 import okhttp3.FormBody
 import org.jsoup.nodes.Document
 import java.net.*
+import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 
 suspend fun NFBypass(mainUrl : String): String {
     val document = app.get("$mainUrl/home").document
