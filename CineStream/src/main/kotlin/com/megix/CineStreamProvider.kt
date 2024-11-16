@@ -88,6 +88,7 @@ open class CineStreamProvider : MainAPI() {
         const val cinemaluxeAPI = "https://cinemaluxe.click"
         const val bollyflixAPI = "https://bollyflix.fi"
         const val TomAPI = "https://tom.autoembed.cc"
+        //const val katmovie4kAPI = "https://katmovie4k.net"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(

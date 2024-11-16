@@ -17,6 +17,18 @@ import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    // suspend fun invokeKat4K(
+    //     id: String,
+    //     season: Int? = null,
+    //     episode: Int? = null,
+    //     callback: (ExtractorLink) -> Unit,
+    //     subtitleCallback: (SubtitleFile) -> Unit
+    // ) {
+    //     val document = app.get("$kat4kAPI/?s=$id").document
+    //     val url = document.select("div.post-thumb > a").attr("href")
+    //     val doc = app.get(url).document
+    // }
+
     suspend fun invokeTom(
         id: Int? = null,
         season: Int? = null,
@@ -91,27 +103,19 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeBollyflix(
-        title: String? = null,
-        year: Int? = null,
+        id: String,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        val fixtitle = title?.substringBefore("-")?.substringBefore(":")?.replace("&", " ")
-        val searchtitle = title?.substringBefore("-").createSlug()
-        var res1 =
-            app.get("$bollyflixAPI/search/$fixtitle $year", interceptor = wpRedisInterceptor).document.select("#content_box article")
-                .toString()
-        val hrefpattern =
-            Regex("""(?i)<article[^>]*>\s*<a\s+href="([^"]*\b$searchtitle\b[^"]*)""").find(res1)?.groupValues?.get(
-                1
-            )
-        val res = hrefpattern?.let { app.get(it).document }
+        var res1 = app.get("$bollyflixAPI/search/$id", interceptor = wpRedisInterceptor).document
+        val url = res1.select("div > article > a").attr("href") ?: return
+        val res = app.get(url).document
         val hTag = if (season == null) "h5" else "h4"
         val sTag = if (season == null) "" else "Season $season"
         val entries =
-            res?.select("div.thecontent.clearfix > $hTag:matches((?i)$sTag.*(1080p|2160p))")
+            res?.select("div.thecontent.clearfix > $hTag:matches((?i)$sTag.*(720p|1080p|2160p))")
                 ?.filter { element -> !element.text().contains("Download", true) }?.takeLast(3)
         entries?.map {
             val href = it.nextElementSibling()?.select("a")?.attr("href")
