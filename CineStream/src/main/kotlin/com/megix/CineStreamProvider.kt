@@ -444,8 +444,7 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     invokeBollyflix(
-                        res.title,
-                        year,
+                        res.id,
                         res.season,
                         res.episode,
                         subtitleCallback,
