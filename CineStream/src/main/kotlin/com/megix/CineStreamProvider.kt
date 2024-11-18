@@ -91,7 +91,6 @@ open class CineStreamProvider : MainAPI() {
         const val TomAPI = "https://tom.autoembed.cc"
         const val torrentioAPI = "https://torrentio.strem.fun"
         const val torrentioCONFIG = "providers=yts,eztv,rarbg,1337x,thepiratebay,kickasstorrents,torrentgalaxy,magnetdl,horriblesubs,nyaasi,tokyotosho,anidex|sort=seeders|qualityfilter=threed,480p,other,scr,cam,unknown|limit=10"
-        const val TRACKER_LIST_URL = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
