@@ -52,10 +52,10 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
         val url = if(season == null) {
-            "$torrentioAPI/$torrentioCONFIG/stream/movie/$id.json"
+            "$torrentioAPI/stream/movie/$id.json"
         }
         else {
-            "$torrentioAPI/$torrentioCONFIG/stream/series/$id:$season:$episode.json"
+            "$torrentioAPI/stream/series/$id:$season:$episode.json"
         }
         val res = app.get(url, timeout = 200L).parsedSafe<TorrentioResponse>()
         res?.streams?.forEach { stream ->
