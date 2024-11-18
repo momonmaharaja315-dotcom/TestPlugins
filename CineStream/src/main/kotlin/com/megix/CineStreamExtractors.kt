@@ -34,8 +34,8 @@ object CineStreamExtractors : CineStreamProvider() {
         res?.streams?.forEach { stream ->
             val sourceTrackers = stream.sources
                 ?.map { it.trim() }
-                .filter { it.isNotBlank() && it.startsWith("tracker:") }
-                .joinToString("&tr=") { it.removePrefix("tracker:") }
+                ?.filter { it.isNotBlank() && it.startsWith("tracker:") }
+                ?.joinToString("&tr=") { it.removePrefix("tracker:") }
             val magnet = "magnet:?xt=urn:btih:${stream.infoHash}&dn=${stream.infoHash}&tr=$sourceTrackers&index=${stream.fileIdx}"
             callback.invoke(
                 ExtractorLink(
