@@ -3,6 +3,14 @@ package com.megix
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.gson.annotations.SerializedName
 
+data class TorrentioResponse(val streams: List<TorrentioStream>)
+
+data class TorrentioStream(
+    val name: String?,
+    val title: String?,
+    val infoHash: String?,
+)
+
 data class TomResponse (
   var videoSource    : String,
   var subtitles      : ArrayList<TomSubtitles> = arrayListOf(),

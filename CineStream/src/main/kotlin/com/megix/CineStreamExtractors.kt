@@ -17,17 +17,45 @@ import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 
 object CineStreamExtractors : CineStreamProvider() {
 
-    // suspend fun invokeKat4K(
-    //     id: String,
-    //     season: Int? = null,
-    //     episode: Int? = null,
-    //     callback: (ExtractorLink) -> Unit,
-    //     subtitleCallback: (SubtitleFile) -> Unit
-    // ) {
-    //     val document = app.get("$kat4kAPI/?s=$id").document
-    //     val url = document.select("div.post-thumb > a").attr("href")
-    //     val doc = app.get(url).document
-    // }
+    suspend fun invokeTorrentio(
+        id: String? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+        subtitleCallback: (SubtitleFile) -> Unit
+    ) {
+        val url = if(season == null) {
+            "$torrentioAPI/$torrentioCONFIG/stream/movie/$id.json"
+        }
+        else {
+            "$torrentioAPI/$torrentioCONFIG/stream/series/$id:$season:$episode.json"
+        }
+        val res = app.get(url, timeout = 100L).parsedSafe<TorrentioResponse>()
+        res?.streams?.forEach { stream ->
+            val resp = app.get(TRACKER_LIST_URL).text
+            val otherTrackers = resp
+                .split("\n")
+                .filterIndexed { i, _ -> i % 2 == 0 }
+                .filter { s -> s.isNotEmpty() }.joinToString("") { "&tr=$it" }
+
+            val sourceTrackers = sources
+                .filter { it.startsWith("tracker:") }
+                .map { it.removePrefix("tracker:") }
+                .filter { s -> s.isNotEmpty() }.joinToString("") { "&tr=$it" }
+
+            val magnet = "magnet:?xt=urn:btih:${stream.infoHash}${sourceTrackers}${otherTrackers}"
+            callback.invoke(
+                ExtractorLink(
+                    "Torrentio",
+                    stream.title ?: stream.name ?: "",
+                    magnet,
+                    "",
+                    getIndexQuality(stream.name),
+                    INFER_TYPE,
+                )
+            )
+        }
+    }
 
     suspend fun invokeTom(
         id: Int? = null,
