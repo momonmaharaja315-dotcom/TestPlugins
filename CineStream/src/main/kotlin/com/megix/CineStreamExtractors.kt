@@ -33,17 +33,12 @@ object CineStreamExtractors : CineStreamProvider() {
         val res = app.get(url, timeout = 100L).parsedSafe<TorrentioResponse>()
         res?.streams?.forEach { stream ->
             val resp = app.get(TRACKER_LIST_URL).text
-            val otherTrackers = resp
+            val sourceTrackers = resp
                 .split("\n")
                 .filterIndexed { i, _ -> i % 2 == 0 }
                 .filter { s -> s.isNotEmpty() }.joinToString("") { "&tr=$it" }
 
-            val sourceTrackers = stream.sources
-                .filter { it.startsWith("tracker:") }
-                .map { it.removePrefix("tracker:") }
-                .filter { s -> s.isNotEmpty() }.joinToString("") { "&tr=$it" }
-
-            val magnet = "magnet:?xt=urn:btih:${stream.infoHash}${sourceTrackers}${otherTrackers}"
+            val magnet = "magnet:?xt=urn:btih:${stream.infoHash}&dn=${stream.infoHash}&tr=$sourceTrackers&index=${stream.fileIdx}"
             callback.invoke(
                 ExtractorLink(
                     "Torrentio",

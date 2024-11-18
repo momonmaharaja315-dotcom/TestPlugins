@@ -10,6 +10,7 @@ data class TorrentioStream(
     val title: String?,
     val infoHash: String?,
     val sources: List<String> = emptyList(),
+    val fileIdx: Int?,
 )
 
 data class TomResponse (
