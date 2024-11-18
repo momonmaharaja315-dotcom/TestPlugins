@@ -57,7 +57,7 @@ object CineStreamExtractors : CineStreamProvider() {
         else {
             "$torrentioAPI/$torrentioCONFIG/stream/series/$id:$season:$episode.json"
         }
-        val res = app.get(url, timeout = 100L).parsedSafe<TorrentioResponse>()
+        val res = app.get(url, timeout = 200L).parsedSafe<TorrentioResponse>()
         res?.streams?.forEach { stream ->
             val sourceTrackers = TorrentTrackers.split(",").map { it.trim() }.filter { it.isNotBlank() }.joinToString("&tr=")
             val magnet = "magnet:?xt=urn:btih:${stream.infoHash}&dn=${stream.infoHash}&tr=$sourceTrackers&index=${stream.fileIdx}"
