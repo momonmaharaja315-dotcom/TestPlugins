@@ -38,7 +38,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 .filterIndexed { i, _ -> i % 2 == 0 }
                 .filter { s -> s.isNotEmpty() }.joinToString("") { "&tr=$it" }
 
-            val sourceTrackers = sources
+            val sourceTrackers = stream.sources
                 .filter { it.startsWith("tracker:") }
                 .map { it.removePrefix("tracker:") }
                 .filter { s -> s.isNotEmpty() }.joinToString("") { "&tr=$it" }

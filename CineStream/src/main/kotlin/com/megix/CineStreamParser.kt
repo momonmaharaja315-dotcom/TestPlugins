@@ -9,6 +9,7 @@ data class TorrentioStream(
     val name: String?,
     val title: String?,
     val infoHash: String?,
+    val sources: List<String> = emptyList(),
 )
 
 data class TomResponse (
