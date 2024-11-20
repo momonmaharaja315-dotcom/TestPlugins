@@ -17,31 +17,31 @@ import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 
 object CineStreamExtractors : CineStreamProvider() {
 
-    val TorrentTrackers = """http://bt2.t-ru.org/ann?magnet",
-        "udp://tracker.opentrackr.org:1337/announce",
-        "udp://open.tracker.cl:1337/announce",
-        "udp://open.stealth.si:80/announce",
-        "udp://tracker.torrent.eu.org:451/announce",
-        "udp://tracker.dump.cl:6969/announce",
-        "udp://tracker-udp.gbitt.info:80/announce",
-        "udp://opentracker.io:6969/announce",
-        "udp://open.free-tracker.ga:6969/announce",
-        "udp://ns-1.x-fins.com:6969/announce",
-        "udp://explodie.org:6969/announce",
-        "http://tracker810.xyz:11450/announce",
-        "http://tracker.xiaoduola.xyz:6969/announce",
-        "http://tracker.moxing.party:6969/announce",
-        "http://tracker.lintk.me:2710/announce",
-        "http://tracker.ipv6tracker.org:80/announce",
-        "http://tracker.corpscorp.online:80/announce",
-        "http://tracker.bz:80/announce",
-        "http://tr.kxmp.cf:80/announce",
-        "http://t.jaekr.sh:6969/announce",
-        "http://shubt.net:2710/announce",
-        "udp://opentor.net:6969",
-        "http://bt.t-ru.org/ann?magnet",
-        "http://bt3.t-ru.org/ann?magnet",
-        "http://bt4.t-ru.org/ann?magnet"
+    val TorrentTrackers = """http://bt2.t-ru.org/ann?magnet,
+        udp://tracker.opentrackr.org:1337/announce,
+        udp://open.tracker.cl:1337/announce,
+        udp://open.stealth.si:80/announce,
+        udp://tracker.torrent.eu.org:451/announce,
+        udp://tracker.dump.cl:6969/announce,
+        udp://tracker-udp.gbitt.info:80/announce,
+        udp://opentracker.io:6969/announce,
+        udp://open.free-tracker.ga:6969/announce,
+        udp://ns-1.x-fins.com:6969/announce,
+        udp://explodie.org:6969/announce,
+        http://tracker810.xyz:11450/announce,
+        http://tracker.xiaoduola.xyz:6969/announce,
+        http://tracker.moxing.party:6969/announce,
+        http://tracker.lintk.me:2710/announce,
+        http://tracker.ipv6tracker.org:80/announce,
+        http://tracker.corpscorp.online:80/announce,
+        http://tracker.bz:80/announce,
+        http://tr.kxmp.cf:80/announce,
+        http://t.jaekr.sh:6969/announce,
+        http://shubt.net:2710/announce,
+        udp://opentor.net:6969,
+        http://bt.t-ru.org/ann?magnet,
+        http://bt3.t-ru.org/ann?magnet,
+        http://bt4.t-ru.org/ann?magnet
         """.trimIndent()
 
     suspend fun invokeTorrentio(
@@ -52,12 +52,16 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
         val url = if(season == null) {
-            "$torrentioAPI/stream/movie/$id.json"
+            "$torrentioAPI/$torrentioCONFIG/stream/movie/$id.json"
         }
         else {
-            "$torrentioAPI/stream/series/$id:$season:$episode.json"
+            "$torrentioAPI/$torrentioCONFIG/stream/series/$id:$season:$episode.json"
         }
-        val res = app.get(url, timeout = 200L).parsedSafe<TorrentioResponse>()
+        val headers = mapOf(
+            "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        )
+        val res = app.get(url, headers = headers, timeout = 200L).parsedSafe<TorrentioResponse>()
         res?.streams?.forEach { stream ->
             val sourceTrackers = TorrentTrackers.split(",").map { it.trim() }.filter { it.isNotBlank() }.joinToString("&tr=")
             val magnet = "magnet:?xt=urn:btih:${stream.infoHash}&dn=${stream.infoHash}&tr=$sourceTrackers&index=${stream.fileIdx}"
@@ -68,7 +72,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     magnet,
                     "",
                     getIndexQuality(stream.name),
-                    INFER_TYPE,
+                    ExtractorLinkType.MAGNET,
                 )
             )
         }
@@ -161,7 +165,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val sTag = if (season == null) "" else "Season $season"
         val entries =
             res?.select("div.thecontent.clearfix > $hTag:matches((?i)$sTag.*(720p|1080p|2160p))")
-                ?.filter { element -> !element.text().contains("Download", true) }?.takeLast(3)
+                ?.filter { element -> !element.text().contains("Download", true) }?.takeLast(4)
         entries?.map {
             val href = it.nextElementSibling()?.select("a")?.attr("href")
             val token = href?.substringAfter("id=")
@@ -547,93 +551,103 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    // suspend fun invokeAstra(
-    //     title: String,
-    //     imdb_id: String,
-    //     tmdb_id: Int? = null,
-    //     year: Int? = null,
-    //     season: Int? = null,
-    //     episode: Int? = null,
-    //     callback: (ExtractorLink) -> Unit,
-    //     subtitleCallback: (SubtitleFile) -> Unit,
-    // ) {
-    //     val query = if (season != null && episode != null) {
-    //         """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"show","season":"$season","episode":"$episode"}"""
-    //     } else {
-    //         """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"movie","season":"","episode":""}"""
-    //     }
-    //     val headers = mapOf("Origin" to "https://www.vidbinge.com")
-    //     val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
-    //     val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=astra", headers = headers).text
-    //     val data = parseJson<WHVX>(json) ?: return
-    //     val encodedUrl = URLEncoder.encode(data.url, StandardCharsets.UTF_8.toString())
-    //     val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=astra", headers = headers).text
-    //     val data2 = parseJson<AstraQuery>(json2) ?: return
-    //     data2.stream.forEach {
-    //         callback.invoke(
-    //             ExtractorLink(
-    //                 "Astra",
-    //                 "Astra",
-    //                 it.playlist,
-    //                 "",
-    //                 Qualities.Unknown.value,
-    //                 INFER_TYPE
-    //             )
-    //         )    
-    //     }
-    // }
+    data class WHVXToken(
+        val token : String,
+    )
 
-    // suspend fun invokeNova(
-    //     title: String,
-    //     imdb_id: String,
-    //     tmdb_id: Int? = null,
-    //     year: Int? = null,
-    //     season: Int? = null,
-    //     episode: Int? = null,
-    //     callback: (ExtractorLink) -> Unit,
-    //     subtitleCallback: (SubtitleFile) -> Unit,
-    // ) {
-    //     val query = if (season != null && episode != null) {
-    //         """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"show","season":"$season","episode":"$episode"}"""
-    //     } else {
-    //         """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"movie","season":"","episode":""}"""
-    //     }
-    //     val headers = mapOf(
-    //         "Origin" to "https://www.vidbinge.com",
-    //     )
+    suspend fun invokeAstra(
+        title: String,
+        imdb_id: String,
+        tmdb_id: Int? = null,
+        year: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+        subtitleCallback: (SubtitleFile) -> Unit,
+    ) {
+        val query = if (season != null && episode != null) {
+            """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"show","season":"$season","episode":"$episode"}"""
+        } else {
+            """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"movie","season":"","episode":""}"""
+        }
+        val headers = mapOf("Origin" to "https://www.vidbinge.com")
+        val tokenJson = app.get("https://ext.8man.me/api/whvxToken").text
+        val token = parseJson<WHVXToken>(tokenJson).token
+        val encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8.toString())
+        val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
+        val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=astra&token=${encodedToken}", headers = headers).text
+        val data = parseJson<WHVX>(json) ?: return
+        val encodedUrl = URLEncoder.encode(data.url, StandardCharsets.UTF_8.toString())
+        val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=astra", headers = headers).text
+        val data2 = parseJson<AstraQuery>(json2) ?: return
+        data2.stream.forEach {
+            callback.invoke(
+                ExtractorLink(
+                    "Astra",
+                    "Astra",
+                    it.playlist,
+                    "",
+                    Qualities.Unknown.value,
+                    INFER_TYPE
+                )
+            )
+        }
+    }
 
-    //     val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
-    //     val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=nova", headers = headers).text
-    //     val data = parseJson<WHVX>(json) ?: return
-    //     val encodedUrl = URLEncoder.encode(data.url, StandardCharsets.UTF_8.toString())
-    //     val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=nova", headers = headers).text
-    //     val data2 = parseJson<NovaVideoData>(json2) ?: return
-    //     for (stream in data2.stream) {
-    //         for ((quality, details) in stream.qualities) {
-    //             callback.invoke(
-    //                 ExtractorLink(
-    //                     "Nova",
-    //                     "Nova",
-    //                     details.url,
-    //                     "",
-    //                     getQualityFromName(quality),
-    //                     INFER_TYPE,
-    //                 )
-    //             )
-    //         }
-    //     }
+    suspend fun invokeNova(
+        title: String,
+        imdb_id: String,
+        tmdb_id: Int? = null,
+        year: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+        subtitleCallback: (SubtitleFile) -> Unit,
+    ) {
+        val query = if (season != null && episode != null) {
+            """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"show","season":"$season","episode":"$episode"}"""
+        } else {
+            """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"movie","season":"","episode":""}"""
+        }
+        val headers = mapOf(
+            "Origin" to "https://www.vidbinge.com",
+        )
 
-    //     for (stream in data2.stream) {
-    //         for (caption in stream.captions) {
-    //             subtitleCallback.invoke(
-    //                 SubtitleFile(
-    //                     caption.language,
-    //                     caption.url
-    //                 )
-    //             )
-    //         }
-    //     }
-    // }
+        val tokenJson = app.get("https://ext.8man.me/api/whvxToken").text
+        val token = parseJson<WHVXToken>(tokenJson).token
+        val encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8.toString())
+        val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
+        val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=nova&token=${encodedToken}", headers = headers).text
+        val data = parseJson<WHVX>(json) ?: return
+        val encodedUrl = URLEncoder.encode(data.url, StandardCharsets.UTF_8.toString())
+        val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=nova&token=${encodedToken}", headers = headers).text
+        val data2 = parseJson<NovaVideoData>(json2) ?: return
+        for (stream in data2.stream) {
+            for ((quality, details) in stream.qualities) {
+                callback.invoke(
+                    ExtractorLink(
+                        "Nova",
+                        "Nova",
+                        details.url,
+                        "",
+                        getQualityFromName(quality),
+                        INFER_TYPE,
+                    )
+                )
+            }
+        }
+
+        for (stream in data2.stream) {
+            for (caption in stream.captions) {
+                subtitleCallback.invoke(
+                    SubtitleFile(
+                        caption.language,
+                        caption.url
+                    )
+                )
+            }
+        }
+    }
 
     suspend fun invokeAutoembed(
         id: Int?,

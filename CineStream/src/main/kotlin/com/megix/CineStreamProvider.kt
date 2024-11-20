@@ -25,8 +25,8 @@ import com.megix.CineStreamExtractors.invokeW4U
 import com.megix.CineStreamExtractors.invokeWHVXSubs
 import com.megix.CineStreamExtractors.invokeWYZIESubs
 import com.megix.CineStreamExtractors.invokeAutoembed
-//import com.megix.CineStreamExtractors.invokeNova
-//import com.megix.CineStreamExtractors.invokeAstra
+import com.megix.CineStreamExtractors.invokeNova
+import com.megix.CineStreamExtractors.invokeAstra
 import com.megix.CineStreamExtractors.invokeUhdmovies
 import com.megix.CineStreamExtractors.invokeVidSrcNL
 import com.megix.CineStreamExtractors.invokeMovies
@@ -73,7 +73,7 @@ open class CineStreamProvider : MainAPI() {
         const val WHVXSubsAPI = "https://subs.whvx.net"
         const val WYZIESubsAPI = "https://subs.wyzie.ru"
         const val AutoembedAPI = "https://autoembed.cc"
-        //const val WHVXAPI = "https://api.whvx.net"
+        const val WHVXAPI = "https://api.whvx.net"
         const val uhdmoviesAPI = "https://uhdmovies.icu"
         const val myConsumetAPI = BuildConfig.CONSUMET_API
         const val moviesAPI = "https://moviesapi.club"
@@ -90,6 +90,7 @@ open class CineStreamProvider : MainAPI() {
         const val bollyflixAPI = "https://bollyflix.fi"
         const val TomAPI = "https://tom.autoembed.cc"
         const val torrentioAPI = "https://torrentio.strem.fun"
+        const val torrentioCONFIG = "providers=yts,eztv,rarbg,1337x,thepiratebay,kickasstorrents,torrentgalaxy,magnetdl,horriblesubs,nyaasi,tokyotosho,anidex|sort=seeders|qualityfilter=threed,480p,other,scr,cam,unknown|limit=10"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
@@ -555,30 +556,30 @@ open class CineStreamProvider : MainAPI() {
                         callback,
                     )
                 },
-                // {
-                //     invokeNova(
-                //         res.title,
-                //         res.id,
-                //         res.tmdbId,
-                //         year,
-                //         res.season,
-                //         res.episode,
-                //         callback,
-                //         subtitleCallback
-                //     )
-                // },
-                // {
-                //     invokeAstra(
-                //         res.title,
-                //         res.id,
-                //         res.tmdbId,
-                //         year,
-                //         res.season,
-                //         res.episode,
-                //         callback,
-                //         subtitleCallback
-                //     )
-                // },
+                {
+                    invokeNova(
+                        res.title,
+                        res.id,
+                        res.tmdbId,
+                        year,
+                        res.season,
+                        res.episode,
+                        callback,
+                        subtitleCallback
+                    )
+                },
+                {
+                    invokeAstra(
+                        res.title,
+                        res.id,
+                        res.tmdbId,
+                        year,
+                        res.season,
+                        res.episode,
+                        callback,
+                        subtitleCallback
+                    )
+                },
                 {
                     invokeUhdmovies(
                         res.title,
