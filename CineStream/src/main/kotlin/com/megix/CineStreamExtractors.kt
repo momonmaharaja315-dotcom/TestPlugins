@@ -570,16 +570,20 @@ object CineStreamExtractors : CineStreamProvider() {
         } else {
             """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"movie","season":"","episode":""}"""
         }
-        val headers = mapOf("Origin" to "https://www.vidbinge.com")
+        val headers = mapOf(
+            "Origin" to "https://www.vidbinge.app",
+            "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+        )
+
         val tokenJson = app.get("https://ext.8man.me/api/whvxToken").text
         val token = parseJson<WHVXToken>(tokenJson).token
         val encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8.toString())
         val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
         val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=astra&token=${encodedToken}", headers = headers).text
-        val data = parseJson<WHVX>(json) ?: return
+        val data = tryParseJson<WHVX>(json) ?: return
         val encodedUrl = URLEncoder.encode(data.url, StandardCharsets.UTF_8.toString())
         val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=astra", headers = headers).text
-        val data2 = parseJson<AstraQuery>(json2) ?: return
+        val data2 = tryParseJson<AstraQuery>(json2) ?: return
         data2.stream.forEach {
             callback.invoke(
                 ExtractorLink(
@@ -609,8 +613,10 @@ object CineStreamExtractors : CineStreamProvider() {
         } else {
             """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"movie","season":"","episode":""}"""
         }
+
         val headers = mapOf(
-            "Origin" to "https://www.vidbinge.com",
+            "Origin" to "https://www.vidbinge.app",
+            "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
         )
 
         val tokenJson = app.get("https://ext.8man.me/api/whvxToken").text
@@ -618,10 +624,10 @@ object CineStreamExtractors : CineStreamProvider() {
         val encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8.toString())
         val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
         val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=nova&token=${encodedToken}", headers = headers).text
-        val data = parseJson<WHVX>(json) ?: return
+        val data = tryParseJson<WHVX>(json) ?: return
         val encodedUrl = URLEncoder.encode(data.url, StandardCharsets.UTF_8.toString())
         val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=nova&token=${encodedToken}", headers = headers).text
-        val data2 = parseJson<NovaVideoData>(json2) ?: return
+        val data2 = tryParseJson<NovaVideoData>(json2) ?: return
         for (stream in data2.stream) {
             for ((quality, details) in stream.qualities) {
                 callback.invoke(
