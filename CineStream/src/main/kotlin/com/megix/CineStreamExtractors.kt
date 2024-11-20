@@ -555,7 +555,8 @@ object CineStreamExtractors : CineStreamProvider() {
         val token : String,
     )
 
-    suspend fun invokeAstra(
+    suspend fun invokeVidbinge(
+        provider : String,
         title: String,
         imdb_id: String,
         tmdb_id: Int? = null,
@@ -577,24 +578,85 @@ object CineStreamExtractors : CineStreamProvider() {
 
         val tokenJson = app.get("https://ext.8man.me/api/whvxToken").text
         val token = parseJson<WHVXToken>(tokenJson).token
+        callback.invoke(
+            ExtractorLink(
+                "TOKEN",
+                "TOKEN",
+                token,
+                "",
+                Qualities.Unknown.value,
+            )
+        )
         val encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8.toString())
         val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
-        val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=astra&token=${encodedToken}", headers = headers).text
+
+        val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=${provider}&token=${encodedToken}", headers = headers).text
+        callback.invoke(
+            ExtractorLink(
+                "json",
+                "json",
+                json,
+                "",
+                Qualities.Unknown.value,
+            )
+        )
+
         val data = tryParseJson<WHVX>(json) ?: return
         val encodedUrl = URLEncoder.encode(data.url, StandardCharsets.UTF_8.toString())
-        val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=astra", headers = headers).text
-        val data2 = tryParseJson<AstraQuery>(json2) ?: return
-        data2.stream.forEach {
-            callback.invoke(
-                ExtractorLink(
-                    "Astra",
-                    "Astra",
-                    it.playlist,
-                    "",
-                    Qualities.Unknown.value,
-                    INFER_TYPE
-                )
+        val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=${provider}", headers = headers).text
+        callback.invoke(
+            ExtractorLink(
+                "json2",
+                "json2",
+                json2,
+                "",
+                Qualities.Unknown.value,
             )
+        )
+        if(provider == "astra") {
+            val data2 = tryParseJson<AstraQuery>(json2) ?: return
+            data2.stream.forEach {
+                callback.invoke(
+                    ExtractorLink(
+                        "Astra",
+                        "Astra",
+                        it.playlist,
+                        "",
+                        Qualities.Unknown.value,
+                        INFER_TYPE
+                    )
+                )
+            }
+        }
+        else if(provider == "nova") {
+            for (stream in data2.stream) {
+                for ((quality, details) in stream.qualities) {
+                    callback.invoke(
+                        ExtractorLink(
+                            "Nova",
+                            "Nova",
+                            details.url,
+                            "",
+                            getQualityFromName(quality),
+                            INFER_TYPE,
+                        )
+                    )
+                }
+            }
+
+            for (stream in data2.stream) {
+                for (caption in stream.captions) {
+                    subtitleCallback.invoke(
+                        SubtitleFile(
+                            caption.language,
+                            caption.url
+                        )
+                    )
+                }
+            }
+        }
+        else {
+
         }
     }
 

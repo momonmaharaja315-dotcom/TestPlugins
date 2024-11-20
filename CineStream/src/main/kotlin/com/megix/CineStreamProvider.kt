@@ -25,8 +25,7 @@ import com.megix.CineStreamExtractors.invokeW4U
 import com.megix.CineStreamExtractors.invokeWHVXSubs
 import com.megix.CineStreamExtractors.invokeWYZIESubs
 import com.megix.CineStreamExtractors.invokeAutoembed
-import com.megix.CineStreamExtractors.invokeNova
-import com.megix.CineStreamExtractors.invokeAstra
+import com.megix.CineStreamExtractors.invokeVidbinge
 import com.megix.CineStreamExtractors.invokeUhdmovies
 import com.megix.CineStreamExtractors.invokeVidSrcNL
 import com.megix.CineStreamExtractors.invokeMovies
@@ -557,7 +556,8 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
-                    invokeNova(
+                    invokeVidbinge(
+                        "astra",
                         res.title,
                         res.id,
                         res.tmdbId,
@@ -569,7 +569,21 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
-                    invokeAstra(
+                    invokeVidbinge(
+                        "nova",
+                        res.title,
+                        res.id,
+                        res.tmdbId,
+                        year,
+                        res.season,
+                        res.episode,
+                        callback,
+                        subtitleCallback
+                    )
+                },
+                {
+                    invokeVidbinge(
+                        "orion",
                         res.title,
                         res.id,
                         res.tmdbId,
