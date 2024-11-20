@@ -133,6 +133,10 @@ data class TwoEmbedStream(
     val playlist: String,
 )
 
+data class WHVXToken(
+    val token : String,
+)
+
 data class OrionStreamData(
     val stream: List<OrionStream>
 )

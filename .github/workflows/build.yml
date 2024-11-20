@@ -43,11 +43,11 @@ jobs:
       - name: Access Secrets
         env:
           CONSUMET_API: ${{ secrets.CONSUMET_API }}
-          PRIMEWIRE_KEY: ${{ secrets.PRIMEWIRE_KEY }}
+          WHVX_TOKEN: ${{ secrets.WHVX_TOKEN }}
         run: |
           cd $GITHUB_WORKSPACE/src
           echo CONSUMET_API=$CONSUMET_API >> local.properties
-          echo PRIMEWIRE_KEY=$PRIMEWIRE_KEY >> local.properties
+          echo WHVX_TOKEN=$WHVX_TOKEN >> local.properties
 
       - name: Build Plugins
         run: |

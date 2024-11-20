@@ -551,10 +551,6 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    data class WHVXToken(
-        val token : String,
-    )
-
     suspend fun invokeVidbinge(
         provider : String,
         title: String,
@@ -576,20 +572,11 @@ object CineStreamExtractors : CineStreamProvider() {
             "user-agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
         )
 
-        val tokenJson = app.get("https://ext.8man.me/api/whvxToken").text
+        val tokenJson = app.get(WHVX_TOKEN).text
         val token = parseJson<WHVXToken>(tokenJson).token
         val encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8.toString())
         val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
         val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=${provider}&token=${encodedToken}", headers = headers).text
-        callback.invoke(
-            ExtractorLink(
-                "WHVX",
-                "WHVX",
-                json,
-                "",
-                Qualities.Unknown.value,
-            )
-        )
         val data = tryParseJson<WHVX>(json) ?: return
         val encodedUrl = URLEncoder.encode(data.url, StandardCharsets.UTF_8.toString())
         val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=${provider}", headers = headers).text
