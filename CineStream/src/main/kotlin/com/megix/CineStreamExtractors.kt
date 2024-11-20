@@ -626,7 +626,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=nova&token=${encodedToken}", headers = headers).text
         val data = tryParseJson<WHVX>(json) ?: return
         val encodedUrl = URLEncoder.encode(data.url, StandardCharsets.UTF_8.toString())
-        val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=nova&token=${encodedToken}", headers = headers).text
+        val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=nova", headers = headers).text
         val data2 = tryParseJson<NovaVideoData>(json2) ?: return
         for (stream in data2.stream) {
             for ((quality, details) in stream.qualities) {
