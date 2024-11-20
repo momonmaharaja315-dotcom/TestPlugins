@@ -629,6 +629,7 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
         else if(provider == "nova") {
+            val data2 = tryParseJson<NovaVideoData>(json2) ?: return
             for (stream in data2.stream) {
                 for ((quality, details) in stream.qualities) {
                     callback.invoke(
@@ -656,63 +657,27 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
         else {
-
-        }
-    }
-
-    suspend fun invokeNova(
-        title: String,
-        imdb_id: String,
-        tmdb_id: Int? = null,
-        year: Int? = null,
-        season: Int? = null,
-        episode: Int? = null,
-        callback: (ExtractorLink) -> Unit,
-        subtitleCallback: (SubtitleFile) -> Unit,
-    ) {
-        val query = if (season != null && episode != null) {
-            """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"show","season":"$season","episode":"$episode"}"""
-        } else {
-            """{"title":"$title","releaseYear":$year,"tmdbId":"$tmdb_id","imdbId":"$imdb_id","type":"movie","season":"","episode":""}"""
-        }
-
-        val headers = mapOf(
-            "Origin" to "https://www.vidbinge.app",
-            "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
-        )
-
-        val tokenJson = app.get("https://ext.8man.me/api/whvxToken").text
-        val token = parseJson<WHVXToken>(tokenJson).token
-        val encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8.toString())
-        val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
-        val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=nova&token=${encodedToken}", headers = headers).text
-        val data = tryParseJson<WHVX>(json) ?: return
-        val encodedUrl = URLEncoder.encode(data.url, StandardCharsets.UTF_8.toString())
-        val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=nova", headers = headers).text
-        val data2 = tryParseJson<NovaVideoData>(json2) ?: return
-        for (stream in data2.stream) {
-            for ((quality, details) in stream.qualities) {
+            val data2 = tryParseJson<OrionStreamData>(json2) ?: return
+            for(stream in data2.stream) {
                 callback.invoke(
                     ExtractorLink(
-                        "Nova",
-                        "Nova",
-                        details.url,
+                        "Orion",
+                        "Orion",
+                        stream.playlist,
                         "",
-                        getQualityFromName(quality),
-                        INFER_TYPE,
+                        Qualities.Unknown.value,
+                        INFER_TYPE
                     )
                 )
-            }
-        }
 
-        for (stream in data2.stream) {
-            for (caption in stream.captions) {
-                subtitleCallback.invoke(
-                    SubtitleFile(
-                        caption.language,
-                        caption.url
+                for (caption in stream.captions) {
+                    subtitleCallback.invoke(
+                        SubtitleFile(
+                            caption.language,
+                            caption.url
+                        )
                     )
-                )
+                }
             }
         }
     }

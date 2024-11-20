@@ -133,6 +133,26 @@ data class TwoEmbedStream(
     val playlist: String,
 )
 
+data class OrionStreamData(
+    val stream: List<OrionStream>
+)
+
+data class OrionStream(
+    val id: String,
+    val type: String,
+    val playlist: String,
+    val flags: List<String>,
+    val captions: List<OrionCaption>
+)
+
+data class OrionCaption(
+    val id: String,
+    val url: String,
+    val type: String,
+    val hasCorsRestrictions: Boolean,
+    val language: String
+)
+
 data class AstraQuery(
     val stream: List<AstraStream>
 )
