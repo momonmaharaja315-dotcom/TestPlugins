@@ -143,14 +143,19 @@ open class CineStreamProvider : MainAPI() {
         val movieCount = movies.metas.size
         skipMap[request.name] = skip + movieCount
         val home = movies.metas.mapNotNull { movie ->
-            val posterUrl = if(movie.poster.toString().contains("mediafusion")) {
-                "https://images.metahub.space/poster/small/${movie.id}/img"
+            if (movie.id.startsWith("mf")) {
+                null
             }
             else {
-                movie.poster.toString()
-            }
-            newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), TvType.Movie) {
-                this.posterUrl = posterUrl
+                val posterUrl = if(movie.poster.toString().contains("mediafusion")) {
+                    "https://images.metahub.space/poster/small/${movie.id}/img"
+                }
+                else {
+                    movie.poster.toString()
+                }
+                newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), TvType.Movie) {
+                    this.posterUrl = posterUrl
+                }
             }
         }
         return newHomePageResponse(
