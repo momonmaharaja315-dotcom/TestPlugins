@@ -107,8 +107,8 @@ open class CineStreamProvider : MainAPI() {
         "$streamio_TMDB/catalog/series/tmdb.trending/skip=###&genre=Day" to "Trending Series Today",
         "$mainUrl/top/catalog/movie/top/skip=###" to "Top Movies",
         "$mainUrl/top/catalog/series/top/skip=###" to "Top Series",
-        "$mediaFusion/catalog/movie/hindi_hdrip/skip=###" to "Trending Hindi Movie",
-        "$mediaFusion/catalog/series/hindi_series/skip=###" to "Trending Hindi Series",
+        "$mediaFusion/catalog/movie/hindi_hdrip/skip=###" to "Trending Movie in India",
+        "$mediaFusion/catalog/series/hindi_series/skip=###" to "Trending Series in India",
         "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
         "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Trending Anime",
         "$streamio_TMDB/catalog/series/tmdb.language/skip=###&genre=Korean" to "Trending Korean Series",
@@ -143,8 +143,14 @@ open class CineStreamProvider : MainAPI() {
         val movieCount = movies.metas.size
         skipMap[request.name] = skip + movieCount
         val home = movies.metas.mapNotNull { movie ->
+            val posterUrl = if(movie.poster.toString().contains("mediafusion")) {
+                "https://images.metahub.space/poster/small/${movie.id}/img"
+            }
+            else {
+                movie.poster.toString()
+            }
             newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), TvType.Movie) {
-                this.posterUrl = movie.poster.toString()
+                this.posterUrl = posterUrl
             }
         }
         return newHomePageResponse(
