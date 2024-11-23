@@ -41,7 +41,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     .split("\n")
                     .filterIndexed { i, _ -> i % 2 == 0 }
                     .filter { s -> s.isNotEmpty() }.joinToString("") { "&tr=$it" }
-            val magnet = "magnet:?xt=urn:btih:${stream.infoHash}&dn=${stream.infoHash}&tr=$sourceTrackers&index=${stream.fileIdx}"
+            val magnet = "magnet:?xt=urn:btih:${stream.infoHash}&dn=${stream.infoHash}$sourceTrackers&index=${stream.fileIdx}"
             callback.invoke(
                 ExtractorLink(
                     "Torrentio",
