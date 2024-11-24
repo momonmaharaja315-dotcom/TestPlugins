@@ -48,7 +48,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
     private fun Element.toSearchResult(): SearchResponse? {
         val title = this.attr("title").replace("Download ", "")
         val href = this.attr("href")
-        var posterUrl = this.select("img").attr("src") ?: this.select("img").attr("data-src")
+        var posterUrl = this.select("img").attr("data-src") ?: this.select("img").attr("src")
 
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
@@ -78,9 +78,10 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
         val imdbUrl = div?.selectFirst("a:matches((?i)(Rating))")?.attr("href")
         val heading = div?.selectFirst("h3")
 
-        val tvtype = if (heading?.nextElementSibling()?.nextElementSibling()?.text()?.contains("Series Name") == true) {
-            "series"
-        } else {
+        val tvtype = if (heading?.nextElementSibling()?.nextElementSibling()?.text()
+            ?.let { it.contains("Series Name") || it.contains("SHOW Name") } == true) {
+                "series"
+        }   else {
             "movie"
         }
 
