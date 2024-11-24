@@ -7,8 +7,8 @@ import org.jsoup.select.Elements
 import com.lagradost.cloudstream3.network.CloudflareKiller
 import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
 import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
-import com.google.gson.Gson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
+import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 
 open class VegaMoviesProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://vegamovies.ps"
@@ -74,13 +74,8 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
         val ogTitle = title
         var posterUrl = document.select("meta[property=og:image]").attr("content")
         val div = document.selectFirst("div.entry-content")
-        val hTagsDisc = div?.selectFirst("h3:matches((?i)(SYNOPSIS|PLOT)), h4:matches((?i)(SYNOPSIS|PLOT))")
-        val pTagDisc = hTagsDisc?.nextElementSibling()
-        var description = pTagDisc?.text()
-
-        val aTagRating = div?.selectFirst("a:matches((?i)(Rating))")
-        val imdbUrl = aTagRating?.attr("href")
-
+        var description = div?.selectFirst("h3:matches((?i)(SYNOPSIS|PLOT)), h4:matches((?i)(SYNOPSIS|PLOT))")?.nextElementSibling()?.text()
+        val imdbUrl = div?.selectFirst("a:matches((?i)(Rating))")?.attr("href")
         val heading = div?.selectFirst("h3")
 
         val tvtype = if (heading?.nextElementSibling()?.selectFirst("p")?.text()?.contains("Series Name") == true) {
@@ -89,7 +84,7 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
             "movie"
         }
 
-        val imdbId = imdbUrl.substringAfter("title/").substringBefore("/")
+        val imdbId = imdbUrl?.substringAfter("title/")?.substringBefore("/")
         val jsonResponse = app.get("$cinemeta_url/$tvtype/$imdbId.json").text
         val responseData = tryParseJson<ResponseData>(jsonResponse)
 
