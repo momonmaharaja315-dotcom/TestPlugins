@@ -48,7 +48,10 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
     private fun Element.toSearchResult(): SearchResponse? {
         val title = this.attr("title").replace("Download ", "")
         val href = this.attr("href")
-        var posterUrl = this.select("img").attr("src") ?: this.select("img").attr("data-src")
+        var posterUrl = this.selectFirst("img")?.attr("data-src").toString()
+        if(posterUrl.isEmpty()) {
+            posterUrl = this.selectFirst("img")?.attr("src").toString()
+        }
 
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
@@ -96,14 +99,14 @@ open class VegaMoviesProvider : MainAPI() { // all providers must be an instance
         var background: String = posterUrl
 
         if(responseData != null) {
-            description = responseData.meta?.description ?: description
-            cast = responseData.meta?.cast ?: emptyList()
-            title = responseData.meta?.name ?: title
-            genre = responseData.meta?.genre ?: emptyList()
-            imdbRating = responseData.meta?.imdbRating ?: ""
-            year = responseData.meta?.year ?: ""
-            posterUrl = responseData.meta?.poster ?: posterUrl
-            background = responseData.meta?.background ?: background
+            description = responseData.meta.description ?: description
+            cast = responseData.meta.cast ?: emptyList()
+            title = responseData.meta.name ?: title
+            genre = responseData.meta.genre ?: emptyList()
+            imdbRating = responseData.meta.imdbRating ?: ""
+            year = responseData.meta.year ?: ""
+            posterUrl = responseData.meta.poster ?: posterUrl
+            background = responseData.meta.background ?: background
         }
 
         if (tvtype == "series") {

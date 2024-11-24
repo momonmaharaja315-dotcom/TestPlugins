@@ -5,6 +5,7 @@ import com.lagradost.cloudstream3.utils.*
 import org.json.JSONObject
 import okhttp3.FormBody
 import okhttp3.*
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 
 class Driveleech : Driveseed() {
     override val name: String = "Driveleech"
@@ -442,6 +443,11 @@ open class GDFlix : ExtractorApi() {
     override val mainUrl: String = "https://new4.gdflix.cfd"
     override val requiresReferer = false
 
+    private fun getIndexQuality(str: String?): Int {
+        return Regex("(\\d{3,4})[pP]").find(str ?: "") ?. groupValues ?. getOrNull(1) ?. toIntOrNull()
+            ?: Qualities.Unknown.value
+    }
+
     override suspend fun getUrl(
         url: String,
         referer: String?,
@@ -466,7 +472,7 @@ open class GDFlix : ExtractorApi() {
                         "GDFLix[Fast Cloud] $fileName",
                         trueurl,
                         "",
-                        getQualityFromName(tags)
+                        getIndexQuality(fileName)
                     )
                 )
             }
@@ -513,7 +519,7 @@ open class GDFlix : ExtractorApi() {
                             "GDFlix[IndexBot](VLC) $fileName",
                             downloadlink,
                             "https://indexbot.lol/",
-                            getQualityFromName(tags)
+                            getIndexQuality(fileName)
                         )
                     )
                 }
@@ -528,7 +534,7 @@ open class GDFlix : ExtractorApi() {
                         "GDFlix[Instant Download] $fileName",
                         link,
                         "",
-                        getQualityFromName(tags)
+                        getIndexQuality(fileName)
                     )
                 )
             }
@@ -589,7 +595,7 @@ class Photolinx : ExtractorApi() {
                 }
             }
         """.trimIndent()
-        val mediaType = MediaType.parse("application/json; charset=utf-8")
+        val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
         val postRequest = Request.Builder()
             .url("https://photolinx.shop/action")
             .addHeader("sec-fetch-site", "same-origin")
