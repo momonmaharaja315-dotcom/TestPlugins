@@ -20,7 +20,7 @@ import com.megix.CineStreamExtractors.invokeFull4Movies
 //import com.megix.CineStreamExtractors.invokeVadaPav
 import com.megix.CineStreamExtractors.invokeNetflix
 import com.megix.CineStreamExtractors.invokePrimeVideo
-import com.megix.CineStreamExtractors.invokeDramaCool
+// import com.megix.CineStreamExtractors.invokeDramaCool
 import com.megix.CineStreamExtractors.invokeW4U
 import com.megix.CineStreamExtractors.invokeWHVXSubs
 import com.megix.CineStreamExtractors.invokeWYZIESubs
@@ -525,16 +525,16 @@ open class CineStreamProvider : MainAPI() {
                         callback
                     )
                 },
-                {
-                    if(res.isAsian) invokeDramaCool(
-                        res.title,
-                        year,
-                        res.season,
-                        res.episode,
-                        subtitleCallback,
-                        callback
-                    )
-                },
+                // {
+                //     if(res.isAsian) invokeDramaCool(
+                //         res.title,
+                //         year,
+                //         res.season,
+                //         res.episode,
+                //         subtitleCallback,
+                //         callback
+                //     )
+                // },
                 {
                     if(!res.isAnime) invokeW4U(
                         res.title,

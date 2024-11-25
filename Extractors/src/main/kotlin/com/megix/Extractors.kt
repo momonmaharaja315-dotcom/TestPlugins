@@ -603,10 +603,10 @@ class Photolinx : ExtractorApi() {
             .addHeader("cookie", "PHPSESSID=9a8d855c700cf0711831c04960c2e2b4")
             .addHeader("Referer", "https://photolinx.shop/download/5mPkrBD0D2x")
             .addHeader("Referrer-Policy", "strict-origin-when-cross-origin")
-            .post(RequestBody.create(mediaType, body))
+            .post(body.toRequestBody(mediaType))
             .build()
         val photolinxRes2 = client.newCall(postRequest).execute()
-        val photolinxData2 = photolinxRes2.body?.string() ?: return
+        val photolinxData2 = photolinxRes2.body.string()
         val jsonResponse = JSONObject(photolinxData2)
         val dwUrl = jsonResponse.optString("download_url")
         callback.invoke(
