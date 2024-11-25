@@ -92,7 +92,7 @@ open class Driveseed : ExtractorApi() {
     ) {
         val document = app.get(url).document
         val quality = document.selectFirst("li.list-group-item:contains(Name)")?.text() ?: ""
-        val fileName = document.select("ul > li.list-group-item").text()?.substringAfter("Name : ") ?: ""
+        val fileName = document.selectFirst("ul > li.list-group-item")?.text()?.substringAfter("Name : ") ?: ""
 
         document.select("div.text-center > a").amap { element ->
             val text = element.text()
@@ -460,7 +460,7 @@ open class GDFlix : ExtractorApi() {
             originalUrl = mainUrl + partialurl
         }
         val document = app.get(originalUrl).document
-        val fileName = document.select("ul > li.list-group-item").text()?.substringAfter("Name : ") ?: ""
+        val fileName = document.selectFirst("ul > li.list-group-item")?.text()?.substringAfter("Name : ") ?: ""
         document.select("div.text-center a").map {
             if (it.select("a").text().contains("FAST CLOUD DL"))
             {

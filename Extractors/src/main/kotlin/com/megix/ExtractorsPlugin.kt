@@ -22,5 +22,6 @@ class ExtractorsPlugin: Plugin() {
         registerExtractorAPI(WLinkFast())
         registerExtractorAPI(FastLinks())
         registerExtractorAPI(Sendcm())
+        registerExtractorAPI(Photolinx())
     }
 }
