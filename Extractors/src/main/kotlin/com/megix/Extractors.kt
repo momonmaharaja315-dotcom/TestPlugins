@@ -584,7 +584,9 @@ class Photolinx : ExtractorApi() {
         callback: (ExtractorLink) -> Unit
     ) {
         val client = OkHttpClient()
-        val document = app.get(url).document
+        val res = app.get(url)
+        val document = res.document
+        val cookies = res.cookies["PHPSESSID"].toString()
         val accessToken = document.select("#generate_url").attr("data-token")
         val uid = document.select("#generate_url").attr("data-uid")
         val body = """
@@ -601,7 +603,7 @@ class Photolinx : ExtractorApi() {
             .url("https://photolinx.shop/action")
             .addHeader("sec-fetch-site", "same-origin")
             .addHeader("x-requested-with", "xmlhttprequest")
-            .addHeader("cookie", "PHPSESSID=9a8d855c700cf0711831c04960c2e2b4")
+            .addHeader("cookie", "PHPSESSID=$cookies")
             .addHeader("Referer", url)
             .addHeader("Referrer-Policy", "strict-origin-when-cross-origin")
             .post(body.toRequestBody(mediaType))
