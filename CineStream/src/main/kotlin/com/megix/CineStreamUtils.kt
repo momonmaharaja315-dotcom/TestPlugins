@@ -18,7 +18,7 @@ suspend fun NFBypass(mainUrl : String): String {
     val hashDigits       = addHash.filter { it.isDigit() }
     val first16Digits    = hashDigits.take(16)
     app.get("${verificationUrl}&t=0.${first16Digits}")
-    delay(5000)
+    delay(10000)
     val requestBody = FormBody.Builder().add("verify", addHash).build()
     val verifyResponse  = app.post("${mainUrl}/verify2.php", requestBody = requestBody)
     return verifyResponse.cookies["t_hash_t"].orEmpty()
@@ -78,7 +78,7 @@ suspend fun loadSourceNameExtractor(
         callback.invoke(
             ExtractorLink(
                 "$source[${link.source}]",
-                "$source[${link.source}]",
+                "$source - ${link.source}",
                 link.url,
                 link.referer,
                 quality ?: link.quality ,

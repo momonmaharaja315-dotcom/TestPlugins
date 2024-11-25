@@ -104,7 +104,7 @@ open class Driveseed : ExtractorApi() {
                     callback.invoke(
                         ExtractorLink(
                             "$name Instant(Download)",
-                            "$name Instant(Download) $fileName",
+                            "$name Instant(Download) - $fileName",
                             instant,
                             "",
                             getIndexQuality(quality)
@@ -116,7 +116,7 @@ open class Driveseed : ExtractorApi() {
                     callback.invoke(
                         ExtractorLink(
                             "$name ResumeBot(VLC)",
-                            "$name ResumeBot(VLC) $fileName",
+                            "$name ResumeBot(VLC) - $fileName",
                             resumeLink,
                             "",
                             getIndexQuality(quality)
@@ -129,7 +129,7 @@ open class Driveseed : ExtractorApi() {
                         callback.invoke(
                             ExtractorLink(
                                 "$name CF Type1",
-                                "$name CF Type1 $fileName",
+                                "$name CF Type1 - $fileName",
                                 it,
                                 "",
                                 getIndexQuality(quality)
@@ -142,7 +142,7 @@ open class Driveseed : ExtractorApi() {
                     callback.invoke(
                         ExtractorLink(
                             "$name ResumeCloud",
-                            "$name ResumeCloud $fileName",
+                            "$name ResumeCloud - $fileName",
                             resumeCloud,
                             "",
                             getIndexQuality(quality)
@@ -222,7 +222,7 @@ class VCloud : ExtractorApi() {
                     callback.invoke(
                         ExtractorLink(
                             "$name[Download]",
-                            "$name[Download] $header",
+                            "$name[Download] - $header",
                             iframe,
                             "",
                             getIndexQuality(header),
@@ -233,7 +233,7 @@ class VCloud : ExtractorApi() {
                     callback.invoke(
                         ExtractorLink(
                             "Pixeldrain",
-                            "Pixeldrain $header",
+                            "Pixeldrain - $header",
                             link,
                             "",
                             getIndexQuality(header),
@@ -244,7 +244,7 @@ class VCloud : ExtractorApi() {
                     callback.invoke(
                         ExtractorLink(
                             name,
-                            "$name $header",
+                            "$name - $header",
                             link,
                             "",
                             getIndexQuality(header),
@@ -256,7 +256,7 @@ class VCloud : ExtractorApi() {
                     callback.invoke(
                         ExtractorLink(
                             "$name[Download]",
-                            "$name[Download] $header",
+                            "$name[Download] - $header",
                             link,
                             "",
                             getIndexQuality(header),
@@ -268,7 +268,7 @@ class VCloud : ExtractorApi() {
                     callback.invoke(
                         ExtractorLink(
                             name,
-                            "$name $header",
+                            "$name - $header",
                             link,
                             "",
                             getIndexQuality(header),
@@ -348,7 +348,7 @@ open class HubCloud : ExtractorApi() {
                 callback.invoke(
                     ExtractorLink(
                         "$name[Download]",
-                        "$name[Download] $header",
+                        "$name[Download] - $header",
                         iframe,
                         "",
                         getIndexQuality(header),
@@ -359,7 +359,7 @@ open class HubCloud : ExtractorApi() {
                 callback.invoke(
                     ExtractorLink(
                         "Pixeldrain",
-                        "Pixeldrain $header",
+                        "Pixeldrain - $header",
                         link,
                         "",
                         getIndexQuality(header),
@@ -370,7 +370,7 @@ open class HubCloud : ExtractorApi() {
                 callback.invoke(
                     ExtractorLink(
                         name,
-                        "$name $header",
+                        "$name - $header",
                         link,
                         "",
                         getIndexQuality(header),
@@ -382,7 +382,7 @@ open class HubCloud : ExtractorApi() {
                 callback.invoke(
                     ExtractorLink(
                         "$name[Download]",
-                        "$name[Download] $header",
+                        "$name[Download] - $header",
                         link,
                         "",
                         getIndexQuality(header),
@@ -394,7 +394,7 @@ open class HubCloud : ExtractorApi() {
                 callback.invoke(
                     ExtractorLink(
                         name,
-                        "$name $header",
+                        "$name - $header",
                         link,
                         "",
                         getIndexQuality(header),
@@ -470,7 +470,7 @@ open class GDFlix : ExtractorApi() {
                 callback.invoke(
                     ExtractorLink(
                         "GDFlix[Fast Cloud]",
-                        "GDFLix[Fast Cloud] $fileName",
+                        "GDFLix[Fast Cloud] - $fileName",
                         trueurl,
                         "",
                         getIndexQuality(fileName)
@@ -517,7 +517,7 @@ open class GDFlix : ExtractorApi() {
                     callback.invoke(
                         ExtractorLink(
                             "GDFlix[IndexBot](VLC)",
-                            "GDFlix[IndexBot](VLC) $fileName",
+                            "GDFlix[IndexBot](VLC)  - $fileName",
                             downloadlink,
                             "https://indexbot.lol/",
                             getIndexQuality(fileName)
@@ -532,7 +532,7 @@ open class GDFlix : ExtractorApi() {
                 callback.invoke(
                     ExtractorLink(
                         "GDFlix[Instant Download]",
-                        "GDFlix[Instant Download] $fileName",
+                        "GDFlix[Instant Download] - $fileName",
                         link,
                         "",
                         getIndexQuality(fileName)
@@ -602,7 +602,7 @@ class Photolinx : ExtractorApi() {
             .addHeader("sec-fetch-site", "same-origin")
             .addHeader("x-requested-with", "xmlhttprequest")
             .addHeader("cookie", "PHPSESSID=9a8d855c700cf0711831c04960c2e2b4")
-            .addHeader("Referer", "https://photolinx.shop/download/5mPkrBD0D2x")
+            .addHeader("Referer", url)
             .addHeader("Referrer-Policy", "strict-origin-when-cross-origin")
             .post(body.toRequestBody(mediaType))
             .build()
