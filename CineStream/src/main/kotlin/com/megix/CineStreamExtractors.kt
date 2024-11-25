@@ -22,7 +22,6 @@ object CineStreamExtractors : CineStreamProvider() {
         season: Int? = null,
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit,
-        subtitleCallback: (SubtitleFile) -> Unit
     ) {
         val url = if(season == null) {
             "$torrentioAPI/$torrentioCONFIG/stream/movie/$id.json"
@@ -141,7 +140,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val hTag = if (season == null) "h5" else "h4"
         val sTag = if (season == null) "" else "Season $season"
         val entries =
-            res?.select("div.thecontent.clearfix > $hTag:matches((?i)$sTag.*(720p|1080p|2160p))")
+            res.select("div.thecontent.clearfix > $hTag:matches((?i)$sTag.*(720p|1080p|2160p))")
                 ?.filter { element -> !element.text().contains("Download", true) }?.takeLast(4)
         entries?.map {
             val href = it.nextElementSibling()?.select("a")?.attr("href")

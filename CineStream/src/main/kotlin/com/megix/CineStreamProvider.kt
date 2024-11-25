@@ -207,8 +207,8 @@ open class CineStreamProvider : MainAPI() {
         val isKitsu = if(meta_url == kitsu_url) true else false
         val isTMDB = if(meta_url == streamio_TMDB) true else false
         val externalIds = if(isKitsu) getExternalIds(id.substringAfter("kitsu:"),"kitsu") else null
-        val malId = if(externalIds != null) externalIds?.myanimelist else null
-        val anilistId = if(externalIds != null) externalIds?.anilist else null
+        val malId = if(externalIds != null) externalIds.myanimelist else null
+        val anilistId = if(externalIds != null) externalIds.anilist else null
         id = if(isKitsu) id.replace(":", "%3A") else id
         val json = app.get("$meta_url/meta/$tvtype/$id.json").text
         val movieData = tryParseJson<ResponseData>(json)
@@ -348,7 +348,6 @@ open class CineStreamProvider : MainAPI() {
                         res.imdbSeason,
                         res.imdbEpisode,
                         callback,
-                        subtitleCallback,
                     )
                 }
             )
@@ -482,19 +481,8 @@ open class CineStreamProvider : MainAPI() {
                         res.season,
                         res.episode,
                         callback,
-                        subtitleCallback,
                     )
                 },
-                // {
-                //     invokeVadaPav(
-                //         res.title,
-                //         year,
-                //         res.season,
-                //         res.episode,
-                //         subtitleCallback,
-                //         callback
-                //     )
-                // },
                 {
                     invokeMultimovies(
                         multimoviesAPI,
