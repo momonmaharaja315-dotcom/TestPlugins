@@ -328,7 +328,6 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val Season = app.get("$jikanAPI/anime/${malId ?: return}").parsedSafe<JikanResponse>()?.data?.season ?:""
         val malsync = app.get("$malsyncAPI/mal/anime/${malId ?: return}")
             .parsedSafe<MALSyncResponses>()?.sites
         val zoroIds = malsync?.zoro?.keys?.map { it }

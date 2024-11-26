@@ -93,7 +93,7 @@ open class Driveseed : ExtractorApi() {
     ) {
         val document = app.get(url).document
         val quality = document.selectFirst("li.list-group-item:contains(Name)")?.text() ?: ""
-        val fileName = quality.substringAfter("Name : ") ?: ""
+        val fileName = quality.replace("Name : ", "")
 
         document.select("div.text-center > a").amap { element ->
             val text = element.text()

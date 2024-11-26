@@ -52,7 +52,6 @@ open class CineStreamProvider : MainAPI() {
     val kitsu_url = "https://anime-kitsu.strem.fun"
     //val anime_catalogs_url = "https://1fe84bc728af-stremio-anime-catalogs.baby-beamup.club"
     val haglund_url = "https://arm.haglund.dev/api/v2"
-    val jikanAPI = "https://api.jikan.moe/v4"
     val streamio_TMDB = "https://94c8cb9f702d-tmdb-addon.baby-beamup.club"
     val mediaFusion = "https://mediafusion.elfhosted.com"
     companion object {
