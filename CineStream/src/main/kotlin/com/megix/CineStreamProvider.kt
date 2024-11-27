@@ -350,8 +350,9 @@ open class CineStreamProvider : MainAPI() {
             argamap(
                 {
                     if(!res.isBollywood) invokeVegamovies(
+                        res.id,
                         res.title,
-                        year,
+                        seasonYear,
                         res.season,
                         res.episode,
                         subtitleCallback,
@@ -393,8 +394,9 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     if(res.isBollywood) invokeRogmovies(
+                        res.id,
                         res.title,
-                        year,
+                        seasonYear,
                         res.season,
                         res.episode,
                         subtitleCallback,
