@@ -62,6 +62,10 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
         val url = if(season == null) "$TomAPI/api/getVideoSource?type=movie&id=$id" else "$TomAPI/api/getVideoSource?type=tv&id=$id/$season/$episode"
+        val headers = mapOf(
+            "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0",
+            "Referer" to "$AutoembedAPI/"
+        )
         val json = app.get(url).text
         val data = tryParseJson<TomResponse>(json) ?: return
 
@@ -841,7 +845,6 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit
     ) {
         invokeWpredis(
-            id,
             title,
             year,
             season,
@@ -861,7 +864,6 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit
     ) {
         invokeWpredis(
-            id,
             title,
             year,
             season,
@@ -873,7 +875,6 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     private suspend fun invokeWpredis(
-        id: String? = null,
         title: String? = null,
         year: Int? = null,
         season: Int? = null,
@@ -886,9 +887,9 @@ object CineStreamExtractors : CineStreamProvider() {
         val cfInterceptor = CloudflareKiller()
         val fixtitle = title?.substringBefore("-")?.substringBefore(":")?.replace("&", " ")
         val url = if (season == null) {
-            "$api/search/$id"
+            "$api/search/$fixtitle $year"
         } else {
-            "$api/search/$id $year"
+            "$api/search/$fixtitle season $season"
         }
         val domain= api.substringAfter("//").substringBefore(".")
         app.get(url, interceptor = cfInterceptor).document.select("#main-content article")

@@ -74,7 +74,7 @@ open class CineStreamProvider : MainAPI() {
         const val moviesAPI = "https://moviesapi.club"
         const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
         //const val FilmyxyAPI = "https://filmxy.wafflehacker.io"
-        const val AutoembedDramaAPI = "https://asian-drama.autoembed.cc"
+        const val AutoembedDramaAPI = "https://drama.autoembed.cc"
         const val RarAPI = "https://nepu.to"
         const val hianimeAPI = "https://hianime.to"
         const val animepaheAPI = "https://animepahe.ru"
@@ -350,7 +350,6 @@ open class CineStreamProvider : MainAPI() {
             argamap(
                 {
                     if(!res.isBollywood) invokeVegamovies(
-                        res.id,
                         res.title,
                         seasonYear,
                         res.season,
@@ -394,7 +393,6 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     if(res.isBollywood) invokeRogmovies(
-                        res.id,
                         res.title,
                         seasonYear,
                         res.season,
