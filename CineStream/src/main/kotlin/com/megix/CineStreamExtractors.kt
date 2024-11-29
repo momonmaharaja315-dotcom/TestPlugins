@@ -67,6 +67,7 @@ object CineStreamExtractors : CineStreamProvider() {
             "Referer" to "$AutoembedAPI/"
         )
         val json = app.get(url).text
+        Log.d("TOM", json)
         val data = tryParseJson<TomResponse>(json) ?: return
 
         callback.invoke(
