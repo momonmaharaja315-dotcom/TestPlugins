@@ -838,7 +838,6 @@ object CineStreamExtractors : CineStreamProvider() {
     suspend fun invokeRogmovies(
         id: String? = null,
         title: String? = null,
-        year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
@@ -857,7 +856,6 @@ object CineStreamExtractors : CineStreamProvider() {
     suspend fun invokeVegamovies(
         id: String? = null,
         title: String? = null,
-        year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
