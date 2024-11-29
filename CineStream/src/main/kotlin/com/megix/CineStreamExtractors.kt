@@ -836,7 +836,6 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeRogmovies(
-        id: String? = null,
         title: String? = null,
         year: Int? = null,
         season: Int? = null,
@@ -845,8 +844,8 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit
     ) {
         invokeWpredis(
+            id,
             title,
-            year,
             season,
             episode,
             subtitleCallback,
@@ -855,7 +854,6 @@ object CineStreamExtractors : CineStreamProvider() {
         )
     }
     suspend fun invokeVegamovies(
-        id: String? = null,
         title: String? = null,
         year: Int? = null,
         season: Int? = null,
@@ -864,8 +862,8 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit
     ) {
         invokeWpredis(
+            id,
             title,
-            year,
             season,
             episode,
             subtitleCallback,
@@ -875,8 +873,8 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     private suspend fun invokeWpredis(
+        id: String? = null,
         title: String? = null,
-        year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
@@ -886,11 +884,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val (seasonSlug, episodeSlug) = getEpisodeSlug(season, episode)
         val cfInterceptor = CloudflareKiller()
         val fixtitle = title?.substringBefore("-")?.substringBefore(":")?.replace("&", " ")
-        val url = if (season == null) {
-            "$api/search/$fixtitle $year"
-        } else {
-            "$api/search/$fixtitle season $season"
-        }
+        val url = "$api/search/$id"
         val domain= api.substringAfter("//").substringBefore(".")
         app.get(url, interceptor = cfInterceptor).document.select("#main-content article")
             .filter { element ->

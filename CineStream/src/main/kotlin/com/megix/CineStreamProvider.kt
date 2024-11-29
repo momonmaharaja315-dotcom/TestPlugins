@@ -48,9 +48,7 @@ open class CineStreamProvider : MainAPI() {
     override val hasDownloadSupport = true
     val skipMap: MutableMap<String, Int> = mutableMapOf()
     val cinemeta_url = "https://v3-cinemeta.strem.io"
-    //val cyberflix_url = "https://cyberflix.elfhosted.com/c/catalogs"
     val kitsu_url = "https://anime-kitsu.strem.fun"
-    //val anime_catalogs_url = "https://1fe84bc728af-stremio-anime-catalogs.baby-beamup.club"
     val haglund_url = "https://arm.haglund.dev/api/v2"
     val streamio_TMDB = "https://94c8cb9f702d-tmdb-addon.baby-beamup.club"
     val mediaFusion = "https://mediafusion.elfhosted.com"
@@ -350,8 +348,8 @@ open class CineStreamProvider : MainAPI() {
             argamap(
                 {
                     if(!res.isBollywood) invokeVegamovies(
+                        res.id,
                         res.title,
-                        seasonYear,
                         res.season,
                         res.episode,
                         subtitleCallback,
@@ -393,8 +391,8 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     if(res.isBollywood) invokeRogmovies(
+                        res.id,
                         res.title,
-                        seasonYear,
                         res.season,
                         res.episode,
                         subtitleCallback,
