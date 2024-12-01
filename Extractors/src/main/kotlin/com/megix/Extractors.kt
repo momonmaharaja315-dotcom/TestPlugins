@@ -467,7 +467,10 @@ open class GDFlix : ExtractorApi() {
         val document = app.get(originalUrl).document
         val fileName = document.selectFirst("ul > li.list-group-item")?.text()?.substringAfter("Name : ") ?: ""
         document.select("div.text-center a").amap {
-            if (it.select("a").text().contains("FAST CLOUD"))
+            if (
+                it.select("a").text().contains("FAST CLOUD") &&
+                !it.select("a").text().contains("ZIP")
+            )
             {
                 val link=it.attr("href")
                 val trueurl=app.get("$mainUrl$link", timeout = 100L).document.selectFirst("a.btn-success")?.attr("href") ?:""
