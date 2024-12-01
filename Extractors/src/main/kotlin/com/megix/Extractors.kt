@@ -549,6 +549,9 @@ open class GDFlix : ExtractorApi() {
                     )
                 )
             }
+            else {
+                Log.d("No Server matched")
+            }
         }
     }
 }
