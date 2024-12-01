@@ -94,9 +94,7 @@ open class Driveseed : ExtractorApi() {
     ) {
         val document = app.get(url).document
         val quality = document.selectFirst("li.list-group-item")?.text() ?: ""
-        Log.d("quality", quality)
         val fileName = quality.replace("Name : ", "")
-        Log.d("fileName", fileName)
         document.select("div.text-center > a").amap { element ->
             val text = element.text()
             val href = element.attr("href")
@@ -433,7 +431,7 @@ class fastdlserver : GDFlix() {
     override var mainUrl = "https://fastdlserver.online"
 }
 
-class GDFlix1 : GDFlix() {
+class GDFlix3 : GDFlix() {
     override val mainUrl: String = "https://new3.gdflix.cfd"
 }
 
@@ -441,9 +439,13 @@ class GDFlix2 : GDFlix() {
     override val mainUrl: String = "https://new2.gdflix.cfd"
 }
 
+class GDFlix4 : ExtractorApi () {
+    override val mainUrl: String = "https://new4.gdflix.cfd"
+}
+
 open class GDFlix : ExtractorApi() {
     override val name: String = "GDFlix"
-    override val mainUrl: String = "https://new4.gdflix.cfd"
+    override val mainUrl: String = "https://new5.gdflix.cfd"
     override val requiresReferer = false
 
     private fun getIndexQuality(str: String?): Int {
