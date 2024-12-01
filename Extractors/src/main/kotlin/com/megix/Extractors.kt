@@ -466,11 +466,11 @@ open class GDFlix : ExtractorApi() {
         }
         val document = app.get(originalUrl).document
         val fileName = document.selectFirst("ul > li.list-group-item")?.text()?.substringAfter("Name : ") ?: ""
-        document.select("div.text-center a").map {
-            if (it.select("a").text().contains("FAST CLOUD DL"))
+        document.select("div.text-center a").amap {
+            if (it.select("a").text().contains("FAST CLOUD"))
             {
                 val link=it.attr("href")
-                val trueurl=app.get("$mainUrl$link", timeout = 30L).document.selectFirst("a.btn-success")?.attr("href") ?:""
+                val trueurl=app.get("$mainUrl$link", timeout = 100L).document.selectFirst("a.btn-success")?.attr("href") ?:""
                 callback.invoke(
                     ExtractorLink(
                         "GDFlix[Fast Cloud]",
@@ -486,47 +486,50 @@ open class GDFlix : ExtractorApi() {
                 val driveLink = it.attr("href")
                 val id = driveLink.substringAfter("id=").substringBefore("&")
                 val doId = driveLink.substringAfter("do=").substringBefore("==")
-                val indexbotlink = "https://indexbot.lol/download?id=${id}&do=${doId}"
-                val indexbotresponse = app.get(indexbotlink, timeout = 30L)
-                if(indexbotresponse.isSuccessful) {
-                    val cookiesSSID = indexbotresponse.cookies["PHPSESSID"]
-                    val indexbotDoc = indexbotresponse.document
-                    val token = Regex("""formData\.append\('token', '([a-f0-9]+)'\)""").find(indexbotDoc.toString()) ?. groupValues ?. get(1) ?: ""
-                    val postId = Regex("""fetch\('/download\?id=([a-zA-Z0-9/+]+)'""").find(indexbotDoc.toString()) ?. groupValues ?. get(1) ?: ""
+                val baseUrls = ["https://drivebot.sbs", "https://drivebot.cfd"]
+                baseUrls.amap { baseUrl ->
+                    val indexbotlink = "$baseUrl/download?id=$id&do=$doId"
+                    val indexbotresponse = app.get(indexbotlink, timeout = 100L)
+                    if(indexbotresponse.isSuccessful) {
+                        val cookiesSSID = indexbotresponse.cookies["PHPSESSID"]
+                        val indexbotDoc = indexbotresponse.document
+                        val token = Regex("""formData\.append\('token', '([a-f0-9]+)'\)""").find(indexbotDoc.toString()) ?. groupValues ?. get(1) ?: ""
+                        val postId = Regex("""fetch\('/download\?id=([a-zA-Z0-9/+]+)'""").find(indexbotDoc.toString()) ?. groupValues ?. get(1) ?: ""
 
-                    val requestBody = FormBody.Builder()
-                        .add("token", token)
-                        .build()
+                        val requestBody = FormBody.Builder()
+                            .add("token", token)
+                            .build()
 
-                    val headers = mapOf(
-                        "Referer" to indexbotlink
-                    )
-
-                    val cookies = mapOf(
-                        "PHPSESSID" to "$cookiesSSID",
-                    )
-
-                    val response = app.post(
-                        "https://indexbot.lol/download?id=${postId}",
-                        requestBody = requestBody,
-                        headers = headers,
-                        cookies = cookies,
-                        timeout = 30L
-                    ).toString()
-
-                    var downloadlink = Regex("url\":\"(.*?)\"").find(response) ?. groupValues ?. get(1) ?: ""
-
-                    downloadlink = downloadlink.replace("\\", "")
-
-                    callback.invoke(
-                        ExtractorLink(
-                            "GDFlix[IndexBot](VLC)",
-                            "GDFlix[IndexBot](VLC)  - $fileName",
-                            downloadlink,
-                            "https://indexbot.lol/",
-                            getIndexQuality(fileName)
+                        val headers = mapOf(
+                            "Referer" to indexbotlink
                         )
-                    )
+
+                        val cookies = mapOf(
+                            "PHPSESSID" to "$cookiesSSID",
+                        )
+
+                        val response = app.post(
+                            "$baseUrl/download?id=${postId}",
+                            requestBody = requestBody,
+                            headers = headers,
+                            cookies = cookies,
+                            timeout = 100L
+                        ).toString()
+
+                        var downloadlink = Regex("url\":\"(.*?)\"").find(response) ?. groupValues ?. get(1) ?: ""
+
+                        downloadlink = downloadlink.replace("\\", "")
+
+                        callback.invoke(
+                            ExtractorLink(
+                                "GDFlix[DriveBot]",
+                                "GDFlix[DriveBot] - $fileName",
+                                downloadlink,
+                                baseUrl,
+                                getIndexQuality(fileName)
+                            )
+                        )
+                    }
                 }
             }
             else if (it.select("a").text().contains("Instant DL"))
