@@ -439,7 +439,7 @@ class GDFlix2 : GDFlix() {
     override val mainUrl: String = "https://new2.gdflix.cfd"
 }
 
-class GDFlix4 : ExtractorApi () {
+class GDFlix4 : GDFlix() {
     override val mainUrl: String = "https://new4.gdflix.cfd"
 }
 
