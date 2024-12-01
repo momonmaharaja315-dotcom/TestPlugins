@@ -550,7 +550,7 @@ open class GDFlix : ExtractorApi() {
                 )
             }
             else {
-                Log.d("No Server matched")
+                Log.d("Error", "No Server matched")
             }
         }
     }
