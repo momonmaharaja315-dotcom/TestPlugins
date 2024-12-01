@@ -486,7 +486,7 @@ open class GDFlix : ExtractorApi() {
                 val driveLink = it.attr("href")
                 val id = driveLink.substringAfter("id=").substringBefore("&")
                 val doId = driveLink.substringAfter("do=").substringBefore("==")
-                val baseUrls = ["https://drivebot.sbs", "https://drivebot.cfd"]
+                val baseUrls = listOf("https://drivebot.sbs", "https://drivebot.cfd")
                 baseUrls.amap { baseUrl ->
                     val indexbotlink = "$baseUrl/download?id=$id&do=$doId"
                     val indexbotresponse = app.get(indexbotlink, timeout = 100L)
