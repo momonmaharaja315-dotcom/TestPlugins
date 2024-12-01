@@ -467,24 +467,50 @@ open class GDFlix : ExtractorApi() {
         val document = app.get(originalUrl).document
         val fileName = document.selectFirst("ul > li.list-group-item")?.text()?.substringAfter("Name : ") ?: ""
         document.select("div.text-center a").amap {
+            val text = it.select("a").text()
             if (
-                it.select("a").text().contains("FAST CLOUD") &&
-                !it.select("a").text().contains("ZIP")
+                text.contains("FAST CLOUD") &&
+                !text.contains("ZIP")
             )
             {
                 val link=it.attr("href")
-                val trueurl=app.get("$mainUrl$link", timeout = 100L).document.selectFirst("a.btn-success")?.attr("href") ?:""
+                if(link.contains("mkv") || link.contains("mp4")) {
+                    callback.invoke(
+                        ExtractorLink(
+                            "GDFlix[Fast Cloud]",
+                            "GDFLix[Fast Cloud] - $fileName",
+                            link,
+                            "",
+                            getIndexQuality(fileName),
+                        )
+                    )
+                }
+                else {
+                    val trueurl=app.get("$mainUrl$link", timeout = 100L).document.selectFirst("a.btn-success")?.attr("href") ?:""
+                    callback.invoke(
+                        ExtractorLink(
+                            "GDFlix[Fast Cloud]",
+                            "GDFLix[Fast Cloud] - $fileName",
+                            trueurl,
+                            "",
+                            getIndexQuality(fileName)
+                        )
+                    )
+                }
+            }
+            else if(text.contains("DIRECT DL")) {
+                val link = it.attr("href")
                 callback.invoke(
                     ExtractorLink(
-                        "GDFlix[Fast Cloud]",
-                        "GDFLix[Fast Cloud] - $fileName",
-                        trueurl,
+                        "GDFlix[Direct]",
+                        "GDFLix[Direct] - $fileName",
+                        link,
                         "",
-                        getIndexQuality(fileName)
+                        getIndexQuality(fileName),
                     )
                 )
             }
-            else if (it.select("a").text().contains("DRIVEBOT LINK"))
+            else if (text.contains("DRIVEBOT LINK"))
             {
                 val driveLink = it.attr("href")
                 val id = driveLink.substringAfter("id=").substringBefore("&")
