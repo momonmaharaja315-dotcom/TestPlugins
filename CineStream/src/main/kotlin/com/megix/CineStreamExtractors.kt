@@ -375,7 +375,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 var lang=""
                 val dub=it.select("span").text()
                 if (dub.contains("eng")) lang="DUB" else lang="SUB"
-                val quality = it.attr("data-resolution").toIntOrNull() ?: Qualities.Unknown.value
+                val quality = it.attr("data-resolution")
                 val href = it.attr("data-src")
                 if (href.contains("kwik.si")) {
                     loadCustomExtractor(
@@ -384,7 +384,7 @@ object CineStreamExtractors : CineStreamProvider() {
                         mainUrl,
                         subtitleCallback,
                         callback,
-                        quality
+                        getQualityFromName(quality)
                     )
                 }
             }
