@@ -92,6 +92,9 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
         if(tvType == "series") {
             val tvSeriesEpisodes = mutableListOf<Episode>()
             var hTags = document.select("h3:matches((?i)(4K|[0-9]*0p))")
+            if(hTags.isEmpty()) {
+                hTags = document.select("a.maxbutton-5")
+            }
             val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
 
             hTags.mapNotNull{ hTag ->
@@ -99,8 +102,13 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
                 val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
                 val matchResult = realSeasonRegex.find(seasonText.toString())
                 val realSeason = matchResult?.groupValues?.get(1)?.toIntOrNull() ?: 0
-                val spanTag = hTag.nextElementSibling()
-                var seasonLink = spanTag ?.selectFirst("a")?.attr("href").toString()
+                var seasonLink =  if(hTag.tagName() == "a") {
+                    hTag.attr("href")
+                }
+                else {
+                    val spanTag = hTag.nextElementSibling()
+                    spanTag ?.selectFirst("a")?.attr("href").toString()
+                }
                 if(seasonLink.contains("luxedailyupdates.xyz")) {
                     seasonLink = bypass(seasonLink)
                 }

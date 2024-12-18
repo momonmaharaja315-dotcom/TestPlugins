@@ -116,7 +116,11 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
         else {
-            document.select("div.wp-content > div:matches((?i)(Season $season))").amap { div ->
+            var season = document.select("span.maxbutton-5-container:matches((?i)(Season $season))")
+            if(season.isEmpty()) {
+                document.select("div.wp-content > div:matches((?i)(Season $season))")
+            }
+            season.amap { div ->
                 val link = cinemaluxeBypass(div.select("a").attr("href"))
                  app.get(link).document.select("""a.maxbutton:matches((?i)(?:episode\s*[-]?\s*)(0?$episode))""").amap {
                     loadSourceNameExtractor(
