@@ -102,9 +102,9 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = searchDocument.select("div.title > a:matches((?i)($title $year))").attr("href")
         val document = app.get(url).document
         if(season == null) {
-            document.select("a.maxbutton").map {
+            document.select("a.maxbutton").amap {
                 val link = cinemaluxeBypass(it.attr("href"))
-                app.get(link).document.select("a.maxbutton").map {
+                app.get(link).document.select("a.maxbutton").amap {
                     loadSourceNameExtractor(
                         "Cinemaluxe",
                         it.attr("href"),
@@ -118,7 +118,7 @@ object CineStreamExtractors : CineStreamProvider() {
         else {
             document.select("div.wp-content > div:matches((?i)(Season $season))").amap { div ->
                 val link = cinemaluxeBypass(div.select("a").attr("href"))
-                 app.get(link).document.select("a:matches((?i)(Episode $episode))").amap {
+                 app.get(link).document.select("a.maxbutton:matches((?i)(Episode $episode))").amap {
                     loadSourceNameExtractor(
                         "Cinemaluxe",
                         it.attr("href"),
