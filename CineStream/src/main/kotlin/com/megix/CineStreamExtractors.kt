@@ -118,7 +118,7 @@ object CineStreamExtractors : CineStreamProvider() {
         else {
             document.select("div.wp-content > div:matches((?i)(Season $season))").amap { div ->
                 val link = cinemaluxeBypass(div.select("a").attr("href"))
-                 app.get(link).document.select("a.maxbutton:matches((?i)(Episode $episode))").amap {
+                 app.get(link).document.select("a.maxbutton:matches((?i)(?:episode\s*[-]?\s*)(0?$episode))").amap {
                     loadSourceNameExtractor(
                         "Cinemaluxe",
                         it.attr("href"),
