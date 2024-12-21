@@ -210,11 +210,20 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        val sources = parseJson<ArrayList<EpisodeLink>>(data)
-        sources.amap {
-            val source = it.source
-            loadExtractor(source, subtitleCallback, callback)
-        }
+        callback.invoke(
+            ExtractorLink(
+                "Bollyflix",
+                "Bollyflix",
+                data,
+                "",
+                Qualties.Unknown.value,
+            )
+        )
+        // val sources = parseJson<ArrayList<EpisodeLink>>(data)
+        // sources.amap {
+        //     val source = it.source
+        //     loadExtractor(source, subtitleCallback, callback)
+        // }
         return true
     }
 
