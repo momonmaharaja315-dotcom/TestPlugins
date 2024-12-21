@@ -455,7 +455,7 @@ open class GDFlix : ExtractorApi() {
         callback: (ExtractorLink) -> Unit
     ) {
         var originalUrl = url
-        if (originalUrl.startsWith("$mainUrl/goto/token/")) {
+        if (originalUrl.startsWith("https://new6.gdflix.cfd/goto/token/")) {
             val partialurl = app.get(originalUrl).text.substringAfter("replace(\"").substringBefore("\")")
             originalUrl = mainUrl + partialurl
         }
@@ -481,7 +481,7 @@ open class GDFlix : ExtractorApi() {
                     )
                 }
                 else {
-                    val trueurl=app.get("$mainUrl$link", timeout = 100L).document.selectFirst("a.btn-success")?.attr("href") ?:""
+                    val trueurl=app.get("https://new6.gdflix.cfd$link", timeout = 100L).document.selectFirst("a.btn-success")?.attr("href") ?:""
                     callback.invoke(
                         ExtractorLink(
                             "GDFlix[Fast Cloud]",
@@ -507,7 +507,7 @@ open class GDFlix : ExtractorApi() {
             }
             else if(text.contains("Index Links")) {
                 val link = it.attr("href")
-                val doc = app.get("$mainUrl$link").document
+                val doc = app.get("https://new6.gdflix.cfd$link").document
                 doc.select("a.btn.btn-outline-info").amap {
                     val serverUrl = mainUrl + it.attr("href")
                     app.get(serverUrl).document.select("div.mb-4 > a").amap {
@@ -583,6 +583,18 @@ open class GDFlix : ExtractorApi() {
                     ExtractorLink(
                         "GDFlix[Instant Download]",
                         "GDFlix[Instant Download] - $fileName",
+                        link,
+                        "",
+                        getIndexQuality(fileName)
+                    )
+                )
+            }
+            else if(text.contains("CLOUD DOWNLOAD [FSL]")) {
+                val link = it.attr("href").substringAfter("url=")
+                callback.invoke(
+                    ExtractorLink(
+                        "GDFlix[FSL Instant Download]",
+                        "GDFlix[FSL Instant Download] - $fileName",
                         link,
                         "",
                         getIndexQuality(fileName)
