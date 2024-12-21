@@ -56,9 +56,9 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
-        val title = this.selectFirst("a") ?. attr("title") ?. replace("Download ", "").toString()
-        val href = this.selectFirst("a") ?. attr("href").toString()
-        val posterUrl = this.selectFirst("img") ?. attr("src").toString()
+        val title = this.select("a").attr("title").replace("Download ", "")
+        val href = this.select("a").attr("href")
+        val posterUrl = this.select("img").attr("src")
     
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
@@ -216,7 +216,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
                 "Bollyflix",
                 data,
                 "",
-                Qualties.Unknown.value,
+                Qualities.Unknown.value,
             )
         )
         // val sources = parseJson<ArrayList<EpisodeLink>>(data)
