@@ -140,15 +140,14 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
                     .filter { element -> !element.text().contains("Zip", true) }
                 var e = 1
                 epLinks.mapNotNull {
-                    val epUrl = app.get(it.attr("href"), allowRedirects = false).headers["location"].toString()
                     val key = Pair(realSeason, e)
                     if (episodesMap.containsKey(key)) {
                         val currentList = episodesMap[key] ?: emptyList()
                         val newList = currentList.toMutableList()
-                        newList.add(epUrl)
+                        newList.add(it.attr("href"))
                         episodesMap[key] = newList
                     } else {
-                        episodesMap[key] = mutableListOf(epUrl)
+                        episodesMap[key] = mutableListOf(it.attr("href"))
                     }
                     e++
                 }
@@ -188,9 +187,8 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
             val data = document.select("a.dl").amap {
                 val id = it.attr("href").substringAfterLast("id=").toString()
                 val decodeUrl = bypass(id)
-                val source = app.get(decodeUrl, allowRedirects = false).headers["location"].toString()
                 EpisodeLink(
-                    source
+                    decodeUrl
                 )
             }
             return newMovieLoadResponse(title, url, TvType.Movie, data) {
@@ -212,20 +210,11 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        callback.invoke(
-            ExtractorLink(
-                "Bollyflix",
-                "Bollyflix",
-                data,
-                "",
-                Qualities.Unknown.value,
-            )
-        )
-        // val sources = parseJson<ArrayList<EpisodeLink>>(data)
-        // sources.amap {
-        //     val source = it.source
-        //     loadExtractor(source, subtitleCallback, callback)
-        // }
+        val sources = parseJson<ArrayList<EpisodeLink>>(data)
+        sources.amap {
+            val source = it.source
+            loadExtractor(source, subtitleCallback, callback)
+        }
         return true
     }
 

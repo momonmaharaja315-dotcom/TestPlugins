@@ -454,12 +454,7 @@ open class GDFlix : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        var originalUrl = url
-        if (originalUrl.startsWith("https://new6.gdflix.cfd/goto/token/")) {
-            val partialurl = app.get(originalUrl).text.substringAfter("replace(\"").substringBefore("\")")
-            originalUrl = mainUrl + partialurl
-        }
-        val document = app.get(originalUrl).document
+        val document = app.get(url).document
         val fileName = document.selectFirst("ul > li.list-group-item")?.text()?.substringAfter("Name : ") ?: ""
         document.select("div.text-center a").amap {
             val text = it.select("a").text()
