@@ -140,14 +140,15 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
                     .filter { element -> !element.text().contains("Zip", true) }
                 var e = 1
                 epLinks.mapNotNull {
+                    val epUrl = app.get(url).document.select("body").attr("onload").substringAfter("location.replace('").substringBefore("'+document")
                     val key = Pair(realSeason, e)
                     if (episodesMap.containsKey(key)) {
                         val currentList = episodesMap[key] ?: emptyList()
                         val newList = currentList.toMutableList()
-                        newList.add(it.attr("href"))
+                        newList.add(epUrl)
                         episodesMap[key] = newList
                     } else {
-                        episodesMap[key] = mutableListOf(it.attr("href"))
+                        episodesMap[key] = mutableListOf(epUrl)
                     }
                     e++
                 }
@@ -187,8 +188,9 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
             val data = document.select("a.dl").amap {
                 val id = it.attr("href").substringAfterLast("id=").toString()
                 val decodeUrl = bypass(id)
+                val source = app.get(decodeUrl).document.select("body").attr("onload").substringAfter("location.replace('").substringBefore("'+document")
                 EpisodeLink(
-                    decodeUrl
+                    source
                 )
             }
             return newMovieLoadResponse(title, url, TvType.Movie, data) {
