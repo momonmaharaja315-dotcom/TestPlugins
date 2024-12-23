@@ -38,9 +38,9 @@ object CineStreamExtractors : CineStreamProvider() {
         val data = tryParseJson<ArrayList<AnimeOwlResponse>>(json) ?: return
         val slug = data[0].slug
         val url = "$animeOwlAPI/anime/$slug"
-        val doc = app.get(url).document
+        var doc = app.get(url).document
         val sub = document.select("""div#anime-cover-sub-content a:matches($episode)""").attr("href")
-        val doc = app.get(sub).document
+        doc = app.get(sub).document
         val dataSrc = doc.select("button#hot-anime-tab").attr("data-source")
         val id = dataSrc.substringAfterLast("/")
         val text = app.get("$animeOwlAPI/players/$id.v2.js").document.toString()
