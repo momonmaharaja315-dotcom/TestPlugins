@@ -35,45 +35,45 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         val json = app.get("$animeOwlAPI/api/live-search/$title").text
-        callback.invoke(
-            ExtractorLink(
-                "Animeowl json",
-                "Animeowl json",
-                json,
-                "",
-                Qualities.Unknown.value,
-            )
-        )
         val data = tryParseJson<ArrayList<AnimeOwlResponse>>(json) ?: return
         val slug = data[0].slug
         val url = "$animeOwlAPI/anime/$slug"
-        callback.invoke(
-            ExtractorLink(
-                "Animeowl[url]",
-                "Animeowl[url]",
-                url,
-                "",
-                Qualities.Unknown.value,
-            )
-        )
         val document = app.get(url).document
         val sub = document.select("""div#anime-cover-sub-content a:matches($episode)""").attr("href")
         val doc = app.get(sub).document
         val dataSrc = doc.select("button#hot-anime-tab").attr("data-source")
         val id = dataSrc.substringAfterLast("/")
         val text = app.get("$animeOwlAPI/players/$id.v2.js").document.toString()
+        val epJS = JsUnpacker(text).unpack() ?: return
         callback.invoke(
             ExtractorLink(
-                "Animeowl[text]",
-                "Animeowl[text]",
-                text,
+                "Animeowl[epjs]",
+                "Animeowl[epjs]",
+                epJS,
                 "",
                 Qualities.Unknown.value,
             )
         )
-        val epJS = JsUnpacker(text).unpack() ?: return
         val jwt = findFirstJwt(epJS) ?: return
+        callback.invoke(
+            ExtractorLink(
+                "Animeowl[jwt]",
+                "Animeowl[jwt]",
+                jwt,
+                "",
+                Qualities.Unknown.value,
+            )
+        )
         val servers = app.get("$animeOwlAPI/$dataSrc").text
+        callback.invoke(
+            ExtractorLink(
+                "Animeowl[servers]",
+                "Animeowl[servers]",
+                servers,
+                "",
+                Qualities.Unknown.value,
+            )
+        )
         val serverJson = tryParseJson<AnimeOwlServers>(servers) ?: return
         serverJson.kaido?.let {
             callback.invoke(
