@@ -17,6 +17,80 @@ import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    data class AnimeOwlResponse(
+        val id: Int,
+        val slug: String,
+    )
+
+    data class AnimeOwlServers(
+        val kaido: String? = null,
+        val luffy: String? = null,
+        val zoro: String? = null,
+    )
+
+    suspend fun invokeAnimeowl(
+        title: String,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        val json = app.get("$animeOwlAPI/api/live-search/$title").text
+        val data = tryParseJson<ArrayList<AnimeOwlResponse>>(json) ?: return
+        val slug = data[0].slug
+        val url = "$animeOwlAPI/anime/$slug"
+        val doc = app.get(url).document
+        val sub = document.select("""div#anime-cover-sub-content a:matches($episode)""").attr("href")
+        val doc = app.get(sub).document
+        val dataSrc = doc.select("button#hot-anime-tab").attr("data-source")
+        val id = dataSrc.substringAfterLast("/")
+        val text = app.get("$animeOwlAPI/players/$id.v2.js").document.toString()
+        val epJS = JsUnpacker(text).unpack() ?: return
+        val jwt = findFirstJwt(epJS) ?: return
+        val servers = app.get("$animeOwlAPI/$dataSrc").text
+        val serverJson = tryParseJson<AnimeOwlServers>(servers) ?: return
+        serverJson.kaido?.let {
+            callback.invoke(
+                ExtractorLink(
+                    "Animeowl",
+                    "Animeowl",
+                    it,
+                    "",
+                    Qualities.Unknown.value,
+                    INFER_TYPE
+                )
+            )
+        }
+        serverJson.luffy?.let {
+            callback.invoke(
+                ExtractorLink(
+                    "Animeowl",
+                    "Animeowl",
+                    it,
+                    "",
+                    Qualities.Unknown.value,
+                    INFER_TYPE
+                )
+            )
+        }
+        serverJson.zoro?.let {
+            callback.invoke(
+                ExtractorLink(
+                    "Animeowl",
+                    "Animeowl",
+                    it,
+                    "",
+                    Qualities.Unknown.value,
+                    INFER_TYPE
+                )
+            )
+        }
+    }
+
+    private fun findFirstJwt(text: String): String? {
+        val jwtPattern = Regex("['\"]([A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+)['\"]")
+        return jwtPattern.find(text)?.groupValues?.get(1)
+    }
+
     suspend fun invokeTorrentio(
         id: String? = null,
         season: Int? = null,

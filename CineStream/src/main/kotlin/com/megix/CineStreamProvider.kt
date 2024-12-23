@@ -78,6 +78,7 @@ open class CineStreamProvider : MainAPI() {
         const val cinemaluxeAPI = "https://cinemaluxe.click"
         const val bollyflixAPI = "https://bollyflix.meme"
         const val TomAPI = "https://tom.autoembed.cc"
+        const val animeOwlAPI = "https://animeowl.live"
         const val torrentioAPI = "https://torrentio.strem.fun"
         const val TRACKER_LIST_URL = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all_ip.txt"
         const val torrentioCONFIG = "providers=yts,eztv,rarbg,1337x,thepiratebay,kickasstorrents,torrentgalaxy,magnetdl,horriblesubs,nyaasi,tokyotosho,anidex|sort=seeders|qualityfilter=threed,480p,other,scr,cam,unknown|limit=10"
@@ -319,6 +320,14 @@ open class CineStreamProvider : MainAPI() {
 
         if(res.isKitsu) {
             argamap(
+                {
+                    invokeAnimeowl(
+                        res.title,
+                        res.episode,
+                        subtitleCallback,
+                        callback
+                    )
+                },
                 {
                     invokeAnimes(
                         res.malId,
