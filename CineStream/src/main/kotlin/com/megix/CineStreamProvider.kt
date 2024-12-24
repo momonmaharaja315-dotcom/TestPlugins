@@ -37,7 +37,7 @@ import com.megix.CineStreamExtractors.invokeCinemaluxe
 import com.megix.CineStreamExtractors.invokeBollyflix
 import com.megix.CineStreamExtractors.invokeTom
 import com.megix.CineStreamExtractors.invokeTorrentio
-import com.megix.CineStreamExtractors.invokeAnimeowl
+import com.megix.CineStreamExtractors.invokeDramaCool
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -57,7 +57,7 @@ open class CineStreamProvider : MainAPI() {
         const val rogMoviesAPI = "https://rogmovies.com"
         const val MovieDrive_API = "https://moviesdrive.cloud"
         const val topmoviesAPI = "https://topmovies.bet"
-        const val MoviesmodAPI = "https://moviesmod.bot"
+        const val MoviesmodAPI = "https://moviesmod.red"
         const val Full4MoviesAPI = "https://www.full4movies.express"
         const val stremifyAPI = "https://stremify.hayd.uk/stream"
         const val W4UAPI = "https://world4ufree.observer"
@@ -67,6 +67,7 @@ open class CineStreamProvider : MainAPI() {
         const val WHVXAPI = "https://api.whvx.net"
         const val uhdmoviesAPI = "https://uhdmovies.bet"
         const val WHVX_TOKEN = BuildConfig.WHVX_TOKEN
+        const val CONSUMET_API = BuildConfig.CONSUMET_API
         const val moviesAPI = "https://moviesapi.club"
         const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
         //const val FilmyxyAPI = "https://filmxy.wafflehacker.io"
@@ -76,10 +77,9 @@ open class CineStreamProvider : MainAPI() {
         const val viteAPI = "https://viet.autoembed.cc"
         const val multimoviesAPI = "https://multimovies.lat"
         const val anitaku = "https://anitaku.pe"
-        const val cinemaluxeAPI = "https://cinemaluxe.click"
+        const val cinemaluxeAPI = "https://cinemaluxe.fans"
         const val bollyflixAPI = "https://bollyflix.meme"
         const val TomAPI = "https://tom.autoembed.cc"
-        const val animeOwlAPI = "https://animeowl.live"
         const val torrentioAPI = "https://torrentio.strem.fun"
         const val TRACKER_LIST_URL = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all_ip.txt"
         const val torrentioCONFIG = "providers=yts,eztv,rarbg,1337x,thepiratebay,kickasstorrents,torrentgalaxy,magnetdl,horriblesubs,nyaasi,tokyotosho,anidex|sort=seeders|qualityfilter=threed,480p,other,scr,cam,unknown|limit=10"
@@ -322,14 +322,6 @@ open class CineStreamProvider : MainAPI() {
         if(res.isKitsu) {
             argamap(
                 {
-                    invokeAnimeowl(
-                        res.title,
-                        res.episode,
-                        subtitleCallback,
-                        callback
-                    )
-                },
-                {
                     invokeAnimes(
                         res.malId,
                         res.anilistId,
@@ -454,6 +446,16 @@ open class CineStreamProvider : MainAPI() {
                         res.episode,
                         callback,
                         subtitleCallback,
+                    )
+                },
+                {
+                    if(res.isAsian) invokeDramaCool(
+                        res.title,
+                        year,
+                        res.season,
+                        res.episode,
+                        subtitleCallback,
+                        callback
                     )
                 },
                 {

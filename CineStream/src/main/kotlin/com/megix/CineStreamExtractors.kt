@@ -17,105 +17,63 @@ import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 
 object CineStreamExtractors : CineStreamProvider() {
 
-    data class AnimeOwlResponse(
-        val id: Int,
-        val slug: String,
-    )
-
-    data class AnimeOwlServers(
-        val kaido: String? = null,
-        val luffy: String? = null,
-        val zoro: String? = null,
-    )
-
-    suspend fun invokeAnimeowl(
+    suspend fun invokeDramaCool(
         title: String,
+        year: Int? = null,
+        season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        val json = app.get("$animeOwlAPI/api/live-search/$title").text
-        val data = tryParseJson<ArrayList<AnimeOwlResponse>>(json) ?: return
-        val slug = data[0].slug
-        val url = "$animeOwlAPI/anime/$slug"
-        val document = app.get(url).document
-        val sub = document.select("""div#anime-cover-sub-content a:matches($episode)""").attr("href")
-        val doc = app.get(sub).document
-        val dataSrc = doc.select("button#hot-anime-tab").attr("data-source")
-        val id = dataSrc.substringAfterLast("/")
-        val text = app.get("$animeOwlAPI/players/$id.v2.js").document.toString()
-        val epJS = JsUnpacker(text).unpack() ?: return
-        callback.invoke(
-            ExtractorLink(
-                "Animeowl[epjs]",
-                "Animeowl[epjs]",
-                epJS,
-                "",
-                Qualities.Unknown.value,
-            )
-        )
-        val jwt = findFirstJwt(epJS) ?: return
-        callback.invoke(
-            ExtractorLink(
-                "Animeowl[jwt]",
-                "Animeowl[jwt]",
-                jwt,
-                "",
-                Qualities.Unknown.value,
-            )
-        )
-        val servers = app.get("$animeOwlAPI/$dataSrc").text
-        callback.invoke(
-            ExtractorLink(
-                "Animeowl[servers]",
-                "Animeowl[servers]",
-                servers,
-                "",
-                Qualities.Unknown.value,
-            )
-        )
-        val serverJson = tryParseJson<AnimeOwlServers>(servers) ?: return
-        serverJson.kaido?.let {
+        val json = if(season == null && episode == null) {
+            var episodeSlug = "$title episode 1".createSlug()
+            val url = "${CONSUMET_API}/movies/dramacool/watch?episodeId=${episodeSlug}"
+            val res = app.get(url).text
+            if(res.contains("Media Not found")) {
+                val newEpisodeSlug = "$title $year episode 1".createSlug()
+                val newUrl = "$CONSUMET_API/movies/dramacool/watch?episodeId=${newEpisodeSlug}"
+                app.get(newUrl).text
+            }
+            else {
+                res
+            }
+        }
+        else {
+            val seasonText = if(season == 1) "" else "season $season"
+            val episodeSlug = "$title $seasonText episode $episode".createSlug()
+            val url =  "${CONSUMET_API}/movies/dramacool/watch?episodeId=${episodeSlug}"
+            val res = app.get(url).text
+            if(res.contains("Media Not found")) {
+                val newEpisodeSlug = "$title $seasonText $year episode $episode".createSlug()
+                val newUrl = "$CONSUMET_API/movies/dramacool/watch?episodeId=${newEpisodeSlug}"
+                app.get(newUrl).text
+            }
+            else {
+                res
+            }
+        }
+        val data = parseJson<ConsumetSources>(json)
+        data.sources?.forEach {
             callback.invoke(
                 ExtractorLink(
-                    "Animeowl",
-                    "Animeowl",
-                    it,
-                    "",
-                    Qualities.Unknown.value,
-                    INFER_TYPE
+                    "DramaCool",
+                    "DramaCool",
+                    it.url,
+                    referer = "",
+                    quality = Qualities.P1080.value,
+                    isM3u8 = true
                 )
             )
         }
-        serverJson.luffy?.let {
-            callback.invoke(
-                ExtractorLink(
-                    "Animeowl",
-                    "Animeowl",
-                    it,
-                    "",
-                    Qualities.Unknown.value,
-                    INFER_TYPE
-                )
-            )
-        }
-        serverJson.zoro?.let {
-            callback.invoke(
-                ExtractorLink(
-                    "Animeowl",
-                    "Animeowl",
-                    it,
-                    "",
-                    Qualities.Unknown.value,
-                    INFER_TYPE
-                )
-            )
-        }
-    }
 
-    private fun findFirstJwt(text: String): String? {
-        val jwtPattern = Regex("['\"]([A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+\\.[A-Za-z0-9-_]+)['\"]")
-        return jwtPattern.find(text)?.groupValues?.get(1)
+        data.subtitles?.forEach {
+            subtitleCallback.invoke(
+                SubtitleFile(
+                    it.lang,
+                    it.url
+                )
+            )
+        }
     }
 
     suspend fun invokeTorrentio(
@@ -421,7 +379,8 @@ object CineStreamExtractors : CineStreamProvider() {
 
         argamap(
             {
-                invokeHianime(zoroIds, episode, subtitleCallback, callback)
+                val hianimeurl=malsync?.zoro?.firstNotNullOf { it.value["url"] }
+                invokeHianime(zoroIds, hianimeurl, episode, subtitleCallback, callback)
             },
             {
                 val animepahe = malsync?.animepahe?.firstNotNullOfOrNull { it.value["url"] }
@@ -1254,50 +1213,44 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     private suspend fun invokeHianime(
-        animeIds: List<String?>? = null,
+        url: String? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val headers = mapOf(
-            "X-Requested-With" to "XMLHttpRequest",
-        )
-        animeIds?.apmap { id ->
-            val episodeId = app.get(
-                "$hianimeAPI/ajax/v2/episode/list/${id ?: return@apmap}",
-                headers = headers
-            ).parsedSafe<HianimeResponses>()?.html?.let {
-                Jsoup.parse(it)
-            }?.select("div.ss-list a")
-                ?.find { it.attr("data-number") == "${episode ?: 1}" }
-                ?.attr("data-id")
+        val id = url?.substringAfterLast("/") ?: return
+        val json = app.get("$CONSUMET_API/anime/zoro/info?id=$id").text
+        val data = tryParseJson<HiAnime>(json) ?: return
+        val epId = data.episodes.find { it.number == episode }?.id ?: return
+        val types =  mutableListOf("sub")
+        if(data.subOrDub == "both") types.add("dub")
+        val servers = mutableListOf("vidstreaming", "vidcloud")
+        types.amap { t ->
+            servers.amap { server ->
+                val epJson = app.get("$CONSUMET_API/anime/zoro/watch?episodeId=${epID.replace("both", t)}&server=$server").text
+                val epData = tryParseJson<HiAnimeMedia>(epJson) ?: return@amap
 
-            val servers = app.get(
-                "$hianimeAPI/ajax/v2/episode/servers?episodeId=${episodeId ?: return@apmap}",
-                headers = headers
-            ).parsedSafe<HianimeResponses>()?.html?.let { Jsoup.parse(it) }
-                ?.select("div.item.server-item")?.map {
-                    Triple(
-                        it.text(),
-                        it.attr("data-id"),
-                        it.attr("data-type"),
+                epData.sources.amap {
+                    callback.invoke(
+                        ExtractorLink(
+                            "HiAnime $server $t",
+                            "HiAnime $server $t",
+                            it.url,
+                            "",
+                            Qualities.Unknown.value,
+                            if(it.type == "hls") true else false
+                        )
                     )
                 }
 
-            servers?.map servers@{ server ->
-                val iframe = app.get(
-                    "$hianimeAPI/ajax/v2/episode/sources?id=${server.second ?: return@servers}",
-                    headers = headers
-                ).parsedSafe<HianimeResponses>()?.link
-                    ?: return@servers
-                val audio = if (server.third == "sub") "Raw" else "English Dub"
-                loadCustomTagExtractor(
-                    "HiAnime ${server.first} [$audio]",
-                    iframe,
-                    "$hianimeAPI/",
-                    subtitleCallback,
-                    callback,
-                )
+                epData.subtitles.amap {
+                    subtitleCallback.invoke(
+                        SubtitleFile(
+                            it.url,
+                            it.lang
+                        )
+                    )
+                }
             }
         }
     }
