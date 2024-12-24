@@ -7,7 +7,7 @@ android {
         val properties = Properties()
         properties.load(project.rootProject.file("local.properties").inputStream())
         buildConfigField("String", "WHVX_TOKEN", "\"${properties.getProperty("WHVX_TOKEN")}\"")
-        buildConfigField("String", "CONSUMET_API", "\"${properties.getProperty("CONSUMET_API)}\"")
+        buildConfigField("String", "CONSUMET_API", "\"${properties.getProperty("CONSUMET_API")}\"")
     }
 }
 
