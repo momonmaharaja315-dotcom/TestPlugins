@@ -43,7 +43,7 @@ jobs:
       - name: Access Secrets
         env:
           WHVX_TOKEN: ${{ secrets.WHVX_TOKEN }}
-          CONSUMET_API: ${{ secrets.WHVX_TOKEN }}
+          CONSUMET_API: ${{ secrets.CONSUMET_API }}
         run: |
           cd $GITHUB_WORKSPACE/src
           echo WHVX_TOKEN=$WHVX_TOKEN >> local.properties

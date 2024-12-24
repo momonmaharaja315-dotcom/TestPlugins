@@ -1220,6 +1220,15 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val id = url?.substringAfterLast("/") ?: return
         val json = app.get("$CONSUMET_API/anime/zoro/info?id=$id").text
+        callback.invoke(
+            ExtractorLink(
+                "HiAnime json",
+                "HiAnime json",
+                json,
+                "",
+                Qualities.Unknown.value,
+            )
+        )
         val data = tryParseJson<HiAnime>(json) ?: return
         val epId = data.episodes.find { it.number == episode }?.id ?: return
         val types =  mutableListOf("sub")
@@ -1228,6 +1237,15 @@ object CineStreamExtractors : CineStreamProvider() {
         types.amap { t ->
             servers.amap { server ->
                 val epJson = app.get("$CONSUMET_API/anime/zoro/watch?episodeId=${epId.replace("both", t)}&server=$server").text
+                callback.invoke(
+                    ExtractorLink(
+                    "HiAnime epjson",
+                    "HiAnime epjson",
+                    epJson,
+                    "",
+                    Qualities.Unknown.value,
+                    )
+                )
                 val epData = tryParseJson<HiAnimeMedia>(epJson) ?: return@amap
 
                 epData.sources.amap {
