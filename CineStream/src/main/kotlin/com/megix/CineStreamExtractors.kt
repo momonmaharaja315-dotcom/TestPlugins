@@ -380,7 +380,7 @@ object CineStreamExtractors : CineStreamProvider() {
         argamap(
             {
                 val hianimeurl=malsync?.zoro?.firstNotNullOf { it.value["url"] }
-                invokeHianime(zoroIds, hianimeurl, episode, subtitleCallback, callback)
+                invokeHianime(hianimeurl, episode, subtitleCallback, callback)
             },
             {
                 val animepahe = malsync?.animepahe?.firstNotNullOfOrNull { it.value["url"] }
@@ -1227,7 +1227,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val servers = mutableListOf("vidstreaming", "vidcloud")
         types.amap { t ->
             servers.amap { server ->
-                val epJson = app.get("$CONSUMET_API/anime/zoro/watch?episodeId=${epID.replace("both", t)}&server=$server").text
+                val epJson = app.get("$CONSUMET_API/anime/zoro/watch?episodeId=${epId.replace("both", t)}&server=$server").text
                 val epData = tryParseJson<HiAnimeMedia>(epJson) ?: return@amap
 
                 epData.sources.amap {
