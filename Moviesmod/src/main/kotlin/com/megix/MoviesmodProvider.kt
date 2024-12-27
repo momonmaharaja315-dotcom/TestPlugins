@@ -219,6 +219,15 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
+        callback.invoke(
+            ExtractorLink(
+                "Test",
+                "Test",
+                data,
+                "",
+                Qualities.Unknown.value
+            )
+        )
         val sources = parseJson<ArrayList<EpisodeLink>>(data)
         sources.amap {
             loadExtractor(it.source, subtitleCallback, callback)
