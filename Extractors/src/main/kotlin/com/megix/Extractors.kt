@@ -94,15 +94,6 @@ open class Driveseed : ExtractorApi() {
     ) {
         val document = if(url.contains("r?key=")) {
             val temp = app.get(url).document.selectFirst("script")?.data()?.substringAfter("replace(\"")?.substringBefore("\")") ?: ""
-            callback.invoke(
-                ExtractorLink(
-                    "check",
-                    "check",
-                    temp,
-                    "",
-                    Qualities.Unknown.value
-                )
-            )
             app.get(mainUrl + temp).document
         }
         else {
