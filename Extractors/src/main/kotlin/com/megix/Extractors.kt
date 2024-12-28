@@ -342,21 +342,45 @@ open class HubCloud : ExtractorApi() {
         val header = document.select("div.card-header").text() ?: ""
         div?.select("h2 a.btn")?.apmap {
             val link = it.attr("href")
+            val text = it.text()
 
-            if (link.contains("technorozen.workers.dev"))
+            if (text.contains("Download [FSL Server]"))
             {
-                val iframe = getGBurl(link)
                 callback.invoke(
                     ExtractorLink(
-                        "$name[Download]",
-                        "$name[Download] - $header",
-                        iframe,
+                        "$name[FSL Server]",
+                        "$name[FSL Server] - $header",
+                        link,
                         "",
                         getIndexQuality(header),
                     )
                 )
             }
-            else if (link.contains("pixeldra.in")) {
+            else if (text.contains("Download File")) {
+                callback.invoke(
+                    ExtractorLink(
+                        "$name",
+                        "$name - $header",
+                        link,
+                        "",
+                        getIndexQuality(header),
+                    )
+                )
+            }
+            else if(text.contains("BuzzServer")) {
+                val dlink = app.get(link, allowRedirects).headers["location"] ?: ""
+                callback.invoke(
+                    ExtractorLink(
+                        "$name[BuzzServer]",
+                        "$name[BuzzServer] - $header",
+                        link.substringBeforeLast("/") + dlink,
+                        "",
+                        getIndexQuality(header),
+                    )
+                )
+            }
+
+            else if (link.contains("pixeldra")) {
                 callback.invoke(
                     ExtractorLink(
                         "Pixeldrain",
@@ -367,52 +391,21 @@ open class HubCloud : ExtractorApi() {
                     )
                 )
             }
-            else if (link.contains(".dev")) {
-                callback.invoke(
-                    ExtractorLink(
-                        name,
-                        "$name - $header",
-                        link,
-                        "",
-                        getIndexQuality(header),
-                    )
-                )
-            }
-            else if (link.contains("fastdl.lol"))
-            {
+            else if (text.contains("Download [Server : 10Gbps]")) {
+                val dlink = app.get(link, allowRedirects = false).headers["location"] ?: ""
                 callback.invoke(
                     ExtractorLink(
                         "$name[Download]",
                         "$name[Download] - $header",
-                        link,
+                        dlink.substringAfter("url="),
                         "",
                         getIndexQuality(header),
                     )
                 )
-            }
-            else if (link.contains("hubcdn.xyz"))
-            {
-                callback.invoke(
-                    ExtractorLink(
-                        name,
-                        "$name - $header",
-                        link,
-                        "",
-                        getIndexQuality(header),
-                    )
-                )
-            }
-            else if (link.contains("gofile.io"))
-            {
-                loadExtractor(link,"",subtitleCallback, callback)
-            }
-            else if (link.contains("pixeldrain"))
-            {
-                loadExtractor(link,"",subtitleCallback, callback)
             }
             else
             {
-                //Nothing
+                loadExtractor(link,"",subtitleCallback, callback)
             }
         }
     }
@@ -421,11 +414,6 @@ open class HubCloud : ExtractorApi() {
         return Regex("(\\d{3,4})[pP]").find(str ?: "") ?. groupValues ?. getOrNull(1) ?. toIntOrNull()
             ?: Qualities.Unknown.value
     }
-
-    private suspend fun getGBurl(url: String): String {
-        return app.get(url).document.selectFirst("#vd")?.attr("href") ?:""
-    }
-
 }
 
 class fastdlserver : GDFlix() {
