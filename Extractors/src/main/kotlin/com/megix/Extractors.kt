@@ -368,7 +368,7 @@ open class HubCloud : ExtractorApi() {
                 )
             }
             else if(text.contains("BuzzServer")) {
-                val dlink = app.get(link, allowRedirects).headers["location"] ?: ""
+                val dlink = app.get(link, allowRedirects = false).headers["location"] ?: ""
                 callback.invoke(
                     ExtractorLink(
                         "$name[BuzzServer]",
