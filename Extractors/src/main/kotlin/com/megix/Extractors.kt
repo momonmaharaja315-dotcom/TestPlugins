@@ -337,7 +337,7 @@ open class HubCloud : ExtractorApi() {
             link = doc.selectFirst("div.vd > center > a") ?. attr("href") ?: ""
         }
 
-        val document = app.get(gamerLink).document
+        val document = app.get(link).document
         val div = document.selectFirst("div.card-body")
         val header = document.select("div.card-header").text() ?: ""
         div?.select("h2 a.btn")?.apmap {
