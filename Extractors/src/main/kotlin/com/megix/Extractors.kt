@@ -309,12 +309,8 @@ class VCloud : ExtractorApi() {
 
 }
 
-class HubCloudClub : HubCloud() {
-    override val mainUrl: String = "https://hubcloud.club"
-}
-
-class HubCloudlol : HubCloud() {
-    override var mainUrl = "https://hubcloud.lol"
+class HubCloudInk : HubCloud() {
+    override val mainUrl: String = "https://hubcloud.ink"
 }
 
 open class HubCloud : ExtractorApi() {
@@ -328,18 +324,15 @@ open class HubCloud : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val text = app.get(url).text
-        val newLink = text.substringAfter("url=").substringBefore("\"")
-        val newDoc = app.get(newLink).document
-        var gamerLink : String
+        val newUrl = url.replace("ink", "tel").replace("art", "tel")
 
-        if(newLink.contains("drive")) {
-            val scriptTag = newDoc.selectFirst("script:containsData(url)")?.toString() ?: ""
-            gamerLink = Regex("var url = '([^']*)'").find(scriptTag) ?. groupValues ?. get(1) ?: ""
+        if(newUrl.contains("drive")) {
+            val scriptTag = doc.selectFirst("script:containsData(url)")?.toString() ?: ""
+            link = newUrl.substringBefore("/drive") + Regex("var url = '([^']*)'").find(scriptTag) ?. groupValues ?. get(1) ?: ""
         }
 
         else {
-            gamerLink = newDoc.selectFirst("div.vd > center > a") ?. attr("href") ?: ""
+            link = doc.selectFirst("div.vd > center > a") ?. attr("href") ?: ""
         }
 
         val document = app.get(gamerLink).document
