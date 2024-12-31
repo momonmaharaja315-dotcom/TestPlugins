@@ -29,10 +29,10 @@ fun String?.createSlug(): String? {
 
 suspend fun extractMdrive(url: String): List<String> {
     val doc = app.get(url).document
-    val href = doc.select("a").filter {
-        it.attr("href").contains(Regex("hubcloud|gdflix", RegexOption.IGNORE_CASE))
-    }
-    return href
+    return doc.select("a")
+        .mapNotNull { it.attr("href").takeIf { href ->
+            href.contains(Regex("hubcloud|gdflix", RegexOption.IGNORE_CASE))
+        }}
 }
 
 
