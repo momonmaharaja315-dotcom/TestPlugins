@@ -234,7 +234,7 @@ class VCloud : ExtractorApi() {
                         )
                     )
                 }
-                else if (text.contains("Download File")) {
+                else if (text.contains("Download [Server : 1]")) {
                     callback.invoke(
                         ExtractorLink(
                             "$name",
@@ -295,13 +295,9 @@ class VCloud : ExtractorApi() {
     }
 }
 
-class HubCloudInk : HubCloud() {
-    override val mainUrl: String = "https://hubcloud.ink"
-}
-
 open class HubCloud : ExtractorApi() {
     override val name: String = "Hub-Cloud"
-    override val mainUrl: String = "https://hubcloud.art"
+    override val mainUrl: String = "https://hubcloud.tel"
     override val requiresReferer = false
 
     override suspend fun getUrl(
@@ -310,17 +306,13 @@ open class HubCloud : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val newUrl = url.replace("ink", "tel").replace("art", "tel")
-        val doc = app.get(newUrl).document
-        val link: String
-
-        if(newUrl.contains("drive")) {
+        val doc = app.get(url).document
+        val link = if(url.contains("drive")) {
             val scriptTag = doc.selectFirst("script:containsData(url)")?.toString() ?: ""
-            link = newUrl.substringBefore("/drive") + Regex("var url = '([^']*)'").find(scriptTag) ?. groupValues ?. get(1) ?: ""
+            Regex("var url = '([^']*)'").find(scriptTag) ?. groupValues ?. get(1) ?: ""
         }
-
         else {
-            link = doc.selectFirst("div.vd > center > a") ?. attr("href") ?: ""
+            doc.selectFirst("div.vd > center > a") ?. attr("href") ?: ""
         }
 
         val document = app.get(link).document
