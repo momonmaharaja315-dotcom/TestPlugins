@@ -827,7 +827,7 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val (seasonSlug, episodeSlug) = getEpisodeSlug(season, episode)
         val cfInterceptor = CloudflareKiller()
-        val url = if(season == null ) "$api/search/$id" else "$api/?s=$imdbId season $season"
+        val url = if(season == null ) "$api/search/$id" else "$api/?s=$id season $season"
         val domain= api.substringAfter("//").substringBefore(".")
         app.get(url, interceptor = cfInterceptor).document.select("article h3 a")
             .amap {
