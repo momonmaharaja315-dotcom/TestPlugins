@@ -295,6 +295,14 @@ class VCloud : ExtractorApi() {
     }
 }
 
+class HubCloudInk : HubCloud() {
+    override val mainUrl: String = "https://hubcloud.ink"
+}
+
+class HubCloudArt : HubCloud() {
+    override val mainUrl: String = "https://hubcloud.art"
+}
+
 open class HubCloud : ExtractorApi() {
     override val name: String = "Hub-Cloud"
     override val mainUrl: String = "https://hubcloud.tel"
@@ -398,16 +406,9 @@ class fastdlserver : GDFlix() {
     override var mainUrl = "https://fastdlserver.online"
 }
 
-class GDFlix4 : GDFlix() {
-    override val mainUrl: String = "https://new4.gdflix.cfd"
-}
-class GDFlix5 : GDFlix() {
-    override val mainUrl: String = "https://new5.gdflix.cfd"
-}
-
 open class GDFlix : ExtractorApi() {
     override val name: String = "GDFlix"
-    override val mainUrl: String = "https://new6.gdflix.cfd"
+    override val mainUrl: String = "https://new.gdflix.dad"
     override val requiresReferer = false
 
     private fun getIndexQuality(str: String?): Int {

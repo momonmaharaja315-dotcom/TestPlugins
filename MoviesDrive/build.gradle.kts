@@ -1,10 +1,10 @@
-version = 19
+version = 14
 
 cloudstream {
-    //language = "hi"
+    language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "Must Install(For other extensions to work properly)"
+    description = "High Quality Movies and TV Shows"
      authors = listOf("megix")
 
     /**
@@ -22,5 +22,5 @@ cloudstream {
         "Anime"
     )
 
-    iconUrl = "https://cdn-icons-png.flaticon.com/512/4961/4961639.png"
+    iconUrl = "https://i.imgur.com/9bGkGMi.png"
 }
