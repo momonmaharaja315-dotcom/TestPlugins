@@ -846,15 +846,6 @@ object CineStreamExtractors : CineStreamProvider() {
                     else {
                         res.select("h3:matches((?i)(Season $season))").amap { h3 ->
                             val link = h3.nextElementSibling()?.selectFirst("a:matches((?i)(V-Cloud))")?.attr("href") ?: return@amap
-                            callback.invoke(
-                                ExtractorLink(
-                                    "VegaMovies",
-                                    "VegaMovies",
-                                    link,
-                                    "",
-                                    Qualities.Unknown.value,
-                                )
-                            )
                             val doc = app.get(link).document
                             val epLink = doc.selectFirst("h4:contains(Episodes):contains($episode)")
                                 ?.nextElementSibling()
@@ -969,6 +960,15 @@ object CineStreamExtractors : CineStreamProvider() {
                 .filter { element -> !element.toString().contains("Download", true) }
             iframeList.amap { (quality, link) ->
                 val driveLink = bypassHrefli(link ?: "") ?: ""
+                callback.invoke(
+                    ExtractorLink(
+                        "UHDMovies",
+                        "UHDMovies",
+                        driveLink,
+                        "",
+                        Qualities.Unknown.value,
+                    )
+                )
                 loadSourceNameExtractor(
                     "UHDMovies",
                     driveLink,
@@ -1095,6 +1095,15 @@ object CineStreamExtractors : CineStreamProvider() {
             ).document.selectFirst(selector)?.let {
                 val link = it.attr("href")
                 val bypassedLink = bypassHrefli(link).toString()
+                callback.invoke(
+                    ExtractorLink(
+                        "Moviesmod",
+                        "Moviesmod",
+                        bypassedLink,
+                        "",
+                        Qualities.Unknown.value,
+                    )
+                )
                 loadSourceNameExtractor("Moviesmod", bypassedLink, "", subtitleCallback, callback)
             }
         }
