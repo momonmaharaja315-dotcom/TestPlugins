@@ -136,7 +136,7 @@ class Full4MoviesProvider : MainAPI() { // all providers must be an instance of 
                     "4links",
                     link,
                     "",
-                    Quality.Unknown.value
+                    Qualities.Unknown.value
                 )
             )
             loadExtractor(link, referer = "", subtitleCallback, callback)

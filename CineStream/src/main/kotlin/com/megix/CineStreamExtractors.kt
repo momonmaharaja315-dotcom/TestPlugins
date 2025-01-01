@@ -722,7 +722,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     if(season == realSeason) {
                         val doc2 = app.get(it.attr("href")).document
                         val h3 = doc2.select("h3:matches((?i)(episode))").get(episode-1)
-                        var source = h3.nextElementSibling().selectFirst("a")?.attr("href") ?: ""
+                        var source = h3?.nextElementSibling()?.selectFirst("a")?.attr("href") ?: ""
                         loadSourceNameExtractor("W4U", source, "", subtitleCallback, callback, getIndexQuality(quality))
                     }
                     else {
@@ -769,7 +769,7 @@ object CineStreamExtractors : CineStreamProvider() {
             }
             if(link.contains("4links.")) {
                 val doc = app.get(fixUrl(link)).document
-                val source = doc.selectFirst("iframe").attr("src") ?: ""
+                val source = doc.selectFirst("iframe")?.attr("src") ?: ""
                 loadSourceNameExtractor("Full4Movies",source, referer = link, subtitleCallback, callback)
             }
             else {
@@ -845,7 +845,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     }
                     else {
                         res.select("h3:matches((?i)(Season $season))").amap { h3 ->
-                            val link = h3.nextElementSibling().selectFirst("a:matches((?i)(V-Cloud))")?.attr("href") ?: return@amap
+                            val link = h3.nextElementSibling()?.selectFirst("a:matches((?i)(V-Cloud))")?.attr("href") ?: return@amap
                             callback.invoke(
                                 ExtractorLink(
                                     "VegaMovies",
@@ -1083,12 +1083,6 @@ object CineStreamExtractors : CineStreamProvider() {
                         .contains("1080p", true) || !element.text().contains("720p", true)
                 }
         entries.amap { it ->
-            val tags =
-                """(?:480p|720p|1080p|2160p)(.*)""".toRegex().find(it.text())?.groupValues?.get(1)
-                    ?.trim()
-            val quality =
-                """480p|720p|1080p|2160p""".toRegex().find(it.text())?.groupValues?.get(0)
-                    ?.trim()
             var href =
                 it.nextElementSibling()?.select("a:contains($aTag)")?.attr("href")
                     ?.substringAfter("=") ?: ""
@@ -1100,7 +1094,8 @@ object CineStreamExtractors : CineStreamProvider() {
                 href,
             ).document.selectFirst(selector)?.let {
                 val link = it.attr("href")
-                loadSourceNameExtractor("Moviesmod", link, "", subtitleCallback, callback)
+                val bypassedLink = bypassHrefli(link).toString()
+                loadSourceNameExtractor("Moviesmod", bypassedLink, "", subtitleCallback, callback)
             }
         }
     }
