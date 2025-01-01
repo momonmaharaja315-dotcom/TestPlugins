@@ -1,10 +1,10 @@
-version = 19
+version = 14
 
 cloudstream {
-    //language = "hi"
+    language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "Must Install(For other extensions to work properly)"
+    description = "Contains Indian Movies and TV Series upto 1080p"
      authors = listOf("megix")
 
     /**
@@ -18,9 +18,7 @@ cloudstream {
     tvTypes = listOf(
         "TvSeries",
         "Movie",
-        "AsianDrama",
-        "Anime"
     )
 
-    iconUrl = "https://cdn-icons-png.flaticon.com/512/4961/4961639.png"
+    iconUrl = "https://www.full4movies.my/wp-content/uploads/2023/12/cropped-cropped-admin-ajax-1.png"
 }
