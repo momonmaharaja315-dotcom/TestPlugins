@@ -846,12 +846,22 @@ object CineStreamExtractors : CineStreamProvider() {
                     else {
                         res.select("h3:matches((?i)(Season $season))").amap { h3 ->
                             val link = h3.nextElementSibling().selectFirst("a:matches((?i)(V-Cloud))")?.attr("href") ?: return@amap
+                            callback.invoke(
+                                ExtractorLink(
+                                    "VegaMovies",
+                                    "VegaMovies",
+                                    link,
+                                    "",
+                                    Qualities.Unknown.value,
+                                )
+                            )
                             val doc = app.get(link).document
                             val epLink = doc.selectFirst("h4:matches((?i)((Episode)&($episode)))")
                                 ?.nextElementSibling()
                                 ?.selectFirst("a:matches((?i)(V-Cloud))")
                                 ?.attr("href")
                                 ?: return@amap
+
                             loadSourceNameExtractor("VegaMovies", epLink, referer = "", subtitleCallback, callback)
                         }
                     }
