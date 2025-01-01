@@ -856,7 +856,7 @@ object CineStreamExtractors : CineStreamProvider() {
                                 )
                             )
                             val doc = app.get(link).document
-                            val epLink = doc.selectFirst("h4:matches((?i)((Episode)&($episode)))")
+                            val epLink = doc.selectFirst("h4:contains(Episodes):contains($episode)")
                                 ?.nextElementSibling()
                                 ?.selectFirst("a:matches((?i)(V-Cloud))")
                                 ?.attr("href")
