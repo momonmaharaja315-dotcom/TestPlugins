@@ -1029,16 +1029,14 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeMoviesmod(
-        title: String? = null,
-        year: Int? = null,
+        id: String,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
         invokeModflix(
-            title,
-            year,
+            id,
             season,
             episode,
             subtitleCallback,
@@ -1048,6 +1046,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeModflix(
+        id: String,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,

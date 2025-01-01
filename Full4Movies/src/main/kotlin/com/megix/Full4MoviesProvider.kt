@@ -129,7 +129,7 @@ class Full4MoviesProvider : MainAPI() { // all providers must be an instance of 
     ): Boolean {
         if(data.contains("4links.")) {
             val doc = app.get(data).document
-            val link = doc.selectFirst("iframe").attr("src")
+            val link = doc.select("iframe").attr("src")
             loadExtractor(link, referer = "", subtitleCallback, callback)
         }
         else {

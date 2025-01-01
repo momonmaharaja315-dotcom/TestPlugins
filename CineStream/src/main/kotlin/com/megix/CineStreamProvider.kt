@@ -414,8 +414,7 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     if(!res.isBollywood) invokeMoviesmod(
-                        res.title,
-                        year,
+                        res.id,
                         res.season,
                         res.episode,
                         subtitleCallback,
