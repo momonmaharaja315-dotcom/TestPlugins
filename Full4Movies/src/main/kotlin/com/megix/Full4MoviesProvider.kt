@@ -133,7 +133,7 @@ class Full4MoviesProvider : MainAPI() { // all providers must be an instance of 
             loadExtractor(link, referer = link, subtitleCallback, callback)
         }
         else {
-            loadExtractor(data, referer = link, subtitleCallback, callback)
+            loadExtractor(data, referer = data, subtitleCallback, callback)
         }
         return true
     }
