@@ -839,7 +839,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     }
                     else {
                         res.select("h3:matches((?i)(Season $season))").amap { h3 ->
-                            h3.nextElementSibling()?.select("a:matches((?i)(V-Cloud|G-Direct))").amap {
+                            h3.nextElementSibling()?.select("a:matches((?i)(V-Cloud|G-Direct))")?.amap {
                                 val link = it.attr("href")
                                 val doc = app.get(link).document
                                 val epLink = doc.selectFirst("h4:contains(Episodes):contains($episode)")
