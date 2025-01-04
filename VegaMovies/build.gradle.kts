@@ -1,10 +1,10 @@
-version = 14
+version = 51
 
 cloudstream {
     language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "Contains Indian Movies and TV Series upto 1080p"
+    description = "Includes LuxMovies, Rogmovies"
      authors = listOf("megix")
 
     /**
@@ -18,7 +18,9 @@ cloudstream {
     tvTypes = listOf(
         "TvSeries",
         "Movie",
+        "AsianDrama",
+        "Anime"
     )
 
-    iconUrl = "https://www.full4movies.my/wp-content/uploads/2023/12/cropped-cropped-admin-ajax-1.png"
+    iconUrl = "https://apkrabi.com/uploads/2023/4/vegamovies-icon.jpg"
 }
