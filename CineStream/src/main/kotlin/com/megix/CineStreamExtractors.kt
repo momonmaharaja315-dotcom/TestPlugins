@@ -821,7 +821,7 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val cfInterceptor = CloudflareKiller()
         val url = "$api/search/$id"
-        app.get(url, interceptor = cfInterceptor).document.select("article h3 a, .post-inner a")
+        app.get(url, interceptor = cfInterceptor).document.select("article h3 a")
             .amap {
                 val hrefpattern=it.attr("href") ?: null
                 if (hrefpattern != null) {
@@ -839,16 +839,15 @@ object CineStreamExtractors : CineStreamProvider() {
                     }
                     else {
                         res.select("h3:matches((?i)(Season $season))").amap { h3 ->
-                            h3.nextElementSibling()?.select("a:matches((?i)(V-Cloud|G-Direct))")?.amap {
-                                val link = it.attr("href")
-                                val doc = app.get(link).document
-                                val epLink = doc.selectFirst("h4:contains(Episodes):contains($episode)")
-                                    ?.nextElementSibling()
-                                    ?.selectFirst("a:matches((?i)(V-Cloud))")
-                                    ?.attr("href")
-                                    ?: return@amap
-                                loadSourceNameExtractor("VegaMovies", epLink, referer = "", subtitleCallback, callback)
-                            }
+                            val link = h3.nextElementSibling()?.selectFirst("a:matches((?i)(V-Cloud))")?.attr("href") ?: return@amap
+                            val doc = app.get(link).document
+                            val epLink = doc.selectFirst("h4:contains(Episodes):contains($episode)")
+                                ?.nextElementSibling()
+                                ?.selectFirst("a:matches((?i)(V-Cloud))")
+                                ?.attr("href")
+                                ?: return@amap
+
+                            loadSourceNameExtractor("VegaMovies", epLink, referer = "", subtitleCallback, callback)
                         }
                     }
                 }
@@ -1107,8 +1106,8 @@ object CineStreamExtractors : CineStreamProvider() {
                 epData.sources.map {
                     callback.invoke(
                         ExtractorLink(
-                            "HiAnime ${server.toUpperCase()} [${t.toUpperCase()}]",
-                            "HiAnime ${server.toUpperCase()} [${t.toUpperCase()}]",
+                            "HiAnime ${server.uppercase()} [${t.uppercase()}]",
+                            "HiAnime ${server.uppercase()} [${t.uppercase()}]",
                             it.url,
                             "",
                             Qualities.Unknown.value,
