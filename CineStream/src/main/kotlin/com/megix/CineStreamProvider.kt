@@ -145,7 +145,7 @@ open class CineStreamProvider : MainAPI() {
                     this.posterUrl = posterUrl
                 }
             }
-        }
+        } ?: emptyList()
         return newHomePageResponse(
             list = HomePageList(
                 name = request.name,
