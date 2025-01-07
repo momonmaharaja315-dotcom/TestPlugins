@@ -128,9 +128,9 @@ open class CineStreamProvider : MainAPI() {
         val newRequestData = request.data.replace("###", skip.toString())
         val json = app.get("$newRequestData.json").text
         val movies = tryParseJson<Home>(json)
-        val movieCount = movies?.metas.size
+        val movieCount = movies?.metas?.size
         skipMap[request.name] = skip + movieCount
-        val home = movies?.metas.mapNotNull { movie ->
+        val home = movies?.metas?.mapNotNull { movie ->
             if (movie.id.startsWith("mf")) {
                 null
             }
