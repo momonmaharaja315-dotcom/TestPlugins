@@ -774,8 +774,8 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeRogmovies(
-        id: String,
-        title: String,
+        id: String? = null,
+        title: String? = null,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
@@ -792,8 +792,8 @@ object CineStreamExtractors : CineStreamProvider() {
         )
     }
     suspend fun invokeVegamovies(
-        id: String,
-        title: String,
+        id: String? = null,
+        title: String? = null,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
@@ -811,8 +811,8 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     private suspend fun invokeWpredis(
-        id: String,
-        title: String,
+        id: String? = null,
+        title: String? = null,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
@@ -820,39 +820,34 @@ object CineStreamExtractors : CineStreamProvider() {
         api: String
     ) {
         val cfInterceptor = CloudflareKiller()
-        val url = "$api/search/$title"
-        document.select("div.post-thumbnail > a, div.blog-pic-wrap > a")
+        val url = "$api/search/$id"
+        app.get(url, interceptor = cfInterceptor).document.select("article h3 a")
             .amap {
-                val hrefpattern = it.attr("href") ?: null
-                val altTitle = it.selectFirst("img")?.attr("alt") ?: ""
-                if (hrefpattern != null && altTitle.contains(title, true)) {
+                val hrefpattern=it.attr("href") ?: null
+                if (hrefpattern != null) {
                     val res = hrefpattern.let { app.get(it).document }
-                    val imdbId = res.selectFirst("p > strong > a:matches((?i)(imdb))")?.attr("href")?.substringAfter("title/")?: ""
                     if(season == null) {
-                        if(id == imdbId ) {
-                            res.select("button.dwd-button").amap {
-                                val link = it.parent()?.attr("href") ?: return@amap
-                                val doc = app.get(link).document
-                                val source = doc.selectFirst("button.btn:matches((?i)(V-Cloud))")
-                                    ?.parent()
-                                    ?.attr("href")
-                                    ?: return@amap
-                                loadSourceNameExtractor("VegaMovies", source, referer = "", subtitleCallback, callback)
-                            }
+                        res.select("button.dwd-button").amap {
+                            val link = it.parent()?.attr("href") ?: return@amap
+                            val doc = app.get(link).document
+                            val source = doc.selectFirst("button.btn:matches((?i)(V-Cloud))")
+                                ?.parent()
+                                ?.attr("href")
+                                ?: return@amap
+                            loadSourceNameExtractor("VegaMovies", source, referer = "", subtitleCallback, callback)
                         }
                     }
                     else {
-                        if(id == imdbId) {
-                            res.select("h3:matches((?i)(Season $season)), h5:matches((?i)(Season $season))").amap { h3 ->
-                                val link = h3.nextElementSibling()?.selectFirst("a:matches((?i)(V-Cloud))")?.attr("href") ?: return@amap
-                                val doc = app.get(link).document
-                                val epLink = doc.selectFirst("h4:contains(Episodes):contains($episode)")
-                                    ?.nextElementSibling()
-                                    ?.selectFirst("a:matches((?i)(V-Cloud))")
-                                    ?.attr("href")
-                                    ?: return@amap
-                                loadSourceNameExtractor("VegaMovies", epLink, referer = "", subtitleCallback, callback)
-                            }
+                        res.select("h3:matches((?i)(Season $season))").amap { h3 ->
+                            val link = h3.nextElementSibling()?.selectFirst("a:matches((?i)(V-Cloud))")?.attr("href") ?: return@amap
+                            val doc = app.get(link).document
+                            val epLink = doc.selectFirst("h4:contains(Episodes):contains($episode)")
+                                ?.nextElementSibling()
+                                ?.selectFirst("a:matches((?i)(V-Cloud))")
+                                ?.attr("href")
+                                ?: return@amap
+
+                            loadSourceNameExtractor("VegaMovies", epLink, referer = "", subtitleCallback, callback)
                         }
                     }
                 }
