@@ -799,17 +799,18 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
+        val (seasonSlug, episodeSlug) = getEpisodeSlug(season, episode)
         val cfInterceptor = CloudflareKiller()
+        val fixtitle = title?.substringBefore("-")?.substringBefore(":")?.replace("&", " ")
         val url = if (season == null) {
-            "$vegaMoviesAPI/?s=$title $year"
+            "$vegaMoviesAPI/?s=$fixtitle $year"
         } else {
-            "$vegaMoviesAPI/?s=$title season $season"
+            "$vegaMoviesAPI/?s=$fixtitle season $season"
         }
-
-        app.get(url, interceptor = cfInterceptor).document.select("div.post-thumbnail > a > img").amap {
-            if(it.attr("alt").contains(title, true)) {
-                val link = it.previousElementSibling()?.attr("href") ?: return@amap
-                val res = app.get(link).document
+        app.get(url, interceptor = cfInterceptor).document.select("article h2").amap {
+            val hrefpattern = Regex("""(?i)<a\s+href="([^"]+)"[^>]*?>[^<]*?\b($title)\b[^<]*?""").find( it.toString() )?.groupValues?.get(1)
+            if(hrefpattern != null) {
+                val res = hrefpattern.let { app.get(it).document }
                 if(season == null) {
                     res.select("button.dwd-button").amap {
                         val link = it.parent()?.attr("href") ?: return@amap
