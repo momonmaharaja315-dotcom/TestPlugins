@@ -792,22 +792,50 @@ object CineStreamExtractors : CineStreamProvider() {
         )
     }
     suspend fun invokeVegamovies(
-        id: String? = null,
-        title: String? = null,
+        title: String,
+        year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        invokeWpredis(
-            id,
-            title,
-            season,
-            episode,
-            subtitleCallback,
-            callback,
-            vegaMoviesAPI
-        )
+        val cfInterceptor = CloudflareKiller()
+        val url = if (season == null) {
+            "$vegaMoviesAPI/?s=$title $year"
+        } else {
+            "$vegaMoviesAPI/?s=$title season $season"
+        }
+
+        app.get(url, interceptor = cfInterceptor).document.select("div.post-thumbnail > a > img").amap {
+            if(it.attr("alt").contains(title, true)) {
+                val link = it.previousElementSibling().attr("href")
+                val res = app.get(link).document
+                if(season == null) {
+                    res.select("button.dwd-button").amap {
+                        val link = it.parent()?.attr("href") ?: return@amap
+                        val doc = app.get(link).document
+                        val source = doc.selectFirst("button.btn:matches((?i)(V-Cloud))")
+                            ?.parent()
+                            ?.attr("href")
+                            ?: return@amap
+                        loadSourceNameExtractor("VegaMovies", source, referer = "", subtitleCallback, callback)
+                    }
+                }
+                else {
+                    res.select("h4:matches((?i)(Season $season))").amap { h4 ->
+                        h4.nextElementSibling().select("a:matches((?i)(V-Cloud|Single|Episode|G-Direct))").amap {
+                            val doc = app.get(it.attr("href")).document
+                            val epLink = doc.selectFirst("h4:contains(Episodes):contains($episode)")
+                                ?.nextElementSibling()
+                                ?.selectFirst("a:matches((?i)(V-Cloud))")
+                                ?.attr("href")
+                                ?: return@amap
+                            loadSourceNameExtractor("VegaMovies", epLink, referer = "", subtitleCallback, callback)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private suspend fun invokeWpredis(
@@ -834,7 +862,7 @@ object CineStreamExtractors : CineStreamProvider() {
                                 ?.parent()
                                 ?.attr("href")
                                 ?: return@amap
-                            loadSourceNameExtractor("VegaMovies", source, referer = "", subtitleCallback, callback)
+                            loadSourceNameExtractor("LuxMovies", source, referer = "", subtitleCallback, callback)
                         }
                     }
                     else {
@@ -847,7 +875,7 @@ object CineStreamExtractors : CineStreamProvider() {
                                 ?.attr("href")
                                 ?: return@amap
 
-                            loadSourceNameExtractor("VegaMovies", epLink, referer = "", subtitleCallback, callback)
+                            loadSourceNameExtractor("LuxMovies", epLink, referer = "", subtitleCallback, callback)
                         }
                     }
                 }
