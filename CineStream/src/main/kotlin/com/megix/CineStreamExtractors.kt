@@ -808,7 +808,7 @@ object CineStreamExtractors : CineStreamProvider() {
 
         app.get(url, interceptor = cfInterceptor).document.select("div.post-thumbnail > a > img").amap {
             if(it.attr("alt").contains(title, true)) {
-                val link = it.previousElementSibling().attr("href")
+                val link = it.previousElementSibling()?.attr("href") ?: return@amap
                 val res = app.get(link).document
                 if(season == null) {
                     res.select("button.dwd-button").amap {
@@ -823,7 +823,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 }
                 else {
                     res.select("h4:matches((?i)(Season $season))").amap { h4 ->
-                        h4.nextElementSibling().select("a:matches((?i)(V-Cloud|Single|Episode|G-Direct))").amap {
+                        h4.nextElementSibling()?.select("a:matches((?i)(V-Cloud|Single|Episode|G-Direct))").amap {
                             val doc = app.get(it.attr("href")).document
                             val epLink = doc.selectFirst("h4:contains(Episodes):contains($episode)")
                                 ?.nextElementSibling()
