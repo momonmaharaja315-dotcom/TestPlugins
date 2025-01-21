@@ -64,7 +64,7 @@ open class CineStreamProvider : MainAPI() {
         const val WYZIESubsAPI = "https://subs.wyzie.ru"
         const val AutoembedAPI = "https://autoembed.cc"
         const val WHVXAPI = "https://api.whvx.net"
-        const val uhdmoviesAPI = "https://uhdmovies.bet"
+        const val uhdmoviesAPI = "https://uhdmovies.beer"
         const val WHVX_TOKEN = BuildConfig.WHVX_TOKEN
         const val CONSUMET_API = BuildConfig.CONSUMET_API
         const val moviesAPI = "https://moviesapi.club"
@@ -166,7 +166,7 @@ open class CineStreamProvider : MainAPI() {
                 this.posterUrl = it.poster.toString()
             })
         }
-        val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
+        val movieJson = app.get("$streamio_TMDB/catalog/movie/tmdb.top/search=$query.json").text
         val movies = parseJson<SearchResult>(movieJson)
         movies.metas.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
@@ -174,7 +174,7 @@ open class CineStreamProvider : MainAPI() {
             })
         }
 
-        val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
+        val seriesJson = app.get("$streamio_TMDB/catalog/series/tmdb.top/search=$query.json").text
         val series = parseJson<SearchResult>(seriesJson)
         series.metas.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {

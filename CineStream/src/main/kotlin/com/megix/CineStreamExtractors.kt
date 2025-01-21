@@ -23,7 +23,7 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val json = app.get("$animiaAPI/api/episode/$id/${episode ?: 1}", timeout = 200L).text
+        val json = app.get("$animiaAPI/api/episode/$id/${episode ?: 1}", timeout = 500L).text
         val data = parseJson<AnimiaResponse>(json)
         data.server1embedLink?.let {
             loadSourceNameExtractor(
