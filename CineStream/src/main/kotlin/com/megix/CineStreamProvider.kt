@@ -337,7 +337,7 @@ open class CineStreamProvider : MainAPI() {
                         subtitleCallback,
                         callback
                     )
-                }
+                },
                 {
                     invokeTorrentio(
                         res.imdb_id,
