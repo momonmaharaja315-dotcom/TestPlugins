@@ -27,7 +27,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val data = parseJson<AnimiaResponse>(json)
         data.server1embedLink?.let {
             loadSourceNameExtractor(
-                "Animia",
+                "Animia[SUB]",
                 it,
                 "",
                 subtitleCallback,
@@ -36,7 +36,7 @@ object CineStreamExtractors : CineStreamProvider() {
         }
         data.server2embedLink?.let {
             loadSourceNameExtractor(
-                "Animia",
+                "Animia[SUB]",
                 it,
                 "",
                 subtitleCallback,
@@ -45,7 +45,7 @@ object CineStreamExtractors : CineStreamProvider() {
         }
         data.server3embedLink?.let {
             loadSourceNameExtractor(
-                "Animia",
+                "Animia[SUB]",
                 it,
                 "",
                 subtitleCallback,
@@ -199,7 +199,8 @@ object CineStreamExtractors : CineStreamProvider() {
         val document = app.get(url).document
         if(season == null) {
             document.select("a.maxbutton").amap {
-                val link = cinemaluxeBypass(it.attr("href"))
+                //val link = cinemaluxeBypass(it.attr("href"))
+                val link = it.attr("href")
                 app.get(link).document.select("a.maxbutton").amap {
                     loadSourceNameExtractor(
                         "Cinemaluxe",
@@ -217,7 +218,8 @@ object CineStreamExtractors : CineStreamProvider() {
                 season = document.select("div.wp-content > div:matches((?i)(Season $season))")
             }
             season.amap { div ->
-                val link = cinemaluxeBypass(div.select("a").attr("href"))
+                //val link = cinemaluxeBypass(div.select("a").attr("href"))
+                val link = div.select("a").attr("href")
                  app.get(link).document.select("""a.maxbutton:matches((?i)(?:episode\s*[-]?\s*)(0?$episode))""").amap {
                     loadSourceNameExtractor(
                         "Cinemaluxe",
