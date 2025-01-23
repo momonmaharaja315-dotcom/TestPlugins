@@ -17,34 +17,25 @@ import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    fun getFirstCharacterOrZero(input: String): String {
+        val firstChar = input[0]
+        return if (!firstChar.isLetter()) {
+            "0"
+        } else {
+            firstChar.toString()
+        }
+    }
+
     suspend fun invokeTokyoInsider(
         title: String,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        val document = app.get("$tokyoInsiderAPI/anime/list", timeout = 500L).document
-        callback.invoke(
-            ExtractorLink(
-                "TokyoInsider",
-                "TokyoInsider[document]",
-                document.toString(),
-                "",
-                Qualities.Unknown.value,
-            )
-        )
-        val type = if(episode == null) "(Movie)" else "(TV)"
-        val link = document.selectFirst("div.c_h2 > a:matches((?i)($title $type))")?.attr("href") ?: return
-        callback.invoke(
-            ExtractorLink(
-                "TokyoInsider",
-                "TokyoInsider[link]",
-                link,
-                "",
-                Qualities.Unknown.value,
-            )
-        )
-        val doc = app.get(tokyoInsiderAPI + link, timeout = 500L).document
+        val tvtype = if(episode == null) "_(Movie)" else "_(TV)"
+        val firstChar = getFirstCharacterOrZero(title)
+        val newTitle = title.replace(" ","_")
+        val doc = app.get("$tokyoInsiderAPI/$firstChar/$newTitle$tvtype", timeout = 500L).document
         callback.invoke(
             ExtractorLink(
                 "TokyoInsider",
