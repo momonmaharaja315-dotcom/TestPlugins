@@ -24,12 +24,57 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         val document = app.get("$tokyoInsiderAPI/anime/list", timeout = 500L).document
+        callback.invoke(
+            ExtractorLink(
+                "TokyoInsider",
+                "TokyoInsider[document]",
+                document.toString(),
+                "",
+                Qualities.Unknown.value,
+            )
+        )
         val type = if(episode == null) "(Movie)" else "(TV)"
         val link = document.selectFirst("div.c_h2 > a:matches((?i)($title $type))")?.attr("href") ?: return
+        callback.invoke(
+            ExtractorLink(
+                "TokyoInsider",
+                "TokyoInsider[link]",
+                link,
+                "",
+                Qualities.Unknown.value,
+            )
+        )
         val doc = app.get(tokyoInsiderAPI + link, timeout = 500L).document
+        callback.invoke(
+            ExtractorLink(
+                "TokyoInsider",
+                "TokyoInsider[doc]",
+                doc.toString(),
+                "",
+                Qualities.Unknown.value,
+            )
+        )
         val selector = if(episode != null) "a.download-link:matches((?i)(episode $episode))" else "a.download-link"
         val epUrl = doc.selectFirst(selector)?.attr("href") ?: return
+        callback.invoke(
+            ExtractorLink(
+                "TokyoInsider",
+                "TokyoInsider[epUrl]",
+                epUrl,
+                "",
+                Qualities.Unknown.value,
+            )
+        )
         val res = app.get(tokyoInsiderAPI + epUrl, timeout = 500L).document
+        callback.invoke(
+            ExtractorLink(
+                "TokyoInsider",
+                "TokyoInsider[res]",
+                res.toString(),
+                "",
+                Qualities.Unknown.value,
+            )
+        )
         res.select("div.c_h2 > div > a").map {
             val name = it.text()
             val url = it.attr("href")
@@ -334,7 +379,7 @@ object CineStreamExtractors : CineStreamProvider() {
             val subDub = if (url!!.contains("-dub")) "Dub" else "Sub"
             val epUrl = url.replace("category/", "").plus("-episode-${episode}")
             val epRes = app.get(epUrl).document
-        epRes.select("div.anime_muti_link > ul > li").forEach {
+            epRes.select("div.anime_muti_link > ul > li").forEach {
                 val sourcename = it.selectFirst("a")?.ownText() ?: return@forEach
                 val iframe = it.selectFirst("a")?.attr("data-video") ?: return@forEach
                 if(iframe.contains("s3taku"))
