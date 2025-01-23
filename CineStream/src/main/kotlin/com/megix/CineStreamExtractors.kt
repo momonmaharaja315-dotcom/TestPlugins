@@ -25,10 +25,10 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val document = app.get("$tokyoInsiderAPI/anime/list").document
         val type = if(episode == null) "(Movie)" else "(TV)"
-        val link = document.selectFirst("div.c_h2 > a:matches((?i)($title $type))").attr("href") ?: return
+        val link = document.selectFirst("div.c_h2 > a:matches((?i)($title $type))")?.attr("href") ?: return
         val doc = app.get(tokyoInsiderAPI + link).document
         val selector = if(episode != null) "a.download-link:matches((?i)(episode $episode))" else "a.download-link"
-        val epUrl = doc.selectFirst(selector).attr("href") ?: return
+        val epUrl = doc.selectFirst(selector)?.attr("href") ?: return
         val res = app.get(tokyoInsiderAPI + epUrl).document
         res.select("div.c_h2 > div > a").map {
             val name = it.text()
@@ -39,7 +39,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     "[TokyoInsider] - $name",
                     url,
                     referer = "",
-                    getIndexQuality(name)
+                    getIndexQuality(name),
                     false
                 )
             )
