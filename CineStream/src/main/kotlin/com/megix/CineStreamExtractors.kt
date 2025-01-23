@@ -17,15 +17,6 @@ import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 
 object CineStreamExtractors : CineStreamProvider() {
 
-    fun getFirstCharacterOrZero(input: String): String {
-        val firstChar = input[0]
-        return if (!firstChar.isLetter()) {
-            "0"
-        } else {
-            firstChar.toString()
-        }
-    }
-
     suspend fun invokeTokyoInsider(
         title: String,
         episode: Int? = null,
@@ -36,36 +27,10 @@ object CineStreamExtractors : CineStreamProvider() {
         val firstChar = getFirstCharacterOrZero(title).uppercase()
         val newTitle = title.replace(" ","_")
         val doc = app.get("$tokyoInsiderAPI/anime/$firstChar/$newTitle$tvtype", timeout = 500L).document
-        callback.invoke(
-            ExtractorLink(
-                "TokyoInsider",
-                "TokyoInsider[doc]",
-                doc.toString(),
-                "",
-                Qualities.Unknown.value,
-            )
-        )
-        val selector = if(episode != null) "a.download-link:matches((?i)(episode $episode))" else "a.download-link"
-        val epUrl = doc.selectFirst(selector)?.attr("href") ?: return
-        callback.invoke(
-            ExtractorLink(
-                "TokyoInsider",
-                "TokyoInsider[epUrl]",
-                epUrl,
-                "",
-                Qualities.Unknown.value,
-            )
-        )
+        val selector = if(episode != null) "a.download-link:matches((?i)(episode $episode\\b))" else "a.download-link"
+        val aTag = doc.selectFirst(selector)
+        val epUrl = aTag?.attr("href") ?: return
         val res = app.get(tokyoInsiderAPI + epUrl, timeout = 500L).document
-        callback.invoke(
-            ExtractorLink(
-                "TokyoInsider",
-                "TokyoInsider[res]",
-                res.toString(),
-                "",
-                Qualities.Unknown.value,
-            )
-        )
         res.select("div.c_h2 > div > a").map {
             val name = it.text()
             val url = it.attr("href")
