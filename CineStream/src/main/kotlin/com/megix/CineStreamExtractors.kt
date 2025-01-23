@@ -23,13 +23,13 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        val document = app.get("$tokyoInsiderAPI/anime/list").document
+        val document = app.get("$tokyoInsiderAPI/anime/list", timeout = 500L).document
         val type = if(episode == null) "(Movie)" else "(TV)"
         val link = document.selectFirst("div.c_h2 > a:matches((?i)($title $type))")?.attr("href") ?: return
-        val doc = app.get(tokyoInsiderAPI + link).document
+        val doc = app.get(tokyoInsiderAPI + link, timeout = 500L).document
         val selector = if(episode != null) "a.download-link:matches((?i)(episode $episode))" else "a.download-link"
         val epUrl = doc.selectFirst(selector)?.attr("href") ?: return
-        val res = app.get(tokyoInsiderAPI + epUrl).document
+        val res = app.get(tokyoInsiderAPI + epUrl, timeout = 500L).document
         res.select("div.c_h2 > div > a").map {
             val name = it.text()
             val url = it.attr("href")
