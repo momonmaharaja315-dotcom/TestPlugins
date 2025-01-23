@@ -33,9 +33,9 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         val tvtype = if(episode == null) "_(Movie)" else "_(TV)"
-        val firstChar = getFirstCharacterOrZero(title)
+        val firstChar = getFirstCharacterOrZero(title).uppercase()
         val newTitle = title.replace(" ","_")
-        val doc = app.get("$tokyoInsiderAPI/$firstChar/$newTitle$tvtype", timeout = 500L).document
+        val doc = app.get("$tokyoInsiderAPI/anime/$firstChar/$newTitle$tvtype", timeout = 500L).document
         callback.invoke(
             ExtractorLink(
                 "TokyoInsider",
