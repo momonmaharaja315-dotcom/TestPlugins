@@ -21,7 +21,7 @@ import com.megix.CineStreamExtractors.invokeW4U
 import com.megix.CineStreamExtractors.invokeWHVXSubs
 import com.megix.CineStreamExtractors.invokeWYZIESubs
 import com.megix.CineStreamExtractors.invokeAutoembed
-// import com.megix.CineStreamExtractors.invokeVidbinge
+import com.megix.CineStreamExtractors.invokeVidbinge
 import com.megix.CineStreamExtractors.invokeUhdmovies
 import com.megix.CineStreamExtractors.invokeVidSrcNL
 import com.megix.CineStreamExtractors.invokeMovies
@@ -53,15 +53,15 @@ open class CineStreamProvider : MainAPI() {
     val mediaFusion = "https://mediafusion.elfhosted.com"
     companion object {
         const val malsyncAPI = "https://api.malsync.moe"
-        const val vegaMoviesAPI = "https://vegamovies.ms"
+        const val vegaMoviesAPI = "https://m.vegamovies.ms"
         const val rogMoviesAPI = "https://luxmovies.cam"
         const val MovieDrive_API = "https://moviesdrive.pro"
         const val tokyoInsiderAPI = "https://www.tokyoinsider.com"
         const val topmoviesAPI = "https://topmovies.beer"
-        const val MoviesmodAPI = "https://moviesmod.red"
+        const val MoviesmodAPI = "https://moviesmod.cash"
         // const val Full4MoviesAPI = "https://www.full4movies.delivery"
         const val stremifyAPI = "https://stremify.hayd.uk/stream"
-        const val W4UAPI = "https://world4ufree.observer"
+        const val W4UAPI = "https://world4ufree.capetown"
         const val WHVXSubsAPI = "https://subs.whvx.net"
         const val WYZIESubsAPI = "https://subs.wyzie.ru"
         const val AutoembedAPI = "https://autoembed.cc"
@@ -77,8 +77,8 @@ open class CineStreamProvider : MainAPI() {
         const val viteAPI = "https://viet.autoembed.cc"
         const val multimoviesAPI = "https://multimovies.today"
         const val anitaku = "https://anitaku.pe"
-        const val cinemaluxeAPI = "https://cinemaluxe.cam"
-        const val bollyflixAPI = "https://bollyflix.spa"
+        const val cinemaluxeAPI = "https://cinemaluxe.work"
+        const val bollyflixAPI = "https://bollyflix.africa"
         const val TomAPI = "https://tom.autoembed.cc"
         const val animiaAPI = "https://animia.buzz"
         const val torrentioAPI = "https://torrentio.strem.fun"
@@ -551,18 +551,18 @@ open class CineStreamProvider : MainAPI() {
                         callback,
                     )
                 },
-                // {
-                //     invokeVidbinge(
-                //         res.title,
-                //         res.id,
-                //         res.tmdbId,
-                //         year,
-                //         res.season,
-                //         res.episode,
-                //         callback,
-                //         subtitleCallback
-                //     )
-                // },
+                {
+                    invokeVidbinge(
+                        res.title,
+                        res.id,
+                        res.tmdbId,
+                        year,
+                        res.season,
+                        res.episode,
+                        callback,
+                        subtitleCallback
+                    )
+                },
                 {
                     invokeUhdmovies(
                         res.title,
