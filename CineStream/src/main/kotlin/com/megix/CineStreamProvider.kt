@@ -21,7 +21,7 @@ import com.megix.CineStreamExtractors.invokeW4U
 import com.megix.CineStreamExtractors.invokeWHVXSubs
 import com.megix.CineStreamExtractors.invokeWYZIESubs
 import com.megix.CineStreamExtractors.invokeAutoembed
-import com.megix.CineStreamExtractors.invokeVidbinge
+// import com.megix.CineStreamExtractors.invokeVidbinge
 import com.megix.CineStreamExtractors.invokeUhdmovies
 import com.megix.CineStreamExtractors.invokeVidSrcNL
 import com.megix.CineStreamExtractors.invokeMovies
@@ -551,18 +551,18 @@ open class CineStreamProvider : MainAPI() {
                         callback,
                     )
                 },
-                {
-                    invokeVidbinge(
-                        res.title,
-                        res.id,
-                        res.tmdbId,
-                        year,
-                        res.season,
-                        res.episode,
-                        callback,
-                        subtitleCallback
-                    )
-                },
+                // {
+                //     invokeVidbinge(
+                //         res.title,
+                //         res.id,
+                //         res.tmdbId,
+                //         year,
+                //         res.season,
+                //         res.episode,
+                //         callback,
+                //         subtitleCallback
+                //     )
+                // },
                 {
                     invokeUhdmovies(
                         res.title,
