@@ -8,7 +8,7 @@ data class TvStreamsResponse(
 )
 
 data class TvStream(
-    val title: String? = "TV Stream",
+    val title: String? = null,
     val name: String? = null,
     val url: String,
     val behaviorHints: TvBehaviorHints
@@ -19,13 +19,7 @@ data class TvBehaviorHints(
 )
 
 data class TvProxyHeaders(
-    val request: TvRequestHeaders,
-)
-
-data class TvRequestHeaders(
-    val Referer: String? = "",
-    val Origin: String? = "",
-    val UserAgent: String? = "",
+    val request: Map<String, String>? = null,
 )
 
 data class AnimiaResponse(

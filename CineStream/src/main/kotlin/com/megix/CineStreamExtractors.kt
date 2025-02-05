@@ -29,16 +29,13 @@ object CineStreamExtractors : CineStreamProvider() {
         data.streams.forEach {
             callback.invoke(
                 ExtractorLink(
-                    it.name ?: it.title,
-                    it.name ?: it.title,
+                    it.name ?: it.title ?: "TV",
+                    it.name ?: it.title ?: "TV",
                     it.url,
-                    referer = it.behaviorHints.proxyHeaders.request.Referer,
+                    "",
                     Qualities.Unknown.value,
-                    ExtractorLinkType.M3U8,
-                    mapOf(
-                        "Origin" to it.behaviorHints.proxyHeaders.request.Origin,
-                        "User-Agent" to it.behaviorHints.proxyHeaders.request.UserAgent
-                    ),
+                    headers = it.behaviorHints.proxyHeaders.request ?: mapOf(),
+                    ExtractorLinkType.M3U8
                 )
             )
         }
