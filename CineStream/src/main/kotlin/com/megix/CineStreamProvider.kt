@@ -107,6 +107,7 @@ open class CineStreamProvider : MainAPI() {
         "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Trending Anime",
         "$streamio_TMDB/catalog/series/tmdb.language/skip=###&genre=Korean" to "Trending Korean Series",
         "$cricketStream/catalog/tv/cricket" to "Cricket Streams",
+        "$mediaFusion/catalog/tv/live_tv/skip=###" to "Live TV",
         "$mainUrl/top/catalog/movie/top/skip=###&genre=Action" to "Top Action Movies",
         "$mainUrl/top/catalog/series/top/skip=###&genre=Action" to "Top Action Series",
         "$mainUrl/top/catalog/movie/top/skip=###&genre=Comedy" to "Top Comedy Movies",

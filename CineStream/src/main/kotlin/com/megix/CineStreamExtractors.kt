@@ -34,7 +34,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     it.url,
                     "",
                     Qualities.Unknown.value,
-                    true,
+                    INFER_TYPE,
                     headers = it.behaviorHints.proxyHeaders.request ?: mapOf(),
                 )
             )
