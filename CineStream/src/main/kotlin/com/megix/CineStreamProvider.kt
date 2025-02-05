@@ -138,23 +138,18 @@ open class CineStreamProvider : MainAPI() {
         val movieCount = movies.metas.size
         skipMap[request.name] = skip + movieCount
         val home = movies.metas.mapNotNull { movie ->
-            if (movie.id.startsWith("mf")) {
-                null
+            val posterUrl = if(movie.poster.toString().contains("mediafusion")) {
+                "https://images.metahub.space/poster/small/${movie.id}/img"
             }
             else {
-                val posterUrl = if(movie.poster.toString().contains("mediafusion")) {
-                    "https://images.metahub.space/poster/small/${movie.id}/img"
-                }
-                else {
-                    movie.poster.toString()
-                }
-                val type =
-                    if(movie.type == "tv") TvType.Live
-                    else if(movie.type == "movie") TvType.Movie
-                    else TvType.TvSeries
-                newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), type) {
-                    this.posterUrl = posterUrl
-                }
+                 movie.poster.toString()
+            }
+            val type =
+                if(movie.type == "tv") TvType.Live
+                else if(movie.type == "movie") TvType.Movie
+                else TvType.TvSeries
+            newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), type) {
+                this.posterUrl = posterUrl
             }
         }
         return newHomePageResponse(
@@ -186,7 +181,7 @@ open class CineStreamProvider : MainAPI() {
         val seriesJson = app.get("$streamio_TMDB/catalog/series/tmdb.top/search=$query.json").text
         val series = parseJson<SearchResult>(seriesJson)
         series.metas.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
+            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.TvSeries) {
                 this.posterUrl = it.poster.toString()
             })
         }
@@ -209,6 +204,10 @@ open class CineStreamProvider : MainAPI() {
         val movie = parseJson<PassData>(url)
         val tvtype = movie.type
         var id = movie.id
+        val type =
+                if(movie.type == "tv") TvType.Live
+                else if(movie.type == "movie") TvType.Movie
+                else TvType.TvSeries
         val meta_url =
             if(id.contains("kitsu")) kitsu_url
             else if(id.contains("tmdb")) streamio_TMDB
@@ -263,7 +262,7 @@ open class CineStreamProvider : MainAPI() {
                 anilistId,
                 malId
             ).toJson()
-            return newMovieLoadResponse(title, url, if(isAnime) TvType.AnimeMovie  else TvType.Movie, data) {
+            return newMovieLoadResponse(title, url, if(isAnime) TvType.AnimeMovie  else type, data) {
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
@@ -311,7 +310,7 @@ open class CineStreamProvider : MainAPI() {
                 }
             } ?: emptyList()
 
-            return newTvSeriesLoadResponse(title, url, if(isAnime) TvType.Anime else TvType.TvSeries, episodes) {
+            return newTvSeriesLoadResponse(title, url, if(isAnime) TvType.Anime else type, episodes) {
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
