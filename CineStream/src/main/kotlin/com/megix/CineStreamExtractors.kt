@@ -34,7 +34,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     it.url,
                     referer = it.behaviorHints.proxyHeaders.request.Referer,
                     Qualities.Unknown.value,
-                    true,
+                    ExtractorLinkType.M3u8,
                     mapOf(
                         "Origin" to it.behaviorHints.proxyHeaders.request.Origin,
                         "User-Agent" to it.behaviorHints.proxyHeaders.request.UserAgent

@@ -336,7 +336,7 @@ open class CineStreamProvider : MainAPI() {
         val seasonYear = if(res.tvtype == "movie") year else res.firstAired?.substringBefore("-")?.toIntOrNull() ?: res.firstAired?.substringBefore("–")?.toIntOrNull()
 
         if(res.tvtype == "tv") {
-            if(id.contains("cricket")) {
+            if(res.id.contains("cricket")) {
                 invokeTvStream(
                     res.id,
                     cricketStream,
