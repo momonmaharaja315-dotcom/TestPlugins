@@ -3,13 +3,29 @@ package com.megix
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.gson.annotations.SerializedName
 
-data class CricketStreamsResponse(
-    val streams: List<CricketStream>
+data class TvStreamsResponse(
+    val streams: List<TvStream>
 )
 
-data class CricketStream(
-    val title: String,
+data class TvStream(
+    val title: String? = "TV Stream",
+    val name: String? = null,
     val url: String,
+    val behaviorHints: TvBehaviorHints
+)
+
+data class TvBehaviorHints(
+    val proxyHeaders: TvProxyHeaders
+)
+
+data class TvProxyHeaders(
+    val request: TvRequestHeaders,
+)
+
+data class TvRequestHeaders(
+    val Referer: String? = "",
+    val Origin: String? = "",
+    val UserAgent: String? = "",
 )
 
 data class AnimiaResponse(

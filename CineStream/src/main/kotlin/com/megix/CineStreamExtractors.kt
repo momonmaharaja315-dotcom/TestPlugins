@@ -17,23 +17,28 @@ import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 
 object CineStreamExtractors : CineStreamProvider() {
 
-    suspend fun invokeCricketStream(
+    suspend fun invokeTvStream(
         id: String,
+        api: String,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val url = "$cricketStream/stream/tv/$id.json"
+        val url = "$api/stream/tv/$id.json"
         val json = app.get(url).text
-        val data = parseJson<CricketStreamsResponse>(json)
+        val data = tryParseJson<TvStreamsResponse>(json) ?: return
         data.streams.forEach {
             callback.invoke(
                 ExtractorLink(
-                    "CricketStream",
-                    it.title,
+                    it.name ?: it.title,
+                    it.name ?: it.title,
                     it.url,
-                    referer = "",
+                    referer = it.behaviorHints.proxyHeaders.request.Referer,
                     Qualities.Unknown.value,
-                    INFER_TYPE
+                    true,
+                    mapOf(
+                        "Origin" to it.behaviorHints.proxyHeaders.request.Origin,
+                        "User-Agent" to it.behaviorHints.proxyHeaders.request.UserAgent
+                    ),
                 )
             )
         }

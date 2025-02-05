@@ -38,7 +38,7 @@ import com.megix.CineStreamExtractors.invokeTorrentio
 import com.megix.CineStreamExtractors.invokeDramaCool
 import com.megix.CineStreamExtractors.invokeAnimia
 import com.megix.CineStreamExtractors.invokeTokyoInsider
-import com.megix.CineStreamExtractors.invokeCricketStream
+import com.megix.CineStreamExtractors.invokeTvStream
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -187,6 +187,14 @@ open class CineStreamProvider : MainAPI() {
             })
         }
 
+        val tvJson = app.get("$mediaFusion/catalog/tv/mediafusion_search_tv/search=$query.json").text
+        val tv = parseJson<SearchResult>(tvJson)
+        tv.metas.forEach {
+            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
+                this.posterUrl = it.poster.toString()
+            })
+        }
+
         return searchResponse.sortedByDescending { response ->
             calculateRelevanceScore(response.name, query)
         }
@@ -328,11 +336,21 @@ open class CineStreamProvider : MainAPI() {
         val seasonYear = if(res.tvtype == "movie") year else res.firstAired?.substringBefore("-")?.toIntOrNull() ?: res.firstAired?.substringBefore("–")?.toIntOrNull()
 
         if(res.tvtype == "tv") {
-            invokeCricketStream(
-                res.id,
-                subtitleCallback,
-                callback
-            )
+            if(id.contains("cricket")) {
+                invokeTvStream(
+                    res.id,
+                    cricketStream,
+                    subtitleCallback,
+                    callback
+                )
+            } else {
+                invokeTvStream(
+                    res.id,
+                    mediaFusion,
+                    subtitleCallback,
+                    callback
+                )
+            }
         }
         else if(res.isKitsu) {
             argamap(
