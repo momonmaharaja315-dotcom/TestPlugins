@@ -25,12 +25,12 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val url = "$api/stream/tv/$id.json"
         val json = app.get(url).text
-        val data = tryParseJson<TvStreamsResponse>(json) ?: return
+        val data = parseJson<TvStreamsResponse>(json)
         data.streams.forEach {
             callback.invoke(
                 ExtractorLink(
                     it.name ?: it.title ?: "TV",
-                    it.name ?: it.title ?: "TV",
+                    it.description ?: it.title ?: "TV",
                     it.url,
                     "",
                     Qualities.Unknown.value,

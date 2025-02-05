@@ -148,7 +148,11 @@ open class CineStreamProvider : MainAPI() {
                 else {
                     movie.poster.toString()
                 }
-                newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), TvType.Movie) {
+                val type =
+                    if(movie.type == "tv") TvType.Live
+                    else if(movie.type == "movie") TvType.Movie
+                    else TvType.Series
+                newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), type) {
                     this.posterUrl = posterUrl
                 }
             }
@@ -190,7 +194,7 @@ open class CineStreamProvider : MainAPI() {
         val tvJson = app.get("$mediaFusion/catalog/tv/mediafusion_search_tv/search=$query.json").text
         val tv = parseJson<SearchResult>(tvJson)
         tv.metas.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
+            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Live) {
                 this.posterUrl = it.poster.toString()
             })
         }
@@ -209,6 +213,7 @@ open class CineStreamProvider : MainAPI() {
             if(id.contains("kitsu")) kitsu_url
             else if(id.contains("tmdb")) streamio_TMDB
             else if(id.contains("cricket")) cricketStream
+            else if(id.contains("mf")) mediaFusion
             else cinemeta_url
         val isKitsu = if(meta_url == kitsu_url) true else false
         val isTMDB = if(meta_url == streamio_TMDB) true else false

@@ -8,8 +8,9 @@ data class TvStreamsResponse(
 )
 
 data class TvStream(
-    val title: String? = null,
-    val name: String? = null,
+    val title: String?,
+    val name: String?,
+    val description: String?,
     val url: String,
     val behaviorHints: TvBehaviorHints
 )
