@@ -151,7 +151,7 @@ open class CineStreamProvider : MainAPI() {
                 val type =
                     if(movie.type == "tv") TvType.Live
                     else if(movie.type == "movie") TvType.Movie
-                    else TvType.Series
+                    else TvType.TvSeries
                 newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), type) {
                     this.posterUrl = posterUrl
                 }
