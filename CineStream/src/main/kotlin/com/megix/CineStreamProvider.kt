@@ -38,6 +38,7 @@ import com.megix.CineStreamExtractors.invokeTorrentio
 import com.megix.CineStreamExtractors.invokeDramaCool
 import com.megix.CineStreamExtractors.invokeAnimia
 import com.megix.CineStreamExtractors.invokeTokyoInsider
+import com.megix.CineStreamExtractors.invokeCricketStream
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -105,7 +106,7 @@ open class CineStreamProvider : MainAPI() {
         "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
         "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Trending Anime",
         "$streamio_TMDB/catalog/series/tmdb.language/skip=###&genre=Korean" to "Trending Korean Series",
-        "$cricketStreamhttps/catalog/tv/cricket" to "Cricket Streams",
+        "$cricketStream/catalog/tv/cricket" to "Cricket Streams",
         "$mainUrl/top/catalog/movie/top/skip=###&genre=Action" to "Top Action Movies",
         "$mainUrl/top/catalog/series/top/skip=###&genre=Action" to "Top Action Series",
         "$mainUrl/top/catalog/movie/top/skip=###&genre=Comedy" to "Top Comedy Movies",
@@ -327,14 +328,10 @@ open class CineStreamProvider : MainAPI() {
         val seasonYear = if(res.tvtype == "movie") year else res.firstAired?.substringBefore("-")?.toIntOrNull() ?: res.firstAired?.substringBefore("–")?.toIntOrNull()
 
         if(res.tvtype == "tv") {
-            argamap(
-                {
-                    invokeCricketStream(
-                        res.id,
-                        subtitleCallback,
-                        callback
-                    )
-                }
+            invokeCricketStream(
+                res.id,
+                subtitleCallback,
+                callback
             )
         }
         else if(res.isKitsu) {
