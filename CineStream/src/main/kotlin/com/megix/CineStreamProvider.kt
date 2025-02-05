@@ -229,7 +229,7 @@ open class CineStreamProvider : MainAPI() {
         val isAsian = (movieData?.meta?.country.toString().contains("Korea", true) ||
                 movieData?.meta?.country.toString().contains("China", true)) && !isAnime
 
-        if(tvtype == "movie" && tvtype == "tv") {
+        if(tvtype == "movie" || tvtype == "tv") {
             val data = LoadLinksData(
                 title,
                 id,
