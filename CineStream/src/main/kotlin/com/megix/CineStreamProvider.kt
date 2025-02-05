@@ -21,7 +21,7 @@ import com.megix.CineStreamExtractors.invokeW4U
 import com.megix.CineStreamExtractors.invokeWHVXSubs
 import com.megix.CineStreamExtractors.invokeWYZIESubs
 import com.megix.CineStreamExtractors.invokeAutoembed
-// import com.megix.CineStreamExtractors.invokeVidbinge
+import com.megix.CineStreamExtractors.invokeVidbinge
 import com.megix.CineStreamExtractors.invokeUhdmovies
 import com.megix.CineStreamExtractors.invokeVidSrcNL
 import com.megix.CineStreamExtractors.invokeMovies
@@ -59,6 +59,7 @@ open class CineStreamProvider : MainAPI() {
         const val tokyoInsiderAPI = "https://www.tokyoinsider.com"
         const val topmoviesAPI = "https://topmovies.beer"
         const val MoviesmodAPI = "https://moviesmod.cash"
+        const val cricketStream = "https://cricketstreaming.vercel.app"
         // const val Full4MoviesAPI = "https://www.full4movies.delivery"
         const val stremifyAPI = "https://stremify.hayd.uk/stream"
         const val W4UAPI = "https://world4ufree.capetown"
@@ -104,6 +105,7 @@ open class CineStreamProvider : MainAPI() {
         "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
         "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Trending Anime",
         "$streamio_TMDB/catalog/series/tmdb.language/skip=###&genre=Korean" to "Trending Korean Series",
+        "$cricketStreamhttps/catalog/tv/cricket" to "Cricket Streams",
         "$mainUrl/top/catalog/movie/top/skip=###&genre=Action" to "Top Action Movies",
         "$mainUrl/top/catalog/series/top/skip=###&genre=Action" to "Top Action Series",
         "$mainUrl/top/catalog/movie/top/skip=###&genre=Comedy" to "Top Comedy Movies",
@@ -194,7 +196,11 @@ open class CineStreamProvider : MainAPI() {
         val movie = parseJson<PassData>(url)
         val tvtype = movie.type
         var id = movie.id
-        val meta_url = if(id.contains("kitsu")) kitsu_url else if(id.contains("tmdb")) streamio_TMDB else cinemeta_url
+        val meta_url =
+            if(id.contains("kitsu")) kitsu_url
+            else if(id.contains("tmdb")) streamio_TMDB
+            else if(id.contains("cricket")) cricketStream
+            else cinemeta_url
         val isKitsu = if(meta_url == kitsu_url) true else false
         val isTMDB = if(meta_url == streamio_TMDB) true else false
         val externalIds = if(isKitsu) getExternalIds(id.substringAfter("kitsu:"),"kitsu") else null
@@ -222,7 +228,7 @@ open class CineStreamProvider : MainAPI() {
         val isAsian = (movieData?.meta?.country.toString().contains("Korea", true) ||
                 movieData?.meta?.country.toString().contains("China", true)) && !isAnime
 
-        if(tvtype == "movie") {
+        if(tvtype == "movie" && tvtype == "tv") {
             val data = LoadLinksData(
                 title,
                 id,
@@ -320,7 +326,18 @@ open class CineStreamProvider : MainAPI() {
         //to get season year
         val seasonYear = if(res.tvtype == "movie") year else res.firstAired?.substringBefore("-")?.toIntOrNull() ?: res.firstAired?.substringBefore("–")?.toIntOrNull()
 
-        if(res.isKitsu) {
+        if(res.tvtype == "tv") {
+            argamap(
+                {
+                    invokeCricketStream(
+                        res.id,
+                        subtitleCallback,
+                        callback
+                    )
+                }
+            )
+        }
+        else if(res.isKitsu) {
             argamap(
                 {
                     invokeAnimes(
@@ -551,18 +568,18 @@ open class CineStreamProvider : MainAPI() {
                         callback,
                     )
                 },
-                // {
-                //     invokeVidbinge(
-                //         res.title,
-                //         res.id,
-                //         res.tmdbId,
-                //         year,
-                //         res.season,
-                //         res.episode,
-                //         callback,
-                //         subtitleCallback
-                //     )
-                // },
+                {
+                    invokeVidbinge(
+                        res.title,
+                        res.id,
+                        res.tmdbId,
+                        year,
+                        res.season,
+                        res.episode,
+                        callback,
+                        subtitleCallback
+                    )
+                },
                 {
                     invokeUhdmovies(
                         res.title,
@@ -706,30 +723,25 @@ open class CineStreamProvider : MainAPI() {
     private fun calculateRelevanceScore(name: String, query: String): Int {
         val lowerCaseName = name.lowercase()
         val lowerCaseQuery = query.lowercase()
-
         var score = 0
 
-        // Exact match gives the highest score
         if (lowerCaseName == lowerCaseQuery) {
             score += 100
         }
 
-        // Check for partial matches and their positions
         if (lowerCaseName.contains(lowerCaseQuery)) {
-            score += 50 // Base score for containing the query
+            score += 50
 
-            // Increase score based on position of the match
             val index = lowerCaseName.indexOf(lowerCaseQuery)
             if (index == 0) {
-                score += 20 // Higher score if match is at the start
+                score += 20
             } else if (index > 0 && index < 5) {
-                score += 10 // Slightly higher score if match is near the start
+                score += 10
             }
 
-            // Count how many words match (for multi-word queries)
             lowerCaseQuery.split(" ").forEach { word ->
                 if (lowerCaseName.contains(word)) {
-                    score += 5 // Incremental score for each matched word
+                    score += 5
                 }
             }
         }

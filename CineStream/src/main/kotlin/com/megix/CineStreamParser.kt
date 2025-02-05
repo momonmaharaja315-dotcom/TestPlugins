@@ -3,6 +3,15 @@ package com.megix
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.gson.annotations.SerializedName
 
+data class CricketStreamsResponse(
+    val streams: List<CricketStream>
+)
+
+data class CricketStream(
+    val title: String,
+    val url: String,
+)
+
 data class AnimiaResponse(
     val server1embedLink: String? = null,
     val server2embedLink: String? = null,
