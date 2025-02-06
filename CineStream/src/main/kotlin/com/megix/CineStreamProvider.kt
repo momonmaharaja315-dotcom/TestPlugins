@@ -144,7 +144,13 @@ open class CineStreamProvider : MainAPI() {
                 this.posterUrl = movie.poster.toString()
             } ?: throw ErrorLoadingException("Invalid Json")
         }
-        return newHomePageResponse(request.name, home)
+        return newHomePageResponse(
+            list = HomePageList(
+                name = request.name,
+                list = home ?: emptyList(),
+            ),
+            hasNext = true
+        )
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
