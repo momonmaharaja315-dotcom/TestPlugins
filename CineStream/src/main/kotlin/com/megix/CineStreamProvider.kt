@@ -131,7 +131,7 @@ open class CineStreamProvider : MainAPI() {
         val skip = if(page == 1) 0 else skipMap[request.name] ?: 0
         val newRequestData = request.data.replace("###", skip.toString())
         val json = app.get("$newRequestData.json").text
-        val movies = parseJson<Home>(json)
+        val movies = tryParseJson<Home>(json) ?: return HomePageResponse.empty()
         val movieCount = movies.metas.size
         skipMap[request.name] = skip + movieCount
         val home = movies.metas.mapNotNull { movie ->
@@ -179,7 +179,7 @@ open class CineStreamProvider : MainAPI() {
             })
         }
 
-        val tvJson = app.get("$mediaFusion/cccatalog/tv/mediafusion_search_tv/search=$query.json").text
+        val tvJson = app.get("$mediaFusion/catalog/tv/mediafusion_search_tv/search=$query.json").text
         val tv = tryParseJson<SearchResult>(tvJson)
         tv?.metas?.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Live) {
