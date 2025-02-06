@@ -131,7 +131,13 @@ open class CineStreamProvider : MainAPI() {
         val skip = if(page == 1) 0 else skipMap[request.name] ?: 0
         val newRequestData = request.data.replace("###", skip.toString())
         val json = app.get("$newRequestData.json").text
-        val movies = tryParseJson<Home>(json) ?: return
+        val movies = tryParseJson<Home>(json) ?: return newHomePageResponse(
+            list = HomePageList(
+                name = request.name,
+                list = emptyList(),
+            ),
+            hasNext = false
+        )
         val movieCount = movies.metas.size
         skipMap[request.name] = skip + movieCount
         val home = movies.metas.mapNotNull { movie ->
