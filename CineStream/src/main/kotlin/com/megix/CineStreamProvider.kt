@@ -147,7 +147,7 @@ open class CineStreamProvider : MainAPI() {
         return newHomePageResponse(
             list = HomePageList(
                 name = request.name,
-                list = home ?: emptyList(),
+                list = home,
             ),
             hasNext = true
         )
