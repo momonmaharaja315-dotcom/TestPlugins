@@ -142,7 +142,7 @@ open class CineStreamProvider : MainAPI() {
 
             newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), type) {
                 this.posterUrl = movie.poster.toString()
-            } ?: throw ErrorLoadingException("Invalid Json")
+            }
         }
         return newHomePageResponse(
             list = HomePageList(
