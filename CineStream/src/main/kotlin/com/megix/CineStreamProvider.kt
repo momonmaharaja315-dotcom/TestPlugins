@@ -134,7 +134,7 @@ open class CineStreamProvider : MainAPI() {
         val movies = tryParseJson<Home>(json)
         val movieCount = movies?.metas?.size ?: 0
         skipMap[request.name] = skip + movieCount
-        val home = movies?.metas?.forEach { movie ->
+        val home = movies?.metas?.mapNotNull { movie ->
             val type =
                 if(movie.type == "tv") TvType.Live
                 else if(movie.type == "movie") TvType.Movie
