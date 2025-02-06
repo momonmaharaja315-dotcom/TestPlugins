@@ -104,7 +104,7 @@ open class CineStreamProvider : MainAPI() {
         "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
         "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Trending Anime",
         "$mediaFusion/catalog/tv/live_tv/skip=###" to "Live TV",
-        "$mainUrl/top/catalog/movie/top/ski=###&genre=Action" to "Top Action Movies",
+        "$mainUrl/cctop/catalog/movie/top/skip=###&genre=Action" to "Top Action Movies",
         "$mainUrl/top/catalog/series/top/skip=###&genre=Action" to "Top Action Series",
         "$mainUrl/top/catalog/movie/top/skip=###&genre=Comedy" to "Top Comedy Movies",
         "$mainUrl/top/catalog/series/top/skip=###&genre=Comedy" to "Top Comedy Series",
@@ -179,7 +179,7 @@ open class CineStreamProvider : MainAPI() {
             })
         }
 
-        val tvJson = app.get("$mediaFusion/catalog/tv/mediafusion_search_tv/search=$query.json").text
+        val tvJson = app.get("$mediaFusion/cccatalog/tv/mediafusion_search_tv/search=$query.json").text
         val tv = tryParseJson<SearchResult>(tvJson)
         tv?.metas?.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Live) {
