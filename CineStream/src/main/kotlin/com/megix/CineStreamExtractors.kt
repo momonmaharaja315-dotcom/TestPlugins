@@ -1044,7 +1044,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeUhdmovies(
-        title: String? = null,
+        title: String,
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
