@@ -1080,8 +1080,17 @@ object CineStreamExtractors : CineStreamProvider() {
         )
 
 
-        links.amap {
+        links.mapNotNull {
             val driveLink = bypassHrefli(it) ?: ""
+            callback.invoke(
+            ExtractorLink(
+                "UHDMovies",
+                "UHDMovies",
+                driveLink,
+                "",
+                Qualities.Unknown.value
+            )
+        )
             loadSourceNameExtractor(
                 "UHDMovies",
                 driveLink,
