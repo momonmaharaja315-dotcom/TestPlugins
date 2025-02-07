@@ -66,8 +66,7 @@ open class Driveleech : ExtractorApi() {
             ),
             referer = finallink,
             headers = mapOf(
-                "x-token" to url,
-                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"
+                "x-token" to url
             )
         )
         val link =
@@ -100,18 +99,18 @@ open class Driveleech : ExtractorApi() {
                 text.contains("Instant Download") -> {
                     try{
                         val instant = instantLink(href)
+                        callback.invoke(
+                            ExtractorLink(
+                                "$name Instant(Download)",
+                                "$name Instant(Download) - $fileName",
+                                instant,
+                                "",
+                                getIndexQuality(quality)
+                            )
+                        )
                     } catch (e: Exception) {
                         Log.d("Error:", e.toString())
                     }
-                    callback.invoke(
-                        ExtractorLink(
-                            "$name Instant(Download)",
-                            "$name Instant(Download) - $fileName",
-                            instant,
-                            "",
-                            getIndexQuality(quality)
-                        )
-                    )
                 }
                 text.contains("Resume Worker Bot") -> {
                     val resumeLink = resumeBot(href)
