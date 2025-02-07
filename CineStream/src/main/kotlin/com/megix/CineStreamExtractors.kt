@@ -1051,40 +1051,33 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
-        val fixTitle = title?.replace("-", " ")?.replace(":", " ")
-        val searchtitle = fixTitle.createSlug()
         val (seasonSlug, episodeSlug) = getEpisodeSlug(season, episode)
-        app.get("$uhdmoviesAPI/search/$fixTitle $year").document.select("#content article").map {
-            val hrefpattern =
-                Regex("""(?i)<a\s+href="([^"]*?\b$searchtitle\b[^"]*?\b$year\b[^"]*?)"[^>]*>""").find(
-                    it.toString()
-                )?.groupValues?.get(1)
-            val detailDoc = hrefpattern?.let { app.get(it).document }
-            val iSelector = if (season == null) {
-                "div.entry-content p:has(:matches($year))"
+        val doc = app.get("$uhdmoviesAPI/download-${title.replace(" ", "-")}").document
+        val iSelector = if (season == null) {
+            "div.entry-content p:has(:matches($year))"
+        } else {
+            "div.entry-content p:has(:matches((?i)(?:S\\s*$seasonSlug|Season\\s*$seasonSlug)))"
+        }
+        val iframeList = doc.select(iSelector).mapNotNull {
+            if (season == null) {
+                it.text() to it.nextElementSibling()?.select("a")?.attr("href")
             } else {
-                "div.entry-content p:has(:matches((?i)(?:S\\s*$seasonSlug|Season\\s*$seasonSlug)))"
+                it.text() to it.nextElementSibling()?.select("a")?.find { child ->
+                    child.select("span").text().equals("Episode $episode", true)
+                }?.attr("href")
             }
-            val iframeList = detailDoc!!.select(iSelector).mapNotNull {
-                if (season == null) {
-                    it.text() to it.nextElementSibling()?.select("a")?.attr("href")
-                } else {
-                    it.text() to it.nextElementSibling()?.select("a")?.find { child ->
-                        child.select("span").text().equals("Episode $episode", true)
-                    }?.attr("href")
-                }
-            }.filter { it.first.contains(Regex("(2160p)|(1080p)")) }
-                .filter { element -> !element.toString().contains("Download", true) }
-            iframeList.amap { (quality, link) ->
-                val driveLink = bypassHrefli(link ?: "") ?: ""
-                loadSourceNameExtractor(
-                    "UHDMovies",
-                    driveLink,
-                    "",
-                    subtitleCallback,
-                    callback,
-                )
-            }
+        }.filter { it.first.contains(Regex("(2160p)|(1080p)")) }
+         .filter { element -> !element.toString().contains("Download", true) }
+
+        iframeList.amap { (quality, link) ->
+            val driveLink = bypassHrefli(link ?: "") ?: ""
+            loadSourceNameExtractor(
+                "UHDMovies",
+                driveLink,
+                "",
+                subtitleCallback,
+                callback,
+            )
         }
     }
 
