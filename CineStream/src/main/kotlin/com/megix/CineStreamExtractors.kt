@@ -1052,6 +1052,7 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
         val doc = app.get("$uhdmoviesAPI/download-${title.replace(" ", "-")}").document
+
         val selector = if (season == null) {
             "div.entry-content > p:has(strong:matches($year))"
         } else {
@@ -1062,11 +1063,29 @@ object CineStreamExtractors : CineStreamProvider() {
         } else {
             "a:matches((?i)(Episode $episode))"
         }
+        callback.invoke(
+            ExtractorLink(
+                "UHDMovies",
+                "UHDMovies",
+                doc.toString(),
+                "",
+                Qualities.Unknown.value
+            )
+        )
         val links = doc.select(selector).mapNotNull {
             val nextElementSibling = it.nextElementSibling()
             nextElementSibling?.select(epSelector)?.attr("href")
-
         }
+
+        callback.invoke(
+            ExtractorLink(
+                "UHDMovies",
+                "UHDMovies",
+                links.toString(),
+                "",
+                Qualities.Unknown.value
+            )
+        )
 
         links.amap {
             val driveLink = bypassHrefli(it) ?: ""
