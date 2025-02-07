@@ -33,7 +33,7 @@ class Driveseed : Driveleech() {
     override val mainUrl: String = "https://driveseed.org"
 }
 
-open class Drivele] : ExtractorApi() {
+open class Driveleech : ExtractorApi() {
     override val name: String = "Driveleech"
     override val mainUrl: String = "https://driveleech.org"
     override val requiresReferer = false
