@@ -107,18 +107,18 @@ open class Driveleech : ExtractorApi() {
                 )
             )
             when {
-                text.contains("Instant Download") -> {
-                    val instant = instantLink(href)
-                    callback.invoke(
-                        ExtractorLink(
-                            "$name Instant(Download)",
-                            "$name Instant(Download) - $fileName",
-                            instant,
-                            "",
-                            getIndexQuality(quality)
-                        )
-                    )
-                }
+                // text.contains("Instant Download") -> {
+                //     val instant = instantLink(href)
+                //     callback.invoke(
+                //         ExtractorLink(
+                //             "$name Instant(Download)",
+                //             "$name Instant(Download) - $fileName",
+                //             instant,
+                //             "",
+                //             getIndexQuality(quality)
+                //         )
+                //     )
+                // }
                 text.contains("Resume Worker Bot") -> {
                     val resumeLink = resumeBot(href)
                     callback.invoke(
@@ -145,19 +145,20 @@ open class Driveleech : ExtractorApi() {
                         )
                     }
                 }
-                // text.contains("Resume Cloud") -> {
-                //     val resumeCloud = resumeCloudLink(href)
-                //     callback.invoke(
-                //         ExtractorLink(
-                //             "$name ResumeCloud",
-                //             "$name ResumeCloud - $fileName",
-                //             resumeCloud,
-                //             "",
-                //             getIndexQuality(quality)
-                //         )
-                //     )
-                // }
+                text.contains("Resume Cloud") -> {
+                    val resumeCloud = resumeCloudLink(href)
+                    callback.invoke(
+                        ExtractorLink(
+                            "$name ResumeCloud",
+                            "$name ResumeCloud - $fileName",
+                            resumeCloud,
+                            "",
+                            getIndexQuality(quality)
+                        )
+                    )
+                }
                 else -> {
+                    Log.d("No server matched")
                 }
             }
         }
