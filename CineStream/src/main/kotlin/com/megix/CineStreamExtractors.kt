@@ -1081,23 +1081,25 @@ object CineStreamExtractors : CineStreamProvider() {
 
 
         links.mapNotNull {
-            val driveLink = bypassHrefli(it) ?: ""
-            callback.invoke(
-            ExtractorLink(
-                "UHDMovies",
-                "UHDMovies",
-                driveLink,
-                "",
-                Qualities.Unknown.value
-            )
-        )
-            loadSourceNameExtractor(
-                "UHDMovies",
-                driveLink,
-                "",
-                subtitleCallback,
-                callback,
-            )
+            if(!it.isNullOrEmpty()) {
+                val driveLink = bypassHrefli(it) ?: "check"
+                callback.invoke(
+                    ExtractorLink(
+                        "UHDMovies",
+                        "UHDMovies",
+                        driveLink,
+                        "",
+                        Qualities.Unknown.value
+                        )
+                    )
+                loadSourceNameExtractor(
+                    "UHDMovies",
+                    driveLink,
+                    "",
+                    subtitleCallback,
+                    callback,
+                )
+            }
         }
         // val iframeList = doc.select(iSelector).mapNotNull {
         //     if (season == null) {

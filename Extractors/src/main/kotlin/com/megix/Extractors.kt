@@ -118,15 +118,6 @@ open class Driveseed : ExtractorApi() {
         else {
             app.get(url).document
         }
-        callback.invoke(
-            ExtractorLink(
-                "$name",
-                "$name",
-                document.toString(),
-                "",
-                Qualities.Unknown.value,
-            )
-        )
         val quality = document.selectFirst("li.list-group-item")?.text() ?: ""
         val fileName = quality.replace("Name : ", "")
         document.select("div.text-center > a").amap { element ->
