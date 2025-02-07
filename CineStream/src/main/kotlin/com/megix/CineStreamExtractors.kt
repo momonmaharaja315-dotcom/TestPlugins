@@ -1054,9 +1054,9 @@ object CineStreamExtractors : CineStreamProvider() {
         val doc = app.get("$uhdmoviesAPI/download-${title.replace(" ", "-")}").document
 
         val selector = if (season == null) {
-            "div.entry-content > p:matches($year)"
+            "div.entry-content p:matches($year)"
         } else {
-            "div.entry-content > p:matches((?i)(S0?$season\b|Season 0?$season\b))"
+            "div.entry-content p:matches((?i)(S0?$season|Season 0?$season))"
         }
         val epSelector = if (season == null) {
             "a"
