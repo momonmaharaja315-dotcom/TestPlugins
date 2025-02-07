@@ -1092,13 +1092,14 @@ object CineStreamExtractors : CineStreamProvider() {
                         Qualities.Unknown.value
                         )
                     )
-                loadSourceNameExtractor(
-                    "UHDMovies",
-                    driveLink,
-                    "",
-                    subtitleCallback,
-                    callback,
-                )
+                Driveleech().getUrl(driveLink, "", subtitleCallback, callback)
+                // loadSourceNameExtractor(
+                //     "UHDMovies",
+                //     driveLink,
+                //     "",
+                //     subtitleCallback,
+                //     callback,
+                // )
             }
         }
         // val iframeList = doc.select(iSelector).mapNotNull {
