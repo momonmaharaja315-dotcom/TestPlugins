@@ -92,20 +92,20 @@ open class Driveleech : ExtractorApi() {
         else {
             app.get(url).document
         }
-        callback.invoke(
-            ExtractorLink(
-                "check",
-                "check",
-                document.toString(),
-                "",
-                Qualities.Unknown.value
-            )
-        )
         val quality = document.selectFirst("li.list-group-item")?.text() ?: ""
         val fileName = quality.replace("Name : ", "")
         document.select("div.text-center > a").amap { element ->
             val text = element.text()
             val href = element.attr("href")
+            callback.invoke(
+                ExtractorLink(
+                    "check",
+                    "check",
+                    href,
+                    "",
+                    Qualities.Unknown.value
+                )
+            )
             when {
                 text.contains("Instant Download") -> {
                     val instant = instantLink(href)
