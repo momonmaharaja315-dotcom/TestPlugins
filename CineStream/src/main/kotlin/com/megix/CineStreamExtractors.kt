@@ -1083,22 +1083,14 @@ object CineStreamExtractors : CineStreamProvider() {
         links.mapNotNull {
             if(!it.isNullOrEmpty()) {
                 val driveLink = bypassHrefli(it) ?: ""
-                callback.invoke(
-                    ExtractorLink(
-                        "UHDMovies",
-                        "UHDMovies",
-                        driveLink,
-                        "",
-                        Qualities.Unknown.value
-                        )
-                    )
-                loadSourceNameExtractor(
-                    "UHDMovies",
-                    driveLink,
-                    "",
-                    subtitleCallback,
-                    callback,
-                )
+                Driveleech().getUrl(driveLink, "", subtitleCallback, callback)
+                // loadSourceNameExtractor(
+                //     "UHDMovies",
+                //     driveLink,
+                //     "",
+                //     subtitleCallback,
+                //     callback,
+                // )
             }
         }
     }
