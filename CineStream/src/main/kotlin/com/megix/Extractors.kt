@@ -145,18 +145,18 @@ open class Driveleech : ExtractorApi() {
                         )
                     }
                 }
-                text.contains("Resume Cloud") -> {
-                    val resumeCloud = resumeCloudLink(href)
-                    callback.invoke(
-                        ExtractorLink(
-                            "$name ResumeCloud",
-                            "$name ResumeCloud - $fileName",
-                            resumeCloud,
-                            "",
-                            getIndexQuality(quality)
-                        )
-                    )
-                }
+                // text.contains("Resume Cloud") -> {
+                //     val resumeCloud = resumeCloudLink(href)
+                //     callback.invoke(
+                //         ExtractorLink(
+                //             "$name ResumeCloud",
+                //             "$name ResumeCloud - $fileName",
+                //             resumeCloud,
+                //             "",
+                //             getIndexQuality(quality)
+                //         )
+                //     )
+                // }
                 else -> {
                 }
             }
