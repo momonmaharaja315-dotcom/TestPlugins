@@ -85,15 +85,6 @@ open class Driveleech : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        callback.invoke(
-            ExtractorLink(
-                "check",
-                "check",
-                url,
-                "",
-                Qualities.Unknown.value
-            )
-        )
         val document = if(url.contains("r?key=")) {
             val temp = app.get(url).document.selectFirst("script")?.data()?.substringAfter("replace(\"")?.substringBefore("\")") ?: ""
             app.get(mainUrl + temp).document
@@ -101,6 +92,15 @@ open class Driveleech : ExtractorApi() {
         else {
             app.get(url).document
         }
+        callback.invoke(
+            ExtractorLink(
+                "check",
+                "check",
+                document.toString(),
+                "",
+                Qualities.Unknown.value
+            )
+        )
         val quality = document.selectFirst("li.list-group-item")?.text() ?: ""
         val fileName = quality.replace("Name : ", "")
         document.select("div.text-center > a").amap { element ->
