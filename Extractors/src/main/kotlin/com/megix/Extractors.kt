@@ -28,14 +28,14 @@ class Luxdrive : ExtractorApi() {
     }
 }
 
-class Driveleech : Driveseed() {
-    override val name: String = "Driveleech"
-    override val mainUrl: String = "https://driveleech.org"
-}
-
-open class Driveseed : ExtractorApi() {
+class Driveseed : Driveleech() {
     override val name: String = "Driveseed"
     override val mainUrl: String = "https://driveseed.org"
+}
+
+open class Drivele] : ExtractorApi() {
+    override val name: String = "Driveleech"
+    override val mainUrl: String = "https://driveleech.org"
     override val requiresReferer = false
 
     private fun getIndexQuality(str: String?): Int {
