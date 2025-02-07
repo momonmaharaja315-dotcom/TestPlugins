@@ -98,7 +98,11 @@ open class Driveleech : ExtractorApi() {
             val href = element.attr("href")
             when {
                 text.contains("Instant Download") -> {
-                    val instant = instantLink(href)
+                    try{
+                        val instant = instantLink(href)
+                    } catch (e: Exception) {
+                        Log.d("Error:", e.toString())
+                    }
                     callback.invoke(
                         ExtractorLink(
                             "$name Instant(Download)",
