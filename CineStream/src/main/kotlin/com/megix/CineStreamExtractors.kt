@@ -271,7 +271,7 @@ object CineStreamExtractors : CineStreamProvider() {
         }
         else {
 
-            val season = document.select("a.maxbutton-5:matches((?i)(Season 0?$season))")
+            val season = document.select("a.maxbutton-5:matches((?i)(Season 0?$season\b))")
             season.amap { div ->
                 var link = div.select("a").attr("href")
                 if(link.contains("luxedailyupdates.xyz")) {
@@ -1051,26 +1051,25 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
-        val (seasonSlug, episodeSlug) = getEpisodeSlug(season, episode)
         val doc = app.get("$uhdmoviesAPI/download-${title.replace(" ", "-")}").document
-        val iSelector = if (season == null) {
-            "div.entry-content p:has(:matches($year))"
+        val selector = if (season == null) {
+            "div.entry-content > p:has(strong:matches($year))"
         } else {
-            "div.entry-content p:has(:matches((?i)(?:S\\s*$seasonSlug|Season\\s*$seasonSlug)))"
+            "div.entry-content > p:has(strong:matches((?i)(S0?$season\b|Season 0?$season\b)))"
         }
-        val iframeList = doc.select(iSelector).mapNotNull {
-            if (season == null) {
-                it.text() to it.nextElementSibling()?.select("a")?.attr("href")
-            } else {
-                it.text() to it.nextElementSibling()?.select("a")?.find { child ->
-                    child.select("span").text().equals("Episode $episode", true)
-                }?.attr("href")
-            }
-        }.filter { it.first.contains(Regex("(2160p)|(1080p)")) }
-         .filter { element -> !element.toString().contains("Download", true) }
+        val epSelector = if (season == null) {
+            "a"
+        } else {
+            "a:matches((?i)(Episode $episode))"
+        }
+        val links = doc.select(selector).mapNotNull {
+            val nextElementSibling = it.nextElementSibling()
+            nextElementSibling?.select(epSelector)?.attr("href")
 
-        iframeList.amap { (quality, link) ->
-            val driveLink = bypassHrefli(link ?: "") ?: ""
+        }
+
+        links.amap {
+            val driveLink = bypassHrefli(it) ?: ""
             loadSourceNameExtractor(
                 "UHDMovies",
                 driveLink,
@@ -1079,6 +1078,26 @@ object CineStreamExtractors : CineStreamProvider() {
                 callback,
             )
         }
+        // val iframeList = doc.select(iSelector).mapNotNull {
+        //     if (season == null) {
+        //         it.text() to it.nextElementSibling()?.select("a")?.attr("href")
+        //     } else {
+        //         it.text() to it.nextElementSibling()?.select("a")?.find { child ->
+        //             child.select("span").text().equals("Episode $episode", true)
+        //         }?.attr("href")
+        //     }
+        // }
+
+        // iframeList.amap { (quality, link) ->
+        //     val driveLink = bypassHrefli(link ?: "") ?: ""
+        //     loadSourceNameExtractor(
+        //         "UHDMovies",
+        //         driveLink,
+        //         "",
+        //         subtitleCallback,
+        //         callback,
+        //     )
+        // }
     }
 
     suspend fun invokeTopMovies(
