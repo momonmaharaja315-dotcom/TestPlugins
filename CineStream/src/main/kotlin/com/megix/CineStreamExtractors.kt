@@ -1082,7 +1082,7 @@ object CineStreamExtractors : CineStreamProvider() {
 
         links.mapNotNull {
             if(!it.isNullOrEmpty()) {
-                val driveLink = bypassHrefli(it) ?: "check"
+                val driveLink = bypassHrefli(it) ?: ""
                 callback.invoke(
                     ExtractorLink(
                         "UHDMovies",
@@ -1092,36 +1092,15 @@ object CineStreamExtractors : CineStreamProvider() {
                         Qualities.Unknown.value
                         )
                     )
-                Driveleech().getUrl(driveLink, "", subtitleCallback, callback)
-                // loadSourceNameExtractor(
-                //     "UHDMovies",
-                //     driveLink,
-                //     "",
-                //     subtitleCallback,
-                //     callback,
-                // )
+                loadSourceNameExtractor(
+                    "UHDMovies",
+                    driveLink,
+                    "",
+                    subtitleCallback,
+                    callback,
+                )
             }
         }
-        // val iframeList = doc.select(iSelector).mapNotNull {
-        //     if (season == null) {
-        //         it.text() to it.nextElementSibling()?.select("a")?.attr("href")
-        //     } else {
-        //         it.text() to it.nextElementSibling()?.select("a")?.find { child ->
-        //             child.select("span").text().equals("Episode $episode", true)
-        //         }?.attr("href")
-        //     }
-        // }
-
-        // iframeList.amap { (quality, link) ->
-        //     val driveLink = bypassHrefli(link ?: "") ?: ""
-        //     loadSourceNameExtractor(
-        //         "UHDMovies",
-        //         driveLink,
-        //         "",
-        //         subtitleCallback,
-        //         callback,
-        //     )
-        // }
     }
 
     suspend fun invokeTopMovies(
