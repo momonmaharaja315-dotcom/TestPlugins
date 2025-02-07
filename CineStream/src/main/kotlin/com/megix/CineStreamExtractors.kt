@@ -1054,38 +1054,35 @@ object CineStreamExtractors : CineStreamProvider() {
         val doc = app.get("$uhdmoviesAPI/download-${title.replace(" ", "-")}").document
 
         val selector = if (season == null) {
-            "div.entry-content > p:has(strong:matches($year))"
+            "div.entry-content > p:matches($year)"
         } else {
-            "div.entry-content > p:has(strong:matches((?i)(S0?$season\b|Season 0?$season\b)))"
+            "div.entry-content > p:matches((?i)(S0?$season\b|Season 0?$season\b))"
         }
         val epSelector = if (season == null) {
             "a"
         } else {
             "a:matches((?i)(Episode $episode))"
         }
-        callback.invoke(
-            ExtractorLink(
-                "UHDMovies",
-                "UHDMovies",
-                doc.toString(),
-                "",
-                Qualities.Unknown.value
-            )
-        )
-        val links = doc.select(selector).mapNotNull {
-            val nextElementSibling = it.nextElementSibling()
-            nextElementSibling?.select(epSelector)?.attr("href")
+
+        val check = doc.select(selector).mapNotNull {
+            it.text().trim()
         }
 
         callback.invoke(
             ExtractorLink(
                 "UHDMovies",
                 "UHDMovies",
-                links.toString(),
+                check.toString(),
                 "",
                 Qualities.Unknown.value
             )
         )
+
+        val links = doc.select(selector).mapNotNull {
+            val nextElementSibling = it.nextElementSibling()
+            nextElementSibling?.select(epSelector)?.attr("href")
+        }
+
 
         links.amap {
             val driveLink = bypassHrefli(it) ?: ""
