@@ -84,7 +84,7 @@ open class Driveleech : ExtractorApi() {
 
     private suspend fun instantLink(finallink: String): String {
         val url = if(finallink.contains("video-leech")) "video-leech.xyz" else "video-seed.xyz"
-        val token = finallink.substringAfter("https://$url/?url=")
+        val token = finallink.substringAfter("url=")
         val downloadlink = app.post(
             url = "https://$url/api",
             data = mapOf(
@@ -92,15 +92,13 @@ open class Driveleech : ExtractorApi() {
             ),
             referer = finallink,
             headers = mapOf(
-                "x-token" to url,
-                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"
+                "x-token" to url
             )
         )
-        val finaldownloadlink =
+        val link =
             downloadlink.toString().substringAfter("url\":\"")
                 .substringBefore("\",\"name")
                 .replace("\\/", "/")
-        val link = finaldownloadlink
         return link
     }
 
@@ -111,15 +109,6 @@ open class Driveleech : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        callback.invoke(
-            ExtractorLink(
-                "check",
-                "check",
-                url,
-                "",
-                Qualities.Unknown.value
-            )
-        )
         val document = if(url.contains("r?key=")) {
             val temp = app.get(url).document.selectFirst("script")?.data()?.substringAfter("replace(\"")?.substringBefore("\")") ?: ""
             app.get(mainUrl + temp).document
@@ -134,16 +123,20 @@ open class Driveleech : ExtractorApi() {
             val href = element.attr("href")
             when {
                 text.contains("Instant Download") -> {
-                    val instant = instantLink(href)
-                    callback.invoke(
-                        ExtractorLink(
-                            "$name Instant(Download)",
-                            "$name Instant(Download) - $fileName",
-                            instant,
-                            "",
-                            getIndexQuality(quality)
+                    try{
+                        val instant = instantLink(href)
+                        callback.invoke(
+                            ExtractorLink(
+                                "$name Instant(Download)",
+                                "$name Instant(Download) - $fileName",
+                                instant,
+                                "",
+                                getIndexQuality(quality)
+                            )
                         )
-                    )
+                    } catch (e: Exception) {
+                        Log.d("Error:", e.toString())
+                    }
                 }
                 text.contains("Resume Worker Bot") -> {
                     val resumeLink = resumeBot(href)
