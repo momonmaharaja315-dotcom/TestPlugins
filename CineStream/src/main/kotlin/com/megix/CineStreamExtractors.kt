@@ -1059,29 +1059,25 @@ object CineStreamExtractors : CineStreamProvider() {
             "div.entry-content p:matches((?i)(S0?$season|Season 0?$season))"
         }
         val epSelector = if (season == null) {
-            "a"
+            "a:matches((?i)(Download))"
         } else {
             "a:matches((?i)(Episode $episode))"
         }
 
-        val check = doc.select(selector).mapNotNull {
-            it.text().trim()
+        val links = doc.select(selector).mapNotNull {
+            val nextElementSibling = it.nextElementSibling()
+            nextElementSibling?.select(epSelector)?.attr("href")
         }
 
         callback.invoke(
             ExtractorLink(
                 "UHDMovies",
                 "UHDMovies",
-                check.toString(),
+                links.toString(),
                 "",
                 Qualities.Unknown.value
             )
         )
-
-        val links = doc.select(selector).mapNotNull {
-            val nextElementSibling = it.nextElementSibling()
-            nextElementSibling?.select(epSelector)?.attr("href")
-        }
 
 
         links.amap {
