@@ -101,7 +101,7 @@ open class Driveleech : ExtractorApi() {
                 ExtractorLink(
                     "check",
                     "check",
-                    href,
+                    "$text - $href",
                     "",
                     Qualities.Unknown.value
                 )
