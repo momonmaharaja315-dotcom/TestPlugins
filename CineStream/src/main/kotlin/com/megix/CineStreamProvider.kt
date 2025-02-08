@@ -165,18 +165,19 @@ open class CineStreamProvider : MainAPI() {
 
     private suspend fun fetchWithRetry(
         urls: List<String>
-    ) : String {
+    ) : SearchResult? {
         for(url in urls) {
             try {
                 val json = app.get(url).text
-                if(tryParseJson<SearchResult>(movieJson) != null) {
-                    return json
+                val movieJson = tryParseJson<SearchResult>(json)
+                if(movieJson != null) {
+                    return movieJson
                 }
             } catch (e: Exception) {
                 Log.d("CineStream", "Failed to get $url")
             }
         }
-        return ""
+        return null
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
@@ -200,17 +201,17 @@ open class CineStreamProvider : MainAPI() {
             })
         }
         //val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
-        val movieJson = fetchWithRetry(movieUrls)
-        val movies = tryParseJson<SearchResult>(movieJson)
+        val movies = fetchWithRetry(movieUrls)
+        //val movies = tryParseJson<SearchResult>(movieJson)
         movies?.metas?.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
         }
 
-        val seriesJson = fetchWithRetry(seriesUrls)
+        val series = fetchWithRetry(seriesUrls)
         //val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
-        val series = tryParseJson<SearchResult>(seriesJson)
+        //val series = tryParseJson<SearchResult>(seriesJson)
         series?.metas?.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.TvSeries) {
                 this.posterUrl = it.poster.toString()
@@ -336,6 +337,7 @@ open class CineStreamProvider : MainAPI() {
                     this.episode = ep.episode
                     this.posterUrl = ep.thumbnail
                     this.description = ep.overview
+                    this.rating = ep.rating?.toIntOrNull()
                     addDate(ep.firstAired?.substringBefore("T"))
                 }
             } ?: emptyList()
@@ -725,6 +727,7 @@ open class CineStreamProvider : MainAPI() {
         val title: String?,
         val season: Int,
         val episode: Int,
+        val rating: String?,
         val released: String?,
         val firstAired: String?,
         val overview: String?,
