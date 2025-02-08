@@ -189,7 +189,7 @@ open class CineStreamProvider : MainAPI() {
         )
 
         val seriesUrls = listOf(
-            "$streamio_TMDB/catalo/series/tmdb.top/search=$query.json",
+            "$streamio_TMDB/catalog/series/tmdb.top/search=$query.json",
             "$cinemeta_url/catalog/series/top/search=$query.json",
         )
 
@@ -337,7 +337,7 @@ open class CineStreamProvider : MainAPI() {
                     this.episode = ep.episode
                     this.posterUrl = ep.thumbnail
                     this.description = ep.overview
-                    this.rating = ep.rating?.toIntOrNull()
+                    this.rating = ep.rating?.toFloat()?.times(10)?.roundToInt()
                     addDate(ep.firstAired?.substringBefore("T"))
                 }
             } ?: emptyList()
