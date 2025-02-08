@@ -10,6 +10,7 @@ import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import com.lagradost.cloudstream3.argamap
+import android.util.Log
 import com.lagradost.cloudstream3.network.CloudflareKiller
 import com.megix.CineStreamExtractors.invokeVegamovies
 import com.megix.CineStreamExtractors.invokeRogmovies
@@ -55,7 +56,7 @@ open class CineStreamProvider : MainAPI() {
     companion object {
         const val malsyncAPI = "https://api.malsync.moe"
         const val vegaMoviesAPI = "https://m.vegamovies.ms"
-        const val rogMoviesAPI = "https://luxmovies.cam"
+        const val rogMoviesAPI = "https://rogmovies.cfd"
         const val MovieDrive_API = "https://moviesdrive.pro"
         const val tokyoInsiderAPI = "https://www.tokyoinsider.com"
         const val topmoviesAPI = "https://topmovies.beer"
@@ -79,7 +80,7 @@ open class CineStreamProvider : MainAPI() {
         const val multimoviesAPI = "https://multimovies.today"
         const val anitaku = "https://anitaku.pe"
         const val cinemaluxeAPI = "https://cinemaluxe.work"
-        const val bollyflixAPI = "https://bollyflix.africa"
+        const val bollyflixAPI = "https://bollyflix.pet"
         const val TomAPI = "https://tom.autoembed.cc"
         const val animiaAPI = "https://animia.buzz"
         const val torrentioAPI = "https://torrentio.strem.fun"
@@ -97,12 +98,15 @@ open class CineStreamProvider : MainAPI() {
     )
 
     override val mainPage = mainPageOf(
+        "$streamio_TMDB/catalog/movie/tmdb.trending/skip=###&genre=Day" to "Trending Movies Today",
+        "$streamio_TMDB/catalog/series/tmdb.trending/skip=###&genre=Day" to "Trending Series Today",
         "$mainUrl/top/catalog/movie/top/skip=###" to "Top Movies",
         "$mainUrl/top/catalog/series/top/skip=###" to "Top Series",
         "$mediaFusion/catalog/movie/hindi_hdrip/skip=###" to "Trending Movie in India",
         "$mediaFusion/catalog/series/hindi_series/skip=###" to "Trending Series in India",
         "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
         "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Trending Anime",
+        "$streamio_TMDB/catalog/series/tmdb.language/skip=###&genre=Korean" to "Trending Korean Series",
         "$mediaFusion/catalog/tv/live_tv/skip=###" to "Live TV",
         "$mainUrl/top/catalog/movie/top/skip=###&genre=Action" to "Top Action Movies",
         "$mainUrl/top/catalog/series/top/skip=###&genre=Action" to "Top Action Series",
@@ -159,17 +163,42 @@ open class CineStreamProvider : MainAPI() {
         )
     }
 
+    private suspend fun fetchWithRetry(
+        urls: List<String>
+    ) : String {
+        for(url in urls) {
+            try {
+                val json = app.get(url).text
+                return json
+            } catch (e: Exception) {
+                Log.d("CineStream", "Failed to get $url")
+            }
+        }
+        return ""
+    }
+
     override suspend fun search(query: String): List<SearchResponse> {
         val searchResponse = mutableListOf<SearchResponse>()
 
+        val movieUrls = listOf(
+            "$streamio_TMDB/catalog/movie/tmdb.top/search=$query.json",
+            "$cinemeta_url/catalog/movie/top/search=$query.json",
+        )
+
+        val seriesUrls = listOf(
+            "$streamio_TMDB/catalog/series/tmdb.top/search=$query.json",
+            "$cinemeta_url/catalog/series/top/search=$query.json",
+        )
+
         val animeJson = app.get("$kitsu_url/catalog/anime/kitsu-anime-list/search=$query.json").text
         val animes = tryParseJson<SearchResult>(animeJson)
-        animes?.metas ?.forEach {
+        animes?.metas?.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
         }
-        val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
+        //val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
+        val movieJson = fetchWithRetry(movieUrls)
         val movies = tryParseJson<SearchResult>(movieJson)
         movies?.metas?.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
@@ -177,7 +206,8 @@ open class CineStreamProvider : MainAPI() {
             })
         }
 
-        val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
+        val seriesJson = fetchWithRetry(seriesUrls)
+        //val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
         val series = tryParseJson<SearchResult>(seriesJson)
         series?.metas?.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.TvSeries) {
@@ -588,7 +618,7 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
-                    invokeUhdmovies(
+                    if(!res.isBollywood) invokeUhdmovies(
                         res.title,
                         year,
                         res.season,
