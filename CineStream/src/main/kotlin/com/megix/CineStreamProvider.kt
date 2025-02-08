@@ -169,7 +169,9 @@ open class CineStreamProvider : MainAPI() {
         for(url in urls) {
             try {
                 val json = app.get(url).text
-                return json
+                if(tryParseJson<SearchResult>(movieJson) != null) {
+                    return json
+                }
             } catch (e: Exception) {
                 Log.d("CineStream", "Failed to get $url")
             }
@@ -186,7 +188,7 @@ open class CineStreamProvider : MainAPI() {
         )
 
         val seriesUrls = listOf(
-            "$streamio_TMDB/catalog/series/tmdb.top/search=$query.json",
+            "$streamio_TMDB/catalo/series/tmdb.top/search=$query.json",
             "$cinemeta_url/catalog/series/top/search=$query.json",
         )
 
