@@ -17,6 +17,29 @@ import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend fun invokeHdPrimeKing(
+        title: String,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        var url = "https://hdprimeking.com/movie/${title.replace(" ", "-")}.html"
+        val doc = app.get(url).document
+        doc.select("ul.wlist a").amap {
+            val str = app.get(it.attr("href")).text
+            val json = Regex("""var mresult = ({.*?});""").find(str)?.groupValues?.get(1) ?: return@amap
+            val data1 = tryParseJson<HdPrimeKingResponse>(json) ?: return@amap
+            if(data1.smwh != null) {
+                loadSourceNameExtractor(
+                    "HdPrimeKing",
+                    "https://hlswish.com/e/${data1.smwh}",
+                    "",
+                    subtitleCallback,
+                    callback
+                )
+            }
+        }
+    }
+
     suspend fun invokeTvStream(
         id: String,
         api: String,

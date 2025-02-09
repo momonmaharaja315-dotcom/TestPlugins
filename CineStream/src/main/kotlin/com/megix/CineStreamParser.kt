@@ -3,6 +3,19 @@ package com.megix
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.gson.annotations.SerializedName
 
+data class HdPrimeKingResponse (
+  var vksr       : String? = null,
+  var flps       : String? = null,
+  var flls       : String? = null,
+  var smwh       : String? = null,
+  var gdtot      : String? = null,
+  var rpmshare   : String? = null,
+  var kknfl      : String? = null,
+  var plrx       : String? = null,
+  var abys       : String? = null,
+  var pixeldrain : String? = null
+)
+
 data class TvStreamsResponse(
     val streams: List<TvStream>
 )

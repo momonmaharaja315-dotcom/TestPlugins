@@ -164,23 +164,6 @@ open class CineStreamProvider : MainAPI() {
         )
     }
 
-    private suspend fun fetchWithRetry(
-        urls: List<String>
-    ) : SearchResult? {
-        for(url in urls) {
-            try {
-                val json = app.get(url).text
-                val movieJson = tryParseJson<SearchResult>(json)
-                if(movieJson != null) {
-                    return movieJson
-                }
-            } catch (e: Exception) {
-                Log.d("CineStream", "Failed to get $url")
-            }
-        }
-        return null
-    }
-
     override suspend fun search(query: String): List<SearchResponse> {
         val searchResponse = mutableListOf<SearchResponse>()
 
@@ -790,6 +773,23 @@ open class CineStreamProvider : MainAPI() {
         }
 
         return score
+    }
+
+    private suspend fun fetchWithRetry(
+        urls: List<String>
+    ) : SearchResult? {
+        for(url in urls) {
+            try {
+                val json = app.get(url).text
+                val movieJson = tryParseJson<SearchResult>(json)
+                if(movieJson != null) {
+                    return movieJson
+                }
+            } catch (e: Exception) {
+                Log.d("CineStream", "Failed to get $url")
+            }
+        }
+        return null
     }
 }
 
