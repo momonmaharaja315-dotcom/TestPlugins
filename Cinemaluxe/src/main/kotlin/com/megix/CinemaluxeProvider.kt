@@ -39,8 +39,7 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
     }
 
     private suspend fun bypass(url: String): String {
-        val link = app.get(url).headers["location"] ?: ""
-        val document = app.get(link).document.toString()
+        val document = app.get(url, allowRedirects = true).document.toString()
         val encodeUrl = Regex("""link":"([^"]+)""").find(document) ?. groupValues ?. get(1) ?: ""
         return base64Decode(encodeUrl)
     }

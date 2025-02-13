@@ -476,7 +476,7 @@ open class GDFlix : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val res = app.get(url)
+        val res = app.get(url, allowRedirects = true)
         val baseUrl = getBaseUrl(res.url)
         val document = res.document
         val fileName = document.selectFirst("ul > li.list-group-item")?.text()?.substringAfter("Name : ") ?: ""
