@@ -355,25 +355,7 @@ open class HubCloud : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        callback.invoke(
-            ExtractorLink(
-                "Hub[true]",
-                "Hub[true]",
-                url,
-                "",
-                Qualities.Unknown.value,
-            )
-        )
         val doc = app.get(url, allowRedirects = true).document
-        callback.invoke(
-            ExtractorLink(
-                "Hub[doc]",
-                "Hub[doc]",
-                doc.toString(),
-                "",
-                Qualities.Unknown.value,
-            )
-        )
         val link = if(url.contains("drive")) {
             val scriptTag = doc.selectFirst("script:containsData(url)")?.toString() ?: ""
             Regex("var url = '([^']*)'").find(scriptTag) ?. groupValues ?. get(1) ?: ""
@@ -493,26 +475,8 @@ open class GDFlix : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        callback.invoke(
-            ExtractorLink(
-                "GDFlix[true]",
-                "GDFLix[true]",
-                url,
-                "",
-                Qualities.Unknown.value,
-            )
-        )
         val res = app.get(url, allowRedirects = true)
         val baseUrl = getBaseUrl(res.url)
-        callback.invoke(
-            ExtractorLink(
-                "GDFlix[base]",
-                "GDFLix[base]",
-                baseUrl,
-                "",
-                Qualities.Unknown.value,
-            )
-        )
         val document = res.document
         val fileName = document.selectFirst("ul > li.list-group-item")?.text()?.substringAfter("Name : ") ?: ""
         document.select("div.text-center a").amap {
