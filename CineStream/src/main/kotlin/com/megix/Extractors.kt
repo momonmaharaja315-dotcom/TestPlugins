@@ -163,17 +163,6 @@ class Pahe : ExtractorApi() {
         val fContent = noRedirects.newCall(fContentRequest).execute()
         val fContentString = fContent.body?.string()
             ?: throw Exception("Failed to read response body from Kwik URL")
-        callback.invoke(
-            ExtractorLink(
-                name,
-                name,
-                fContentString,
-                "",
-                Qualities.Unknown.value,
-                INFER_TYPE
-            )
-        )
-
         val (fullString, key, v1, v2) = kwikParamsRegex.find(fContentString)?.destructured
             ?: throw Exception("Failed to extract parameters from Kwik response")
         val decrypted = decrypt(fullString, key, v1.toInt(), v2.toInt())
