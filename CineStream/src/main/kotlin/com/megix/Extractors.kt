@@ -138,7 +138,7 @@ class Pahe : ExtractorApi() {
         return sb.toString()
     }
 
-    override suspend fun getUrl(url: String, referer: String?): List<ExtractorLink>? {
+    override suspend fun getUrl(url: String, referer: String?, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit) {
         val noRedirects = OkHttpClient.Builder()
             .followRedirects(false)
             .followSslRedirects(false)
