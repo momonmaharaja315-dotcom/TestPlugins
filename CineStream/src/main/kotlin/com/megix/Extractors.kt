@@ -139,6 +139,16 @@ class Pahe : ExtractorApi() {
     }
 
     override suspend fun getUrl(url: String, referer: String?, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit) {
+        callback.invoke(
+            ExtractorLink(
+                name,
+                name,
+                url,
+                "",
+                Qualities.Unknown.value,
+                INFER_TYPE
+            )
+        )
         val noRedirects = OkHttpClient.Builder()
             .followRedirects(false)
             .followSslRedirects(false)
@@ -169,6 +179,16 @@ class Pahe : ExtractorApi() {
         val (fullString, key, v1, v2) = kwikParamsRegex.find(fContentString)?.destructured
             ?: throw Exception("Failed to extract parameters from Kwik response")
         val decrypted = decrypt(fullString, key, v1.toInt(), v2.toInt())
+        callback.invoke(
+            ExtractorLink(
+                name,
+                name,
+                decrypted,
+                "",
+                Qualities.Unknown.value,
+                INFER_TYPE
+            )
+        )
 
         val uri = kwikDUrl.find(decrypted)?.destructured?.component1()
             ?: throw Exception("Failed to extract URI from decrypted data")
