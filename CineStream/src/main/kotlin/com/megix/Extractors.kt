@@ -4,6 +4,11 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.network.WebViewResolver
 import com.lagradost.cloudstream3.extractors.StreamWishExtractor
+import okhttp3.*
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.IOException
 
 class MultimoviesAIO: StreamWishExtractor() {
     override var name = "Multimovies Cloud AIO"
@@ -94,6 +99,124 @@ class Kwik : ExtractorApi() {
                 m3u8,
                 "",
                 getQualityFromName(""),
+                INFER_TYPE
+            )
+        )
+    }
+}
+
+class Pahe : ExtractorApi() {
+    override val name = "Pahe"
+    override val mainUrl = "https://pahe.win"
+    override val requiresReferer = true
+    private val kwikParamsRegex = Regex("""\("(\w+)",\d+,"(\w+)",(\d+),(\d+),\d+\)""")
+    private val kwikDUrl = Regex("action=\"([^\"]+)\"")
+    private val kwikDToken = Regex("value=\"([^\"]+)\"")
+
+    private fun decrypt(fullString: String, key: String, v1: Int, v2: Int): String {
+        val keyIndexMap = key.withIndex().associate { it.value to it.index }
+        val sb = StringBuilder()
+        var i = 0
+        val toFind = key[v2]
+
+        while (i < fullString.length) {
+            val nextIndex = fullString.indexOf(toFind, i)
+            if (nextIndex == -1) break
+
+            val decodedCharStr = buildString {
+                for (j in i until nextIndex) {
+                    append(keyIndexMap[fullString[j]] ?: -1)
+                }
+            }
+
+            i = nextIndex + 1
+
+            val decodedChar = (decodedCharStr.toInt(v2) - v1).toChar()
+            sb.append(decodedChar)
+        }
+
+        return sb.toString()
+    }
+
+    override suspend fun getUrl(url: String, referer: String?): List<ExtractorLink>? {
+        val noRedirects = OkHttpClient.Builder()
+            .followRedirects(false)
+            .followSslRedirects(false)
+            .build()
+
+        val initialRequest = Request.Builder()
+            .url("$url/i")
+            .get()
+            .build()
+
+        val initialResponse = noRedirects.newCall(initialRequest).execute()
+        val locationHeader = initialResponse.header("Location")
+            ?: throw Exception("Missing Location header in initial response")
+        val kwikUrl = locationHeader.also {
+            require(it.startsWith("https://")) { "Invalid URL in Location header" }
+        }
+
+        val fContentRequest = Request.Builder()
+            .url(kwikUrl)
+            .header("Referer", "https://kwik.cx/")
+            .get()
+            .build()
+
+        val fContent = noRedirects.newCall(fContentRequest).execute()
+        val fContentString = fContent.body?.string()
+            ?: throw Exception("Failed to read response body from Kwik URL")
+
+        val (fullString, key, v1, v2) = kwikParamsRegex.find(fContentString)?.destructured
+            ?: throw Exception("Failed to extract parameters from Kwik response")
+        val decrypted = decrypt(fullString, key, v1.toInt(), v2.toInt())
+
+        val uri = kwikDUrl.find(decrypted)?.destructured?.component1()
+            ?: throw Exception("Failed to extract URI from decrypted data")
+        val tok = kwikDToken.find(decrypted)?.destructured?.component1()
+            ?: throw Exception("Failed to extract token from decrypted data")
+
+        val noRedirectClient = OkHttpClient.Builder()
+            .followRedirects(false)
+            .followSslRedirects(false)
+            .cookieJar(CookieJar.NO_COOKIES)
+            .build()
+
+        var code = 419
+        var tries = 0
+        var content: Response? = null
+
+        while (code != 302 && tries < 20) {
+            val formBody = FormBody.Builder()
+                .add("_token", tok)
+                .build()
+
+            val postRequest = Request.Builder()
+                .url(uri)
+                .header("Referer", fContent.request.url.toString())
+                .header("Cookie", fContent.header("Set-Cookie")?.replace("path=/;", "") ?: "")
+                .post(formBody)
+                .build()
+
+            content = noRedirectClient.newCall(postRequest).execute()
+            code = content.code
+            tries++
+        }
+
+        if (tries >= 20) {
+            throw Exception("Failed to extract the stream URI from Kwik after $tries attempts")
+        }
+
+        val location = content?.header("Location")
+            ?: throw Exception("Missing Location header in final response")
+        content.close()
+
+        callback.invoke(
+            ExtractorLink(
+                name,
+                name,
+                location,
+                "",
+                Qualities.Unknown.value,
                 INFER_TYPE
             )
         )

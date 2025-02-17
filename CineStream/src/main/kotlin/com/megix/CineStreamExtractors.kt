@@ -471,13 +471,12 @@ object CineStreamExtractors : CineStreamProvider() {
                 if (animepahe!=null)
                     invokeAnimepahe(animepahe, episode, subtitleCallback, callback)
             },
-            {
-                val Gogourl = malsync?.Gogoanime?.firstNotNullOfOrNull { it.value["url"] }
-                if (Gogourl != null)
-                    invokeAnitaku(Gogourl, episode, subtitleCallback, callback)
-            }
+            // {
+            //     val Gogourl = malsync?.Gogoanime?.firstNotNullOfOrNull { it.value["url"] }
+            //     if (Gogourl != null)
+            //         invokeAnitaku(Gogourl, episode, subtitleCallback, callback)
+            // }
         )
-
     }
 
     private suspend fun invokeAnimepahe(
@@ -493,24 +492,36 @@ object CineStreamExtractors : CineStreamProvider() {
             app.get("$animepaheAPI/api?m=release&id=$id&sort=episode_desc&page=1", headers)
                 .parsedSafe<animepahe>()?.data
         val session = animeData?.find { it.episode == episode }?.session ?: ""
-        app.get("$animepaheAPI/play/$id/$session", headers).document.select("div.dropup button")
-            .map {
-                var lang=""
-                val dub=it.select("span").text()
-                if (dub.contains("eng")) lang="DUB" else lang="SUB"
-                val quality = it.attr("data-resolution")
-                val href = it.attr("data-src")
-                if (href.contains("kwik.si")) {
-                    loadCustomExtractor(
-                        "Animepahe [$lang]",
-                        href,
-                        mainUrl,
-                        subtitleCallback,
-                        callback,
-                        getQualityFromName(quality)
-                    )
-                }
+        val doc = app.get("$animepaheAPI/play/$id/$session", headers).document
+        doc.select("div.dropup button").map {
+            var lang=""
+            val dub=it.select("span").text()
+            if (dub.contains("eng")) lang="DUB" else lang="SUB"
+            val quality = it.attr("data-resolution")
+            val href = it.attr("data-src")
+            if (href.contains("kwik.si")) {
+                loadCustomExtractor(
+                    "Animepahe(VLC) [$lang]",
+                    href,
+                    mainUrl,
+                    subtitleCallback,
+                    callback,
+                    getQualityFromName(quality)
+                )
             }
+        }
+        doc.select("div#pickDownload > a").map {
+            val href = it.attr("href")
+            val text = it.text()
+            loadCustomExtractor(
+                "Animepahe [$text]",
+                href,
+                "",
+                subtitleCallback,
+                callback,
+                getQualityFromName(text)
+            )
+        }
     }
 
     // suspend fun invokeRar(
