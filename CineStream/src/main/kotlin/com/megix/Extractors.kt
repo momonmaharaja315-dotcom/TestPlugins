@@ -121,8 +121,6 @@ class Pahe : ExtractorApi() {
 
         while (i < fullString.length) {
             val nextIndex = fullString.indexOf(toFind, i)
-            if (nextIndex == -1) break
-
             val decodedCharStr = buildString {
                 for (j in i until nextIndex) {
                     append(keyIndexMap[fullString[j]] ?: -1)
