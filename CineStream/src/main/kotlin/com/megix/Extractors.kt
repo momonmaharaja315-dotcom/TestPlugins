@@ -112,6 +112,8 @@ class Pahe : ExtractorApi() {
     private val kwikParamsRegex = Regex("""\("(\w+)",\d+,"(\w+)",(\d+),(\d+),\d+\)""")
     private val kwikDUrl = Regex("action=\"([^\"]+)\"")
     private val kwikDToken = Regex("value=\"([^\"]+)\"")
+    private var cookies: String = ""
+    private val client = OkHttpClient.Builder().build()
 
     private fun decrypt(fullString: String, key: String, v1: Int, v2: Int): String {
         val keyIndexMap = key.withIndex().associate { it.value to it.index }
