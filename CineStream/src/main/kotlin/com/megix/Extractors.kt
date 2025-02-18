@@ -9,7 +9,6 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
-import kotlinx.coroutines.*
 
 class MultimoviesAIO: StreamWishExtractor() {
     override var name = "Multimovies Cloud AIO"
@@ -180,6 +179,17 @@ class Pahe : ExtractorApi() {
         var tries = 0
         var content: Response? = null
 
+        callback.invoke(
+            ExtractorLink(
+                name,
+                name,
+                "uri:$uri and token:$tok and referer:${fContent.request.url.toString()} and cookie:${fContent.header("set-cookie").toString()}",
+                "",
+                Qualities.Unknown.value,
+                INFER_TYPE
+            )
+        )
+
         while (code != 302 && tries < 20) {
             val formBody = FormBody.Builder()
                 .add("_token", tok)
@@ -195,7 +205,6 @@ class Pahe : ExtractorApi() {
             content = noRedirectClient.newCall(postRequest).execute()
             code = content.code
             tries++
-            delay(1000)
         }
 
         // if (tries > 19) {
@@ -214,6 +223,6 @@ class Pahe : ExtractorApi() {
                 INFER_TYPE
             )
         )
-        content?.close()
+        // content?.close()
     }
 }
