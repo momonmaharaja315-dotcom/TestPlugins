@@ -249,7 +249,16 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
         val type = if(episode != null) "tvshow" else "movie"
-        val url = "$cinemaluxeAPI/$type/${title.replace(" ", "-")}-${year.toString()}"
+        val url = "$cinemaluxeAPI/$type/${title.replace(" ", "-")}-$year"
+        callback.invoke(
+            ExtractorLink(
+                "Cinemaluxe",
+                "Cinemaluxe",
+                url,
+                referer = "",
+                quality = Qualities.Unknown.value,
+            )
+        )
         val document = app.get(url).document
         if(season == null) {
             document.select("a.maxbutton").amap {
@@ -269,9 +278,27 @@ object CineStreamExtractors : CineStreamProvider() {
         }
         else {
             val season = document.select("a.maxbutton-5:matches((?i)(Season 0?$season\b))")
+            callback.invoke(
+                ExtractorLink(
+                    "season",
+                    "season",
+                    season.toString(),
+                    referer = "",
+                    quality = Qualities.Unknown.value,
+                )
+            )
             season.amap { div ->
                 var link = div.select("a").attr("href")
                 link = cinemaluxeBypass(link)
+                callback.invoke(
+                    ExtractorLink(
+                        "link",
+                        "link",
+                        link,
+                        referer = "",
+                        quality = Qualities.Unknown.value,
+                    )
+                )
                  app.get(link).document.select("""a.maxbutton:matches((?i)(?:episode\s*[-]?\s*)(0?$episode))""").amap {
                     loadSourceNameExtractor(
                         "Cinemaluxe",
@@ -1236,7 +1263,7 @@ object CineStreamExtractors : CineStreamProvider() {
                             "HiAnime ${server.uppercase()} [${t.uppercase()}]",
                             it.url,
                             "",
-                            Qualities.Unknown.value,
+                            Qualities.P1080.value,
                             if(it.type == "hls") true else false
                         )
                     )
