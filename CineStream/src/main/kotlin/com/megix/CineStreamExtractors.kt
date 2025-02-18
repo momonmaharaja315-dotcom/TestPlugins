@@ -493,7 +493,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 .parsedSafe<animepahe>()?.data
         val session = animeData?.find { it.episode == episode }?.session ?: ""
         val doc = app.get("$animepaheAPI/play/$id/$session", headers).document
-        doc.select("div.dropup button").map {
+        doc.select("div.dropup button").amap {
             var lang=""
             val dub=it.select("span").text()
             if (dub.contains("eng")) lang="DUB" else lang="SUB"
@@ -510,7 +510,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 )
             }
         }
-        doc.select("div#pickDownload > a").map {
+        doc.select("div#pickDownload > a").amap {
             val href = it.attr("href")
             val text = it.text()
             loadCustomExtractor(
