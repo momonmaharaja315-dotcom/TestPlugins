@@ -194,6 +194,7 @@ class Pahe : ExtractorApi() {
             content = noRedirectClient.newCall(postRequest).execute()
             code = content.code
             tries++
+            delay(1000)
         }
 
         // if (tries > 19) {
