@@ -277,7 +277,7 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
         else {
-            val season = document.select("a.maxbutton-5:matches((?i)(Season 0?$season\b))")
+            val season = document.select("a.maxbutton-5:matches((?i)(Season 0?$season))")
             callback.invoke(
                 ExtractorLink(
                     "season",
