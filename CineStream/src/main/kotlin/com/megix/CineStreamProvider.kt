@@ -37,7 +37,6 @@ import com.megix.CineStreamExtractors.invokeCinemaluxe
 import com.megix.CineStreamExtractors.invokeBollyflix
 import com.megix.CineStreamExtractors.invokeTom
 import com.megix.CineStreamExtractors.invokeTorrentio
-import com.megix.CineStreamExtractors.invokeDramaCool
 import com.megix.CineStreamExtractors.invokeAnimia
 import com.megix.CineStreamExtractors.invokeTokyoInsider
 import com.megix.CineStreamExtractors.invokeTvStream
@@ -519,16 +518,6 @@ open class CineStreamProvider : MainAPI() {
                         res.episode,
                         callback,
                         subtitleCallback,
-                    )
-                },
-                {
-                    if(res.isAsian) invokeDramaCool(
-                        res.title,
-                        year,
-                        res.season,
-                        res.episode,
-                        subtitleCallback,
-                        callback
                     )
                 },
                 {
