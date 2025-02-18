@@ -112,8 +112,6 @@ class Pahe : ExtractorApi() {
     private val kwikParamsRegex = Regex("""\("(\w+)",\d+,"(\w+)",(\d+),(\d+),\d+\)""")
     private val kwikDUrl = Regex("action=\"([^\"]+)\"")
     private val kwikDToken = Regex("value=\"([^\"]+)\"")
-    private var cookies: String = ""
-    private val client = OkHttpClient.Builder().build()
 
     private fun decrypt(fullString: String, key: String, v1: Int, v2: Int): String {
         val keyIndexMap = key.withIndex().associate { it.value to it.index }
@@ -152,15 +150,16 @@ class Pahe : ExtractorApi() {
         val kwikUrl = "https://" + noRedirects.newCall(initialRequest).execute()
                                 .header("location")!!.substringAfterLast("https://")
 
-        val fContentRequest = Request.Builder()
-            .url(kwikUrl)
-            .header("Referer", "https://kwik.cx/")
-            .get()
-            .build()
+        // val fContentRequest = Request.Builder()
+        //     .url(kwikUrl)
+        //     .header("referer", "https://kwik.cx/")
+        //     .get()
+        //     .build()
 
+        // val fContent =
+        //     client.newCall(fContentRequest).execute()
         val fContent =
-            client.newCall(fContentRequest).execute()
-        cookies += fContent.header("set-cookie")!!
+            app.get(kwikUrl, referer = "https://kwik.cx/", headers = mapOf("referer" to "https://kwik.cx/"))
         val fContentString = fContent.body.string()
 
         val (fullString, key, v1, v2) = kwikParamsRegex.find(fContentString)!!.destructured
@@ -181,9 +180,9 @@ class Pahe : ExtractorApi() {
 
         callback.invoke(
             ExtractorLink(
-                name,
-                name,
-                "uri:$uri and token:$tok and referer:${fContent.request.url.toString()} and cookie:${fContent.header("set-cookie").toString()}",
+                "check",
+                "check",
+                "uri:$uri and token:$tok and referer:${fContent.request.url.toString()} and cookie:${fContent.header("set-cookie")!!.split(";")[0].toString()}",
                 "",
                 Qualities.Unknown.value,
                 INFER_TYPE
