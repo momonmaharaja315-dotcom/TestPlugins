@@ -248,8 +248,8 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
-        val searchDocument = app.get("$cinemaluxeAPI/?s=$title $year").document
-        val url = searchDocument.select("div.title > a:matches((?i)($title $year))").attr("href")
+        val type = if(episode != null) "tvshow" else "movie"
+        val url = "$cinemaluxeAPI/$type/${title.replace(" ", "-")}-$year"
         val document = app.get(url).document
         if(season == null) {
             document.select("a.maxbutton").amap {
@@ -268,7 +268,6 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
         else {
-
             val season = document.select("a.maxbutton-5:matches((?i)(Season 0?$season\b))")
             season.amap { div ->
                 var link = div.select("a").attr("href")
@@ -521,7 +520,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 "",
                 subtitleCallback,
                 callback,
-                getQualityFromName(text)
+                getQualityFromName(it.text())
             )
         }
     }

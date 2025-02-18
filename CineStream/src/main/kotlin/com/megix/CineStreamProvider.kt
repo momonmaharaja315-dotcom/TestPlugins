@@ -514,7 +514,7 @@ open class CineStreamProvider : MainAPI() {
                 {
                     invokeCinemaluxe(
                         res.title,
-                        year,
+                        seasonYear,
                         res.season,
                         res.episode,
                         callback,
