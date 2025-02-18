@@ -147,12 +147,8 @@ class Pahe : ExtractorApi() {
             .get()
             .build()
 
-        val initialResponse = noRedirects.newCall(initialRequest).execute()
-        val locationHeader = initialResponse.header("Location")
-            ?: throw Exception("Missing Location header in initial response")
-        val kwikUrl = locationHeader.also {
-            require(it.startsWith("https://")) { "Invalid URL in Location header" }
-        }
+        val kwikUrl = "https://" + noRedirects.newCall(initialRequest).execute()
+                                .header("location")!!.substringAfterLast("https://")
 
         val fContentRequest = Request.Builder()
             .url(kwikUrl)
@@ -160,11 +156,12 @@ class Pahe : ExtractorApi() {
             .get()
             .build()
 
-        val fContent = noRedirects.newCall(fContentRequest).execute()
-        val fContentString = fContent.body?.string()
-            ?: throw Exception("Failed to read response body from Kwik URL")
-        val (fullString, key, v1, v2) = kwikParamsRegex.find(fContentString)?.destructured
-            ?: throw Exception("Failed to extract parameters from Kwik response")
+        val fContent =
+            client.newCall(fContentRequest).execute()
+        cookies += fContent.header("set-cookie")!!
+        val fContentString = fContent.body.string()
+
+        val (fullString, key, v1, v2) = kwikParamsRegex.find(fContentString)!!.destructured
         val decrypted = decrypt(fullString, key, v1.toInt(), v2.toInt())
         callback.invoke(
             ExtractorLink(
@@ -176,16 +173,13 @@ class Pahe : ExtractorApi() {
                 INFER_TYPE
             )
         )
+        val uri = kwikDUrl.find(decrypted)!!.destructured.component1()
+        val tok = kwikDToken.find(decrypted)!!.destructured.component1()
 
-        val uri = kwikDUrl.find(decrypted)?.destructured?.component1()
-            ?: throw Exception("Failed to extract URI from decrypted data")
-        val tok = kwikDToken.find(decrypted)?.destructured?.component1()
-            ?: throw Exception("Failed to extract token from decrypted data")
-
-        val noRedirectClient = OkHttpClient.Builder()
+        val noRedirectClient = OkHttpClient().newBuilder()
             .followRedirects(false)
             .followSslRedirects(false)
-            .cookieJar(CookieJar.NO_COOKIES)
+            .cookieJar(client.cookieJar)
             .build()
 
         var code = 419
@@ -213,9 +207,8 @@ class Pahe : ExtractorApi() {
             throw Exception("Failed to extract the stream URI from Kwik after $tries attempts")
         }
 
-        val location = content?.header("Location")
-            ?: throw Exception("Missing Location header in final response")
-        content.close()
+        val location = content?.header("location").toString()
+        content?.close()
 
         callback.invoke(
             ExtractorLink(
