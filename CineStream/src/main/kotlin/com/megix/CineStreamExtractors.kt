@@ -241,7 +241,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeCinemaluxe(
-        title: String? = null,
+        title: String,
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
@@ -249,7 +249,7 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
         val type = if(episode != null) "tvshow" else "movie"
-        val url = "$cinemaluxeAPI/$type/${title.replace(" ", "-")}-$year"
+        val url = "$cinemaluxeAPI/$type/${title.replace(" ", "-")}-${year.toString()}"
         val document = app.get(url).document
         if(season == null) {
             document.select("a.maxbutton").amap {
