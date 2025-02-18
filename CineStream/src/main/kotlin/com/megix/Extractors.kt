@@ -165,18 +165,19 @@ class Pahe : ExtractorApi() {
 
         val (fullString, key, v1, v2) = kwikParamsRegex.find(fContentString)!!.destructured
         val decrypted = decrypt(fullString, key, v1.toInt(), v2.toInt())
+
+        val uri = kwikDUrl.find(decrypted)!!.destructured.component1()
+        val tok = kwikDToken.find(decrypted)!!.destructured.component1()
         callback.invoke(
             ExtractorLink(
                 name,
                 name,
-                decrypted,
+                "uri : $uri and token : $tok",
                 "",
                 Qualities.Unknown.value,
                 INFER_TYPE
             )
         )
-        val uri = kwikDUrl.find(decrypted)!!.destructured.component1()
-        val tok = kwikDToken.find(decrypted)!!.destructured.component1()
 
         val noRedirectClient = OkHttpClient().newBuilder()
             .followRedirects(false)
@@ -196,7 +197,7 @@ class Pahe : ExtractorApi() {
             val postRequest = Request.Builder()
                 .url(uri)
                 .header("Referer", fContent.request.url.toString())
-                .header("Cookie", fContent.header("Set-Cookie")?.replace("path=/;", "") ?: "")
+                .header("Cookie",  fContent.header("set-cookie")!!.replace("path=/;", ""))
                 .post(formBody)
                 .build()
 
@@ -205,8 +206,8 @@ class Pahe : ExtractorApi() {
             tries++
         }
 
-        if (tries >= 20) {
-            throw Exception("Failed to extract the stream URI from Kwik after $tries attempts")
+        if (tries > 19) {
+            throw Exception("Failed to extract the stream uri from kwik.")
         }
 
         val location = content?.header("location").toString()
