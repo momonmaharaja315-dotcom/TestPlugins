@@ -181,7 +181,7 @@ class Pahe : ExtractorApi() {
             ExtractorLink(
                 "check",
                 "check",
-                "uri:$uri and token:$tok and referer:${fContent.request.url.toString()} and cookie:${fContent.header("set-cookie")!!.replace("path=/;", "")}",
+                "uri:$uri and token:$tok and referer:${fContent.request.url.toString()} and cookie:${fContent.headers("set-cookie").firstOrNull().toString()}",
                 "",
                 Qualities.Unknown.value,
                 INFER_TYPE
@@ -195,6 +195,7 @@ class Pahe : ExtractorApi() {
 
             val postRequest = Request.Builder()
                 .url(uri)
+                .header("user-agent", " Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
                 .header("referer", fContent.request.url.toString())
                 .header("cookie",  fContent.header("set-cookie")!!.replace("path=/;", ""))
                 .post(formBody)
@@ -210,6 +211,7 @@ class Pahe : ExtractorApi() {
         // }
 
         val location = content?.header("location").toString()
+        content?.close()
 
         callback.invoke(
             ExtractorLink(
@@ -221,6 +223,5 @@ class Pahe : ExtractorApi() {
                 INFER_TYPE
             )
         )
-        // content?.close()
     }
 }
