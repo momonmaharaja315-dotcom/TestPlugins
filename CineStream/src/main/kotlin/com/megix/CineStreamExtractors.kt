@@ -1160,7 +1160,6 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val AllanimeAPI = "https://api.allanime.day/api"
         val referer = "https://allmanga.to/"
         val sha256Hash = "06327bc10dd682e1ee7e07b6db9c16e9ad2fd56c1b769e47513128cd5c9fc77a"
         val epSha256Hash = "5f1a64b73793cc2234a389cf3a8f93ad82de7043017dd551f38f65b89daa65e0"
@@ -1195,8 +1194,8 @@ object CineStreamExtractors : CineStreamProvider() {
                                 app.get("https://allanime.day/apivtwo/clock.json?id=$downloadid")
                                     .parsedSafe<AnichiDownload>()?.links?.map {
                                     val href = it.link
-                                    loadNameExtractor(
-                                        "Anichi [${i.uppercase()}] [$sourcename]",
+                                    loadCustomExtractor(
+                                        "Allanime [${lang.uppercase()}] [$sourcename]",
                                         href,
                                         "",
                                         subtitleCallback,
@@ -1215,7 +1214,7 @@ object CineStreamExtractors : CineStreamProvider() {
                                     val secretDecryptKey = "54674138327930866480207815084989"
                                     GogoHelper.extractVidstream(
                                         sourceUrl,
-                                        "Anichi [${i.uppercase()}] [Vidstreaming]",
+                                        "Allanime [${lang.uppercase()}] [Vidstreaming]",
                                         callback,
                                         iv,
                                         secretKey,
@@ -1226,7 +1225,7 @@ object CineStreamExtractors : CineStreamProvider() {
                                 }
                                 val sourcename = sourceUrl.getHost()
                                 loadCustomExtractor(
-                                    "Anichi [${i.uppercase()}] [$sourcename]",
+                                    "Allanime [${lang.uppercase()}] [$sourcename]",
                                     sourceUrl ?: "",
                                     "",
                                     subtitleCallback,
