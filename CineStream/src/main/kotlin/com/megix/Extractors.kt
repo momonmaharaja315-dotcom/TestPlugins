@@ -9,9 +9,6 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.IOException
-import okhttp3.CookieJar
-import okhttp3.JavaNetCookieJar
-import java.net.CookieManager
 
 class MultimoviesAIO: StreamWishExtractor() {
     override var name = "Multimovies Cloud AIO"
@@ -116,9 +113,7 @@ class Pahe : ExtractorApi() {
     private val kwikDUrl = Regex("action=\"([^\"]+)\"")
     private val kwikDToken = Regex("value=\"([^\"]+)\"")
     private var cookies: String = ""
-    private val client = OkHttpClient().newBuilder()
-        .cookieJar(JavaNetCookieJar(CookieManager()))
-        .build()
+    private val client = OkHttpClient()
 
     private fun decrypt(fullString: String, key: String, v1: Int, v2: Int): String {
         val keyIndexMap = key.withIndex().associate { it.value to it.index }
