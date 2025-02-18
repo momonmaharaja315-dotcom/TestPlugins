@@ -1171,12 +1171,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = """$AllanimeAPI?variables={"search":{"types":["$type"],"query":"$title","year":$year},"limit":26,"page":1,"translationType":"sub","countryOrigin":"ALL"}&extensions={"persistedQuery":{"version":1,"sha256Hash":"$sha256Hash"}}"""
         val response = app.get(url, referer = referer).parsedSafe<Anichi>()?.data?.shows?.edges
         if (response != null) {
-            val id = response.firstOrNull {
-                it.name.contains("$name", ignoreCase = true) || it.englishName.contains(
-                    "$name",
-                    ignoreCase = true
-                )
-            }?.id
+            val id = response.firstOrNull()?.id
             val langType = listOf("sub", "dub")
             for (lang in langType) {
                 val epData =
