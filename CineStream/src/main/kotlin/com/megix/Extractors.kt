@@ -198,7 +198,7 @@ class Pahe : ExtractorApi() {
             val postRequest = Request.Builder()
                 .url(uri)
                 .header("referer", fContent.request.url.toString())
-                .header("cookie",  fContent.header("set-cookie")!!.replace("path=/;", ""))
+                .header("cookie",  fContent.header("set-cookie")!!.split(";")[0])
                 .post(formBody)
                 .build()
 
