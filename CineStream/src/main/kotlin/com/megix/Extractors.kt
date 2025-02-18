@@ -112,7 +112,6 @@ class Pahe : ExtractorApi() {
     private val kwikParamsRegex = Regex("""\("(\w+)",\d+,"(\w+)",(\d+),(\d+),\d+\)""")
     private val kwikDUrl = Regex("action=\"([^\"]+)\"")
     private val kwikDToken = Regex("value=\"([^\"]+)\"")
-    private var cookies: String = ""
     private val client = OkHttpClient()
 
     private fun decrypt(fullString: String, key: String, v1: Int, v2: Int): String {
@@ -177,17 +176,6 @@ class Pahe : ExtractorApi() {
         var tries = 0
         var content: Response? = null
 
-        callback.invoke(
-            ExtractorLink(
-                "check",
-                "check",
-                "uri:$uri and token:$tok and referer:${fContent.request.url.toString()} and cookie:${fContent.headers("set-cookie").firstOrNull().toString()}",
-                "",
-                Qualities.Unknown.value,
-                INFER_TYPE
-            )
-        )
-
         while (code != 302 && tries < 20) {
             val formBody = FormBody.Builder()
                 .add("_token", tok)
@@ -197,7 +185,7 @@ class Pahe : ExtractorApi() {
                 .url(uri)
                 .header("user-agent", " Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
                 .header("referer", fContent.request.url.toString())
-                .header("cookie",  fContent.header("set-cookie")!!.replace("path=/;", ""))
+                .header("cookie",  fContent.headers("set-cookie").firstOrNull().toString())
                 .post(formBody)
                 .build()
 
@@ -205,10 +193,6 @@ class Pahe : ExtractorApi() {
             code = content.code
             tries++
         }
-
-        // if (tries > 19) {
-        //     throw Exception("Failed to extract the stream uri from kwik.")
-        // }
 
         val location = content?.header("location").toString()
         content?.close()

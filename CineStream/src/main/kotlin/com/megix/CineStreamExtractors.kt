@@ -512,9 +512,11 @@ object CineStreamExtractors : CineStreamProvider() {
         }
         doc.select("div#pickDownload > a").amap {
             val href = it.attr("href")
-            val text = it.text()
+            var type = "SUB"
+            if(it.select("span").text().contains("eng"))
+                type="DUB"
             loadCustomExtractor(
-                "Animepahe [$text]",
+                "Animepahe [$type]",
                 href,
                 "",
                 subtitleCallback,
