@@ -3,6 +3,24 @@ package com.megix
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.gson.annotations.SerializedName
 
+//Dramacool
+data class Dramacool (
+  var streams : ArrayList<DramacoolStreams> = arrayListOf()
+)
+
+data class DramacoolSubtitles (
+  var id   : String? = null,
+  var lang : String? = null,
+  var url  : String? = null
+)
+
+data class DramacoolStreams (
+  var subtitles : ArrayList<DramacoolSubtitles> = arrayListOf(),
+  var title     : String?              = null,
+  var url       : String?              = null
+
+)
+
 //Anichi
 
 data class Anichi(
