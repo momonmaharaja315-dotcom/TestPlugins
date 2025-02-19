@@ -9,16 +9,14 @@ data class Dramacool (
 )
 
 data class DramacoolSubtitles (
-  var id   : String? = null,
-  var lang : String? = null,
-  var url  : String? = null
+  var lang : String,
+  var url  : String
 )
 
 data class DramacoolStreams (
   var subtitles : ArrayList<DramacoolSubtitles> = arrayListOf(),
-  var title     : String?              = null,
-  var url       : String?              = null
-
+  var title     : String,
+  var url       : String
 )
 
 //Anichi

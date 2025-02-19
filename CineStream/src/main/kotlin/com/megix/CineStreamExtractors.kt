@@ -52,20 +52,30 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val titleSlug = title.replace(" ", "-")
         val s = if(season != 1) "-season-$season" else ""
-        val url = "$api/stream/series/kdhd-$titleSlug-$s::$titleSlug${s}-ep-$episode.json"
-        val json = app.get(url).json
+        val url = "$stremio_Dramacool/stream/series/kdhd-$titleSlug-$s::$titleSlug${s}-ep-$episode.json"
+        val json = app.get(url).text
         val data = tryParseJson<Dramacool>(json) ?: return
         data.streams.forEach {
+
             callback.invoke(
                 ExtractorLink(
-                    it.title ?: "Kdramahood",
-                    it.title ?: "Kdramahood",
+                    it.title,
+                    it.title,
                     it.url,
                     "",
                     Qualities.P1080.value,
                     INFER_TYPE
                 )
             )
+
+            it.subtitles.forEach {
+                subtitleCallback.invoke(
+                    SubtitleFile(
+                        it.lang,
+                        it.url
+                    )
+                )
+            }
         }
     }
 
