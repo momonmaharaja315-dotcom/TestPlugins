@@ -542,7 +542,7 @@ object CineStreamExtractors : CineStreamProvider() {
             {
                 malsync?.Gogoanime?.forEach { (_, entry) ->
                     entry["url"]?.let { url ->
-                        invokeAnitaku(Gogourl, episode, subtitleCallback, callback)
+                        invokeAnitaku(url, episode, subtitleCallback, callback)
                     }
                 }
             },
