@@ -541,15 +541,6 @@ object CineStreamExtractors : CineStreamProvider() {
             },
             {
                 val Gogourl = malsync?.Gogoanime?.firstNotNullOfOrNull { it.value["url"] }
-                callback.invoke(
-                    ExtractorLink(
-                        "Gogoanime",
-                        "Gogoanime",
-                        Gogourl.toString(),
-                        "",
-                        Qualities.Unknown.value,
-                    )
-                )
                 if (Gogourl != null)
                     invokeAnitaku(Gogourl, episode, subtitleCallback, callback)
             },
