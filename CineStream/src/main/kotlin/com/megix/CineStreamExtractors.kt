@@ -545,7 +545,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     ExtractorLink(
                         "Gogoanime",
                         "Gogoanime",
-                        Gogourl,
+                        Gogourl.toString(),
                         "",
                         Qualities.Unknown.value,
                     )
