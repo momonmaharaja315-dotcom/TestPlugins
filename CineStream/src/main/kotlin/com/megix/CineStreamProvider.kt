@@ -379,7 +379,7 @@ open class CineStreamProvider : MainAPI() {
             val movieData = tryParseJson<ResponseData>(json)
             val imdbTitle = movieData?.meta?.name.toString()
             val tmdbId = movieData?.meta?.moviedb_id
-            val imdbYear = if(tvtype == "movie") {
+            val imdbYear = if(res.tvtype == "movie") {
                 movieData?.meta?.year?.toIntOrNull()
             }
             else {
@@ -499,7 +499,7 @@ open class CineStreamProvider : MainAPI() {
                         imdbTitle,
                         imdbYear,
                         res.imdbSeason,
-                        res.imdbYear,
+                        res.imdbEpisode,
                         callback,
                         subtitleCallback,
                     )
@@ -585,7 +585,7 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
-                    if(isAnime) invokeAllanime(
+                    if(res.isAnime) invokeAllanime(
                         res.title,
                         seasonYear,
                         res.episode,
