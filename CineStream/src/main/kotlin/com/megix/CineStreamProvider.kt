@@ -109,7 +109,6 @@ open class CineStreamProvider : MainAPI() {
         "$mediaFusion/catalog/series/hindi_series/skip=###" to "Trending Series in India",
         "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
         "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Trending Anime",
-        """$animeCatalog/{"anilist_upcoming-next-season":"on"}/catalog/anime/anilist_upcoming-next-season/skip=###""" to "Upcoming Anime",
         "$streamio_TMDB/catalog/series/tmdb.language/skip=###&genre=Korean" to "Trending Korean Series",
         "$mediaFusion/catalog/tv/live_tv/skip=###" to "Live TV",
         "$mediaFusion/catalog/events/live_sport_events/skip=###" to "Live Sports Events",
@@ -137,7 +136,10 @@ open class CineStreamProvider : MainAPI() {
         page: Int,
         request: MainPageRequest
     ): HomePageResponse {
-        val skip = (page - 1) * 20
+        val skipNumber = if(request.data.contains(mainUrl) || request.data.contains(mediaFusion)) 50
+            else if(request.data.contains(kitsu_url)) 40
+            else 20
+        val skip = (page - 1) * skipNumber
         val newRequestData = request.data.replace("###", skip.toString())
         val json = app.get("$newRequestData.json").text
         val movies = tryParseJson<Home>(json) ?: return newHomePageResponse(
@@ -149,11 +151,12 @@ open class CineStreamProvider : MainAPI() {
         )
         val home = movies.metas.mapNotNull { movie ->
             val type =
-                if(movie.type == "tv") TvType.Live
+                if(movie.type == "tv" || movie.type == "events") TvType.Live
                 else if(movie.type == "movie") TvType.Movie
                 else TvType.TvSeries
+            val title = movie.name ?: movie.description
 
-            newMovieSearchResponse(movie.name, PassData(movie.id, movie.type).toJson(), type) {
+            newMovieSearchResponse(title, PassData(movie.id, movie.type).toJson(), type) {
                 this.posterUrl = movie.poster.toString()
             }
         }
@@ -714,8 +717,9 @@ open class CineStreamProvider : MainAPI() {
     data class Media(
         val id: String,
         val type: String,
-        val name: String,
+        val name: String?,
         val poster: String?,
+        val description: String?,
     )
 
     data class EpisodeDetails(
