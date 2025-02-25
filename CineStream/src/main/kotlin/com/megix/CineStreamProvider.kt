@@ -154,7 +154,7 @@ open class CineStreamProvider : MainAPI() {
                 if(movie.type == "tv" || movie.type == "events") TvType.Live
                 else if(movie.type == "movie") TvType.Movie
                 else TvType.TvSeries
-            val title = movie.name ?: movie.description ?: "No Title"
+            val title = movie.name ?: movie.description ?: "Empty"
 
             newMovieSearchResponse(title, PassData(movie.id, movie.type).toJson(), type) {
                 this.posterUrl = movie.poster.toString()
@@ -189,14 +189,15 @@ open class CineStreamProvider : MainAPI() {
 
         val animes = fetchWithRetry(animeUrls)
         animes?.metas?.forEach {
-            val title = it.name ?: it.description ?: "No Title"
+            val title = it.name ?: it.description ?: "Empty"
             searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
         }
+
         val movies = fetchWithRetry(movieUrls)
         movies?.metas?.forEach {
-            val title = it.name ?: it.description ?: "No Title"
+            val title = it.name ?: it.description ?: "Empty"
             searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
@@ -204,7 +205,7 @@ open class CineStreamProvider : MainAPI() {
 
         val series = fetchWithRetry(seriesUrls)
         series?.metas?.forEach {
-            val title = it.name ?: it.description ?: "No Title"
+            val title = it.name ?: it.description ?: "Empty"
             searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.TvSeries) {
                 this.posterUrl = it.poster.toString()
             })
@@ -213,7 +214,7 @@ open class CineStreamProvider : MainAPI() {
         val tvJson = app.get("$mediaFusion/catalog/tv/mediafusion_search_tv/search=$query.json").text
         val tv = tryParseJson<SearchResult>(tvJson)
         tv?.metas?.forEach {
-            val title = it.name ?: it.description ?: "No Title"
+            val title = it.name ?: it.description ?: "Empty"
             searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.Live) {
                 this.posterUrl = it.poster.toString()
             })
@@ -265,7 +266,7 @@ open class CineStreamProvider : MainAPI() {
         val isAsian = (movieData?.meta?.country.toString().contains("Korea", true) ||
                 movieData?.meta?.country.toString().contains("China", true)) && !isAnime
 
-        if(tvtype == "movie" || tvtype == "tv") {
+        if(tvtype == "movie" || tvtype == "tv" || tvtype == "events") {
             val data = LoadLinksData(
                 title,
                 id,
@@ -364,16 +365,28 @@ open class CineStreamProvider : MainAPI() {
         //to get season year
         val seasonYear = if(res.tvtype == "movie") year else res.firstAired?.substringBefore("-")?.toIntOrNull() ?: res.firstAired?.substringBefore("–")?.toIntOrNull()
 
-        if(res.tvtype == "tv") {
-
+        if(res.tvtype == "tv" || res.tvtype == "events") {
             invokeTvStream(
                 res.id,
                 mediaFusion,
+                res.tvtype,
                 subtitleCallback,
                 callback
             )
         }
         else if(res.isKitsu) {
+            val json = app.get("$cinemeta_url/meta/${res.tvtype}/${res.imdb_id}.json").text
+            val movieData = tryParseJson<ResponseData>(json)
+            val imdbTitle = movieData?.meta?.name.toString()
+            val tmdbId = movieData?.meta?.moviedb_id
+            val imdbYear = if(tvtype == "movie") {
+                movieData?.meta?.year?.toIntOrNull()
+            }
+            else {
+                movieData?.meta?.year?.substringBefore("-")?.toIntOrNull()
+                    ?: movieData?.meta?.year?.substringBefore("–")?.toIntOrNull()
+            }
+
             argamap(
                 {
                     invokeAnimes(
@@ -434,6 +447,100 @@ open class CineStreamProvider : MainAPI() {
                         subtitleCallback
                     )
                 },
+                {
+                    invokeMoviesmod(
+                        res.imdb_id.toString(),
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        subtitleCallback,
+                        callback
+                    )
+                },
+                {
+                    invokeBollyflix(
+                        res.imdb_id.toString(),
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        subtitleCallback,
+                        callback,
+                    )
+                },
+                {
+                    invokeVegamovies(
+                        imdbTitle,
+                        imdbYear,
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        subtitleCallback,
+                        callback
+                    )
+                },
+                {
+                    invokeTom(
+                        tmdbId,
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        callback,
+                        subtitleCallback
+                    )
+                },
+                {
+                    invokeMoviesdrive(
+                        imdbTitle,
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        imdbYear,
+                        subtitleCallback,
+                        callback
+                    )
+                },
+                {
+                    invokeCinemaluxe(
+                        imdbTitle,
+                        imdbYear,
+                        res.imdbSeason,
+                        res.imdbYear,
+                        callback,
+                        subtitleCallback,
+                    )
+                },
+                {
+                    invokeMultimovies(
+                        multimoviesAPI,
+                        imdbTitle,
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        subtitleCallback,
+                        callback
+                    )
+                },
+                {
+                    invokeAutoembed(
+                        tmdbId,
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        callback,
+                    )
+                },
+                {
+                    invokeUhdmovies(
+                        imdbTitle,
+                        imdbYear,
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        callback,
+                        subtitleCallback
+                    )
+                },
+                {
+                    invoke2embed(
+                        res.imdb_id.toString(),
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        callback,
+                        subtitleCallback
+                    )
+                },
             )
         }
         else {
@@ -472,6 +579,15 @@ open class CineStreamProvider : MainAPI() {
                         res.title,
                         year,
                         res.season,
+                        res.episode,
+                        subtitleCallback,
+                        callback
+                    )
+                },
+                {
+                    if(isAnime) invokeAllanime(
+                        res.title,
+                        seasonYear,
                         res.episode,
                         subtitleCallback,
                         callback
