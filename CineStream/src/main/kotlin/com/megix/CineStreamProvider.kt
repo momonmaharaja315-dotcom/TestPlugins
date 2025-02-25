@@ -189,20 +189,23 @@ open class CineStreamProvider : MainAPI() {
 
         val animes = fetchWithRetry(animeUrls)
         animes?.metas?.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
+            val title = it.name ?: it.description ?: "No Title"
+            searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
         }
         val movies = fetchWithRetry(movieUrls)
         movies?.metas?.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
+            val title = it.name ?: it.description ?: "No Title"
+            searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
         }
 
         val series = fetchWithRetry(seriesUrls)
         series?.metas?.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.TvSeries) {
+            val title = it.name ?: it.description ?: "No Title"
+            searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.TvSeries) {
                 this.posterUrl = it.poster.toString()
             })
         }
@@ -210,7 +213,8 @@ open class CineStreamProvider : MainAPI() {
         val tvJson = app.get("$mediaFusion/catalog/tv/mediafusion_search_tv/search=$query.json").text
         val tv = tryParseJson<SearchResult>(tvJson)
         tv?.metas?.forEach {
-            searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Live) {
+            val title = it.name ?: it.description ?: "No Title"
+            searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.Live) {
                 this.posterUrl = it.poster.toString()
             })
         }
