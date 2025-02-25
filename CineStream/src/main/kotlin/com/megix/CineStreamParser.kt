@@ -163,6 +163,7 @@ data class HiAnime(
 data class HiAnimeEpisode(
     val id: String,
     val number: Int,
+    val isDubbed: Boolean,
 )
 data class HiAnimeMedia(
     val sources: List<HiAnimeSource>,
@@ -172,7 +173,6 @@ data class HiAnimeSource(
     val url: String,
     val isM3U8: Boolean,
     val type: String,
-    val isDubbed: Boolean,
 )
 
 data class HiAnimeSubtitle(

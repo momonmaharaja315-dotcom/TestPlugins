@@ -1284,7 +1284,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val epId = data.episodes.find { it.number == episode }?.id ?: return
         val isDubbed = data.episodes.find { it.number == episode }?.isDubbed ?: false
         val types =  mutableListOf("sub")
-        if(isDubbed == true) types.add("dub")
+        //if(isDubbed == true) types.add("dub")
         val servers = mutableListOf("vidstreaming", "vidcloud")
         types.map { t ->
             servers.map { server ->
