@@ -26,7 +26,6 @@ import com.megix.CineStreamExtractors.invokeAutoembed
 import com.megix.CineStreamExtractors.invokeVidbinge
 import com.megix.CineStreamExtractors.invokeUhdmovies
 import com.megix.CineStreamExtractors.invokeVidSrcNL
-import com.megix.CineStreamExtractors.invokeMovies
 import com.megix.CineStreamExtractors.invoke2embed
 // import com.megix.CineStreamExtractors.invokeRar
 import com.megix.CineStreamExtractors.invokeAnimes
@@ -51,19 +50,19 @@ open class CineStreamProvider : MainAPI() {
     override val hasMainPage = true
     override var lang = "en"
     override val hasDownloadSupport = true
-    val skipMap: MutableMap<String, Int> = mutableMapOf()
     val cinemeta_url = "https://v3-cinemeta.strem.io"
     val kitsu_url = "https://anime-kitsu.strem.fun"
     val haglund_url = "https://arm.haglund.dev/api/v2"
     val streamio_TMDB = "https://94c8cb9f702d-tmdb-addon.baby-beamup.club"
     val mediaFusion = "https://mediafusion.elfhosted.com"
+    val animeCatalog = "https://1fe84bc728af-stremio-anime-catalogs.baby-beamup.club"
     companion object {
         const val malsyncAPI = "https://api.malsync.moe"
         const val vegaMoviesAPI = "https://vegamovies.rs"
         const val rogMoviesAPI = "https://rogmovies.cfd"
         const val MovieDrive_API = "https://moviesdrive.pro"
         const val tokyoInsiderAPI = "https://www.tokyoinsider.com"
-        const val topmoviesAPI = "https://topmovies.fyi"
+        const val topmoviesAPI = "https://topmovies.nexus"
         const val MoviesmodAPI = "https://moviesmod.how"
         // const val Full4MoviesAPI = "https://www.full4movies.delivery"
         const val stremifyAPI = "https://stremify.hayd.uk/YnVpbHQtaW4sZnJlbWJlZCxmcmVuY2hjbG91ZCxtZWluZWNsb3VkLGtpbm9raXN0ZSxjaW5laGRwbHVzLHZlcmhkbGluayxndWFyZGFoZCx2aXNpb25jaW5lLHdlY2ltYSxha3dhbSxkcmFtYWNvb2wsZHJhbWFjb29sX2NhdGFsb2csZ29nb2FuaW1lLGdvZ29hbmltZV9jYXRhbG9n/stream"
@@ -112,8 +111,10 @@ open class CineStreamProvider : MainAPI() {
         "$mediaFusion/catalog/series/hindi_series/skip=###" to "Trending Series in India",
         "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
         "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Trending Anime",
+        "$animeCatalog/{"anilist_upcoming-next-season":"on"}/catalog/anime/anilist_upcoming-next-season/skip=###" to "Upcoming Anime",
         "$streamio_TMDB/catalog/series/tmdb.language/skip=###&genre=Korean" to "Trending Korean Series",
         "$mediaFusion/catalog/tv/live_tv/skip=###" to "Live TV",
+        "$mediaFusion/catalog/events/live_sport_events/skip=###" to "Live Sports Events",
         "$mainUrl/top/catalog/movie/top/skip=###&genre=Action" to "Top Action Movies",
         "$mainUrl/top/catalog/series/top/skip=###&genre=Action" to "Top Action Series",
         "$mainUrl/top/catalog/movie/top/skip=###&genre=Comedy" to "Top Comedy Movies",
@@ -138,7 +139,7 @@ open class CineStreamProvider : MainAPI() {
         page: Int,
         request: MainPageRequest
     ): HomePageResponse {
-        val skip = if(page == 1) 0 else skipMap[request.name] ?: 0
+        val skip = (page - 1) * 20
         val newRequestData = request.data.replace("###", skip.toString())
         val json = app.get("$newRequestData.json").text
         val movies = tryParseJson<Home>(json) ?: return newHomePageResponse(
@@ -148,8 +149,6 @@ open class CineStreamProvider : MainAPI() {
             ),
             hasNext = false
         )
-        val movieCount = movies.metas.size
-        skipMap[request.name] = skip + movieCount
         val home = movies.metas.mapNotNull { movie ->
             val type =
                 if(movie.type == "tv") TvType.Live
@@ -182,16 +181,18 @@ open class CineStreamProvider : MainAPI() {
             "$cinemeta_url/catalog/series/top/search=$query.json",
         )
 
-        val animeJson = app.get("$kitsu_url/catalog/anime/kitsu-anime-list/search=$query.json").text
-        val animes = tryParseJson<SearchResult>(animeJson)
+        val animeUrls = listOf(
+            "$kitsu_url/catalog/anime/kitsu-anime-airing/search=$query.json",
+            """$animeCatalog"/{"search":"on"}/catalog/anime/anime-catalogs-search/search=$query.json""",
+        )
+
+        val animes = fetchWithRetry(animeUrls)
         animes?.metas?.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
             })
         }
-        //val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
         val movies = fetchWithRetry(movieUrls)
-        //val movies = tryParseJson<SearchResult>(movieJson)
         movies?.metas?.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.Movie) {
                 this.posterUrl = it.poster.toString()
@@ -199,8 +200,6 @@ open class CineStreamProvider : MainAPI() {
         }
 
         val series = fetchWithRetry(seriesUrls)
-        //val seriesJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
-        //val series = tryParseJson<SearchResult>(seriesJson)
         series?.metas?.forEach {
             searchResponse.add(newMovieSearchResponse(it.name, PassData(it.id, it.type).toJson(), TvType.TvSeries) {
                 this.posterUrl = it.poster.toString()
@@ -236,7 +235,7 @@ open class CineStreamProvider : MainAPI() {
             else cinemeta_url
         val isKitsu = if(meta_url == kitsu_url) true else false
         val isTMDB = if(meta_url == streamio_TMDB) true else false
-        val externalIds = if(isKitsu) getExternalIds(id.substringAfter("kitsu:"),"kitsu") else null
+        val externalIds = if(isKitsu) getExternalIds(id.substringAfter("kitsu:"),"kitsu") else  null
         val malId = if(externalIds != null) externalIds.myanimelist else null
         val anilistId = if(externalIds != null) externalIds.anilist else null
         id = if(isKitsu) id.replace(":", "%3A") else id

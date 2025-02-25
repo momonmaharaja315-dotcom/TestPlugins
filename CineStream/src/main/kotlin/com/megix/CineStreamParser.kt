@@ -171,7 +171,8 @@ data class HiAnimeMedia(
 data class HiAnimeSource(
     val url: String,
     val isM3U8: Boolean,
-    val type: String
+    val type: String,
+    val isDubbed: Boolean,
 )
 
 data class HiAnimeSubtitle(
