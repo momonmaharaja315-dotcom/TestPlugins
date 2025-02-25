@@ -25,7 +25,6 @@ import com.megix.CineStreamExtractors.invokeWYZIESubs
 import com.megix.CineStreamExtractors.invokeAutoembed
 import com.megix.CineStreamExtractors.invokeVidbinge
 import com.megix.CineStreamExtractors.invokeUhdmovies
-import com.megix.CineStreamExtractors.invokeVidSrcNL
 import com.megix.CineStreamExtractors.invoke2embed
 // import com.megix.CineStreamExtractors.invokeRar
 import com.megix.CineStreamExtractors.invokeAnimes
@@ -74,7 +73,6 @@ open class CineStreamProvider : MainAPI() {
         const val uhdmoviesAPI = "https://uhdmovies.fyi"
         const val WHVX_TOKEN = BuildConfig.WHVX_TOKEN
         const val CONSUMET_API = BuildConfig.CONSUMET_API
-        const val moviesAPI = "https://moviesapi.club"
         const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
         // const val RarAPI = "https://nepu.to"
         const val hianimeAPI = "https://hianime.to"
@@ -111,7 +109,7 @@ open class CineStreamProvider : MainAPI() {
         "$mediaFusion/catalog/series/hindi_series/skip=###" to "Trending Series in India",
         "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
         "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Trending Anime",
-        "$animeCatalog/{"anilist_upcoming-next-season":"on"}/catalog/anime/anilist_upcoming-next-season/skip=###" to "Upcoming Anime",
+        """$animeCatalog/{"anilist_upcoming-next-season":"on"}/catalog/anime/anilist_upcoming-next-season/skip=###""" to "Upcoming Anime",
         "$streamio_TMDB/catalog/series/tmdb.language/skip=###&genre=Korean" to "Trending Korean Series",
         "$mediaFusion/catalog/tv/live_tv/skip=###" to "Live TV",
         "$mediaFusion/catalog/events/live_sport_events/skip=###" to "Live Sports Events",
@@ -645,23 +643,6 @@ open class CineStreamProvider : MainAPI() {
                         res.episode,
                         callback,
                         subtitleCallback
-                    )
-                },
-                {
-                    if(!res.isAnime) invokeVidSrcNL(
-                        res.tmdbId,
-                        res.season,
-                        res.episode,
-                        callback,
-                    )
-                },
-                {
-                    if (!res.isAnime) invokeMovies(
-                        res.tmdbId,
-                        res.season,
-                        res.episode,
-                        subtitleCallback,
-                        callback
                     )
                 },
                 {
