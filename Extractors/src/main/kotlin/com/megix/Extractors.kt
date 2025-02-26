@@ -15,7 +15,11 @@ fun getIndexQuality(str: String?): Int {
         ?: Qualities.Unknown.value
 }
 
-class Luxdrive : ExtractorApi() {
+class Luxdrive2 : Luxdrive() {
+    override val mainUrl = "https://files.luxedrive.space"
+}
+
+open class Luxdrive : ExtractorApi() {
     override val name: String = "Luxdrive"
     override val mainUrl: String = "https://new.luxedrive.online"
     override val requiresReferer = false
@@ -27,12 +31,13 @@ class Luxdrive : ExtractorApi() {
         callback: (ExtractorLink) -> Unit
     ) {
         val document = app.get(url).document
-        document.select("div > a").map {
+        document.select("div > div > a").map {
             val href = it.attr("href")
             loadExtractor(href, "", subtitleCallback, callback)
         }
     }
 }
+
 
 class Driveseed : Driveleech() {
     override val name: String = "Driveseed"
@@ -459,6 +464,15 @@ open class GDFlix : ExtractorApi() {
     ) {
         val res = app.get(url, allowRedirects = true)
         val document = res.document
+        callback.invoke(
+            ExtractorLink(
+                "GDFlix",
+                "GDFLix",
+                document.toString(),
+                "",
+                Qualities.Unknown.value
+            )
+        )
         val fileName = document.selectFirst("ul > li.list-group-item")?.text()?.substringAfter("Name : ") ?: ""
 
         document.select("div.text-center a").amap {
@@ -578,7 +592,7 @@ open class GDFlix : ExtractorApi() {
             else if (text.contains("Instant DL"))
             {
                 val instantLink = it.attr("href")
-                val link = app.get(instantLink, timeout = 30L, allowRedirects = false).headers["Location"]?.split("url=") ?. getOrNull(1) ?: ""
+                val link = app.get(instantLink, timeout = 30L, allowRedirects = false).headers["location"]?.substringAfter("url=") ?: ""
                 callback.invoke(
                     ExtractorLink(
                         "GDFlix[Instant Download]",
@@ -590,12 +604,11 @@ open class GDFlix : ExtractorApi() {
                 )
             }
             else if(text.contains("CLOUD DOWNLOAD [FSL]")) {
-                val link = it.attr("href").substringAfter("url=")
                 callback.invoke(
                     ExtractorLink(
                         "GDFlix[FSL]",
                         "GDFlix[FSL] $fileName",
-                        link,
+                        it.attr("href"),
                         "",
                         getIndexQuality(fileName)
                     )

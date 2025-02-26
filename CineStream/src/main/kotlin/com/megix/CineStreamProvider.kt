@@ -231,7 +231,7 @@ open class CineStreamProvider : MainAPI() {
         val tvtype = movie.type
         var id = movie.id
         val type =
-                if(movie.type == "tv") TvType.Live
+                if(movie.type == "tv" || movie.type == "events") TvType.Live
                 else if(movie.type == "movie") TvType.Movie
                 else TvType.TvSeries
         val meta_url =
@@ -295,7 +295,7 @@ open class CineStreamProvider : MainAPI() {
                 this.year = year ?.toIntOrNull() ?: releaseInfo?.toIntOrNull() ?: year?.substringBefore("-")?.toIntOrNull()
                 this.backgroundPosterUrl = background
                 this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
-                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else "IMDB"
+                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else if(meta_url == mediaFusion) "Mediafusion" else "IMDB"
                 addActors(cast)
                 addAniListId(anilistId)
                 addMalId(malId)
@@ -344,7 +344,7 @@ open class CineStreamProvider : MainAPI() {
                 this.year = year?.substringBefore("–")?.toIntOrNull() ?: releaseInfo?.substringBefore("–")?.toIntOrNull() ?: year?.substringBefore("-")?.toIntOrNull()
                 this.backgroundPosterUrl = background
                 this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
-                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else "IMDB"
+                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else if(meta_url == mediaFusion) "Mediafusion" else "IMDB"
                 addActors(cast)
                 addAniListId(anilistId)
                 addImdbId(id)
@@ -505,16 +505,6 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
-                    invokeMultimovies(
-                        multimoviesAPI,
-                        imdbTitle,
-                        res.imdbSeason,
-                        res.imdbEpisode,
-                        subtitleCallback,
-                        callback
-                    )
-                },
-                {
                     invokeAutoembed(
                         tmdbId,
                         res.imdbSeason,
@@ -533,12 +523,31 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
-                    invoke2embed(
+                    invokeVite(
                         res.imdb_id.toString(),
                         res.imdbSeason,
                         res.imdbEpisode,
-                        callback,
-                        subtitleCallback
+                        callback
+                    )
+                },
+                {
+                    invokeNetflix(
+                        imdbTitle,
+                        imdbYear,
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        subtitleCallback,
+                        callback
+                    )
+                },
+                {
+                    invokePrimeVideo(
+                        imdbTitle,
+                        imdbYear,
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        subtitleCallback,
+                        callback
                     )
                 },
             )

@@ -1085,29 +1085,21 @@ object CineStreamExtractors : CineStreamProvider() {
                 val href = entry.nextElementSibling()?.selectFirst("a")?.attr("href") ?: ""
                 if (href.isNotBlank()) {
                     val doc = app.get(href).document
-                    val fEp = doc.selectFirst("h5:matches((?i)$sep)")?.toString()
-                    if (fEp.isNullOrEmpty()) {
-                        val furl = doc.select("h5 a:contains(HubCloud)").attr("href")
-                        loadSourceNameExtractor("MoviesDrive",furl, "", subtitleCallback, callback)
-                    } else
-                        doc.selectFirst("h5:matches((?i)$sep)")?.let { epElement ->
-                            val linklist = mutableListOf<String>()
-                            val firstHubCloudH5 = epElement.nextElementSibling()
-                            val secondHubCloudH5 = firstHubCloudH5?.nextElementSibling()
-                            val firstLink = firstHubCloudH5?.selectFirst("a")?.attr("href")
-                            val secondLink = secondHubCloudH5?.selectFirst("a")?.attr("href")
-                            if (firstLink != null) linklist.add(firstLink)
-                            if (secondLink != null) linklist.add(secondLink)
-                            linklist.forEach { url ->
-                                loadSourceNameExtractor(
-                                    "MoviesDrive",
-                                    url,
-                                    referer = "",
-                                    subtitleCallback,
-                                    callback
-                                )
-                            }
-                        }
+                    val fEp = doc.selectFirst("h5:matches((?i)$sep)")
+                    val linklist = mutableListOf<String>()
+                    val source1 = fEp?.nextElementSibling()?.selectFirst("a")?.attr("href")
+                    val source2 = fEp?.nextElementSibling()?.nextElementSibling()?.selectFirst("a")?.attr("href")
+                    if (source1 != null) linklist.add(source1)
+                    if (source2 != null) linklist.add(source2)
+                    linklist.forEach { url ->
+                        loadSourceNameExtractor(
+                            "MoviesDrive",
+                            url,
+                            referer = "",
+                            subtitleCallback,
+                            callback
+                        )
+                    }
                 }
             }
         }
@@ -1285,11 +1277,11 @@ object CineStreamExtractors : CineStreamProvider() {
         val epId = data.episodes.find { it.number == episode }?.id ?: return
         val isDubbed = data.episodes.find { it.number == episode }?.isDubbed ?: false
         val types =  mutableListOf("sub")
-        //if(isDubbed == true) types.add("dub")
+        if(isDubbed == true) types.add("dub")
         val servers = mutableListOf("vidstreaming", "vidcloud")
         types.map { t ->
             servers.map { server ->
-                val epJson = app.get("$CONSUMET_API/anime/zoro/watch?episodeId=${epId.replace("both", t)}&server=$server").text
+                val epJson = app.get("$CONSUMET_API/anime/zoro/watch?episodeId=$epId&${'$'}${t}&server=$server").text
                 val epData = tryParseJson<HiAnimeMedia>(epJson) ?: return@map
 
                 epData.sources.map {
