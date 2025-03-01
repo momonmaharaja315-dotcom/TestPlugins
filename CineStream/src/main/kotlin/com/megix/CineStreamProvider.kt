@@ -21,7 +21,7 @@ import com.megix.CineStreamExtractors.invokeMoviesdrive
 // import com.megix.CineStreamExtractors.invokeFull4Movies
 import com.megix.CineStreamExtractors.invokeW4U
 import com.megix.CineStreamExtractors.invokeWHVXSubs
-import com.megix.CineStreamExtractors.invokeWYZIESubs
+import com.megix.CineStreamExtractors.invokeAnizone
 import com.megix.CineStreamExtractors.invokeAutoembed
 import com.megix.CineStreamExtractors.invokeVidbinge
 import com.megix.CineStreamExtractors.invokeUhdmovies

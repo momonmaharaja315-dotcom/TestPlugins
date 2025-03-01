@@ -1276,7 +1276,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 "Anizone[Multi Lang]",
                 source,
                 "",
-                Qualities.Unknown.P1080,
+                Qualities.value.P1080,
                 isM3u8 = true,
             )
         )
