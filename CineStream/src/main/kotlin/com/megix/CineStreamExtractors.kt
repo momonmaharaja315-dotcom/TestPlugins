@@ -1250,7 +1250,7 @@ object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun invokeAnizone(
         title: String,
-        episode: Int,
+        episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
@@ -1276,7 +1276,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 "Anizone[Multi Lang]",
                 source,
                 "",
-                Qualities.value.P1080,
+                Qualities.P1080.value,
                 isM3u8 = true,
             )
         )
