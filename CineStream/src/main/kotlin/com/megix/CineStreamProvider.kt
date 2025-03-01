@@ -39,7 +39,7 @@ import com.megix.CineStreamExtractors.invokeAnimia
 import com.megix.CineStreamExtractors.invokeTokyoInsider
 import com.megix.CineStreamExtractors.invokeTvStream
 import com.megix.CineStreamExtractors.invokeAllanime
-import com.megix.CineStreamExtractors.invokeKdramahood
+import com.megix.CineStreamExtractors.invokeDramacool
 import com.megix.CineStreamExtractors.invokeNetflix
 import com.megix.CineStreamExtractors.invokePrimeVideo
 
@@ -59,7 +59,7 @@ open class CineStreamProvider : MainAPI() {
         const val malsyncAPI = "https://api.malsync.moe"
         const val vegaMoviesAPI = "https://vegamovies.rs"
         const val rogMoviesAPI = "https://rogmovies.cfd"
-        const val MovieDrive_API = "https://moviesdrive.pro"
+        const val MovieDrive_API = "https://moviesdrive.club"
         const val tokyoInsiderAPI = "https://www.tokyoinsider.com"
         const val topmoviesAPI = "https://topmovies.nexus"
         const val MoviesmodAPI = "https://moviesmod.how"
@@ -78,12 +78,13 @@ open class CineStreamProvider : MainAPI() {
         const val hianimeAPI = "https://hianime.to"
         const val animepaheAPI = "https://animepahe.ru"
         const val viteAPI = "https://viet.autoembed.cc"
-        const val multimoviesAPI = "https://multimovies.life"
-        const val cinemaluxeAPI = "https://luxecinema.zip"
-        const val bollyflixAPI = "https://bollyflix.kids"
+        const val multimoviesAPI = "https://multimovies.world"
+        const val cinemaluxeAPI = "https://luxecinema.fans"
+        const val bollyflixAPI = "https://bollyflix.phd"
         const val TomAPI = "https://tom.autoembed.cc"
         const val animiaAPI = "https://animia.buzz"
         const val torrentioAPI = "https://torrentio.strem.fun"
+        const val anizoneAPI = "https://anizone.to"
         const val netflixAPI = "https://iosmirror.cc"
         const val AllanimeAPI = "https://api.allanime.day/api"
         const val stremio_Dramacool = "https://stremio-dramacool-addon.xyz"
@@ -424,6 +425,14 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
+                    invokeAnizone(
+                        res.title,
+                        res.episode,
+                        subtitleCallback,
+                        callback
+                    )
+                },
+                {
                     invokeTorrentio(
                         res.imdb_id,
                         res.imdbSeason,
@@ -433,6 +442,7 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     invokeWHVXSubs(
+                        WHVXSubsAPI,
                         res.imdb_id,
                         res.imdbSeason,
                         res.imdbEpisode,
@@ -440,7 +450,8 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
-                    invokeWYZIESubs(
+                    invokeWHVXSubs(
+                        WYZIESubsAPI,
                         res.imdb_id,
                         res.imdbSeason,
                         res.imdbEpisode,
@@ -594,15 +605,6 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
-                    if(res.isAnime) invokeAllanime(
-                        res.title,
-                        seasonYear,
-                        res.episode,
-                        subtitleCallback,
-                        callback
-                    )
-                },
-                {
                     invokeVite(
                         res.id,
                         res.season,
@@ -646,8 +648,19 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
-                    if(res.isAsian && res.season != null) invokeKdramahood(
+                    if(res.isAsian && res.season != null) invokeDramacool(
                         res.title,
+                        "kdhd",
+                        res.season,
+                        res.episode,
+                        subtitleCallback,
+                        callback
+                    )
+                },
+                {
+                    if(res.isAsian && res.season != null) invokeDramacool(
+                        res.title,
+                        "ottv",
                         res.season,
                         res.episode,
                         subtitleCallback,
@@ -733,17 +746,19 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     invokeWHVXSubs(
-                        res.id,
-                        res.season,
-                        res.episode,
+                        WHVXSubsAPI,
+                        res.imdb_id,
+                        res.imdbSeason,
+                        res.imdbEpisode,
                         subtitleCallback
                     )
                 },
                 {
-                    invokeWYZIESubs(
-                        res.id,
-                        res.season,
-                        res.episode,
+                    invokeWHVXSubs(
+                        WYZIESubsAPI,
+                        res.imdb_id,
+                        res.imdbSeason,
+                        res.imdbEpisode,
                         subtitleCallback
                     )
                 },
