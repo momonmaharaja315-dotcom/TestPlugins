@@ -1,12 +1,12 @@
 package com.megix
 
-import android.content.Context
 import com.lagradost.cloudstream3.plugins.CloudstreamPlugin
 import com.lagradost.cloudstream3.plugins.Plugin
+import android.content.Context
 
 @CloudstreamPlugin
-class YesPornPleaseProvider : Plugin() {
+class PornmzProvider: Plugin() {
     override fun load(context: Context) {
-        registerMainAPI(YesPornPlease())
+        registerMainAPI(Pornmz())
     }
 }
