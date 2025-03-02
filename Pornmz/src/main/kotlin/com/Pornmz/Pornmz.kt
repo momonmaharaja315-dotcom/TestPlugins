@@ -39,7 +39,10 @@ class Pornmz : MainAPI() {
     private fun Element.toSearchResult(): SearchResponse {
         val title     = this.attr("title")
         val href      = this.attr("href")
-        val posterUrl = this.select("img").attr("src")
+        var posterUrl = this.select("img").attr("src")
+        if(posterUrl.isEmpty()) {
+            posterUrl = this.select("video").attr("poster")
+        }
 
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
@@ -82,15 +85,15 @@ class Pornmz : MainAPI() {
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
         val document = app.get(data).document
         val iframe = document.select(".responsive-player iframe").attr("src")
-        val doc = app.get(iframe).document
+        val source = app.get(iframe).document.select("video source").attr("src")
 
         callback.invoke(
             ExtractorLink(
                 "Pornmz",
                 "Pornmz",
-                doc.select("video source").attr("src"),
-                "",
-                getQualityFromName(doc.select("video source").attr("label")),
+                source,
+                mainUrl,
+                Qualities.Unknown.value
             )
         )
         return true

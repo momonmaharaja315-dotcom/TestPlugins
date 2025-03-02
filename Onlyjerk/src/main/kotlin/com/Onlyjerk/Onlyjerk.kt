@@ -20,7 +20,7 @@ class Onlyjerk : MainAPI() {
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         val document = app.get("$mainUrl${request.data}/page/$page/").document
-        val home     = document.select("#tdi_86 a").mapNotNull { it.toSearchResult() }
+        val home     = document.select("div.td-cpt-post").mapNotNull { it.toSearchResult() }
 
         return newHomePageResponse(
                 list    = HomePageList(
@@ -33,9 +33,9 @@ class Onlyjerk : MainAPI() {
     }
 
     private fun Element.toSearchResult(): SearchResponse {
-        val title     = this.attr("title")
-        val href      = this.attr("href")
-        val posterUrl = this.select("span").attr("style").substringAfter("url(").substringBefore(")")
+        val title     = this.select("a").attr("title")
+        val href      = this.select("a").attr("href")
+        val posterUrl = this.select("a > span").attr("style").substringAfter("url(").substringBefore(")")
 
         return newMovieSearchResponse(title, href, TvType.Movie) {
             this.posterUrl = posterUrl
@@ -47,7 +47,7 @@ class Onlyjerk : MainAPI() {
 
         for (i in 1..5) {
             val document = app.get("$mainUrl/page/$i/?s=$query").document
-            val results = document.select("#tdi_95 a").mapNotNull { it.toSearchResult() }
+            val results = document.select("div.td-cpt-post").mapNotNull { it.toSearchResult() }
 
             if (!searchResponse.containsAll(results)) {
                 searchResponse.addAll(results)
@@ -82,7 +82,7 @@ class Onlyjerk : MainAPI() {
             ExtractorLink(
                     "Onlyjerk",
                     "Onlyjerk",
-                    it.attr("data-src"),
+                    it.attr("data-litespeed-src"),
                     "",
                     Qualities.Unknown.value
                 )
