@@ -21,7 +21,7 @@ class Bigwarp : ExtractorApi() {
         callback: (ExtractorLink) -> Unit
     ) {
         val link = app.get(url, allowRedirects = false).headers["location"] ?: url
-        val source = app.get(link).document.toString().substringAfter("""file:\"""").substringBefore("?t=")
+        val source = app.get(link).document.toString().substringAfter("""[{file:\"""").substringBefore("?t=")
         callback.invoke(
             ExtractorLink(
                 this.name,
