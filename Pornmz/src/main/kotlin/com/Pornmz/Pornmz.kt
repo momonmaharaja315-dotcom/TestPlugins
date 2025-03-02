@@ -69,7 +69,7 @@ class Pornmz : MainAPI() {
         val document = app.get(url).document
 
         val title       = document.select("meta[property=og:title]").attr("content")
-        val poster      = document.select("[property='og:image']").attr("content"))
+        val poster      = document.select("meta[property='og:image']").attr("content")
         val description = document.select("meta[property=og:description]").attr("content")
 
 
