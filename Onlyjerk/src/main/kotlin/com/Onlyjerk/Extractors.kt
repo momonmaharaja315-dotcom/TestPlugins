@@ -21,15 +21,21 @@ class Bigwarp : ExtractorApi() {
         callback: (ExtractorLink) -> Unit
     ) {
         val link = app.get(url, allowRedirects = false).headers["location"] ?: url
-        val source = app.get(link).document.toString().substringAfter("""sources:[{file:\"""").substringBefore("?t=")
-        callback.invoke(
-            ExtractorLink(
-                this.name,
-                this.name,
-                source,
-                "",
-                Qualities.Unknown.value
+        val source = app.get(link).document.selectFirst("body > script").toString()
+        val regex = """https?:\/\/[^\s]+\.mp4[^\s]*"""
+        val pattern = Regex(regex)
+        val match = pattern.find(text)
+
+        if (match != null) {
+            callback.invoke(
+                ExtractorLink(
+                    this.name,
+                    this.name,
+                    match.value,
+                    "",
+                    Qualities.Unknown.value
+                )
             )
-        )
+        }
     }
 }
