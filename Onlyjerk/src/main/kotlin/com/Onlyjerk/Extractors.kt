@@ -8,18 +8,18 @@ class Dooodster : DoodLaExtractor() {
 }
 
 class Bigwarp : ExtractorApi() {
-    override val name = "Bigwarp"
-    override val mainUrl = "https://bigwarp.io"
+    override var name = "Bigwarp"
+    override var mainUrl = "https://bigwarp.io"
     override val requiresReferer = true
 
-    override suspend fun getUrl(
+    suspend fun getUrl(
         url: String,
         referer: String?,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
         val link = app.get(url, allowRedirects = false).headers["location"] ?: url
-        val source = app.get(link).document().toString().substringAfter("""file:\"""").substringBefore("?t=")
+        val source = app.get(link).document.toString().substringAfter("""file:\"""").substringBefore("?t=")
         callback.invoke(
             ExtractorLink(
                 this.name,
