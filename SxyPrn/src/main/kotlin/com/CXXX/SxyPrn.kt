@@ -7,6 +7,7 @@ import org.jsoup.nodes.Element
 import com.lagradost.cloudstream3.utils.Qualities
 import com.lagradost.cloudstream3.utils.loadExtractor
 import com.lagradost.cloudstream3.utils.httpsify
+import com.lagradost.cloudstream3.network.WebViewResolver
 
 class SxyPrn : MainAPI() {
     override var mainUrl = "https://sxyprn.com"
@@ -124,27 +125,21 @@ class SxyPrn : MainAPI() {
         document.select("div.post_el_wrap a.extlink").map {
             loadExtractor(it.attr("href"), "", subtitleCallback, callback)
         }
-        val parsed = AppUtils.parseJson<Map<String, String>>(
-            document.select("span.vidsnfo").attr("data-vnfo")
+
+        val response = app.get(
+            data,
+            interceptor = WebViewResolver(
+                Regex(""".vid""")
+            )
         )
-        parsed[parsed.keys.toList()[0]]
-        var url = parsed[parsed.keys.toList()[0]].toString()
 
-        var tmp = url.split("/").toMutableList()
-        tmp[1] += "8"
-        tmp = updateUrl(tmp)
-
-        url = fixUrl(tmp.joinToString("/"))
-        // url = httpsify(
-        //     app.get(url, allowRedirects = false)
-        //     .headers["location"].toString()
-        // )
+        val source = response.headers["location"].toString()
 
         callback.invoke(
             ExtractorLink(
                 this.name,
                 this.name,
-                url,
+                source,
                 referer = "",
                 quality = Qualities.Unknown.value
             )
@@ -152,7 +147,3 @@ class SxyPrn : MainAPI() {
         return true
     }
 }
-
-
-//https://sxyprn.com/cdn8/ODYtc3h5cHJuLmNvbS01Mw../c6/o20460m9mz04601ds26z41w0s0dfgzkft8r344azrad1g603lzhd4276h71z22b6j3694z1etao7i3u/TJo8PUMM8QNEU-ctW8UHZA/1740895489/35680d4r82688mcx9ne8122nfr6/w6372ch2oc2agec8kb3cv5k96ao.vid
-//https://sxyprn.com/cdn8/ODYtc3h5cHJuLmNvbS01Mw../c6/o20460m9mz04601ds26z41w0s0dfgzkft8r344azrad1g603lzhd4276h71z22b6j3694z1etao7i3u/TJo8PUMM8QNEU-ctW8UHZA/1740895350/35680d4r82688mcx9ne8122nfr6/w6372ch2oc2agec8kb3cv5k96ao.vid

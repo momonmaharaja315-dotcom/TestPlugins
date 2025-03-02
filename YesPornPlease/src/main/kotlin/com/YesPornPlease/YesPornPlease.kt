@@ -81,6 +81,15 @@ class YesPornPlease : MainAPI() {
 
         val document = app.get(data).document
         val iframe = document.select(".wp-video iframe").attr("src")
+        callback.invoke(
+            ExtractorLink(
+                this.name,
+                this.name,
+                iframe,
+                referer = mainUrl,
+                quality = Qualities.Unknown.value,
+            )
+        )
         val source = app.get(iframe).document.select("#video > a").attr("href")
         callback.invoke(
             ExtractorLink(
