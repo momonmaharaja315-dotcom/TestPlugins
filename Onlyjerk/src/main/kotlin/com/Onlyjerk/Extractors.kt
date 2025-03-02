@@ -3,16 +3,16 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.extractors.DoodLaExtractor
 
-class Dooodster : DoodLaExtractor() {
+open class Dooodster : DoodLaExtractor() {
     override var mainUrl = "https://dooodster.com"
 }
 
-class Bigwarp : ExtractorApi() {
+open class Bigwarp : ExtractorApi() {
     override var name = "Bigwarp"
     override var mainUrl = "https://bigwarp.io"
     override val requiresReferer = true
 
-    suspend fun getUrl(
+    override suspend fun getUrl(
         url: String,
         referer: String?,
         subtitleCallback: (SubtitleFile) -> Unit,
