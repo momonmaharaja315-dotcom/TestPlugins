@@ -16,6 +16,13 @@ class Onlyjerk : MainAPI() {
 
     override val mainPage = mainPageOf(
         "/videos" to "Latest",
+        "/featured" to "Featured",
+        "/trending" to "Trending",
+        "/onlyfans" to "Onlyfans",
+        "/camwhores" to "Camwhores",
+        "/fansly" to "Fansly",
+        "/manyvids" to "Manyvids",
+        "/porn" to "Porn",
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
