@@ -31,7 +31,7 @@ class Bigwarp : ExtractorApi() {
                 ExtractorLink(
                     this.name,
                     this.name,
-                    match.value,
+                    match.value.substringBefore("""\",label""),
                     "",
                     Qualities.Unknown.value
                 )
