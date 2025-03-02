@@ -24,7 +24,7 @@ class Bigwarp : ExtractorApi() {
         val source = app.get(link).document.selectFirst("body > script").toString()
         val regex = """https?:\/\/[^\s]+\.mp4[^\s]*"""
         val pattern = Regex(regex)
-        val match = pattern.find(text)
+        val match = pattern.find(source)
 
         if (match != null) {
             callback.invoke(
