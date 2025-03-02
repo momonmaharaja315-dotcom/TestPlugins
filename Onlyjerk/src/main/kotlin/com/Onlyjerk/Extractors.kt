@@ -22,16 +22,16 @@ class Bigwarp : ExtractorApi() {
     ) {
         val link = app.get(url, allowRedirects = false).headers["location"] ?: url
         val source = app.get(link).document.selectFirst("body > script").toString()
-        val regex = """https?:\/\/[^\s]+\.mp4[^\s]*"""
-        val pattern = Regex(regex)
-        val match = pattern.find(source)
+        val regex = Regex("""file:\s*\"((?:https?://|//)[^\"]+)""")
+        val matchResult = regex.find(source)
+        val source = matchResult?.groupValues?.get(1)
 
-        if (match != null) {
+        if (source != null) {
             callback.invoke(
                 ExtractorLink(
                     this.name,
                     this.name,
-                    match.value.substringBefore("""\",label"""),
+                    source,
                     "",
                     Qualities.Unknown.value
                 )
