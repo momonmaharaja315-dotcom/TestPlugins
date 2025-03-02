@@ -9,6 +9,6 @@ class OnlyjerkProvider: Plugin() {
     override fun load(context: Context) {
         registerMainAPI(Onlyjerk())
         registerExtractorAPI(Dooodster())
-        registerExtractorAPI(Bigwrap())
+        registerExtractorAPI(Bigwarp())
     }
 }

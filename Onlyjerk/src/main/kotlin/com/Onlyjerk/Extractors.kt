@@ -7,12 +7,12 @@ class Dooodster : DoodLaExtractor() {
     override var mainUrl = "https://dooodster.com"
 }
 
-class Bigwrap : ExtractorApi() {
-    override val name = "Bigwrap"
-    override val mainUrl = "https://bigwrap.com"
+class Bigwarp : ExtractorApi() {
+    override val name = "Bigwarp"
+    override val mainUrl = "https://bigwarp.io"
     override val requiresReferer = true
 
-    override fun getUrl(
+    override suspend fun getUrl(
         url: String,
         referer: String?,
         subtitleCallback: (SubtitleFile) -> Unit,
