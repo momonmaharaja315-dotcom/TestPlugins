@@ -78,21 +78,21 @@ class Onlyjerk : MainAPI() {
     override suspend fun loadLinks(data: String, isCasting: Boolean, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit): Boolean {
         val document = app.get(data).document
         document.select(".tabcontent > iframe").map {
-            callback.invoke(
-            ExtractorLink(
-                    "Onlyjerk",
-                    "Onlyjerk",
-                    it.attr("data-litespeed-src"),
-                    "",
-                    Qualities.Unknown.value
-                )
-            )
-            // loadExtractor(
-            //     it.attr("data-src"),
-            //     referer = "",
-            //     subtitleCallback,
-            //     callback
+            // callback.invoke(
+            // ExtractorLink(
+            //         "Onlyjerk",
+            //         "Onlyjerk",
+            //         it.attr("data-litespeed-src"),
+            //         "",
+            //         Qualities.Unknown.value
+            //     )
             // )
+            loadExtractor(
+                it.attr("data-litespeed-src"),
+                referer = "",
+                subtitleCallback,
+                callback
+            )
         }
         return true
     }
