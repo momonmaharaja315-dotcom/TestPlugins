@@ -4,29 +4,37 @@ import com.lagradost.cloudstream3.app
 import com.lagradost.cloudstream3.utils.ExtractorApi
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.M3u8Helper
-import com.lagradost.api.Log
-
+import com.lagradost.cloudstream3.*
+import com.lagradost.cloudstream3.utils.*
 
 open class Xtremestream : ExtractorApi() {
     override var name = "Xtremestream"
     override var mainUrl = "https://perv.xtremestream.xyz"
     override val requiresReferer = false
 
-    override suspend fun getUrl(url: String, referer: String?): List<ExtractorLink>? {
+    override suspend fun getUrl(url: String, referer: String?, , subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit){
         // val response = app.get(
         //     url, referer = "https://${url.substringAfter("//").substringBefore("/")}/",
         // )
         val response = app.get(
             url, referer = referer,
         )
-        Log.d("document", response.document.toString())
+
+        callback.invoke(
+            ExtractorLink(
+                name,
+                name,
+                response.document.toString(),
+                "",
+                Qualities.Unknown.value
+            )
+        )
 
 
         val playerScript =
             response.document.selectXpath("//script[contains(text(),'var video_id')]")
                 .html()
 
-        val sources = mutableListOf<ExtractorLink>()
         if (playerScript.isNotBlank()) {
             val videoId = playerScript.substringAfter("var video_id = `").substringBefore("`;")
             val m3u8LoaderUrl =
@@ -38,10 +46,18 @@ open class Xtremestream : ExtractorApi() {
                     "$m3u8LoaderUrl/$videoId",
                     "$m3u8LoaderUrl/$videoId"
                 ).forEach { link ->
-                    sources.add(link)
+                    callback.invoke(
+                        ExtractorLink(
+                            name,
+                            name,
+                            link,
+                            "",
+                            Qualities.Unknown.value
+                        )
+                    )
                 }
             }
         }
-        return sources
+
     }
 }
