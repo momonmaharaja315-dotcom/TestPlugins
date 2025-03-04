@@ -407,23 +407,23 @@ open class CineStreamProvider : MainAPI() {
                         callback
                     )
                 },
-                // {
-                //     invokeTokyoInsider(
-                //         res.title,
-                //         res.episode,
-                //         subtitleCallback,
-                //         callback
-                //     )
-                // },
                 {
-                    invokeAllanime(
+                    invokeTokyoInsider(
                         res.title,
-                        year,
                         res.episode,
                         subtitleCallback,
                         callback
                     )
                 },
+                // {
+                //     invokeAllanime(
+                //         res.title,
+                //         year,
+                //         res.episode,
+                //         subtitleCallback,
+                //         callback
+                //     )
+                // },
                 {
                     invokeAnizone(
                         res.title,
