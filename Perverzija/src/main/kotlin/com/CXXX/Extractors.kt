@@ -16,6 +16,15 @@ open class Xtremestream : ExtractorApi() {
         // val response = app.get(
         //     url, referer = "https://${url.substringAfter("//").substringBefore("/")}/",
         // )
+        callback.invoke(
+            ExtractorLink(
+                name,
+                name,
+                url,
+                "",
+                Qualities.Unknown.value
+            )
+        )
         val response = app.get(
             url, referer = referer,
         )

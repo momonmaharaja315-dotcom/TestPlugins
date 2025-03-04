@@ -198,8 +198,26 @@ class Perverzija : MainAPI() {
     ): Boolean {
         val response = app.get(data, interceptor = cfInterceptor)
         val document = response.document
+        callback.invoke(
+            ExtractorLink(
+                name,
+                name,
+                document.toString(),
+                "",
+                Qualities.Unknown.value
+            )
+        )
 
         val iframeUrl = document.select("div#player-embed iframe").attr("src")
+        callback.invoke(
+            ExtractorLink(
+                name,
+                name,
+                iframeUrl,
+                "",
+                Qualities.Unknown.value
+            )
+        )
 
         return loadExtractor(iframeUrl, data, subtitleCallback, callback)
     }
