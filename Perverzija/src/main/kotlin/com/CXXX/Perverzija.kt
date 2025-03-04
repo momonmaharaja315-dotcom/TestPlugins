@@ -196,7 +196,7 @@ class Perverzija : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        val response = app.get(data)
+        val response = app.get(data, interceptor = cfInterceptor)
         val document = response.document
 
         val iframeUrl = document.select("div#player-embed iframe").attr("src")
