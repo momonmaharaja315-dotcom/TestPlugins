@@ -34,7 +34,7 @@ open class Xtremestream : ExtractorApi() {
         val playerScript =
             response.document.selectXpath("//script[contains(text(),'var video_id')]")
                 .html()
-
+        val sources = mutableListOf<ExtractorLink>()
         if (playerScript.isNotBlank()) {
             val videoId = playerScript.substringAfter("var video_id = `").substringBefore("`;")
             val m3u8LoaderUrl =
@@ -46,17 +46,12 @@ open class Xtremestream : ExtractorApi() {
                     "$m3u8LoaderUrl/$videoId",
                     "$m3u8LoaderUrl/$videoId"
                 ).forEach { link ->
-                    callback.invoke(
-                        ExtractorLink(
-                            "Xtremestream",
-                            "Xtremestream",
-                            link,
-                            "",
-                            Qualities.Unknown.value
-                        )
-                    )
+                    sources.add(link)
                 }
             }
+        }
+        sources.forEach { source ->
+            callback.invoke(source)
         }
 
     }
