@@ -20,16 +20,8 @@ open class Xtremestream : ExtractorApi() {
         val response = app.get(
             url, referer = referer,
         )
+        Log.d("document", response.document.toString())
 
-        callback.invoke(
-            ExtractorLink(
-                name,
-                name,
-                response.document.toString(),
-                "",
-                Qualities.P1080.value,
-            )
-        )
 
         val playerScript =
             response.document.selectXpath("//script[contains(text(),'var video_id')]")
