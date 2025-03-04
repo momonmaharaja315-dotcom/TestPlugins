@@ -12,7 +12,7 @@ open class Xtremestream : ExtractorApi() {
     override var mainUrl = "https://perv.xtremestream.xyz"
     override val requiresReferer = false
 
-    override suspend fun getUrl(url: String, referer: String?, , subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit){
+    override suspend fun getUrl(url: String, referer: String?, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit){
         // val response = app.get(
         //     url, referer = "https://${url.substringAfter("//").substringBefore("/")}/",
         // )
@@ -48,8 +48,8 @@ open class Xtremestream : ExtractorApi() {
                 ).forEach { link ->
                     callback.invoke(
                         ExtractorLink(
-                            name,
-                            name,
+                            "Xtremestream",
+                            "Xtremestream",
                             link,
                             "",
                             Qualities.Unknown.value
