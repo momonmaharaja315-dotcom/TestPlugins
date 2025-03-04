@@ -9,7 +9,7 @@ import com.lagradost.cloudstream3.utils.*
 
 open class Xtremestream : ExtractorApi() {
     override var name = "Xtremestream"
-    override var mainUrl = "https://perv.xtremestream.xyz"
+    override var mainUrl = "https://pervl4.xtremestream.xyz"
     override val requiresReferer = false
 
     override suspend fun getUrl(url: String, referer: String?, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit){

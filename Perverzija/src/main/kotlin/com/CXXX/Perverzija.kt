@@ -19,8 +19,6 @@ import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.loadExtractor
 import kotlinx.coroutines.delay
 import org.jsoup.nodes.Element
-import com.lagradost.cloudstream3.*
-import com.lagradost.cloudstream3.utils.*
 
 class Perverzija : MainAPI() {
     override var name = "Perverzija"
@@ -200,27 +198,11 @@ class Perverzija : MainAPI() {
     ): Boolean {
         val response = app.get(data, interceptor = cfInterceptor)
         val document = response.document
-        callback.invoke(
-            ExtractorLink(
-                name,
-                name,
-                document.toString(),
-                "",
-                Qualities.Unknown.value
-            )
-        )
 
         val iframeUrl = document.select("div#player-embed iframe").attr("src")
-        callback.invoke(
-            ExtractorLink(
-                name,
-                name,
-                iframeUrl,
-                "",
-                Qualities.Unknown.value
-            )
-        )
 
-        return loadExtractor(iframeUrl, data, subtitleCallback, callback)
+        Xtremestream().getUrl(iframeUrl, data, subtitleCallback, callback)
+
+        return true
     }
 }
