@@ -13,32 +13,10 @@ open class Xtremestream : ExtractorApi() {
     override val requiresReferer = false
 
     override suspend fun getUrl(url: String, referer: String?, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit){
-        // val response = app.get(
-        //     url, referer = "https://${url.substringAfter("//").substringBefore("/")}/",
-        // )
-        callback.invoke(
-            ExtractorLink(
-                name,
-                name,
-                url,
-                "",
-                Qualities.Unknown.value
-            )
-        )
+      
         val response = app.get(
             url, referer = referer,
         )
-
-        callback.invoke(
-            ExtractorLink(
-                name,
-                name,
-                response.document.toString(),
-                "",
-                Qualities.Unknown.value
-            )
-        )
-
 
         val playerScript =
             response.document.selectXpath("//script[contains(text(),'var video_id')]")
