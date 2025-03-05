@@ -418,12 +418,30 @@ object CineStreamExtractors : CineStreamProvider() {
                 app.get("https://blog.finzoox.com/?id=$token").text.substringAfter("link\":\"")
                     .substringBefore("\"};")
             val decodedurl = base64Decode(encodedurl)
+            callback.invoke(
+                ExtractorLink(
+                    "Bollyflix",
+                    "Bollyflix",
+                    decodedurl,
+                    "",
+                    Qualities.Unknown.value,
+                )
+            )
             if (season == null) {
                 loadSourceNameExtractor("Bollyflix", decodedurl , "", subtitleCallback, callback)
             } else {
                 val link =
                     app.get(decodedurl).document.selectFirst("article h3 a:contains(Episode 0$episode)")!!
                         .attr("href")
+                callback.invoke(
+                ExtractorLink(
+                    "Bollyflix link",
+                    "Bollyflix link",
+                    links,
+                    "",
+                    Qualities.Unknown.value,
+                    )
+                )
                 loadSourceNameExtractor("Bollyflix", link , "", subtitleCallback, callback)
             }
         }
@@ -989,7 +1007,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = "$api/search/$id"
         app.get(url, interceptor = cfInterceptor).document.select("article h3 a")
             .amap {
-                val hrefpattern=it.attr("href") ?: null
+                val hrefpattern = it.attr("href") ?: null
                 if (hrefpattern != null) {
                     val res = hrefpattern.let { app.get(it).document }
                     if(season == null) {
