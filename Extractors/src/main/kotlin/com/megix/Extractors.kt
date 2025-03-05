@@ -455,8 +455,22 @@ open class HubCloud : ExtractorApi() {
     }
 }
 
-class fastdlserver : GDFlix() {
+class fastdlserver : ExtractorApi() {
+    override val name: String = "fastdlserver"
     override var mainUrl = "https://fastdlserver.online"
+    override val requiresReferer = false
+
+    override suspend fun getUrl(
+        url: String,
+        referer: String?,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val location = app.get(url).headers["location"]
+        if (location != null) {
+            loadExtractor(location, "", subtitleCallback, callback)
+        }
+    }
 }
 
 class GDLink : GDFlix() {
