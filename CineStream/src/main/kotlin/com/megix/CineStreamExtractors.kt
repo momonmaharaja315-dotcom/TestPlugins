@@ -1320,7 +1320,7 @@ object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun invokeAllanime(
         name: String,
-        year: String? = null,
+        year: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
