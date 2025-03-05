@@ -945,6 +945,7 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
+        val cfInterceptor = CloudflareKiller()
         val url = "$vegaMoviesAPI/?s=$id"
         app.get(url, interceptor = cfInterceptor).document.select("article h2 a").amap {
             val res = app.get(it.attr("href")).document
