@@ -466,7 +466,7 @@ class fastdlserver : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val location = app.get(url).headers["location"]
+        val location = app.get(url, allowRedirects = false).headers["location"]
         if (location != null) {
             loadExtractor(location, "", subtitleCallback, callback)
         }
