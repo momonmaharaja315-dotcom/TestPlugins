@@ -1318,7 +1318,7 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    private suspend fun invokeAllanime(
+    suspend fun invokeAllanime(
         name: String,
         year: String? = null,
         episode: Int? = null,
@@ -1331,7 +1331,6 @@ object CineStreamExtractors : CineStreamProvider() {
         var type = ""
         if (episode == null) {
             type = "Movie"
-            season = ""
         } else {
             type = "TV"
         }
