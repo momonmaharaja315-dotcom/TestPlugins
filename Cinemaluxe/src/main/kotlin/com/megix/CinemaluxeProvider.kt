@@ -6,7 +6,6 @@ import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
 import com.lagradost.cloudstream3.base64Decode
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
-import com.google.gson.annotations.SerializedName
 import okhttp3.*
 
 class CinemaluxeProvider : MainAPI() { // all providers must be an instance of MainAPI
@@ -40,105 +39,18 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
         return newHomePageResponse(request.name, home)
     }
 
-    data class Options (
-        @SerializedName("soralink_pleasewait_countdown_text" ) var soralinkPleasewaitCountdownText : Boolean? = null,
-        @SerializedName("soralink_open_in_new_tab"           ) var soralinkOpenInNewTab            : Boolean? = null,
-        @SerializedName("soralink_button_appearance_mode"    ) var soralinkButtonAppearanceMode    : String?  = null,
-        @SerializedName("soralink_z"                         ) var soralinkZ                       : String?  = null,
-        @SerializedName("soralink_mode"                      ) var soralinkMode                    : String?  = null,
-        @SerializedName("soralink_auto_guessing_mode"        ) var soralinkAutoGuessingMode        : Boolean? = null,
-        @SerializedName("rechaptcha_enabled"                 ) var rechaptchaEnabled               : Boolean? = null,
-        @SerializedName("googlekey"                          ) var googlekey                       : String?  = null,
-        @SerializedName("grechaptcha_element_id"             ) var grechaptchaElementId            : String?  = null,
-        @SerializedName("grechaptcha_skin"                   ) var grechaptchaSkin                 : String?  = null,
-        @SerializedName("soralink_ajaxurl"                   ) var soralinkAjaxurl                 : String?  = null
-    )
-
-    data class Item (
-        @SerializedName("token"    ) var token    : String?  = null,
-        @SerializedName("id"       ) var id       : Int?     = null,
-        @SerializedName("time"     ) var time     : Int?     = null,
-        @SerializedName("post"     ) var post     : String?  = null,
-        @SerializedName("redirect" ) var redirect : String?  = null,
-        @SerializedName("cacha"    ) var cacha    : String?  = null,
-        @SerializedName("new"      ) var new      : Boolean? = null,
-        @SerializedName("link"     ) var link     : String?  = null
-    )
-
     private suspend fun bypass(url: String): String {
-        val document = app.get(url, allowRedirects = true).document.toString()
-        //val encodeUrl = Regex("""link":"([^"]+)""").find(document) ?. groupValues ?. get(1) ?: ""
-        val itemRegex = """var item = (\{.*?\})"""
-        val optionsRegex = """var options = (\{.*?\});"""
-        val optionsMatch = optionsRegex.find(document)
-        val itemMatch = itemRegex.find(document)
-
-        if (itemMatch != null && optionsMatch != null) {
-            val itemObject = itemMatch.groupValues[1]
-            val optionsObject = optionsMatch.groupValues[1]
-            val itemData = parseJson<Item>(itemObject)
-            val optionsData = parseJson<Options>(optionsObject)
-            val url = makeRequest(itemData, optionsData, 0)
-            return url
-        }
-        return "empty"
+        val jsonBody = """{"url":"$url"}"""
+        val requestBody = jsonBody.toRequestBody("application/json".toMediaType())
+        return app.post(
+            "https://ext.8man.me/api/cinemaluxe",
+            headers = mapOf(
+                "Content-Type" to "application/json",
+            ),
+            body = requestBody
+        )
     }
 
-
-    suspend fun makeRequest(itemData : Item, optionsData: Options, try: Integer) : String {
-        val formBody = FormBody.Builder().apply {
-            itemData::class.members.forEach { member ->
-                if (member is kotlin.reflect.KProperty<*>) {
-                    val value = member.getter.call(itemData)?.toString()
-                    if (value != null) {
-                        add(member.name, value)
-                    }
-                }
-            }
-            add("action", optionsData.soralinkZ ?: "")
-        }.build()
-
-        val headers = mapOf(
-            "accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "accept-language" to "en-US,en;q=0.9,en-IN;q=0.8",
-            "cache-control" to "no-cache",
-            "content-type" to "application/x-www-form-urlencoded",
-            "pragma" to "no-cache",
-            "priority" to "u=0, i",
-            "sec-ch-ua" to "\"Not(A:Brand\";v=\"99\", \"Microsoft Edge\";v=\"133\", \"Chromium\";v=\"133\"",
-            "sec-ch-ua-mobile" to "?0",
-            "sec-ch-ua-platform" to "\"Windows\"",
-            "sec-fetch-dest" to "document",
-            "sec-fetch-mode" to "navigate",
-            "sec-fetch-site" to "same-origin",
-            "sec-fetch-user" to "?1",
-            "upgrade-insecure-requests" to "1",
-            "cookie" to "ext_name=ojplmecpdpgccookcobabopnaifgidhf",
-            "Referer" to "https://hdmovie.website/future-of-blockchain-2025/",
-            "Referrer-Policy" to "strict-origin-when-cross-origin"
-        )
-
-        val response = app.post(
-            itemData.redirect ?: "",
-            body = formBody,
-            headers = headers,
-            allowRedirects = false
-        )
-        if(response?.status >= 300 && response?.status < 400) {
-            return response.headers["location"] ?: "empty"
-        }
-        else if(response?.status == 200) {
-            if(try < 6) {
-                makeRequest(itemData, optionsData, try + 1)
-            }
-            else {
-                return "empty"
-            }
-        }
-        else {
-            return "empty"
-        }
-    }
 
     private fun Element.toSearchResult(): SearchResponse? {
         val title = this.selectFirst("img") ?. attr("alt") ?: ""
