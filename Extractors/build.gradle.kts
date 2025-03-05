@@ -1,10 +1,10 @@
-version = 20
+version = 33
 
 cloudstream {
-    language = "hi"
+    //language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "Movies and Series upto 4K"
+    description = "Must Install(For other extensions to work properly)"
      authors = listOf("megix")
 
     /**
@@ -18,7 +18,9 @@ cloudstream {
     tvTypes = listOf(
         "TvSeries",
         "Movie",
+        "AsianDrama",
+        "Anime"
     )
 
-    iconUrl = "http://luxecinema.fans/wp-content/uploads/2023/12/fresh-logo-dark-theme-.jpg"
+    iconUrl = "https://cdn-icons-png.flaticon.com/512/4961/4961639.png"
 }
