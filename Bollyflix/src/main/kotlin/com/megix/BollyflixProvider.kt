@@ -134,9 +134,9 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
                 val seasonText = button.parent()?.previousElementSibling()?.text().toString()
                 val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
                 val realSeason = realSeasonRegex.find(seasonText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
-                var decodeUrl = bypass(id)
-                decodeUrl = if(decodeUrl == "") null else decodeUrl
-                val seasonDoc = app.get(decodeUrl ?: return@mapNotNull).document
+                val decodeUrl = bypass(id)
+                if(decodeUrl == "") return@mapNotNull
+                val seasonDoc = app.get(decodeUrl).document
                 val epLinks = seasonDoc.select("h3 > a")
                     .filter { element -> !element.text().contains("Zip", true) }
                 var e = 1

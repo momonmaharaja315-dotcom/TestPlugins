@@ -437,7 +437,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 ExtractorLink(
                     "Bollyflix link",
                     "Bollyflix link",
-                    links,
+                    link,
                     "",
                     Qualities.Unknown.value,
                     )
