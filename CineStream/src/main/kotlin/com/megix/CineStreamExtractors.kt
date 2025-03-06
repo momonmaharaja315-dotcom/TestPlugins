@@ -358,10 +358,8 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
-        val type = if(episode != null) "tvshow" else "movie"
-        val regex = Regex("[^A-Za-z0-9 ]")
-        val url = "$cinemaluxeAPI/$type/${title.replace(regex, "").replace(" ", "-")}-$year"
-        val document = app.get(url).document
+        val url = "$cinemaluxeAPI/?s=$title $year"
+        val document = app.get(url).document.selectFirst("div.title > a:matches((?i)($title $year))")?.attr("href") ?: return
 
         if(season == null) {
             document.select("a.maxbutton").amap {
