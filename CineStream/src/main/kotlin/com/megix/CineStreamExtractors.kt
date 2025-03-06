@@ -359,7 +359,8 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
         val url = "$cinemaluxeAPI/?s=$title $year"
-        val document = app.get(url).document.selectFirst("div.title > a:matches((?i)($title $year))")?.attr("href") ?: return
+        val link = app.get(url).document.selectFirst("div.title > a:matches((?i)($title $year))")?.attr("href") ?: return
+        val document = app.get(link).document
 
         if(season == null) {
             document.select("a.maxbutton").amap {
