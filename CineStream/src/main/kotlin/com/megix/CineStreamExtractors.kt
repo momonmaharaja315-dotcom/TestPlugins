@@ -1341,7 +1341,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val response =
             app.get(query, referer = privatereferer).parsedSafe<Anichi>()?.data?.shows?.edges
         if (response != null) {
-            val id = response.firstOrNull?.id ?: return
+            val id = response.firstOrNull()?.id ?: return
             val langType = listOf("sub", "dub")
             for (i in langType) {
                 val epData =
