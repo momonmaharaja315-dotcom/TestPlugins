@@ -1297,7 +1297,7 @@ object CineStreamExtractors : CineStreamProvider() {
         servers.amap {
             val epJson = app.get("$CONSUMET_API/movies/goku/watch?episodeId=$epId&mediaId=$id&server=$it").text
             val epData = tryParseJson<ConsumetWatch>(epJson) ?: return@amap
-            val referer = epData.headers.Referer
+            val referer = epData.headers.Referer ?: ""
 
             epData.sources.map {
                 callback.invoke(
