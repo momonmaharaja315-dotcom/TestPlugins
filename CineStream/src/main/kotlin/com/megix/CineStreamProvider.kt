@@ -42,6 +42,7 @@ import com.megix.CineStreamExtractors.invokeAllanime
 import com.megix.CineStreamExtractors.invokeDramacool
 import com.megix.CineStreamExtractors.invokeNetflix
 import com.megix.CineStreamExtractors.invokePrimeVideo
+import com.megix.CineStreamExtractors.invokeGoku
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -716,6 +717,15 @@ open class CineStreamProvider : MainAPI() {
                         res.episode,
                         callback,
                         subtitleCallback,
+                    )
+                },
+                {
+                    invokeGoku(
+                        res.title,
+                        res.season,
+                        res.episode,
+                        subtitleCallback,
+                        callback,
                     )
                 },
                 {
