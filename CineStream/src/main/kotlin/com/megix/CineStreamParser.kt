@@ -412,7 +412,7 @@ data class ConsumetWatch (
 )
 
 data class ConsumetHeaders (
-  var Referer : String
+  var Referer : String? = null,
 )
 
 data class ConsumetSources (

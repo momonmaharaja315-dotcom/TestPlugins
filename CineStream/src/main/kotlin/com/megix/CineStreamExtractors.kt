@@ -1307,7 +1307,7 @@ object CineStreamExtractors : CineStreamProvider() {
                         it.url,
                         referer,
                         it.quality.toIntOrNull() ?: Qualities.Unknown.value,
-                        isM3u8 = it.isM3u8
+                        isM3u8 = it.isM3U8
 
                     )
                 )
