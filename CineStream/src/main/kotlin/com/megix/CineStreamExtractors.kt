@@ -383,7 +383,7 @@ object CineStreamExtractors : CineStreamProvider() {
             season.amap { div ->
                 var link = div.select("a").attr("href")
                 link = cinemaluxeBypass(link)
-                 app.get(link).document.select("""a.maxbutton:matches((?i)(episode 0?$episode\\b))""").amap {
+                 app.get(link).document.select("""a.maxbutton:matches((?i)(?:episode\s*[-]?\s*)(0?$episode\\b))""").amap {
                     loadSourceNameExtractor(
                         "Cinemaluxe",
                         it.attr("href"),
