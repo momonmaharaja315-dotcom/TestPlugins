@@ -1455,7 +1455,7 @@ object CineStreamExtractors : CineStreamProvider() {
             val langType = listOf("sub", "dub")
             for (i in langType) {
                 val epData =
-                    """$AllanimeAPI?variables={"showId":"$id","translationType":"$i","episodeString":"$episode"}&extensions={"persistedQuery":{"version":1,"sha256Hash":"$ephash"}}"""
+                    """$AllanimeAPI?variables={"showId":"$id","translationType":"$i","episodeString":"${episode ?: 1}"}&extensions={"persistedQuery":{"version":1,"sha256Hash":"$ephash"}}"""
                 val eplinks = app.get(epData, referer = privatereferer)
                     .parsedSafe<AnichiEP>()?.data?.episode?.sourceUrls
                 eplinks?.apmap { source ->
