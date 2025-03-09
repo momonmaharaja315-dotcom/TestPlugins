@@ -26,7 +26,7 @@ import com.megix.CineStreamExtractors.invokeAutoembed
 import com.megix.CineStreamExtractors.invokeVidbinge
 import com.megix.CineStreamExtractors.invokeUhdmovies
 import com.megix.CineStreamExtractors.invoke2embed
-// import com.megix.CineStreamExtractors.invokeRar
+import com.megix.CineStreamExtractors.invokeRar
 import com.megix.CineStreamExtractors.invokeAnimes
 import com.megix.CineStreamExtractors.invokeVite
 import com.megix.CineStreamExtractors.invokeMultimovies
@@ -77,7 +77,7 @@ open class CineStreamProvider : MainAPI() {
         const val WHVX_TOKEN = BuildConfig.WHVX_TOKEN
         const val CONSUMET_API = BuildConfig.CONSUMET_API
         const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
-        // const val RarAPI = "https://nepu.to"
+        const val RarAPI = "https://nepu.to"
         const val hianimeAPI = "https://hianime.to"
         const val animepaheAPI = "https://animepahe.ru"
         const val viteAPI = "https://viet.autoembed.cc"
@@ -719,15 +719,15 @@ open class CineStreamProvider : MainAPI() {
                         callback
                     )
                 },
-                // {
-                //     invokeRar(
-                //         res.title,
-                //         year,
-                //         res.season,
-                //         res.episode,
-                //         callback
-                //     )
-                // },
+                {
+                    invokeRar(
+                        res.title,
+                        year,
+                        res.season,
+                        res.episode,
+                        callback
+                    )
+                },
                 // {
                 //     if(!res.isAnime) invokeFull4Movies(
                 //         res.title,

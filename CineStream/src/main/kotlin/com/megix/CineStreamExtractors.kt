@@ -61,8 +61,8 @@ object CineStreamExtractors : CineStreamProvider() {
         data.sources.forEach {
             callback.invoke(
                 ExtractorLink(
-                    "Autoembed 2 ${it.label}",
-                    "Autoembed 2 ${it.label}",
+                    "Autoembed 2[${it.label}]",
+                    "Autoembed 2[${it.label}]",
                     it.file,
                     "",
                     Qualities.Unknown.value,
@@ -169,13 +169,16 @@ object CineStreamExtractors : CineStreamProvider() {
                 val seasonId = media?.season?.find { it.s == "$season" }?.id
                 var episodeId : String? = null
                 var page = 1
-                while(episodeId == null  || media?.nextPageShow == 1) {
-                    episodeId = app.get(
+
+                while(episodeId == null) {
+                    val data = app.get(
                         "$netflixAPI/pv/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}&page=$page",
                         headers = headers,
                         cookies = cookies,
                         referer = "$netflixAPI/"
-                    ).parsedSafe<NetflixResponse>()?.episodes?.find { it.ep == "E$episode" }?.id
+                    ).parsedSafe<NetflixResponse>()
+                    episodeId = data?.episodes?.find { it.ep == "E$episode" }?.id
+                    if(data?.nextPageShow != 1) { break }
                     page++
                 }
 
@@ -238,13 +241,15 @@ object CineStreamExtractors : CineStreamProvider() {
                 val seasonId = media?.season?.find { it.s == "$season" }?.id
                 var episodeId : String? = null
                 var page = 1
-                while(episodeId == null  || media?.nextPageShow == 1) {
-                    episodeId = app.get(
+                while(episodeId == null) {
+                    val data = app.get(
                         "$netflixAPI/pv/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}&page=$page",
                         headers = headers,
                         cookies = cookies,
                         referer = "$netflixAPI/"
-                    ).parsedSafe<NetflixResponse>()?.episodes?.find { it.ep == "E$episode" }?.id
+                    ).parsedSafe<NetflixResponse>()
+                    episodeId = data?.episodes?.find { it.ep == "E$episode" }?.id
+                    if(data?.nextPageShow != 1) { break }
                     page++
                 }
                 media?.title to episodeId
@@ -678,36 +683,36 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    // suspend fun invokeRar(
-    //     title: String,
-    //     year: Int? = null,
-    //     season: Int? = null,
-    //     episode: Int? = null,
-    //     callback: (ExtractorLink) -> Unit,
-    // ) {
-    //     val json = app.get("$RarAPI/ajax/posts?q=$title ($year)").text
-    //     val responseData = parseJson<RarResponseData>(json)
-    //     val id = responseData.data?.firstOrNull {
-    //         it.second_name == title
-    //     }?.id ?: return
-    //     val slug = "$title $year $id".createSlug()
-    //     val url = if(season != null) "$RarAPI/show/$slug/season/$season/episode/$episode" else "$RarAPI/movie/$slug"
-    //     val embedId = app.get(url).document.selectFirst("a.btn-service")?.attr("data-embed") ?: return
-    //     val body = FormBody.Builder().add("id", embedId).build()
-    //     val document = app.post("$RarAPI/ajax/embed", requestBody = body).document
-    //     val regex = Regex("""(https?:\/\/[^\"']+\.m3u8)""")
-    //     val link = regex.find(document.toString())?.groupValues?.get(1) ?: return
-    //     callback.invoke(
-    //         ExtractorLink(
-    //             "Rar",
-    //             "Rar",
-    //             link,
-    //             referer = "",
-    //             Qualities.P1080.value,
-    //             true
-    //         )
-    //     )
-    // }
+    suspend fun invokeRar(
+        title: String,
+        year: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        val json = app.get("$RarAPI/ajax/posts?q=$title ($year)").text
+        val responseData = parseJson<RarResponseData>(json)
+        val id = responseData.data?.firstOrNull {
+            it.second_name == title
+        }?.id ?: return
+        val slug = "$title $year $id".createSlug()
+        val url = if(season != null) "$RarAPI/show/$slug/season/$season/episode/$episode" else "$RarAPI/movie/$slug"
+        val embedId = app.get(url).document.selectFirst("a.btn-service")?.attr("data-embed") ?: return
+        val body = FormBody.Builder().add("id", embedId).build()
+        val document = app.post("$RarAPI/ajax/embed", requestBody = body).document
+        val regex = Regex("""(https?:\/\/[^\"']+\.m3u8)""")
+        val link = regex.find(document.toString())?.groupValues?.get(1) ?: return
+        callback.invoke(
+            ExtractorLink(
+                "Rar",
+                "Rar",
+                link,
+                referer = "",
+                Qualities.P1080.value,
+                true
+            )
+        )
+    }
 
     suspend fun invoke2embed(
         id:  String,
@@ -754,17 +759,17 @@ object CineStreamExtractors : CineStreamProvider() {
             "user-agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
         )
 
-        val tokenJson = app.get(WHVX_TOKEN).text
+        val tokenJson = app.get(WHVX_TOKEN, timeout = 500L).text
         val token = parseJson<WHVXToken>(tokenJson).token
         val encodedToken = URLEncoder.encode(token, StandardCharsets.UTF_8.toString())
         val encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8.toString())
-        providers.map { provider ->
-            val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=${provider}&token=${encodedToken}", headers = headers).text
-            val data = tryParseJson<WHVX>(json) ?: return@map
+        providers.amap { provider ->
+            val json = app.get("${WHVXAPI}/search?query=${encodedQuery}&provider=${provider}&token=${encodedToken}", headers = headers, timeout = 500L).text
+            val data = tryParseJson<WHVX>(json) ?: return@amap
             val encodedUrl = URLEncoder.encode(data.url, StandardCharsets.UTF_8.toString())
-            val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=${provider}", headers = headers).text
+            val json2 = app.get("${WHVXAPI}/source?resourceId=${encodedUrl}&provider=${provider}", headers = headers, timeout = 500L).text
             if(provider == "astra") {
-                val data2 = tryParseJson<AstraQuery>(json2) ?: return@map
+                val data2 = tryParseJson<AstraQuery>(json2) ?: return@amap
                 data2.stream.forEach {
                     callback.invoke(
                         ExtractorLink(
@@ -779,7 +784,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 }
             }
             else if(provider == "nova") {
-                val data2 = tryParseJson<NovaVideoData>(json2) ?: return@map
+                val data2 = tryParseJson<NovaVideoData>(json2) ?: return@amap
                 for (stream in data2.stream) {
                     for ((quality, details) in stream.qualities) {
                         callback.invoke(
@@ -807,7 +812,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 }
             }
             else {
-                val data2 = tryParseJson<OrionStreamData>(json2) ?: return@map
+                val data2 = tryParseJson<OrionStreamData>(json2) ?: return@amap
                 for(stream in data2.stream) {
                     callback.invoke(
                         ExtractorLink(
