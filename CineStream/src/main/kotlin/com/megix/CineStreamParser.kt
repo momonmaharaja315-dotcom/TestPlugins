@@ -7,6 +7,17 @@ data class CinemaluxeRedirectUrl(
     val redirectUrl: String
 )
 
+//Autoembed2
+
+data class Autoembed2(
+    val sources : List<Autoembed2Source>
+)
+
+data class Autoembed2Source(
+    val label : String,
+    val file : String
+)
+
 
 //NF
 data class NFVerifyUrl(
@@ -47,6 +58,7 @@ data class NetflixResponse(
     @JsonProperty("season") val season: ArrayList<NetflixSeason>? = arrayListOf(),
     @JsonProperty("episodes") val episodes: ArrayList<NetflixEpisodes>? = arrayListOf(),
     @JsonProperty("sources") val sources: ArrayList<NetflixSources>? = arrayListOf(),
+    @JsonProperty("nextPageShow") val nextPageShow: Int? = null,
 )
 
 //Dramacool

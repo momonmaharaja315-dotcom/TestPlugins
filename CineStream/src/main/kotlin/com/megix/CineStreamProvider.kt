@@ -44,6 +44,7 @@ import com.megix.CineStreamExtractors.invokeNetflix
 import com.megix.CineStreamExtractors.invokePrimeVideo
 import com.megix.CineStreamExtractors.invokeGoku
 import com.megix.CineStreamExtractors.invokeFlixhq
+import com.megix.CineStreamExtractors.invokeAutoembed2
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -89,6 +90,7 @@ open class CineStreamProvider : MainAPI() {
         const val anizoneAPI = "https://anizone.to"
         const val netflixAPI = "https://iosmirror.cc"
         const val AllanimeAPI = "https://api.allanime.day/api"
+        const val AutoembedAPI2 = "https://hindiscrape.whvx.net"
         const val stremio_Dramacool = "https://stremio-dramacool-addon.xyz"
         const val TRACKER_LIST_URL = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all_ip.txt"
         const val torrentioCONFIG = "providers=yts,eztv,rarbg,1337x,thepiratebay,kickasstorrents,torrentgalaxy,magnetdl,horriblesubs,nyaasi,tokyotosho,anidex|sort=seeders|qualityfilter=threed,480p,other,scr,cam,unknown|limit=10"
@@ -557,6 +559,14 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
+                    invokeAutoembed2(
+                        tmdbId,
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        callback,
+                    )
+                },
+                {
                     invokeUhdmovies(
                         imdbTitle,
                         imdbYear,
@@ -814,6 +824,14 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     invokeAutoembed(
+                        res.tmdbId,
+                        res.season,
+                        res.episode,
+                        callback,
+                    )
+                },
+                {
+                    invokeAutoembed2(
                         res.tmdbId,
                         res.season,
                         res.episode,

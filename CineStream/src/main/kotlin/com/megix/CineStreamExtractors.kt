@@ -44,6 +44,33 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
+    suspend fun invokeAutoembed2(
+        id: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        val url = if(season == null) {
+            "$AutoembedAPI2/movie/$id"
+        } else {
+            "$AutoembedAPI2/tv/$id/$season/$episode"
+        }
+
+        val json = app.get(url).text
+        val data = tryParseJson<Autoembed2>(json) ?: return
+        data.sources.forEach {
+            callback.invoke(
+                ExtractorLink(
+                    "Autoembed 2 ${it.label}",
+                    "Autoembed 2 ${it.label}",
+                    it.file,
+                    "",
+                    Qualities.Unknown.value,
+                )
+            )
+        }
+    }
+
     suspend fun invokeDramacool(
         title: String,
         provider: String,
@@ -140,13 +167,18 @@ object CineStreamExtractors : CineStreamProvider() {
                 media?.title to netflixId
             } else if(year.toString() == media?.year.toString()) {
                 val seasonId = media?.season?.find { it.s == "$season" }?.id
-                val episodeId =
-                    app.get(
-                        "$netflixAPI/pv/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}",
+                var episodeId : String? = null
+                var page = 1
+                while(episodeId == null  || media?.nextPageShow == 1) {
+                    episodeId = app.get(
+                        "$netflixAPI/pv/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}&page=$page",
                         headers = headers,
                         cookies = cookies,
                         referer = "$netflixAPI/"
                     ).parsedSafe<NetflixResponse>()?.episodes?.find { it.ep == "E$episode" }?.id
+                    page++
+                }
+
                 media?.title to episodeId
             }
             else {
@@ -204,13 +236,17 @@ object CineStreamExtractors : CineStreamProvider() {
                 media?.title to netflixId
             } else if(year.toString() == media?.year.toString()) {
                 val seasonId = media?.season?.find { it.s == "$season" }?.id
-                val episodeId =
-                    app.get(
-                        "$netflixAPI/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}",
+                var episodeId : String? = null
+                var page = 1
+                while(episodeId == null  || media?.nextPageShow == 1) {
+                    episodeId = app.get(
+                        "$netflixAPI/pv/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}&page=$page",
                         headers = headers,
                         cookies = cookies,
                         referer = "$netflixAPI/"
                     ).parsedSafe<NetflixResponse>()?.episodes?.find { it.ep == "E$episode" }?.id
+                    page++
+                }
                 media?.title to episodeId
             }
             else {
@@ -1001,7 +1037,7 @@ object CineStreamExtractors : CineStreamProvider() {
                         res.select("button.dwd-button").amap {
                             val link = it.parent()?.attr("href") ?: return@amap
                             val doc = app.get(link).document
-                            val source = doc.selectFirst("button.btn:matches((?i)(V-Cloud))")
+                            val source = doc.selectFirst("button.btn:matches((?i)(V-Cloud||Download))")
                                 ?.parent()
                                 ?.attr("href")
                                 ?: return@amap
