@@ -30,5 +30,6 @@ class ExtractorsPlugin: Plugin() {
         registerExtractorAPI(Photolinx())
         registerExtractorAPI(Watchadsontape())
         registerExtractorAPI(Howblogs())
+        registerExtractorAPI(Smoothpre())
     }
 }

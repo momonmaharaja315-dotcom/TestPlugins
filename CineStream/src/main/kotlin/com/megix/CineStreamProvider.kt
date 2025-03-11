@@ -44,6 +44,7 @@ import com.megix.CineStreamExtractors.invokePrimeVideo
 import com.megix.CineStreamExtractors.invokeGoku
 import com.megix.CineStreamExtractors.invokeFlixhq
 import com.megix.CineStreamExtractors.invokeSkymovies
+import com.megix.CineStreamExtractors.invokeMoviesflix
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -89,6 +90,8 @@ open class CineStreamProvider : MainAPI() {
         const val netflixAPI = "https://iosmirror.cc"
         const val AllanimeAPI = "https://api.allanime.day/api"
         const val skymoviesAPI = "https://skymovieshd.farm"
+        const val moveisflixAPI = "https://themoviesflix.bio"
+        const val hdmoviesflixAPI = "https://hdmoviesflix.name"
         const val stremio_Dramacool = "https://stremio-dramacool-addon.xyz"
         const val TRACKER_LIST_URL = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all_ip.txt"
         const val torrentioCONFIG = "providers=yts,eztv,rarbg,1337x,thepiratebay,kickasstorrents,torrentgalaxy,magnetdl,horriblesubs,nyaasi,tokyotosho,anidex|sort=seeders|qualityfilter=threed,480p,other,scr,cam,unknown|limit=10"
@@ -844,6 +847,28 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     invoke2embed(
+                        res.id,
+                        res.season,
+                        res.episode,
+                        callback,
+                        subtitleCallback
+                    )
+                },
+                {
+                    if(!res.isBollywood || !res.isAnime) invokeMoviesflix(
+                        "Moviesflix",
+                        moviesflixAPI,
+                        res.id,
+                        res.season,
+                        res.episode,
+                        callback,
+                        subtitleCallback
+                    )
+                },
+                {
+                    if(res.isBollywood) invokeMoviesflix(
+                        "Hdmoviesflix",
+                        hdmoviesflixAPI,
                         res.id,
                         res.season,
                         res.episode,

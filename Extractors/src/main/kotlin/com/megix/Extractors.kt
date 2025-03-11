@@ -9,6 +9,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import com.lagradost.api.Log
 import com.lagradost.cloudstream3.extractors.StreamTape
+import com.lagradost.cloudstream3.extractors.VidHidePro
 
 fun getIndexQuality(str: String?): Int {
     return Regex("""(\d{3,4})[pP]""").find(str ?: "")?.groupValues?.getOrNull(1)?.toIntOrNull()
@@ -17,6 +18,10 @@ fun getIndexQuality(str: String?): Int {
 
 class Watchadsontape : StreamTape() {
     override var mainUrl: String = "https://watchadsontape.com"
+}
+
+class Smoothpre : VidHidePro() {
+    override var mainUrl: String = "https://smoothpre.com"
 }
 
 class Howblogs : ExtractorApi() {

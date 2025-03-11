@@ -274,6 +274,63 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
+    suspend fun invokeMoviesflix(
+        sourceName: String,
+        api: String,
+        id: String? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        app.get("$api/?s=$id").document.select("a.post-image").amap {
+            val doc = app.get(it.attr("href")).document
+            if(episode == null) {
+                doc.select("a.maxbutton").amap { button ->
+                    val document = app.get(button.attr("href")).document
+                    document.select("a.maxbutton").amap { source ->
+                        val linkText = source.text()
+                        if (!linkText.contains("Google Drive", ignoreCase = true) &&
+                            !linkText.contains("Other Download Links", ignoreCase = true) &&
+                            !linkText.contains("G-Direct", ignoreCase = true)
+                        ) {
+                            loadSourceNameExtractor(
+                                sourceName,
+                                source.attr("href"),
+                                "",
+                                subtitleCallback,
+                                callback,
+                            )
+                        }
+                    }
+                }
+            }
+            else {
+                doc.select("h3.has-text-color:contains(Season $season | S0$season | S$season)")
+                .amap { p ->
+                    p.nextElementSibling()?.select("a.maxbutton")?.amap { button ->
+                        val buttonText = button.text()
+                        if(!buttonText.contains("G-Direct", ignoreCase = true) &&
+                            !buttonText.contains("Drop Galaxy", ignoreCase = true) &&
+                            !buttonText.contains("G-Drive", ignoreCase = true) &&
+                            !buttonText.contains("Mega.nz", ignoreCase = true)
+                        ) {
+                            app.get(button.attr("href")).document.select("h3 a:contains(Episode $episode)").amap { source ->
+                                loadSourceNameExtractor(
+                                    sourceName,
+                                    source.attr("href"),
+                                    "",
+                                    subtitleCallback,
+                                    callback,
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     suspend fun invokeTorrentio(
         id: String? = null,
         season: Int? = null,
