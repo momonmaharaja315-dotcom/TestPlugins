@@ -15,8 +15,7 @@ import org.jsoup.Jsoup
 import com.lagradost.cloudstream3.argamap
 import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 import com.lagradost.cloudstream3.mvvm.safeApiCall
-import org.json.JSONArray
-import org.json.JSONObject
+
 
 object CineStreamExtractors : CineStreamProvider() {
 
@@ -43,71 +42,6 @@ object CineStreamExtractors : CineStreamProvider() {
                 )
             )
         }
-    }
-
-    data class Embedsu(
-        val hash : String,
-        val server : String,
-    )
-
-    fun getApiHash(vConfigHash: String, serverName: String): String {
-        return try {
-            val decodedBytes = base64Decode(vConfigHash)
-            val decodedString = String(decodedBytes, Charsets.UTF_8)
-
-            val reversedSegments = decodedString.split('.').map { it.reversed() }
-
-            val reencodedString = reversedSegments.joinToString("").reversed()
-            val decodedAgainBytes = Base64.getDecoder().decode(reencodedString)
-            val serversJson = String(decodedAgainBytes, Charsets.UTF_8)
-
-            val serversArray = JSONArray(serversJson)
-            val targetServerName = serverName.lowercase()
-
-            (0 until serversArray.length())
-                .asSequence()
-                .map { serversArray.getJSONObject(it) }
-                .firstOrNull { it.getString("name").lowercase() == targetServerName }
-                ?.getString("hash") ?: ""
-        } catch (e: Exception) {
-            //println("getApiHash error: $e")
-            ""
-        }
-    }
-
-    suspend fun invokeEmbedsu(
-        tmdbId: Int? = null,
-        season: Int? = null,
-        episode: Int? = null,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
-
-    ) {
-        val url = if(episode == null) "$embedsuAPI/embed/movie/$tmdbId"
-            else "$embedsuAPI/embed/tv/$tmdbId/$season/$episode"
-
-        val text = app.get(url, referer = embedsuAPI).text
-        val encodedValue = Regex("""atob\(`([^`]+)`\)""").find(text)?.groupValues?.get(1) ?: return
-        val decodeValue = base64Decode(encodedValue)
-        val data = tryParseJson<Embedsu>(decodeValue) ?: return
-        val hash = data.hash
-        val server = data.server
-        val hash = getApiHash(hash, server)
-        if(hash.isEmpty()) return
-        val headers = mapOf("Origin" to embedsuAPI)
-        val json = app.get("$embedsuAPI/api/e/$hash", referer = embedsuAPI, headers = headers).text
-        val streamJson = json.jsonObject
-        val stream = streamJson.getJSONArray("source")
-        callback.invoke(
-            ExtractorLink(
-                "Viper",
-                "Viper",
-                stream.toString(),
-                "",
-                Qualities.Unknown.value
-                isM3u8 = true,
-            )
-        )
     }
 
     suspend fun invokeDramacool(
@@ -320,40 +254,23 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    suspend fun invokeAnimia(
-        id: Int? = null,
-        episode: Int? = null,
+    suspend fun invokeSkymovies(
+        title: String? = null,
+        year: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
+        callback: (ExtractorLink) -> Unit,
     ) {
-        val json = app.get("$animiaAPI/api/episode/$id/${episode ?: 1}", timeout = 500L).text
-        val data = parseJson<AnimiaResponse>(json)
-        data.server1embedLink?.let {
-            loadSourceNameExtractor(
-                "Animia[SUB]",
-                it,
-                "",
-                subtitleCallback,
-                callback,
-            )
-        }
-        data.server2embedLink?.let {
-            loadSourceNameExtractor(
-                "Animia[SUB]",
-                it,
-                "",
-                subtitleCallback,
-                callback,
-            )
-        }
-        data.server3embedLink?.let {
-            loadSourceNameExtractor(
-                "Animia[SUB]",
-                it,
-                "",
-                subtitleCallback,
-                callback,
-            )
+        val url = "$skymoviesAPI/search.php?search=$title ($year)&cat=All"
+        app.get(url).document.select("div.L a").amap {
+            app.get(skymoviesAPI + it.attr("href")).document.select("div.Bolly > a").amap {
+                loadSourceNameExtractor(
+                    "Skymovies[Complete]",
+                    it.attr("href"),
+                    "",
+                    subtitleCallback,
+                    callback,
+                )
+            }
         }
     }
 
