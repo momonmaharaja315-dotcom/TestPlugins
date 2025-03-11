@@ -16,7 +16,7 @@ fun getIndexQuality(str: String?): Int {
 }
 
 class Watchadsontape : StreamTape() {
-    override val mainUrl: String = "https://watchadsontape.com"
+    override var mainUrl: String = "https://watchadsontape.com"
 }
 
 class Howblogs : ExtractorApi() {
