@@ -90,7 +90,7 @@ open class CineStreamProvider : MainAPI() {
         const val netflixAPI = "https://iosmirror.cc"
         const val AllanimeAPI = "https://api.allanime.day/api"
         const val skymoviesAPI = "https://skymovieshd.farm"
-        const val moveisflixAPI = "https://themoviesflix.bio"
+        const val moviesflixAPI = "https://themoviesflix.bio"
         const val hdmoviesflixAPI = "https://hdmoviesflix.name"
         const val stremio_Dramacool = "https://stremio-dramacool-addon.xyz"
         const val TRACKER_LIST_URL = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all_ip.txt"
@@ -861,8 +861,8 @@ open class CineStreamProvider : MainAPI() {
                         res.id,
                         res.season,
                         res.episode,
+                        subtitleCallback,
                         callback,
-                        subtitleCallback
                     )
                 },
                 {
@@ -872,8 +872,8 @@ open class CineStreamProvider : MainAPI() {
                         res.id,
                         res.season,
                         res.episode,
+                        subtitleCallback,
                         callback,
-                        subtitleCallback
                     )
                 },
             )
