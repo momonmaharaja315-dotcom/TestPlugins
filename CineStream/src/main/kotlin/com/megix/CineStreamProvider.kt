@@ -41,7 +41,6 @@ import com.megix.CineStreamExtractors.invokeAllanime
 import com.megix.CineStreamExtractors.invokeDramacool
 import com.megix.CineStreamExtractors.invokeNetflix
 import com.megix.CineStreamExtractors.invokePrimeVideo
-import com.megix.CineStreamExtractors.invokeGoku
 import com.megix.CineStreamExtractors.invokeFlixhq
 import com.megix.CineStreamExtractors.invokeSkymovies
 import com.megix.CineStreamExtractors.invokeMoviesflix
@@ -74,7 +73,7 @@ open class CineStreamProvider : MainAPI() {
         const val AutoembedAPI = "https://autoembed.cc"
         const val WHVXAPI = "https://api.whvx.net"
         const val uhdmoviesAPI = "https://uhdmovies.fyi"
-        const val WHVX_TOKEN = BuildConfig.WHVX_TOKEN
+        const val BYPASS_API = BuildConfig.BYPASS_API
         const val CONSUMET_API = BuildConfig.CONSUMET_API
         const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
         // const val RarAPI = "https://nepu.to"
@@ -526,24 +525,6 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
-                    invokeGoku(
-                        imdbTitle,
-                        res.imdbSeason,
-                        res.imdbEpisode,
-                        subtitleCallback,
-                        callback,
-                    )
-                },
-                {
-                    invokeFlixhq(
-                        imdbTitle,
-                        res.imdbSeason,
-                        res.imdbEpisode,
-                        subtitleCallback,
-                        callback,
-                    )
-                },
-                {
                     invokeAutoembed(
                         tmdbId,
                         res.imdbSeason,
@@ -737,15 +718,6 @@ open class CineStreamProvider : MainAPI() {
                     if(!res.isAnime) invokeSkymovies(
                         res.title,
                         seasonYear,
-                        subtitleCallback,
-                        callback,
-                    )
-                },
-                {
-                    invokeGoku(
-                        res.title,
-                        res.season,
-                        res.episode,
                         subtitleCallback,
                         callback,
                     )
