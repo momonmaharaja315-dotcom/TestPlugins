@@ -254,6 +254,33 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
+    suspend fun invokeEmbed123(
+        id: String? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        val type = if(season == null) "tv" else "movie"
+        val url = if(season == null) "$embed123API/$type/$id" else "$embed123API/$type/$id/$season/$episode"
+        val json = app.get(url).text
+        val data = tryParseJson<Embed123>(json) ?: return
+
+        data.playlist.map {
+            callback.invoke(
+                ExtractorLink(
+                    "Embed123",
+                    "Embed123",
+                    it.file,
+                    "",
+                    Qualities.Unknown.value,
+                    isM3u8 = if(it.type == "hls") true else false,
+                    headers = mapOf("Origin" to "https://play2.123embed.net")
+                )
+            )
+        }
+
+    }
+
     suspend fun invokeSkymovies(
         title: String? = null,
         year: Int? = null,
@@ -339,7 +366,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     )
                     if(possibleMatches.any {
                         p.previousElementSibling()?.previousElementSibling()?.text()?.contains(it) == true
-}                   ) {
+                    }) {
                         p.select("a.maxbutton").amap { button ->
                             val buttonText = button.text()
                             if(!buttonText.contains("G-Direct", ignoreCase = true) &&
