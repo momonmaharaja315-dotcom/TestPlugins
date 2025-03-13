@@ -306,7 +306,7 @@ class VCloud : ExtractorApi() {
             val div = document.selectFirst("div.card-body")
             val header = document.select("div.card-header").text() ?: ""
 
-            div?.select("h2 a.btn")?.apmap {
+            div?.select("h2 a.btn")?.amap {
                 val link = it.attr("href")
                 val text = it.text()
                 if (text.contains("Download [FSL Server]"))
@@ -410,7 +410,7 @@ open class HubCloud : ExtractorApi() {
         val div = document.selectFirst("div.card-body")
         val header = document.select("div.card-header").text() ?: ""
 
-        div?.select("h2 a.btn")?.apmap {
+        div?.select("h2 a.btn")?.amap {
             val link = it.attr("href")
             val text = it.text()
 

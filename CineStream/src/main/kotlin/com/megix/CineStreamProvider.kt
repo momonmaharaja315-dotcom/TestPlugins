@@ -73,7 +73,6 @@ open class CineStreamProvider : MainAPI() {
         const val AutoembedAPI = "https://autoembed.cc"
         const val WHVXAPI = "https://api.whvx.net"
         const val uhdmoviesAPI = "https://uhdmovies.fyi"
-        const val BYPASS_API = BuildConfig.BYPASS_API
         const val CONSUMET_API = BuildConfig.CONSUMET_API
         const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
         // const val RarAPI = "https://nepu.to"
@@ -718,6 +717,7 @@ open class CineStreamProvider : MainAPI() {
                     if(!res.isAnime) invokeSkymovies(
                         res.title,
                         seasonYear,
+                        episode,
                         subtitleCallback,
                         callback,
                     )

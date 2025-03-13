@@ -257,13 +257,14 @@ object CineStreamExtractors : CineStreamProvider() {
     suspend fun invokeSkymovies(
         title: String? = null,
         year: Int? = null,
+        episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
         val url = "$skymoviesAPI/search.php?search=$title ($year)&cat=All"
         app.get(url).document.select("div.L a").amap {
             app.get(skymoviesAPI + it.attr("href")).document.select("div.Bolly > a").amap {
-                if(season == null) {
+                if(episode == null) {
                   loadSourceNameExtractor(
                         "Skymovies",
                         it.attr("href"),
@@ -272,7 +273,7 @@ object CineStreamExtractors : CineStreamProvider() {
                         callback,
                     )
                 }
-                else if(season != null && it.text().contains("Episode 0$episode|Episode $episode"))
+                else if(episode != null && it.text().contains("Episode 0$episode|Episode $episode"))
                 ) {
                     loadSourceNameExtractor(
                         "Skymovies",
@@ -327,7 +328,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 }
             }
             else {
-                doc.select("h3.has-text-color:contains(Season $season | S0$season | S$season)")
+                doc.select("h3.has-text-color:contains(Season 0$season|Season $season|S0$season|S$season)")
                 .amap { p ->
                     p.nextElementSibling()?.select("a.maxbutton")?.amap { button ->
                         val buttonText = button.text()
