@@ -264,6 +264,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = "$skymoviesAPI/search.php?search=$title ($year)&cat=All"
         app.get(url).document.select("div.L a").amap {
             app.get(skymoviesAPI + it.attr("href")).document.select("div.Bolly > a").amap {
+                val text = it.text()
                 if(episode == null) {
                   loadSourceNameExtractor(
                         "Skymovies",
@@ -273,8 +274,8 @@ object CineStreamExtractors : CineStreamProvider() {
                         callback,
                     )
                 }
-                else if(episode != null && it.text().contains("Episode")) {
-                    if(it.text().contains("Episode $episode|Episode 0$episode")) {
+                else if(episode != null && text.contains("Episode")) {
+                    if(text.contains("Episode $episode") || text.contains("Episode 0$episode") {
                         loadSourceNameExtractor(
                             "Skymovies",
                             it.attr("href"),
@@ -330,23 +331,32 @@ object CineStreamExtractors : CineStreamProvider() {
                 }
             }
             else {
-                doc.select("h3.has-text-color:contains(Season 0$season|Season $season|S0$season|S$season)")
-                .amap { p ->
-                    p.nextElementSibling()?.select("a.maxbutton")?.amap { button ->
-                        val buttonText = button.text()
-                        if(!buttonText.contains("G-Direct", ignoreCase = true) &&
-                            !buttonText.contains("Drop Galaxy", ignoreCase = true) &&
-                            !buttonText.contains("G-Drive", ignoreCase = true) &&
-                            !buttonText.contains("Mega.nz", ignoreCase = true)
-                        ) {
-                            app.get(button.attr("href")).document.select("h3 a:contains(Episode $episode|Episode 0$episode|E0$episode|E$episode)").amap { source ->
-                                loadSourceNameExtractor(
-                                    sourceName,
-                                    source.attr("href"),
-                                    "",
-                                    subtitleCallback,
-                                    callback,
-                                )
+                doc.select("p:has(a.maxbutton)").amap { p ->
+                    val possibleMatches = listOf(
+                        "Season $season",
+                        "Season 0$season",
+                        "S$season",
+                        "S0$season"
+                    )
+                    if(possibleMatches.any {
+                        p.previousElementSibling()?.previousElementSibling()?.text?.contains(it) == true
+}                   ) {
+                        p.select("a.maxbutton").amap { button ->
+                            val buttonText = button.text()
+                            if(!buttonText.contains("G-Direct", ignoreCase = true) &&
+                                !buttonText.contains("Drop Galaxy", ignoreCase = true) &&
+                                !buttonText.contains("G-Drive", ignoreCase = true) &&
+                                !buttonText.contains("Mega.nz", ignoreCase = true)
+                            ) {
+                                app.get(button.attr("href")).document.select("h3 a:contains(Episode $episode|Episode 0$episode|E0$episode|E$episode)").amap { source ->
+                                    loadSourceNameExtractor(
+                                        sourceName,
+                                        source.attr("href"),
+                                        "",
+                                        subtitleCallback,
+                                        callback,
+                                    )
+                                }
                             }
                         }
                     }
