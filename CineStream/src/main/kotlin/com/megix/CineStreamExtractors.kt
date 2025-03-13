@@ -275,7 +275,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     )
                 }
                 else if(episode != null && text.contains("Episode")) {
-                    if(text.contains("Episode $episode") || text.contains("Episode 0$episode") {
+                    if(text.contains("Episode $episode") || text.contains("Episode 0$episode")) {
                         loadSourceNameExtractor(
                             "Skymovies",
                             it.attr("href"),
@@ -284,7 +284,6 @@ object CineStreamExtractors : CineStreamProvider() {
                             callback,
                         )
                     }
-
                 }
                 else {
                     loadSourceNameExtractor(
@@ -339,7 +338,7 @@ object CineStreamExtractors : CineStreamProvider() {
                         "S0$season"
                     )
                     if(possibleMatches.any {
-                        p.previousElementSibling()?.previousElementSibling()?.text?.contains(it) == true
+                        p.previousElementSibling()?.previousElementSibling()?.text()?.contains(it) == true
 }                   ) {
                         p.select("a.maxbutton").amap { button ->
                             val buttonText = button.text()
