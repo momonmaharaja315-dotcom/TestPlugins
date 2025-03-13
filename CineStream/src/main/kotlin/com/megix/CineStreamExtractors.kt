@@ -273,14 +273,17 @@ object CineStreamExtractors : CineStreamProvider() {
                         callback,
                     )
                 }
-                else if(episode != null && it.text().contains("Episode 0$episode|Episode $episode")) {
-                    loadSourceNameExtractor(
-                        "Skymovies",
-                        it.attr("href"),
-                        "",
-                        subtitleCallback,
-                        callback,
-                    )
+                else if(episode != null && it.text().contains("Episode")) {
+                    if(it.text().contains("Episode $episode|Episode 0$episode")) {
+                        loadSourceNameExtractor(
+                            "Skymovies",
+                            it.attr("href"),
+                            "",
+                            subtitleCallback,
+                            callback,
+                        )
+                    }
+
                 }
                 else {
                     loadSourceNameExtractor(
