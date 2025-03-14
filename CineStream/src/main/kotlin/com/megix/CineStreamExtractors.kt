@@ -291,43 +291,17 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        val url = "$hdmovie2API/movies/${title.createSlug()}-$year"
-        val doc = app.get(url).document
         val type = if(episode != null) "(Combined)" else ""
-
-        val link = doc.selectFirst("div.wp-content  a")?.attr("href")
-        if(link != null) {
-            val document = app.get(link).document
-            document.select("div.elementor-widget-container > p > a").amap {
-                loadSourceNameExtractor(
-                    "Hdmovie2$type",
-                    it.attr("href"),
-                    "",
-                    subtitleCallback,
-                    callback,
-                )
-            }
-        }
-        if(episode != null) {
-            doc.select("ul#playeroptionsul > li").amap {
-                val type = it.attr("data-type")
-                val post = it.attr("data-post")
-                val nume = it.attr("data-nume")
-
-                val source = app.post(
-                    url = "$hdmovie2API/wp-admin/admin-ajax.php", data = mapOf(
-                    "action" to "doo_player_ajax", "post" to "$post", "nume" to "$nume", "type" to "$type"
-                    ), referer = hdmovie2API, headers = mapOf("Accept" to "*/*", "X-Requested-With" to "XMLHttpRequest"
-                )).parsed<Hdmovie2ResponseHash>().embed_url.getIframe()
-
-                if (!source.contains("youtube")) loadSourceNameExtractor(
-                    "Hdmovie2",
-                    source,
-                    "$hdmovie2API/",
-                    subtitleCallback,
-                    callback
-                )
-            }
+        val link = "https://dwso.cam/${title.createSlug()}-$year"
+        val document = app.get(link).document
+        document.select("div.elementor-widget-container > p > a").amap {
+            loadSourceNameExtractor(
+                "Hdmovie2$type",
+                it.attr("href"),
+                "",
+                subtitleCallback,
+                callback,
+            )
         }
     }
 
