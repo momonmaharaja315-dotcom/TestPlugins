@@ -41,6 +41,43 @@ class Howblogs : ExtractorApi() {
     }
 }
 
+open class Akamaicdn : ExtractorApi() {
+    override val name = "Akamaicdn"
+    override val mainUrl = "https://akamaicdn.life"
+    override val requiresReferer = true
+
+    override suspend fun getUrl(
+        url: String,
+        referer: String?,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val headers= mapOf(
+            "user-agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+        )
+        val res = app.get(url, referer = referer, headers = headers).document
+        val mappers = res.selectFirst("script:containsData(sniff\\()")?.data()?.substringAfter("sniff(")
+            ?.substringBefore(");") ?: return
+        val ids = mappers.split(",").map { it.replace("\"", "") }
+        callback.invoke(
+            ExtractorLink(
+                this.name,
+                this.name,
+                "$mainUrl/m3u8/${ids[1]}/${ids[2]}/master.txt?s=1&cache=1",
+                url,
+                Qualities.P1080.value,
+                type = ExtractorLinkType.M3U8,
+                headers = headers
+            )
+        )
+    }
+}
+
+class Mocdn:Akamaicdn(){
+   override val name = "Mocdn"
+   override val mainUrl = "https://mocdn.art"
+}
+
 class Vifix: ExtractorApi() {
     override val name: String = "Vifix"
     override val mainUrl: String = "https://vifix.site"

@@ -31,5 +31,7 @@ class ExtractorsPlugin: Plugin() {
         registerExtractorAPI(Watchadsontape())
         registerExtractorAPI(Howblogs())
         registerExtractorAPI(Smoothpre())
+        registerExtractorAPI(Mocdn())
+        registerExtractorAPI(Akamaicdn())
     }
 }

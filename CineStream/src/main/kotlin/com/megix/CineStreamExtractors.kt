@@ -143,7 +143,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 var episodeId : String? = null
                 var page = 1
 
-                while(episodeId == null) {
+                while(episodeId == null || page < 10) {
                     val data = app.get(
                         "$netflixAPI/pv/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}&page=$page",
                         headers = headers,
@@ -214,9 +214,9 @@ object CineStreamExtractors : CineStreamProvider() {
                 val seasonId = media?.season?.find { it.s == "$season" }?.id
                 var episodeId : String? = null
                 var page = 1
-                while(episodeId == null) {
+                while(episodeId == null || page < 10) {
                     val data = app.get(
-                        "$netflixAPI/pv/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}&page=$page",
+                        "$netflixAPI/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}&page=$page",
                         headers = headers,
                         cookies = cookies,
                         referer = "$netflixAPI/"
@@ -260,7 +260,7 @@ object CineStreamExtractors : CineStreamProvider() {
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit,
     ) {
-        val type = if(season == null) "tv" else "movie"
+        val type = if(season == null) "movie" else "tv"
         val url = if(season == null) "$embed123API/$type/$id" else "$embed123API/$type/$id/$season/$episode"
         val json = app.get(url).text
         val data = tryParseJson<Embed123>(json) ?: return
@@ -278,7 +278,57 @@ object CineStreamExtractors : CineStreamProvider() {
                 )
             )
         }
+    }
 
+    fun String.getIframe(): String {
+        return Jsoup.parse(this).select("iframe").attr("src")
+    }
+
+    suspend fun invokeHdmovie2(
+        title: String? = null,
+        year: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        val url = "$hdmovie2API/movies/${title.createSlug()}-$year"
+        val doc = app.get(url).document
+        val type = if(episode != null) "(Combined)" else ""
+
+        val link = doc.selectFirst("div.wp-content  a")?.attr("href")
+        if(link != null) {
+            val document = app.get(link).document
+            document.select("div.elementor-widget-container > p > a").amap {
+                loadSourceNameExtractor(
+                    "Hdmovie2$type",
+                    it.attr("href"),
+                    "",
+                    subtitleCallback,
+                    callback,
+                )
+            }
+        }
+        if(episode != null) {
+            doc.select("ul#playeroptionsul > li").amap {
+                val type = it.attr("data-type")
+                val post = it.attr("data-post")
+                val nume = it.attr("data-nume")
+
+                val source = app.post(
+                    url = "$hdmovie2API/wp-admin/admin-ajax.php", data = mapOf(
+                    "action" to "doo_player_ajax", "post" to "$post", "nume" to "$nume", "type" to "$type"
+                    ), referer = hdmovie2API, headers = mapOf("Accept" to "*/*", "X-Requested-With" to "XMLHttpRequest"
+                )).parsed<Hdmovie2ResponseHash>().embed_url.getIframe()
+
+                if (!source.contains("youtube")) loadSourceNameExtractor(
+                    "Hdmovie2",
+                    source,
+                    "$hdmovie2API/",
+                    subtitleCallback,
+                    callback
+                )
+            }
+        }
     }
 
     suspend fun invokeSkymovies(

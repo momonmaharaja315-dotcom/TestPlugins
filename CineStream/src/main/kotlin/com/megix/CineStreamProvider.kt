@@ -45,6 +45,7 @@ import com.megix.CineStreamExtractors.invokeFlixhq
 import com.megix.CineStreamExtractors.invokeSkymovies
 import com.megix.CineStreamExtractors.invokeMoviesflix
 import com.megix.CineStreamExtractors.invokeEmbed123
+import com.megix.CineStreamExtractors.invokeHdmovie2
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -89,6 +90,7 @@ open class CineStreamProvider : MainAPI() {
         const val torrentioAPI = "https://torrentio.strem.fun"
         const val anizoneAPI = "https://anizone.to"
         const val netflixAPI = "https://iosmirror.cc"
+        const val hdmovie2 = "https://hdmovie2.network"
         const val AllanimeAPI = "https://api.allanime.day/api"
         const val skymoviesAPI = "https://skymovieshd.farm"
         const val moviesflixAPI = "https://themoviesflix.bio"
@@ -552,26 +554,6 @@ open class CineStreamProvider : MainAPI() {
                         callback
                     )
                 },
-                {
-                    invokeNetflix(
-                        imdbTitle,
-                        imdbYear,
-                        res.imdbSeason,
-                        res.imdbEpisode,
-                        subtitleCallback,
-                        callback
-                    )
-                },
-                {
-                    invokePrimeVideo(
-                        imdbTitle,
-                        imdbYear,
-                        res.imdbSeason,
-                        res.imdbEpisode,
-                        subtitleCallback,
-                        callback
-                    )
-                },
             )
         }
         else {
@@ -718,6 +700,15 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     if(!res.isAnime) invokeSkymovies(
+                        res.title,
+                        seasonYear,
+                        res.episode,
+                        subtitleCallback,
+                        callback,
+                    )
+                },
+                {
+                    if(!res.isAnime) invokeHdmovie2(
                         res.title,
                         seasonYear,
                         res.episode,

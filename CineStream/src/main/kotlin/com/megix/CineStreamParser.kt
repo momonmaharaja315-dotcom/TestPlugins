@@ -3,6 +3,12 @@ package com.megix
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.gson.annotations.SerializedName
 
+//Hdmovie2
+data class Hdmovie2ResponseHash(
+    @JsonProperty("embed_url") val embed_url: String,
+    @JsonProperty("type") val type: String?,
+)
+
 //Embed123
 data class Embed123 (
     var playlist : ArrayList<Embed123Playlist> = arrayListOf()
