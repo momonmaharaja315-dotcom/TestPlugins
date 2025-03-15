@@ -1086,23 +1086,9 @@ object CineStreamExtractors : CineStreamProvider() {
 
     // }
 
-    suspend fun invokeRogmovies(
-        id: String? = null,
-        season: Int? = null,
-        episode: Int? = null,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
-    ) {
-        invokeWpredis(
-            id,
-            season,
-            episode,
-            subtitleCallback,
-            callback,
-            rogMoviesAPI
-        )
-    }
     suspend fun invokeVegamovies(
+        api: String,
+        sourceName: String,
         id: String? = null,
         season: Int? = null,
         episode: Int? = null,
@@ -1110,8 +1096,8 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit
     ) {
         val cfInterceptor = CloudflareKiller()
-        val url = "$vegaMoviesAPI/?s=$id"
-        app.get(url, interceptor = cfInterceptor).document.select("article h2 a").amap {
+        val url = "$api/?s=$id"
+        app.get(url, interceptor = cfInterceptor).document.select("article h2 a, article h3 a").amap {
             val res = app.get(it.attr("href")).document
             if(season == null) {
                 res.select("button.dwd-button").amap {
@@ -1121,7 +1107,7 @@ object CineStreamExtractors : CineStreamProvider() {
                         ?.parent()
                         ?.attr("href")
                         ?: return@amap
-                    loadSourceNameExtractor("VegaMovies", source, referer = "", subtitleCallback, callback)
+                    loadSourceNameExtractor(sourceName, source, referer = "", subtitleCallback, callback)
                 }
             }
             else {
@@ -1133,54 +1119,11 @@ object CineStreamExtractors : CineStreamProvider() {
                             ?.selectFirst("a:matches((?i)(V-Cloud))")
                             ?.attr("href")
                             ?: return@amap
-                        loadSourceNameExtractor("VegaMovies", epLink, referer = "", subtitleCallback, callback)
+                        loadSourceNameExtractor(sourceName, epLink, referer = "", subtitleCallback, callback)
                     }
                 }
             }
         }
-    }
-
-    private suspend fun invokeWpredis(
-        id: String? = null,
-        season: Int? = null,
-        episode: Int? = null,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit,
-        api: String
-    ) {
-        val cfInterceptor = CloudflareKiller()
-        val url = "$api/?s=$id"
-        app.get(url, interceptor = cfInterceptor).document.select("article h3 a")
-            .amap {
-                val hrefpattern = it.attr("href") ?: null
-                if (hrefpattern != null) {
-                    val res = app.get(hrefpattern).document
-                    if(season == null) {
-                        res.select("button.dwd-button").amap {
-                            val link = it.parent()?.attr("href") ?: return@amap
-                            val doc = app.get(link).document
-                            val source = doc.selectFirst("button.btn:matches((?i)(V-Cloud))")
-                                ?.parent()
-                                ?.attr("href")
-                                ?: return@amap
-                            loadSourceNameExtractor("LuxMovies", source, referer = "", subtitleCallback, callback)
-                        }
-                    }
-                    else {
-                        res.select("h3:matches((?i)(Season $season))").amap { h3 ->
-                            val link = h3.nextElementSibling()?.selectFirst("a:matches((?i)(V-Cloud|Download))")?.attr("href") ?: return@amap
-                            val doc = app.get(link).document
-                            val epLink = doc.selectFirst("h4:contains(Episodes):contains($episode)")
-                                ?.nextElementSibling()
-                                ?.selectFirst("a:matches((?i)(V-Cloud))")
-                                ?.attr("href")
-                                ?: return@amap
-
-                            loadSourceNameExtractor("LuxMovies", epLink, referer = "", subtitleCallback, callback)
-                        }
-                    }
-                }
-            }
     }
 
     suspend fun invokeMoviesdrive(

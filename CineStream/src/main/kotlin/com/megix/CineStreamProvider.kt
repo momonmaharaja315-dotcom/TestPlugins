@@ -14,7 +14,6 @@ import kotlin.math.roundToInt
 import com.lagradost.api.Log
 import com.lagradost.cloudstream3.network.CloudflareKiller
 import com.megix.CineStreamExtractors.invokeVegamovies
-import com.megix.CineStreamExtractors.invokeRogmovies
 import com.megix.CineStreamExtractors.invokeMoviesmod
 import com.megix.CineStreamExtractors.invokeTopMovies
 import com.megix.CineStreamExtractors.invokeMoviesdrive
@@ -492,6 +491,8 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     invokeVegamovies(
+                        vegaMoviesAPI,
+                        "VegaMovies"
                         res.imdb_id,
                         res.imdbSeason,
                         res.imdbEpisode,
@@ -560,6 +561,8 @@ open class CineStreamProvider : MainAPI() {
             argamap(
                 {
                     if(!res.isBollywood) invokeVegamovies(
+                        vegaMoviesAPI,
+                        "VegaMovies",
                         res.id,
                         res.season,
                         res.episode,
@@ -611,7 +614,9 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
-                    if(res.isBollywood) invokeRogmovies(
+                    if(res.isBollywood) invokeVegamovies(
+                        rogMoviesAPI,
+                        "RogMovies",
                         res.id,
                         res.season,
                         res.episode,
