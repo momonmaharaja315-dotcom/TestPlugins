@@ -289,26 +289,18 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val type = if(episode != null) "(Combined)" else ""
         val link = "https://dwso.cam/${title.createSlug()}-$year"
-        callback.invoke(
-            ExtractorLink(
-                "Hdmovie2",
-                "Hdmovie2",
-                link,
-                "",
-                Qualities.Unknown.value,
-            )
-        )
         val document = app.get(link).document
-        callback.invoke(
-            ExtractorLink(
-                "Hdmovie2",
-                "Hdmovie2",
-                document.toString(),
-                "",
-                Qualities.Unknown.value,
-            )
-        )
+
         document.select("div.elementor-widget-container > p > a").amap {
+            callback.invoke(
+                ExtractorLink(
+                    "Hdmovie2",
+                    "Hdmovie2",
+                    it.attr("href"),
+                    "",
+                    Qualities.Unknown.value,
+                )
+            )
             loadSourceNameExtractor(
                 "Hdmovie2$type",
                 it.attr("href"),
@@ -396,15 +388,6 @@ object CineStreamExtractors : CineStreamProvider() {
             }
             else {
                 doc.select("p:has(a.maxbutton)").amap { p ->
-                    callback.invoke(
-                        ExtractorLink(
-                            sourceName,
-                            sourceName,
-                            p.toString(),
-                            "",
-                            Qualities.Unknown.value,
-                        )
-                    )
                     val possibleMatches = listOf(
                         "Season $season",
                         "Season 0$season",
@@ -421,6 +404,15 @@ object CineStreamExtractors : CineStreamProvider() {
                                 !buttonText.contains("G-Drive", ignoreCase = true) &&
                                 !buttonText.contains("Mega.nz", ignoreCase = true)
                             ) {
+                                callback.invoke(
+                        ExtractorLink(
+                            sourceName,
+                            sourceName,
+                            buttonText.toString(),
+                            "",
+                            Qualities.Unknown.value,
+                            )
+                        )
                                 app.get(button.attr("href")).document.select("h3 a:contains(Episode $episode|Episode 0$episode|E0$episode|E$episode)").amap { source ->
                                     loadSourceNameExtractor(
                                         sourceName,
