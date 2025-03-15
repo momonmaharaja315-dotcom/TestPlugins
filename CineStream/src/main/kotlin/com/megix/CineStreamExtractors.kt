@@ -292,15 +292,6 @@ object CineStreamExtractors : CineStreamProvider() {
         val document = app.get(link).document
 
         document.select("div.elementor-widget-container > p > a").amap {
-            callback.invoke(
-                ExtractorLink(
-                    "Hdmovie2",
-                    "Hdmovie2",
-                    it.attr("href"),
-                    "",
-                    Qualities.Unknown.value,
-                )
-            )
             loadSourceNameExtractor(
                 "Hdmovie2$type",
                 it.attr("href"),
@@ -404,16 +395,16 @@ object CineStreamExtractors : CineStreamProvider() {
                                 !buttonText.contains("G-Drive", ignoreCase = true) &&
                                 !buttonText.contains("Mega.nz", ignoreCase = true)
                             ) {
-                                callback.invoke(
-                        ExtractorLink(
-                            sourceName,
-                            sourceName,
-                            buttonText.toString(),
-                            "",
-                            Qualities.Unknown.value,
-                            )
-                        )
                                 app.get(button.attr("href")).document.select("h3 a:contains(Episode $episode|Episode 0$episode|E0$episode|E$episode)").amap { source ->
+                                    callback.invoke(
+                                        ExtractorLink(
+                                            sourceName,
+                                            sourceName,
+                                            source.attr("href"),
+                                            "",
+                                            Qualities.Unknown.value,
+                                        )
+                                    )
                                     loadSourceNameExtractor(
                                         sourceName,
                                         source.attr("href"),
