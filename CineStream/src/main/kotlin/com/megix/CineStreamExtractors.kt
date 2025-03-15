@@ -287,11 +287,10 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
+        val link = app.get("$hdmovie2API/movies/${title.createSlug()}-$year").document
+            .select("div.wp-content p a").filter { !it.text().contains("EP") }.first().attr("href")
         val type = if(episode != null) "(Combined)" else ""
-        val link = "https://dwso.cam/${title.createSlug()}-$year"
-        val document = app.get(link).document
-
-        document.select("div.elementor-widget-container > p > a").amap {
+        app.get(link).document.select("div > p > a").amap {
             loadSourceNameExtractor(
                 "Hdmovie2$type",
                 it.attr("href"),
@@ -396,15 +395,6 @@ object CineStreamExtractors : CineStreamProvider() {
                                 !buttonText.contains("Mega.nz", ignoreCase = true)
                             ) {
                                 app.get(button.attr("href")).document.select("h3 a:contains(Episode $episode|Episode 0$episode|E0$episode|E$episode)").amap { source ->
-                                    callback.invoke(
-                                        ExtractorLink(
-                                            sourceName,
-                                            sourceName,
-                                            source.attr("href"),
-                                            "",
-                                            Qualities.Unknown.value,
-                                        )
-                                    )
                                     loadSourceNameExtractor(
                                         sourceName,
                                         source.attr("href"),
