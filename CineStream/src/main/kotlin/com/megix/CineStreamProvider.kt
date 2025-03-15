@@ -89,7 +89,7 @@ open class CineStreamProvider : MainAPI() {
         const val TomAPI = "https://tom.autoembed.cc"
         const val torrentioAPI = "https://torrentio.strem.fun"
         const val anizoneAPI = "https://anizone.to"
-        const val netflixAPI = "https://iosmirror.cc"
+        const val netflixAPI = "https://netfree.cc"
         const val hdmovie2API = "https://hdmovie2.network"
         const val AllanimeAPI = "https://api.allanime.day/api"
         const val skymoviesAPI = "https://skymovieshd.farm"
@@ -613,7 +613,6 @@ open class CineStreamProvider : MainAPI() {
                 {
                     if(res.isBollywood) invokeRogmovies(
                         res.id,
-                        res.title,
                         res.season,
                         res.episode,
                         subtitleCallback,

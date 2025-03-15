@@ -114,7 +114,7 @@ suspend fun NFBypass(mainUrl : String): String {
     if(NfCookie != "") {
         return NfCookie
     }
-    val homePageDocument = app.get("${mainUrl}/home").document
+    val homePageDocument = app.get("${mainUrl}/mobile/home").document
     val addHash          = homePageDocument.select("body").attr("data-addhash")
     val time             = homePageDocument.select("body").attr("data-time")
 
