@@ -492,7 +492,7 @@ open class CineStreamProvider : MainAPI() {
                 {
                     invokeVegamovies(
                         vegaMoviesAPI,
-                        "VegaMovies"
+                        "VegaMovies",
                         res.imdb_id,
                         res.imdbSeason,
                         res.imdbEpisode,

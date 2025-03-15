@@ -298,7 +298,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 Qualities.Unknown.value,
             )
         )
-        val document = app.get(link, allowRediects = true).document
+        val document = app.get(link).document
         callback.invoke(
             ExtractorLink(
                 "Hdmovie2",

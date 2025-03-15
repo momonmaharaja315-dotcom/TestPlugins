@@ -44,7 +44,7 @@ class NetflixMirrorProvider : MainAPI() {
         val items = document.select(".tray-container, #top10").map {
             it.toHomePageList()
         }
-        return HomePageResponse(items, false)
+        return newHomePageResponse(items, false)
     }
 
     private fun Element.toHomePageList(): HomePageList {
