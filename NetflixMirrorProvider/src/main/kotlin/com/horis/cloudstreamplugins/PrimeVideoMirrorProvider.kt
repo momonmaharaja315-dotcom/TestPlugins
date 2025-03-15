@@ -33,8 +33,6 @@ class PrimeVideoMirrorProvider : MainAPI() {
         "X-Requested-With" to "XMLHttpRequest"
     )
 
-    
-
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse? {
         cookie_value = if(cookie_value.isEmpty()) bypass(mainUrl) else cookie_value
         val cookies = mapOf(
