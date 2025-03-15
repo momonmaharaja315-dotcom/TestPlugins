@@ -1192,7 +1192,9 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
-        val doc = app.get("$uhdmoviesAPI/download-${title.replace(" ", "-")}").document
+        val url = app.get("$uhdmoviesAPI/search/$title $year").document
+            .select("article div.entry-image a").attr("href")
+        val doc = app.get(url).document
 
         val selector = if (season == null) {
             "div.entry-content p:matches($year)"
