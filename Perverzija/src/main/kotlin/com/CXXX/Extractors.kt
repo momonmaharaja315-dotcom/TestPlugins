@@ -14,11 +14,40 @@ open class Xtremestream : ExtractorApi() {
 
     override suspend fun getUrl(url: String, referer: String?, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit){
 
+        callback.invoke(
+            ExtractorLink(
+                "url",
+                "url",
+                url,
+                "",
+                Qualities.Unknown.value,
+            )
+        )
+
         val response = app.get(url, referer = referer)
+
+        callback.invoke(
+            ExtractorLink(
+                "response",
+                "response",
+                response.document.toString(),
+                "",
+                Qualities.Unknown.value,
+            )
+        )
 
         val playerScript =
             response.document.selectXpath("//script[contains(text(),'var video_id')]")
                 .html()
+        callback.invoke(
+            ExtractorLink(
+                "playerScript",
+                "playerScript",
+                playerScript.toString(),
+                "",
+                Qualities.Unknown.value,
+            )
+        )
         val sources = mutableListOf<ExtractorLink>()
         if (playerScript.isNotBlank()) {
             val videoId = playerScript.substringAfter("var video_id = `").substringBefore("`;")
