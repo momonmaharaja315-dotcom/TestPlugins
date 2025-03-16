@@ -16,7 +16,18 @@ open class Xtremestream : ExtractorApi() {
 
         val headers = mapOf(
             "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Accept-Encoding" to "gzip, deflate, br, zstd",
+            "Accept-Language" to "en-GB,en;q=0.8",
+            "Priority" to "u=0, i",
+            "Referer" to "$referer",
+            "Sec-Ch-Ua" to "\"Not/A)Brand\";v=\"8\", \"Chromium\";v=\"126\", \"Brave\";v=\"126\"",
+            "Sec-Ch-Ua-Mobile" to "?0",
+            "Sec-Ch-Ua-Platform" to "\"Linux\"",
             "Sec-Fetch-Dest" to "iframe",
+            "Sec-Fetch-Mode" to "navigate",
+            "Sec-Fetch-Site" to "cross-site",
+            "Sec-Gpc" to "1",
+            "Upgrade-Insecure-Requests" to "1",
             "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
         )
 
