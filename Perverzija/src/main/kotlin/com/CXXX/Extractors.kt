@@ -14,17 +14,13 @@ open class Xtremestream : ExtractorApi() {
 
     override suspend fun getUrl(url: String, referer: String?, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit){
 
-        callback.invoke(
-            ExtractorLink(
-                "url",
-                "url",
-                url,
-                "",
-                Qualities.Unknown.value,
-            )
+        val headers = mapOf(
+            "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            "Sec-Fetch-Dest" to "iframe",
+            "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
         )
 
-        val response = app.get(url, referer = referer)
+        val response = app.get(url, referer = referer, headers = headers)
 
         callback.invoke(
             ExtractorLink(
@@ -39,15 +35,6 @@ open class Xtremestream : ExtractorApi() {
         val playerScript =
             response.document.selectXpath("//script[contains(text(),'var video_id')]")
                 .html()
-        callback.invoke(
-            ExtractorLink(
-                "playerScript",
-                "playerScript",
-                playerScript.toString(),
-                "",
-                Qualities.Unknown.value,
-            )
-        )
         val sources = mutableListOf<ExtractorLink>()
         if (playerScript.isNotBlank()) {
             val videoId = playerScript.substringAfter("var video_id = `").substringBefore("`;")
