@@ -136,7 +136,7 @@ class Perverzija : MainAPI() {
 
         val iframeUrl = document.select("div#player-embed iframe").attr("src")
 
-        Xtremestream().getUrl(iframeUrl, data, subtitleCallback, callback)
+        Xtremestream().getUrl(iframeUrl, "$mainUrl/", subtitleCallback, callback)
 
         return true
     }
