@@ -15,14 +15,17 @@ open class Xtremestream : ExtractorApi() {
     override suspend fun getUrl(url: String, referer: String?, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit){
 
         val response = app.get(
-            url, referer = referer
+            url, referer = referer , headers = mapOf(
+                "Accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+            )
         )
 
         callback.invoke(
             ExtractorLink(
                 "Xtremestream",
                 "Xtremestream",
-                response.document.toString(),
+                response.text,
                 "",
                 Qualities.Unknown.value,
             )
