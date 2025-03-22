@@ -6,6 +6,8 @@ import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.M3u8Helper
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 open class Xtremestream : ExtractorApi() {
     override var name = "Xtremestream"
