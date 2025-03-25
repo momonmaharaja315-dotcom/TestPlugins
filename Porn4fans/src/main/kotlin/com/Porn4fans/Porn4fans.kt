@@ -64,7 +64,7 @@ class Porn4fans : MainAPI() {
 
     override suspend fun load(url: String): LoadResponse {
         val document = app.get(url).document
-        val jsonString = document.select("script[type=application/ld+json]").data()
+        val jsonString = document.selectFirst("script[type=application/ld+json]")?.data().toString()
         val jsonObject = parseJson<Response>(jsonString)
 
         return newMovieLoadResponse(jsonObject.name, url, TvType.NSFW, jsonObject.contentUrl) {
@@ -79,7 +79,7 @@ class Porn4fans : MainAPI() {
                 "Porn4fans",
                 "Porn4fans",
                 data,
-                "",
+                mainUrl,
                 Qualities.Unknown.value
             )
         )
