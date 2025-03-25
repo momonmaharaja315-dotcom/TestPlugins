@@ -16,11 +16,16 @@ class Porn4fans : MainAPI() {
     override val vpnStatus            = VPNStatus.MightBeNeeded
 
     override val mainPage = mainPageOf(
-        "onlyfans-videos/" to "Latest",
+        "$mainUrl/onlyfans-videos/%d/" to "Latest",
+        "$mainUrl/onlyfans-videos/%d/?p=post_date&post_date_from=7" to "Most Viewed(This Week)",
+        "$mainUrl/categories/roleplay-fantasy/%d/" to "Roleplay",
+        "$mainUrl/categories/pornstar/%d/" to "Pornstars",
+        "$mainUrl/onlyfans-videos/%d/?p=video_viewed&post_date_from=30" to "Most Viewed(Month)",
+        "$mainUrl/onlyfans-videos/%d/?p=video_viewed" to "Most Viewed(All time)",
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
-        val document = app.get("$mainUrl/${request.data}/$page/").document
+        val document = app.get(request.data.format(page)).document
         val home     = document.select("div.item").mapNotNull { it.toSearchResult() }
 
         return newHomePageResponse(
@@ -47,7 +52,7 @@ class Porn4fans : MainAPI() {
         val searchResponse = mutableListOf<SearchResponse>()
 
         for (i in 1..7) {
-            val document = app.get("$mainUrl/search/$query/?mode=async&function=get_block&block_id=custom_list_videos_videos_list_search_result&q=hi&category_ids=&sort_by=&from_videos=$i&from_albums=$i").document
+            val document = app.get("$mainUrl/search/$query?mode=async&function=get_block&block_id=custom_list_videos_videos_list_search_result&q=$query&category_ids=&sort_by=&from_videos=$i&from_albums=$i").document
             val results = document.select("div.item").mapNotNull { it.toSearchResult() }
 
             if (!searchResponse.containsAll(results)) {

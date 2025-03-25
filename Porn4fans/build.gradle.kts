@@ -5,7 +5,7 @@ version = 1
 cloudstream {
     // All of these properties are optional, you can safely remove them
 
-    description = "Porn4fans"
+    description = "Porn4fans - Onlyfans Content"
     language    = "en"
     authors = listOf("megix")
 
@@ -22,5 +22,5 @@ cloudstream {
     // You can find a list of avaliable types here:
     // https://recloudstream.github.io/cloudstream/html/app/com.lagradost.cloudstream3/-tv-type/index.html
     tvTypes = listOf("NSFW")
-    iconUrl = "https://www.porn4fans.com/static/images/logo-dark-hover.svg"
+    iconUrl = "https://www.porn4fans.com/static/images/logo-hover.svg"
 }
