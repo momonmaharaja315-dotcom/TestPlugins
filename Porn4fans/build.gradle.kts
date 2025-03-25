@@ -1,11 +1,13 @@
 // use an integer for version numbers
-version = 3
+version = 1
+
 
 cloudstream {
     // All of these properties are optional, you can safely remove them
 
-    description = "Contains all the videos from Perverzija"
-    authors = listOf("coxju, megix")
+    description = "Porn4fans"
+    language    = "en"
+    authors = listOf("megix")
 
     /**
     * Status int as the following:
@@ -20,8 +22,5 @@ cloudstream {
     // You can find a list of avaliable types here:
     // https://recloudstream.github.io/cloudstream/html/app/com.lagradost.cloudstream3/-tv-type/index.html
     tvTypes = listOf("NSFW")
-
-    iconUrl = "https://www.google.com/s2/favicons?domain=tube.perverzija.com&sz=%size%"
-
-    language = "en"
+    iconUrl = "https://www.porn4fans.com/static/images/logo-dark-hover.svg"
 }
