@@ -290,8 +290,9 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        val link = app.get("$hdmovie2API/movies/${title.createSlug()}-$year").document
-            .select("div.wp-content p a").filter { !it.text().contains("EP") }.first().attr("href")
+        val headers = mapOf("User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
+        val link = app.get("$hdmovie2API/movies/${title.createSlug()}-$year", headers = headers, allowRedirects = true).document
+            .select("div.wp-content p a").attr("href")
         val type = if(episode != null) "(Combined)" else ""
         app.get(link).document.select("div > p > a").amap {
             loadSourceNameExtractor(
@@ -908,7 +909,7 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val url =  if(season != null) "$MultiembedAPI/api/getVideoSource?type=tv&id=$id/$season/$episode"
         else "$MultiembedAPI/api/getVideoSource?type=movie&id=$id"
-        val jsonBody = app.get(url).text.toJson()
+        val jsonBody = app.get(url, headers = mapOf("Referer" to MultiembedAPI)).text.toJson()
             .toRequestBody(RequestBodyTypes.JSON.toMediaTypeOrNull())
         val headers = mapOf(
             "Content-Type" to "application/json",
@@ -941,7 +942,7 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val url =  if(season != null) "$NonoembedAPI/api/getVideoSource?type=tv&id=$id/$season/$episode"
         else "$NonoembedAPI/api/getVideoSource?type=movie&id=$id"
-        val jsonBody = app.get(url).text.toJson()
+        val jsonBody = app.get(url, headers = mapOf("Referer" to NonoembedAPI)).text.toJson()
             .toRequestBody(RequestBodyTypes.JSON.toMediaTypeOrNull())
         val headers = mapOf(
             "Content-Type" to "application/json",
