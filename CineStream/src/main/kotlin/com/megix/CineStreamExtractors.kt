@@ -942,49 +942,66 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        val url = "https://hin.autoembed.cc/api/getVideoSource?type=movie&id=tt3359350"
-        val jsonBody = app.get(url).text.toJson().toRequestBody(RequestBodyTypes.JSON.toMediaTypeOrNull())
+        val url =  if(season != null) "$MultiembedAPI/api/getVideoSource?type=tv&id=$id/$season/$episode"
+        else "$MultiembedAPI/api/getVideoSource?type=movie&id=$id"
+        val jsonBody = app.get(url).text.toJson()
+            .toRequestBody(RequestBodyTypes.JSON.toMediaTypeOrNull())
         val headers = mapOf(
             "Content-Type" to "application/json",
-            "Referer" to "https://hin.autoembed.cc/",
+            "Referer" to "$MultiembedAPI/",
         )
-        val json = app.post("https://hin.autoembed.cc/api/decryptVideoSource",
+        val json = app.post("$MultiembedAPI/api/decryptVideoSource",
             requestBody = jsonBody, headers = headers
         ).text
 
+        val data = tryParseJson<MultiAutoembedResponse>(json) ?: return
+        data.audioTracks.forEach {
+            callback.invoke(
+                ExtractorLink(
+                    "MultiAutoembed[${it.label}]",
+                    "MultiAutoembed[${it.label}]"
+                    it.file,
+                    "",
+                    Qualities.Unknown.value,
+                )
+            )
+        }
+    }
+
+    suspend fun invokeNonoAutoembed(
+        id: String? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        val url =  if(season != null) "$NonoembedAPI/api/getVideoSource?type=tv&id=$id/$season/$episode"
+        else "$NonoembedAPI/api/getVideoSource?type=movie&id=$id"
+        val jsonBody = app.get(url).text.toJson()
+            .toRequestBody(RequestBodyTypes.JSON.toMediaTypeOrNull())
+        val headers = mapOf(
+            "Content-Type" to "application/json",
+            "Referer" to "$NonoembedAPI/",
+        )
+        val json = app.post("$NonoembedAPI/api/decryptVideoSource",
+            requestBody = jsonBody, headers = headers
+        ).text
+
+        val data = tryParseJson<NonoAutoembedResponse>(json) ?: return
         callback.invoke(
             ExtractorLink(
-                "Test",
-                "Test",
-                json,
-                referer = "",
+                "NonoAutoembed",
+                "NonoAutoembed",
+                data.videoSource,
+                "",
                 Qualities.Unknown.value,
             )
         )
-    }
-
-    suspend fun invokeAutoembed(
-        id: Int?,
-        season: Int? = null,
-        episode: Int? = null,
-        callback: (ExtractorLink) -> Unit,
-    ) {
-        val url = if(season != null) "${AutoembedAPI}/embed/player.php?id=${id}&s=${season}&e=${episode}" else "${AutoembedAPI}/embed/player.php?id=${id}"
-        val document = app.get(url).document
-        val regex = Regex("""(?:"title":\s*"([^"]*)",\s*"file":\s*"([^"]*)")""")
-        val matches = regex.findAll(document.toString())
-
-        matches.forEach { match ->
-            val title = match.groups?.get(1)?.value ?: ""
-            val file = match.groups?.get(2)?.value ?: ""
-            callback.invoke(
-                ExtractorLink(
-                    "Autoembed[${title}]",
-                    "Autoembed[${title}]",
-                    file,
-                    referer = "",
-                    quality = Qualities.Unknown.value,
-                    true,
+        data.subtitles.forEach {
+            subtitleCallback.invoke(
+                SubtitleFile(
+                    it.label,
+                    it.file
                 )
             )
         }
