@@ -17,7 +17,7 @@ import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 import com.lagradost.cloudstream3.mvvm.safeApiCall
 import com.lagradost.nicehttp.RequestBodyTypes
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.RequestBody.Companion.toMediaTypeOrNull
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 
 object CineStreamExtractors : CineStreamProvider() {
