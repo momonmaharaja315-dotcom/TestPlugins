@@ -15,7 +15,10 @@ import org.jsoup.Jsoup
 import com.lagradost.cloudstream3.argamap
 import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 import com.lagradost.cloudstream3.mvvm.safeApiCall
-
+import com.lagradost.nicehttp.RequestBodyTypes
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.RequestBody.Companion.toMediaTypeOrNull
+import com.lagradost.cloudstream3.utils.AppUtils.toJson
 
 object CineStreamExtractors : CineStreamProvider() {
 
@@ -932,10 +935,6 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    data class MultiAutoembedEncryptedData(
-        val encryptedData: String,
-    )
-
     suspend fun invokeMultiAutoembed(
         id: String? = null,
         season: Int? = null,
@@ -944,31 +943,20 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         val url = "https://hin.autoembed.cc/api/getVideoSource?type=movie&id=tt3359350"
-        val json = app.get(url).text
-        val encryptedData = tryParseJson<MultiAutoembedEncryptedData>(json)?.encryptedData ?: return
-        callback.invoke(
-            ExtractorLink(
-                "Encrypted",
-                "Encrypted",
-                encryptedData,
-                referer = "",
-                Qualities.Unknown.value,
-            )
-        )
-        val formBody = FormBody.Builder().add("encryptedData", encryptedData).build()
+        val jsonBody = app.get(url).text.toJson().toRequestBody(RequestBodyTypes.JSON.toMediaTypeOrNull())
         val headers = mapOf(
             "Content-Type" to "application/json",
             "Referer" to "https://hin.autoembed.cc/",
         )
-        val json2 = app.post("https://hin.autoembed.cc/api/decryptVideoSource",
-            requestBody = formBody, headers = headers
+        val json = app.post("https://hin.autoembed.cc/api/decryptVideoSource",
+            requestBody = jsonBody, headers = headers
         ).text
 
         callback.invoke(
             ExtractorLink(
                 "Test",
                 "Test",
-                json2,
+                json,
                 referer = "",
                 Qualities.Unknown.value,
             )
