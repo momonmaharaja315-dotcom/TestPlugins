@@ -33,7 +33,6 @@ import com.megix.CineStreamExtractors.invokeMultimovies
 import com.megix.CineStreamExtractors.invokeStreamify
 import com.megix.CineStreamExtractors.invokeCinemaluxe
 import com.megix.CineStreamExtractors.invokeBollyflix
-import com.megix.CineStreamExtractors.invokeTom
 import com.megix.CineStreamExtractors.invokeTorrentio
 import com.megix.CineStreamExtractors.invokeTokyoInsider
 import com.megix.CineStreamExtractors.invokeTvStream
@@ -72,6 +71,7 @@ open class CineStreamProvider : MainAPI() {
         const val W4UAPI = "https://world4ufree.fyi"
         const val WHVXSubsAPI = "https://subs.whvx.net"
         const val WYZIESubsAPI = "https://subs.wyzie.ru"
+        const val AutoembedAPI = "https://autoembed.cc"
         const val MultiembedAPI = "https://hin.autoembed.cc"
         const val NonoembedAPI = "https://nono.autoembed.cc"
         const val WHVXAPI = "https://api.whvx.net"
@@ -525,15 +525,6 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
-                    invokeTom(
-                        tmdbId,
-                        res.imdbSeason,
-                        res.imdbEpisode,
-                        callback,
-                        subtitleCallback
-                    )
-                },
-                {
                     invokeMoviesdrive(
                         imdbTitle,
                         res.imdbSeason,
@@ -584,15 +575,6 @@ open class CineStreamProvider : MainAPI() {
                         res.episode,
                         subtitleCallback,
                         callback
-                    )
-                },
-                {
-                    invokeTom(
-                        res.tmdbId,
-                        res.season,
-                        res.episode,
-                        callback,
-                        subtitleCallback
                     )
                 },
                 {

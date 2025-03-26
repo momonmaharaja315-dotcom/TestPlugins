@@ -451,42 +451,6 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    suspend fun invokeTom(
-        id: Int? = null,
-        season: Int? = null,
-        episode: Int? = null,
-        callback: (ExtractorLink) -> Unit,
-        subtitleCallback: (SubtitleFile) -> Unit
-    ) {
-        val url = if(season == null) "$TomAPI/api/getVideoSource?type=movie&id=$id" else "$TomAPI/api/getVideoSource?type=tv&id=$id/$season/$episode"
-        val headers = mapOf(
-            "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0",
-            "Referer" to "$AutoembedAPI/"
-        )
-        val json = app.get(url, headers = headers).text
-        val data = tryParseJson<TomResponse>(json) ?: return
-
-        callback.invoke(
-            ExtractorLink(
-                "Tom",
-                "Tom",
-                data.videoSource,
-                "",
-                Qualities.Unknown.value,
-                true
-            )
-        )
-
-        data.subtitles.map {
-            subtitleCallback.invoke(
-                SubtitleFile(
-                    it.label,
-                    it.file,
-                )
-            )
-        }
-    }
-
     suspend fun invokeCinemaluxe(
         title: String,
         year: Int? = null,
@@ -959,7 +923,7 @@ object CineStreamExtractors : CineStreamProvider() {
             callback.invoke(
                 ExtractorLink(
                     "MultiAutoembed[${it.label}]",
-                    "MultiAutoembed[${it.label}]"
+                    "MultiAutoembed[${it.label}]",
                     it.file,
                     "",
                     Qualities.Unknown.value,

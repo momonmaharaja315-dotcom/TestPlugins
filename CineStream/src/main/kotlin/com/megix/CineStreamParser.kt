@@ -224,16 +224,6 @@ data class TorrentioStream(
     val fileIdx: Int?,
 )
 
-data class TomResponse (
-  var videoSource    : String,
-  var subtitles      : ArrayList<TomSubtitles> = arrayListOf(),
-)
-
-data class TomSubtitles (
-  var file    : String,
-  var label   : String
-)
-
 data class StreamifyResponse(
     val streams: List<Streamify>
 )
