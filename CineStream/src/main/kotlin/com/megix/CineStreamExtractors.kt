@@ -946,6 +946,15 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = "https://hin.autoembed.cc/api/getVideoSource?type=movie&id=tt3359350"
         val json = app.get(url).text
         val encryptedData = tryParseJson<MultiAutoembedEncryptedData>(json)?.encryptedData ?: return
+        callback.invoke(
+            ExtractorLink(
+                "Encrypted",
+                "Encrypted",
+                encryptedData,
+                referer = "",
+                Qualities.Unknown.value,
+            )
+        )
         val formBody = FormBody.Builder().add("encryptedData", encryptedData).build()
         val headers = mapOf(
             "Content-Type" to "application/json",
