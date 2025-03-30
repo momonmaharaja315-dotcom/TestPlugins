@@ -685,16 +685,7 @@ open class GDFlix : ExtractorApi() {
                 app.get(it.attr("href")).document.select(".row .row a").amap {
                     val link = it.attr("href")
                     if(link.contains("gofile")) {
-                        callback.invoke(
-                            ExtractorLink(
-                                "GDFlix[GoFile]",
-                                "GDFlix[GoFile] $fileName",
-                                link,
-                                "",
-                                getIndexQuality(fileName)
-                            )
-                        )
-                        loadExtractor(link, "", subtitleCallback, callback)
+                        Gofile().getUrl(link, "", subtitleCallback, callback)
                     }
                 }
             }
