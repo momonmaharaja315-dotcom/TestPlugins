@@ -540,17 +540,7 @@ open class GDFlix : ExtractorApi() {
     ) {
         val newUrl = url.replace(mainUrl, "https://new4.gdflix.dad")
         val document = app.get(newUrl).document
-
         val fileName = document.selectFirst("ul > li.list-group-item")?.text()?.substringAfter("Name : ") ?: ""
-        callback.invoke(
-            ExtractorLink(
-                "GDFlix",
-                "GDFlix $fileName",
-                fileName,
-                "",
-                getIndexQuality(fileName)
-            )
-        )
 
         document.select("div.text-center a").amap {
             val text = it.select("a").text()
@@ -695,6 +685,15 @@ open class GDFlix : ExtractorApi() {
                 app.get(it.attr("href")).document.select(".row .row a").amap {
                     val link = it.attr("href")
                     if(link.contains("gofile")) {
+                        callback.invoke(
+                            ExtractorLink(
+                                "GDFlix[GoFile]",
+                                "GDFlix[GoFile] $fileName",
+                                link,
+                                "",
+                                getIndexQuality(fileName)
+                            )
+                        )
                         loadExtractor(link, "", subtitleCallback, callback)
                     }
                 }
@@ -718,6 +717,15 @@ open class Gofile : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
+        callback.invoke(
+            ExtractorLink(
+                this.name,
+                this.name,
+                url,
+                "",
+                Qualities.Unknown.value
+            )
+        )
         val res = app.get(url)
         val id = Regex("/(?:\\?c=|d/)([\\da-zA-Z-]+)").find(url)?.groupValues?.get(1) ?: return
         val genAccountRes = app.post("$mainApi/accounts").text
