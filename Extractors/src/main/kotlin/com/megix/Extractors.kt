@@ -717,8 +717,16 @@ open class Gofile : ExtractorApi() {
 
         val globalRes = app.get("$mainUrl/dist/js/global.js").text
         val wt = Regex("""appdata\.wt\s*=\s*[\"']([^\"']+)[\"']""").find(globalRes)?.groupValues?.get(1) ?: return
-
-        val response = app.post("$mainApi/contents/${id}?wt=${wt}",
+        callback.invoke(
+            ExtractorLink(
+                this.name,
+                "check",
+                "id : $id token : $token wt : $wt",
+                "",
+                Qualities.Unknown.value
+            )
+        )
+        val response = app.post("$mainApi/contents/$id?wt=$wt",
             headers = mapOf(
                 "Authorization" to "Bearer $token",
             )
