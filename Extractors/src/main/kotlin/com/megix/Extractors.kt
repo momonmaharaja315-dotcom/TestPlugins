@@ -726,7 +726,7 @@ open class Gofile : ExtractorApi() {
                 Qualities.Unknown.value
             )
         )
-        val response = app.post("$mainApi/contents/$id?wt=$wt",
+        val response = app.get("$mainApi/contents/$id?wt=$wt",
             headers = mapOf(
                 "Authorization" to "Bearer $token",
             )
