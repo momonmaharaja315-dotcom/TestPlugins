@@ -542,6 +542,15 @@ open class GDFlix : ExtractorApi() {
         val document = app.get(newUrl).document
 
         val fileName = document.selectFirst("ul > li.list-group-item")?.text()?.substringAfter("Name : ") ?: ""
+        callback.invoke(
+            ExtractorLink(
+                "GDFlix",
+                "GDFlix $fileName",
+                fileName,
+                "",
+                getIndexQuality(fileName)
+            )
+        )
 
         document.select("div.text-center a").amap {
             val text = it.select("a").text()
