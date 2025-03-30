@@ -706,14 +706,13 @@ open class Gofile : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val response = app.get(url)
+        val res = app.get(url)
         val id = Regex("/(?:\\?c=|d/)([\\da-zA-Z-]+)").find(url)?.groupValues?.get(1) ?: return
         val genAccountRes = app.post("$mainApi/accounts").text
-        val jsonResponse = JSONObject(genAccountRes)
-        val token = jsonResponse.getJSONObject("data").getString("token") ?: return
+        val jsonResp = JSONObject(genAccountRes)
+        val token = jsonResp.getJSONObject("data").getString("token") ?: return
         val globalRes = app.get("$mainUrl/dist/js/global.js").text
-        val wt = Regex("/appdata\.wt\s*=\s*["']([^"']+)["']/").find(globalRes)?.groupValues?.get(1) ?: return
-        val token = app.get("$mainApi/createAccount").parsedSafe<Account>()?.data?.get("token")
+        val wt = Regex("appdata\.wt\s*=\s*[\"']([^\"']+)[\"']").find(globalRes)?.groupValues?.get(1) ?: return
         val response = app.post("$mainApi/contents/${id}?wt=${wt}",
             headers = mapOf(
                 "Authorization" to "Bearer $token",
@@ -725,7 +724,7 @@ open class Gofile : ExtractorApi() {
         val oId = children.keys().next()
         val link = children.getJSONObject(oId).getString("link")
         val fileName = children.getJSONObject(oId).getString("name")
-        if(link && fileName) {
+        if(link != null && fileName != null) {
             callback.invoke(
                 ExtractorLink(
                     "Gofile",
