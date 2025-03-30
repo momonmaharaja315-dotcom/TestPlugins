@@ -712,7 +712,7 @@ open class Gofile : ExtractorApi() {
         val jsonResp = JSONObject(genAccountRes)
         val token = jsonResp.getJSONObject("data").getString("token") ?: return
         val globalRes = app.get("$mainUrl/dist/js/global.js").text
-        val wt = Regex("appdata\.wt\s*=\s*[\"']([^\"']+)[\"']").find(globalRes)?.groupValues?.get(1) ?: return
+        val wt = Regex("""appdata\.wt\s*=\s*[\"']([^\"']+)[\"']""").find(globalRes)?.groupValues?.get(1) ?: return
         val response = app.post("$mainApi/contents/${id}?wt=${wt}",
             headers = mapOf(
                 "Authorization" to "Bearer $token",
