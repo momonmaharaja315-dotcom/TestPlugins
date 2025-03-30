@@ -692,9 +692,12 @@ open class GDFlix : ExtractorApi() {
                 )
             }
             else if(text.contains("GoFile")) {
-                val link = app.get(it.attr("href")).document
-                            .select(".row .row a").attr("href")
-                loadExtractor(link,"",subtitleCallback, callback)
+                app.get(it.attr("href")).document.select(".row .row a").amap {
+                    val link = it.attr("href")
+                    if(link.contains("gofile")) {
+                        loadExtractor(link, "", subtitleCallback, callback)
+                    }
+                }
             }
             else {
                 Log.d("Error", "No Server matched")
