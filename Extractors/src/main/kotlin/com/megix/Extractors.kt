@@ -199,8 +199,8 @@ open class Driveleech : ExtractorApi() {
                         val resumeLink = resumeBot(href)
                         callback.invoke(
                             ExtractorLink(
-                                "$name ResumeBot(VLC)",
-                                "$name[ResumeBot(VLC)] $fileName",
+                                "$name ResumeBot",
+                                "$name[ResumeBot] $fileName",
                                 resumeLink,
                                 "",
                                 getIndexQuality(quality)
@@ -246,6 +246,7 @@ open class Driveleech : ExtractorApi() {
                     }
                 }
                 else -> {
+                    loadExtractor(href, "", subtitleCallback, callback)
                 }
             }
         }
@@ -538,6 +539,15 @@ open class GDFlix : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
+        callback.invoke(
+            ExtractorLink(
+                "GDFlix",
+                "GDFLix",
+                url,
+                "",
+                Qualities.Unknown.value
+            )
+        )
         val newUrl = url.replace(mainUrl, "https://new4.gdflix.dad")
         val document = app.get(newUrl).document
         val fileName = document.selectFirst("ul > li.list-group-item")?.text()?.substringAfter("Name : ") ?: ""
@@ -717,29 +727,13 @@ open class Gofile : ExtractorApi() {
 
         val globalRes = app.get("$mainUrl/dist/js/global.js").text
         val wt = Regex("""appdata\.wt\s*=\s*[\"']([^\"']+)[\"']""").find(globalRes)?.groupValues?.get(1) ?: return
-        callback.invoke(
-            ExtractorLink(
-                this.name,
-                "check",
-                "id : $id token : $token wt : $wt",
-                "",
-                Qualities.Unknown.value
-            )
-        )
+
         val response = app.get("$mainApi/contents/$id?wt=$wt",
             headers = mapOf(
                 "Authorization" to "Bearer $token",
             )
         ).text
-        callback.invoke(
-            ExtractorLink(
-                this.name,
-                "response",
-                response,
-                "",
-                Qualities.Unknown.value
-            )
-        )
+
         val jsonResponse = JSONObject(response)
         val data = jsonResponse.getJSONObject("data")
         val children = data.getJSONObject("children")
@@ -753,7 +747,10 @@ open class Gofile : ExtractorApi() {
                     "Gofile $fileName",
                     link,
                     "",
-                    getQuality(fileName)
+                    getQuality(fileName),
+                    headers = mapOf(
+                        "Cookie" to "accountToken=$token",
+                    )
                 )
             )
         }
