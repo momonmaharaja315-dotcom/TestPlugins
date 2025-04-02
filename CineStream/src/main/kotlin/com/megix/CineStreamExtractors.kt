@@ -407,7 +407,16 @@ object CineStreamExtractors : CineStreamProvider() {
                                         Qualities.Unknown.value,
                                     )
                                 )
-                                app.get(button.attr("href")).document.select("h3 a:contains(Episode $episode|Episode 0$episode|E0$episode|E$episode)").amap { source ->
+                                app.get(button.attr("href")).document.select("h3 > strong > a").getOrNull(episode-1)?.let { source ->
+                                    callback.invoke(
+                                        ExtractorLink(
+                                            "Moviesflix[Test]",
+                                            "Moviesflix[Test]",
+                                            source.attr("href"),
+                                            "",
+                                            Qualities.Unknown.value,
+                                        )
+                                    )
                                     loadSourceNameExtractor(
                                         sourceName,
                                         source.attr("href"),
