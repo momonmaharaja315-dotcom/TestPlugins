@@ -400,7 +400,7 @@ object CineStreamExtractors : CineStreamProvider() {
                             ) {
                                 callback.invoke(
                                     ExtractorLink(
-                                        "Moviesflix[Test]"
+                                        "Moviesflix[Test]",
                                         "Moviesflix[Test]",
                                         button.attr("href"),
                                         "",
@@ -1340,16 +1340,16 @@ object CineStreamExtractors : CineStreamProvider() {
         }
 
         val servers = listOf("upcloud", "vidcloud")
-        servers.amap {
-            val epJson = app.get("$CONSUMET_API/movies/flixhq/watch?episodeId=$epId&mediaId=$id&server=$it").text
+        servers.amap { server ->
+            val epJson = app.get("$CONSUMET_API/movies/flixhq/watch?episodeId=$epId&mediaId=$id&server=$server").text
             val epData = tryParseJson<ConsumetWatch>(epJson) ?: return@amap
             val referer = epData.headers.Referer ?: ""
 
             epData.sources.map {
                 callback.invoke(
                     ExtractorLink(
-                        "Flixhq ${it.uppercase()}",
-                        "Flixhq ${it.uppercase()}",
+                        "Flixhq ${server.uppercase()}",
+                        "Flixhq ${server.uppercase()}",
                         it.url,
                         referer,
                         it.quality.toIntOrNull() ?: Qualities.Unknown.value,
