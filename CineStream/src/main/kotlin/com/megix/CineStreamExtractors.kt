@@ -398,15 +398,6 @@ object CineStreamExtractors : CineStreamProvider() {
                                 !buttonText.contains("G-Drive", ignoreCase = true) &&
                                 !buttonText.contains("Mega.nz", ignoreCase = true)
                             ) {
-                                callback.invoke(
-                                    ExtractorLink(
-                                        "Moviesflix[Test]",
-                                        "Moviesflix[Test]",
-                                        button.attr("href"),
-                                        "",
-                                        Qualities.Unknown.value,
-                                    )
-                                )
                                 app.get(button.attr("href")).document.select("h3 > strong > a").getOrNull(episode-1)?.let { source ->
                                     callback.invoke(
                                         ExtractorLink(
