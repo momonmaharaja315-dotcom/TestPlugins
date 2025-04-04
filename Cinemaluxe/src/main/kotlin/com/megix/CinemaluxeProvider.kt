@@ -85,8 +85,8 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
 
     override suspend fun load(url: String): LoadResponse? {
         val document = app.get(url).document
-        val title = document.select("meta[property=og:title]").attr("content").replace("Download ", "")
-        val posterUrl = document.select("meta[property=og:image]").attr("content")
+        val title = document.select("div.data > h1").text()
+        val posterUrl = document.select("div.poster > img").attr("data-src")
         val description = document.selectFirst("div.wp-content")?.ownText() ?: ""
 
         val tvType = if (url.contains("tvshow")) {
