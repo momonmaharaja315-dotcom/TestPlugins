@@ -149,7 +149,7 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
                 var link = button.attr("href")
                 link = bypass(link)
                 val doc = app.get(link).document
-                val selector = if("linkstore") "div.ep-button-container > a" else "div.mirror-buttons a"
+                val selector = if(link.contains("linkstore")) "div.ep-button-container > a" else "div.mirror-buttons a"
                 doc.select(selector).mapNotNull {
                     val source = it.attr("href")
                     EpisodeLink(
