@@ -87,7 +87,7 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
         val document = app.get(url).document
         val title = document.select("meta[property=og:title]").attr("content").replace("Download ", "")
         val posterUrl = document.select("meta[property=og:image]").attr("content")
-        val description = document.select("div.wp-content").ownText()
+        val description = document.selectFirst("div.wp-content")?.ownText() ?: ""
 
         val tvType = if (url.contains("tvshow")) {
             "series"
@@ -105,7 +105,7 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
                 val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
                 val matchResult = realSeasonRegex.find(seasonText)
                 val realSeason = matchResult?.groupValues?.get(1)?.toIntOrNull() ?: 0
-                seasonLink = bypass(aTag.attr("href"))
+                val seasonLink = bypass(aTag.attr("href"))
                 val doc = app.get(seasonLink).document
                 var innerATags = doc.select("div.ep-button-container > a:matches((?i)(Episode))")
                 
@@ -149,7 +149,8 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
                 var link = button.attr("href")
                 link = bypass(link)
                 val doc = app.get(link).document
-                doc.select("div.mirror-buttons a").mapNotNull {
+                val selector = if("linkstore") "div.ep-button-container > a" else "div.mirror-buttons a"
+                doc.select(selector).mapNotNull {
                     val source = it.attr("href")
                     EpisodeLink(
                         source
