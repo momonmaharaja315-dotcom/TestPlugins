@@ -12,6 +12,10 @@ import com.lagradost.nicehttp.NiceResponse
 import kotlinx.coroutines.delay
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 val SPEC_OPTIONS = mapOf(
     "quality" to listOf(
@@ -261,25 +265,24 @@ suspend fun loadSourceNameExtractor(
                     "$source[${link.source}] $extractedSpecs",
                     link.url,
                     type = link.type
-                )
-                // {
-                //     this.referer = link.referer
-                //     this.quality = quality ?: link.quality
-                //     this.headers = link.headers
-                //     this.extractorData = link.extractorData
-                // }
+                ) {
+                    this.referer = link.referer
+                    this.quality = quality ?: link.quality
+                    this.headers = link.headers
+                    this.extractorData = link.extractorData
+                }
             )
         }
     }
 }
 
 suspend fun loadCustomTagExtractor(
-        tag: String? = null,
-        url: String,
-        referer: String? = null,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit,
-        quality: Int? = null,
+    tag: String? = null,
+    url: String,
+    referer: String? = null,
+    subtitleCallback: (SubtitleFile) -> Unit,
+    callback: (ExtractorLink) -> Unit,
+    quality: Int? = null,
 ) {
     loadExtractor(url, referer, subtitleCallback) { link ->
         callback.invoke(
@@ -288,13 +291,12 @@ suspend fun loadCustomTagExtractor(
                 "${link.name} $tag",
                 link.url,
                 link.type
-            )
-            // {
-            //     this.quality = quality ?: link.quality
-            //     this.referer = link.referer
-            //     this.headers = link.headers
-            //     this.extractorData = link.extractorData
-            // }
+            ) {
+                this.quality = quality ?: link.quality
+                this.referer = link.referer
+                this.headers = link.headers
+                this.extractorData = link.extractorData
+            }
         )
     }
 }
@@ -307,21 +309,24 @@ suspend fun loadCustomExtractor(
     callback: (ExtractorLink) -> Unit,
     quality: Int? = null,
 ) {
+    // Define a scope for the coroutine
+    val scope = CoroutineScope(Dispatchers.Default + Job())
+
     loadExtractor(url, referer, subtitleCallback) { link ->
-        callback.invoke(
-            newExtractorLink(
+        scope.launch {
+            val newLink = newExtractorLink(
                 name ?: link.source,
                 name ?: link.name,
                 link.url,
                 type = link.type
-            )
-            //  {
-            //     this.quality = quality ?: link.quality
-            //     this.referer = link.referer
-            //     this.headers = link.headers
-            //     this.extractorData = link.extractorData
-            // }
-        )
+            ) {
+                this.quality = quality ?: link.quality
+                this.referer = link.referer
+                this.headers = link.headers
+                this.extractorData = link.extractorData
+            }
+            callback.invoke(newLink)
+        }
     }
 }
 
