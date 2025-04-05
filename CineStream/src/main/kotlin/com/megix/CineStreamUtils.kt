@@ -191,17 +191,17 @@ fun loadNameExtractor(
     callback: (ExtractorLink) -> Unit,
     quality: Int,
 ) {
-        callback.invoke(
-            newExtractorLink(
-                name ?: "",
-                name ?: "",
-                url,
-                type = if (url.contains("m3u8"))ExtractorLinkType.M3U8 else INFER_TYPE,
-            ) {
-                this.referer = referer ?: ""
-                this.quality = quality
-            }
-        )
+    callback.invoke(
+        newExtractorLink(
+            name ?: "",
+            name ?: "",
+            url,
+            type = if (url.contains("m3u8"))ExtractorLinkType.M3U8 else INFER_TYPE,
+        ) {
+            this.referer = referer ?: ""
+            this.quality = quality
+        }
+    )
 }
 
 fun getEpisodeSlug(
