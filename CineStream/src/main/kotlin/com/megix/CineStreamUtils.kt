@@ -251,7 +251,7 @@ suspend fun loadSourceNameExtractor(
     callback: (ExtractorLink) -> Unit,
     quality: Int? = null,
 ) {
-    loadExtractor(url, referer, subtitleCallback) { link ->
+    loadExtractor(url, referer, subtitleCallback, callback) { link ->
         if(!link.source.contains("Download")) {
             val extracted = extractSpecs(link.name)
             val extractedSpecs = buildExtractedTitle(extracted)
@@ -279,7 +279,7 @@ suspend fun loadCustomTagExtractor(
         callback: (ExtractorLink) -> Unit,
         quality: Int? = null,
 ) {
-    loadExtractor(url, referer, subtitleCallback) { link ->
+    loadExtractor(url, referer, subtitleCallback, callback) { link ->
         callback.invoke(
             newExtractorLink(
                 link.source,
@@ -303,7 +303,7 @@ suspend fun loadCustomExtractor(
     callback: (ExtractorLink) -> Unit,
     quality: Int? = null,
 ) {
-    loadExtractor(url, referer, subtitleCallback) { link ->
+    loadExtractor(url, referer, subtitleCallback, callback) { link ->
         callback.invoke(
             newExtractorLink(
                 name ?: link.source,
