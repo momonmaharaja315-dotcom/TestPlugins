@@ -250,40 +250,6 @@ open class Driveleech : ExtractorApi() {
     }
 }
 
-class PixelDrain : ExtractorApi() {
-    override val name            = "PixelDrain"
-    override val mainUrl         = "https://pixeldrain.com"
-    override val requiresReferer = true
-
-    override suspend fun getUrl(url: String, referer: String?, subtitleCallback: (SubtitleFile) -> Unit, callback: (ExtractorLink) -> Unit) {
-        val mId = Regex("/u/(.*)").find(url)?.groupValues?.get(1)
-        if (mId.isNullOrEmpty())
-        {
-            callback.invoke(
-                ExtractorLink(
-                    this.name,
-                    this.name,
-                    url,
-                    url,
-                    Qualities.Unknown.value,
-                )
-            )
-        }
-        else {
-            callback.invoke(
-                ExtractorLink(
-                    this.name,
-                    this.name,
-                    "$mainUrl/api/file/${mId}?download",
-                    url,
-                    Qualities.Unknown.value,
-                )
-            )
-        }
-    }
-}
-
-
 class VCloud : ExtractorApi() {
     override val name: String = "V-Cloud"
     override val mainUrl: String = "https://vcloud.lol"
@@ -572,7 +538,7 @@ open class GDFlix : ExtractorApi() {
                     val link = it.attr("href")
                     app.get("https://new5.gdflix.dad$link")
                     .document.select("a.btn.btn-outline-info").amap {
-                        val serverUrl = mainUrl + it.attr("href")
+                        val serverUrl = "https://new5.gdflix.dad" + it.attr("href")
                         app.get(serverUrl).document.select("div.mb-4 > a").amap {
                             val source = it.attr("href")
                             callback.invoke(

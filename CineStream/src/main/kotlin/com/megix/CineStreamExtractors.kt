@@ -320,17 +320,36 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         val headers = mapOf("User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
-        val link = app.get("$hdmovie2API/movies/${title.createSlug()}-$year", headers = headers, allowRedirects = true).document
-            .select("div.wp-content p a").attr("href")
-        val type = if(episode != null) "(Combined)" else ""
-        app.get(link).document.select("div > p > a").amap {
-            loadSourceNameExtractor(
-                "Hdmovie2$type",
-                it.attr("href"),
-                "",
-                subtitleCallback,
-                callback,
-            )
+        val document = app.get("$hdmovie2API/movies/${title.createSlug()}-$year", headers = headers, allowRedirects = true).document
+        document.select("div.wp-content p a").amap {
+            if(episode != null && it.text().contains("EP")) {
+                if(
+                    it.text().contains("EP$episode")||
+                    it.text().contains("EP0$episode")
+                ) {
+                    app.get(it.attr("href")).document.select("div > p > a").amap {
+                        loadSourceNameExtractor(
+                            "Hdmovie2",
+                            it.attr("href"),
+                            "",
+                            subtitleCallback,
+                            callback,
+                        )
+                    }
+                }
+            }
+            else {
+                val type = if(episode != null) "(Combined)" else ""
+                app.get(it.attr("href")).document.select("div > p > a").amap {
+                    loadSourceNameExtractor(
+                        "Hdmovie2$type",
+                        it.attr("href"),
+                        "",
+                        subtitleCallback,
+                        callback,
+                    )
+                }
+            }
         }
     }
 
