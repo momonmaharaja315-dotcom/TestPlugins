@@ -251,7 +251,7 @@ suspend fun loadSourceNameExtractor(
     callback: (ExtractorLink) -> Unit,
     quality: Int? = null,
 ) {
-    loadExtractor(url, referer, subtitleCallback, callback) { link ->
+    loadExtractor(url, referer, subtitleCallback) { link ->
         if(!link.source.contains("Download")) {
             val extracted = extractSpecs(link.name)
             val extractedSpecs = buildExtractedTitle(extracted)
@@ -265,6 +265,8 @@ suspend fun loadSourceNameExtractor(
                     this.referer = link.referer
                     this.quality = quality ?: link.quality
                     this.headers = link.headers
+                    this.extractorData = link.extractorData
+
                 }
             )
         }
@@ -279,7 +281,7 @@ suspend fun loadCustomTagExtractor(
         callback: (ExtractorLink) -> Unit,
         quality: Int? = null,
 ) {
-    loadExtractor(url, referer, subtitleCallback, callback) { link ->
+    loadExtractor(url, referer, subtitleCallback) { link ->
         callback.invoke(
             newExtractorLink(
                 link.source,
@@ -290,6 +292,7 @@ suspend fun loadCustomTagExtractor(
                 this.quality = quality ?: link.quality
                 this.referer = link.referer
                 this.headers = link.headers
+                this.extractorData = link.extractorData
             }
         )
     }
@@ -303,7 +306,7 @@ suspend fun loadCustomExtractor(
     callback: (ExtractorLink) -> Unit,
     quality: Int? = null,
 ) {
-    loadExtractor(url, referer, subtitleCallback, callback) { link ->
+    loadExtractor(url, referer, subtitleCallback) { link ->
         callback.invoke(
             newExtractorLink(
                 name ?: link.source,
@@ -314,6 +317,7 @@ suspend fun loadCustomExtractor(
                 this.quality = quality ?: link.quality
                 this.referer = link.referer
                 this.headers = link.headers
+                this.extractorData = link.extractorData
             }
         )
     }
