@@ -261,12 +261,13 @@ suspend fun loadSourceNameExtractor(
                     "$source[${link.source}] $extractedSpecs",
                     link.url,
                     type = link.type
-                ) {
-                    this.referer = link.referer
-                    this.quality = quality ?: link.quality
-                    this.headers = link.headers
-                    this.extractorData = link.extractorData
-                }
+                )
+                // {
+                //     this.referer = link.referer
+                //     this.quality = quality ?: link.quality
+                //     this.headers = link.headers
+                //     this.extractorData = link.extractorData
+                // }
             )
         }
     }
@@ -287,12 +288,13 @@ suspend fun loadCustomTagExtractor(
                 "${link.name} $tag",
                 link.url,
                 link.type
-            ) {
-                this.quality = quality ?: link.quality
-                this.referer = link.referer
-                this.headers = link.headers
-                this.extractorData = link.extractorData
-            }
+            )
+            // {
+            //     this.quality = quality ?: link.quality
+            //     this.referer = link.referer
+            //     this.headers = link.headers
+            //     this.extractorData = link.extractorData
+            // }
         )
     }
 }
@@ -305,35 +307,21 @@ suspend fun loadCustomExtractor(
     callback: (ExtractorLink) -> Unit,
     quality: Int? = null,
 ) {
-    // loadExtractor(url, referer, subtitleCallback) { link ->
-    //     callback.invoke(
-    //         newExtractorLink(
-    //             name ?: link.source,
-    //             name ?: link.name,
-    //             link.url,
-    //             type = link.type
-    //         ) {
-    //             this.quality = quality ?: link.quality
-    //             this.referer = link.referer
-    //             this.headers = link.headers
-    //             this.extractorData = link.extractorData
-    //         }
-    //     )
-    // }
-
     loadExtractor(url, referer, subtitleCallback) { link ->
-        val newLink = newExtractorLink(
-            name ?: link.source,
-            name ?: link.name,
-            link.url,
-            type = link.type
-        ) {
-            this.quality = quality ?: link.quality
-            this.referer = link.referer
-            this.headers = link.headers
-            this.extractorData = link.extractorData
-        }
-        callback.invoke(newLink)
+        callback.invoke(
+            newExtractorLink(
+                name ?: link.source,
+                name ?: link.name,
+                link.url,
+                type = link.type
+            )
+            //  {
+            //     this.quality = quality ?: link.quality
+            //     this.referer = link.referer
+            //     this.headers = link.headers
+            //     this.extractorData = link.extractorData
+            // }
+        )
     }
 }
 
