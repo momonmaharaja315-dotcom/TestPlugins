@@ -266,7 +266,6 @@ suspend fun loadSourceNameExtractor(
                     this.quality = quality ?: link.quality
                     this.headers = link.headers
                     this.extractorData = link.extractorData
-
                 }
             )
         }
@@ -306,20 +305,35 @@ suspend fun loadCustomExtractor(
     callback: (ExtractorLink) -> Unit,
     quality: Int? = null,
 ) {
+    // loadExtractor(url, referer, subtitleCallback) { link ->
+    //     callback.invoke(
+    //         newExtractorLink(
+    //             name ?: link.source,
+    //             name ?: link.name,
+    //             link.url,
+    //             type = link.type
+    //         ) {
+    //             this.quality = quality ?: link.quality
+    //             this.referer = link.referer
+    //             this.headers = link.headers
+    //             this.extractorData = link.extractorData
+    //         }
+    //     )
+    // }
+
     loadExtractor(url, referer, subtitleCallback) { link ->
-        callback.invoke(
-            newExtractorLink(
-                name ?: link.source,
-                name ?: link.name,
-                link.url,
-                type = link.type
-            ) {
-                this.quality = quality ?: link.quality
-                this.referer = link.referer
-                this.headers = link.headers
-                this.extractorData = link.extractorData
-            }
-        )
+        val newLink = newExtractorLink(
+            name ?: link.source,
+            name ?: link.name,
+            link.url,
+            type = link.type
+        ) {
+            this.quality = quality ?: link.quality
+            this.referer = link.referer
+            this.headers = link.headers
+            this.extractorData = link.extractorData
+        }
+        callback.invoke(newLink)
     }
 }
 
