@@ -192,14 +192,15 @@ fun loadNameExtractor(
     quality: Int,
 ) {
         callback.invoke(
-            ExtractorLink(
+            newExtractorLink(
                 name ?: "",
                 name ?: "",
                 url,
-                referer ?: "",
-                quality,
-                if (url.contains("m3u8"))ExtractorLinkType.M3U8 else INFER_TYPE,
-            )
+                type = if (url.contains("m3u8"))ExtractorLinkType.M3U8 else INFER_TYPE,
+            ) {
+                this.referer = referer ?: ""
+                this.quality = quality
+            }
         )
 }
 
@@ -231,13 +232,13 @@ suspend fun getHindMoviezLinks(
     val extractedSpecs = buildExtractedTitle(extracted)
     document.select("a.button").map {
         callback.invoke(
-            ExtractorLink(
+            newExtractorLink(
                 "HindMoviez",
                 "HindMoviez $extractedSpecs",
                 it.attr("href"),
-                "",
-                getIndexQuality(name),
-            )
+            ) {
+                this.quality = getIndexQuality(name)
+            }
         )
     }
 }
@@ -255,16 +256,16 @@ suspend fun loadSourceNameExtractor(
             val extracted = extractSpecs(link.name)
             val extractedSpecs = buildExtractedTitle(extracted)
             callback.invoke(
-                ExtractorLink(
+                newExtractorLink(
                     "$source[${link.source}]",
                     "$source[${link.source}] $extractedSpecs",
                     link.url,
-                    link.referer,
-                    quality ?: link.quality,
-                    link.type,
-                    link.headers,
-                    link.extractorData
-                )
+                    type = link.type,
+                ) {
+                    this.referer = link.referer
+                    this.quality = quality ?: link.quality
+                    this.headers = link.headers
+                }
             )
         }
     }
@@ -280,16 +281,16 @@ suspend fun loadCustomTagExtractor(
 ) {
     loadExtractor(url, referer, subtitleCallback) { link ->
         callback.invoke(
-            ExtractorLink(
+            newExtractorLink(
                 link.source,
                 "${link.name} $tag",
                 link.url,
-                link.referer,
-                quality ?: link.quality,
                 link.type,
-                link.headers,
-                link.extractorData
-            )
+            ) {
+                this.quality = quality ?: link.quality
+                this.referer = link.referer
+                this.headers = link.headers
+            }
         )
     }
 }
@@ -304,19 +305,16 @@ suspend fun loadCustomExtractor(
 ) {
     loadExtractor(url, referer, subtitleCallback) { link ->
         callback.invoke(
-            ExtractorLink(
+            newExtractorLink(
                 name ?: link.source,
                 name ?: link.name,
                 link.url,
-                link.referer,
-                when {
-                    link.name == "VidSrc" -> Qualities.P1080.value
-                    else -> quality ?: link.quality
-                },
-                link.type,
-                link.headers,
-                link.extractorData
-            )
+                type = link.type,
+            ) {
+                this.quality = quality ?: link.quality
+                this.referer = link.referer
+                this.headers = link.headers
+            }
         )
     }
 }

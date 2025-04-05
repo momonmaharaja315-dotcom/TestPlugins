@@ -179,13 +179,13 @@ open class Driveleech : ExtractorApi() {
                     try{
                         val instant = instantLink(href)
                         callback.invoke(
-                            ExtractorLink(
+                            newExtractorLink(
                                 "$name Instant(Download)",
                                 "$name[Instant(Download)] $fileName",
                                 instant,
-                                "",
-                                getIndexQuality(quality)
-                            )
+                            ) {
+                                this.quality = getIndexQuality(quality)
+                            }
                         )
                     } catch (e: Exception) {
                         Log.d("Error:", e.toString())
@@ -195,13 +195,13 @@ open class Driveleech : ExtractorApi() {
                     try{
                         val resumeLink = resumeBot(href)
                         callback.invoke(
-                            ExtractorLink(
+                            newExtractorLink(
                                 "$name ResumeBot",
                                 "$name[ResumeBot] $fileName",
                                 resumeLink,
-                                "",
-                                getIndexQuality(quality)
-                            )
+                            ) {
+                                this.quality = getIndexQuality(quality)
+                            }
                         )
                     } catch (e: Exception) {
                         Log.d("Error:", e.toString())
@@ -213,13 +213,13 @@ open class Driveleech : ExtractorApi() {
                         val link = mainUrl + href
                         CFType1(link).forEach {
                             callback.invoke(
-                                ExtractorLink(
+                                newExtractorLink(
                                     "$name CF Type1",
                                     "$name[CF Type1] $fileName",
                                     it,
-                                    "",
-                                    getIndexQuality(quality)
-                                )
+                                ) {
+                                    this.quality = getIndexQuality(quality)
+                                }
                             )
                         }
                     } catch (e: Exception) {
@@ -230,13 +230,13 @@ open class Driveleech : ExtractorApi() {
                     try {
                         val resumeCloud = resumeCloudLink(href)
                         callback.invoke(
-                            ExtractorLink(
+                            newExtractorLink(
                                 "$name ResumeCloud",
                                 "$name[ResumeCloud] $fileName",
                                 resumeCloud,
-                                "",
-                                getIndexQuality(quality)
-                            )
+                            ) {
+                                this.quality = getIndexQuality(quality)
+                            }
                         )
                     } catch (e: Exception) {
                         Log.d("Error:", e.toString())
@@ -280,60 +280,60 @@ class VCloud : ExtractorApi() {
                 if (text.contains("Download [FSL Server]"))
                 {
                     callback.invoke(
-                        ExtractorLink(
+                        newExtractorLink(
                             "$name[FSL Server]",
                             "$name[FSL Server] $header",
                             link,
-                            "",
-                            getIndexQuality(header),
-                        )
+                        ) {
+                            this.quality = getIndexQuality(header)
+                        }
                     )
                 }
                 else if (text.contains("Download [Server : 1]")) {
                     callback.invoke(
-                        ExtractorLink(
+                        newExtractorLink(
                             "$name",
                             "$name $header",
                             link,
-                            "",
-                            getIndexQuality(header),
-                        )
+                        ) {
+                            this.quality = getIndexQuality(header)
+                        }
                     )
                 }
                 else if(text.contains("BuzzServer")) {
                     val dlink = app.get("$link/download", allowRedirects = false).headers["location"] ?: ""
                     callback.invoke(
-                        ExtractorLink(
+                        newExtractorLink(
                             "$name[BuzzServer]",
                             "$name[BuzzServer] $header",
                             link.substringBeforeLast("/") + dlink,
-                            "",
-                            getIndexQuality(header),
-                        )
+                        ) {
+                            this.quality = getIndexQuality(header)
+                        }
                     )
                 }
 
                 else if (link.contains("pixeldra")) {
                     callback.invoke(
-                        ExtractorLink(
+                        newExtractorLink(
                             "Pixeldrain",
                             "Pixeldrain $header",
                             link,
-                            "",
-                            getIndexQuality(header),
-                        )
+                        ) {
+                            this.quality = getIndexQuality(header)
+                        }
                     )
                 }
                 else if (text.contains("Download [Server : 10Gbps]")) {
                     val dlink = app.get(link, allowRedirects = false).headers["location"] ?: ""
                     callback.invoke(
-                        ExtractorLink(
+                        newExtractorLink(
                             "$name[Download]",
                             "$name[Download] $header",
                             dlink.substringAfter("link="),
-                            "",
-                            getIndexQuality(header),
-                        )
+                        ) {
+                            this.quality = getIndexQuality(header)
+                        }
                     )
                 }
                 else
@@ -389,60 +389,60 @@ open class HubCloud : ExtractorApi() {
             if (text.contains("Download [FSL Server]"))
             {
                 callback.invoke(
-                    ExtractorLink(
+                    newExtractorLink(
                         "$name[FSL Server]",
                         "$name[FSL Server] $header",
                         link,
-                        "",
-                        getIndexQuality(header),
-                    )
+                    ) {
+                        this.quality = getIndexQuality(header)
+                    }
                 )
             }
             else if (text.contains("Download File")) {
                 callback.invoke(
-                    ExtractorLink(
+                    newExtractorLink(
                         "$name",
                         "$name $header",
                         link,
-                        "",
-                        getIndexQuality(header),
-                    )
+                    ) {
+                        this.quality = getIndexQuality(header)
+                    }
                 )
             }
             else if(text.contains("BuzzServer")) {
                 val dlink = app.get("$link/download", allowRedirects = false).headers["location"] ?: ""
                 callback.invoke(
-                    ExtractorLink(
+                    newExtractorLink(
                         "$name[BuzzServer]",
                         "$name[BuzzServer] $header",
                         link.substringBeforeLast("/") + dlink,
-                        "",
-                        getIndexQuality(header),
-                    )
+                    ) {
+                        this.quality = getIndexQuality(header)
+                    }
                 )
             }
 
             else if (link.contains("pixeldra")) {
                 callback.invoke(
-                    ExtractorLink(
+                    newExtractorLink(
                         "Pixeldrain",
                         "Pixeldrain $header",
                         link,
-                        "",
-                        getIndexQuality(header),
-                    )
+                    ) {
+                        this.quality = getIndexQuality(header)
+                    }
                 )
             }
             else if (text.contains("Download [Server : 10Gbps]")) {
                 val dlink = app.get(link, allowRedirects = false).headers["location"] ?: ""
                 callback.invoke(
-                    ExtractorLink(
+                    newExtractorLink(
                         "$name[Download]",
                         "$name[Download] $header",
                         dlink.substringAfter("link="),
-                        "",
-                        getIndexQuality(header),
-                    )
+                    ) {
+                        this.quality = getIndexQuality(header)
+                    }
                 )
             }
             else
@@ -524,13 +524,13 @@ open class GDFlix : ExtractorApi() {
             if(text.contains("DIRECT DL")) {
                 val link = it.attr("href")
                 callback.invoke(
-                    ExtractorLink(
+                    newExtractorLink(
                         "GDFlix[Direct]",
                         "GDFLix[Direct] $fileName",
                         link,
-                        "",
-                        getIndexQuality(fileName),
-                    )
+                    ) {
+                        this.quality = getIndexQuality(fileName)
+                    }
                 )
             }
             else if(text.contains("Index Links")) {
@@ -542,13 +542,13 @@ open class GDFlix : ExtractorApi() {
                         app.get(serverUrl).document.select("div.mb-4 > a").amap {
                             val source = it.attr("href")
                             callback.invoke(
-                                ExtractorLink(
+                                newExtractorLink(
                                     "GDFlix[Index]",
                                     "GDFLix[Index] $fileName",
                                     source,
-                                    "",
-                                    getIndexQuality(fileName),
-                                )
+                                ) {
+                                    this.quality = getIndexQuality(fileName)
+                                }
                             )
                         }
                     }
@@ -597,13 +597,14 @@ open class GDFlix : ExtractorApi() {
                             downloadlink = downloadlink.replace("\\", "")
 
                             callback.invoke(
-                                ExtractorLink(
+                                newExtractorLink(
                                     "GDFlix[DriveBot]",
                                     "GDFlix[DriveBot] $fileName",
                                     downloadlink,
-                                    baseUrl,
-                                    getIndexQuality(fileName)
-                                )
+                                ) {
+                                    this.referer = baseUrl
+                                    this.quality = getIndexQuality(fileName)
+                                }
                             )
                         }
                     }
@@ -617,13 +618,13 @@ open class GDFlix : ExtractorApi() {
                     val instantLink = it.attr("href")
                     val link = app.get(instantLink, timeout = 30L, allowRedirects = false).headers["location"]?.substringAfter("url=") ?: ""
                     callback.invoke(
-                        ExtractorLink(
+                        newExtractorLink(
                             "GDFlix[Instant Download]",
                             "GDFlix[Instant Download] $fileName",
                             link,
-                            "",
-                            getIndexQuality(fileName)
-                        )
+                        ) {
+                            this.quality = getIndexQuality(fileName)
+                        }
                     )
                 } catch (e: Exception) {
                     Log.d("Instant DL", e.toString())
@@ -631,13 +632,13 @@ open class GDFlix : ExtractorApi() {
             }
             else if(text.contains("CLOUD DOWNLOAD")) {
                 callback.invoke(
-                    ExtractorLink(
+                    newExtractorLink(
                         "GDFlix[CLOUD DOWNLOAD]",
                         "GDFlix[CLOUD DOWNLOAD] $fileName",
                         it.attr("href"),
-                        "",
-                        getIndexQuality(fileName)
-                    )
+                    ) {
+                        this.quality = getIndexQuality(fileName)
+                    }
                 )
             }
             else if(text.contains("GoFile")) {
@@ -695,16 +696,16 @@ open class Gofile : ExtractorApi() {
         val fileName = children.getJSONObject(oId).getString("name")
         if(link != null && fileName != null) {
             callback.invoke(
-                ExtractorLink(
+                newExtractorLink(
                     "Gofile",
                     "Gofile $fileName",
                     link,
-                    "",
-                    getQuality(fileName),
-                    headers = mapOf(
-                        "Cookie" to "accountToken=$token",
+                ) {
+                    this.quality = getQuality(fileName)
+                    this.headers = mapOf(
+                        "Cookie" to "accountToken=$token"
                     )
-                )
+                }
             )
         }
     }
@@ -786,12 +787,10 @@ class Photolinx : ExtractorApi() {
         val jsonResponse = JSONObject(photolinxData2)
         val dwUrl = jsonResponse.optString("download_url")
         callback.invoke(
-            ExtractorLink(
+            newExtractorLink(
                 "${this.name}[Download]",
                 "${this.name}[Download] - $fileName",
                 dwUrl,
-                referer = "",
-                Qualities.Unknown.value
             )
         )
     }
@@ -818,12 +817,10 @@ class WLinkFast : ExtractorApi() {
         }
 
         callback.invoke (
-            ExtractorLink (
+            newExtractorLink (
                 this.name,
                 this.name,
                 downloadLink,
-                referer = "",
-                Qualities.Unknown.value,
             )
         )
     }
@@ -858,13 +855,14 @@ class Sendcm : ExtractorApi() {
 
         if(locationHeader.contains("watch")) {
             callback.invoke(
-                ExtractorLink(
+                newExtractorLink(
                     this.name,
                     this.name,
                     locationHeader,
-                    referer = "https://send.cm/",
-                    quality = Qualities.Unknown.value,
-                )
+                ) {
+                    this.referer = mainUrl
+                    this.quality = Qualities.Unknown.value
+                }
             )
         }
     }
