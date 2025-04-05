@@ -255,12 +255,14 @@ suspend fun loadSourceNameExtractor(
     callback: (ExtractorLink) -> Unit,
     quality: Int? = null,
 ) {
+    val scope = CoroutineScope(Dispatchers.Default + Job())
+
     loadExtractor(url, referer, subtitleCallback) { link ->
-        if(!link.source.contains("Download")) {
-            val extracted = extractSpecs(link.name)
-            val extractedSpecs = buildExtractedTitle(extracted)
-            callback.invoke(
-                newExtractorLink(
+        if (!link.source.contains("Download")) {
+            scope.launch {
+                val extracted = extractSpecs(link.name)
+                val extractedSpecs = buildExtractedTitle(extracted)
+                val newLink = newExtractorLink(
                     "$source[${link.source}]",
                     "$source[${link.source}] $extractedSpecs",
                     link.url,
@@ -271,7 +273,8 @@ suspend fun loadSourceNameExtractor(
                     this.headers = link.headers
                     this.extractorData = link.extractorData
                 }
-            )
+                callback.invoke(newLink)
+            }
         }
     }
 }
@@ -284,9 +287,11 @@ suspend fun loadCustomTagExtractor(
     callback: (ExtractorLink) -> Unit,
     quality: Int? = null,
 ) {
+    val scope = CoroutineScope(Dispatchers.Default + Job())
+
     loadExtractor(url, referer, subtitleCallback) { link ->
-        callback.invoke(
-            newExtractorLink(
+        scope.launch {
+            val newLink = newExtractorLink(
                 link.source,
                 "${link.name} $tag",
                 link.url,
@@ -297,7 +302,8 @@ suspend fun loadCustomTagExtractor(
                 this.headers = link.headers
                 this.extractorData = link.extractorData
             }
-        )
+            callback.invoke(newLink)
+        }
     }
 }
 
