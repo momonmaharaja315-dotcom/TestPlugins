@@ -183,7 +183,7 @@ suspend fun extractMdrive(url: String): List<String> {
         }}
 }
 
-fun loadNameExtractor(
+suspend fun loadNameExtractor(
     name: String? = null,
     url: String,
     referer: String? = null,
@@ -196,7 +196,7 @@ fun loadNameExtractor(
             name ?: "",
             name ?: "",
             url,
-            type = if (url.contains("m3u8"))ExtractorLinkType.M3U8 else INFER_TYPE,
+            type = if (url.contains("m3u8")) ExtractorLinkType.M3U8 else INFER_TYPE
         ) {
             this.referer = referer ?: ""
             this.quality = quality
@@ -260,7 +260,7 @@ suspend fun loadSourceNameExtractor(
                     "$source[${link.source}]",
                     "$source[${link.source}] $extractedSpecs",
                     link.url,
-                    type = link.type,
+                    type = link.type
                 ) {
                     this.referer = link.referer
                     this.quality = quality ?: link.quality
@@ -285,7 +285,7 @@ suspend fun loadCustomTagExtractor(
                 link.source,
                 "${link.name} $tag",
                 link.url,
-                link.type,
+                link.type
             ) {
                 this.quality = quality ?: link.quality
                 this.referer = link.referer
@@ -309,7 +309,7 @@ suspend fun loadCustomExtractor(
                 name ?: link.source,
                 name ?: link.name,
                 link.url,
-                type = link.type,
+                type = link.type
             ) {
                 this.quality = quality ?: link.quality
                 this.referer = link.referer
