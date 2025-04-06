@@ -855,7 +855,7 @@ open class CineStreamProvider : MainAPI() {
                             newExtractorLink(
                                 "Test1",
                                 "Test1",
-                                "${res.title}  ${res.firstAired}",
+                                "${res.year}  ${res.firstAired}",
                             )
                         )
                         val (aniId, malId) = convertTmdbToAnimeId(
