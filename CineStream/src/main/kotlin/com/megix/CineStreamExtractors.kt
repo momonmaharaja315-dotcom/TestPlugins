@@ -109,7 +109,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeTokyoInsider(
-        title: String,
+        title: String? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
@@ -1334,7 +1334,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeAnizone(
-        title: String,
+        title: String? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
@@ -1467,7 +1467,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeAllanime(
-        name: String,
+        name: String? = null,
         year: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,

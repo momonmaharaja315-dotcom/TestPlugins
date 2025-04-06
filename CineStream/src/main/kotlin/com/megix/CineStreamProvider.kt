@@ -859,8 +859,8 @@ open class CineStreamProvider : MainAPI() {
                         )
 
                         invokeAnimes(
-                            res.malId,
-                            res.aniId,
+                            malId,
+                            aniId,
                             res.episode,
                             year,
                             "imdb",
