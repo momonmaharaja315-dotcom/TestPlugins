@@ -860,7 +860,7 @@ open class CineStreamProvider : MainAPI() {
                         )
                         val (aniId, malId) = convertTmdbToAnimeId(
                             res.title,
-                            res.year,
+                            year,
                             res.firstAired,
                             if(res.tvtype == "movie") TvType.AnimeMovie else TvType.Anime,
                             callback
