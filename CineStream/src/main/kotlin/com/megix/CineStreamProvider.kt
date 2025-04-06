@@ -436,6 +436,7 @@ open class CineStreamProvider : MainAPI() {
                         res.anilistId,
                         res.episode,
                         year,
+                        "kitsu",
                         subtitleCallback,
                         callback
                     )
@@ -848,6 +849,26 @@ open class CineStreamProvider : MainAPI() {
                         callback,
                     )
                 },
+                {
+                    if(res.isAnime) {
+                        val (aniId, malId) = convertTmdbToAnimeId(
+                            res.title,
+                            res.year,
+                            res.firstAired,
+                            if(res.tvtype == "movie") TvType.AnimeMovie else TvType.Anime
+                        )
+
+                        invokeAnimes(
+                            res.malId,
+                            res.aniId,
+                            res.episode,
+                            year,
+                            "imdb",
+                            subtitleCallback,
+                            callback
+                        )
+                    }
+                }
             )
         }
         return true
