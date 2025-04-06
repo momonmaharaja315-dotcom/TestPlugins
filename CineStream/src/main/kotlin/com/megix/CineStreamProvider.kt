@@ -851,11 +851,27 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     if(res.isAnime) {
+                        callback.invoke(
+                            newExtractorLink(
+                                "Test1",
+                                "Test1",
+                                "${res.title}  ${res.firstAired}",
+                            )
+                        )
                         val (aniId, malId) = convertTmdbToAnimeId(
                             res.title,
                             res.year,
                             res.firstAired,
-                            if(res.tvtype == "movie") TvType.AnimeMovie else TvType.Anime
+                            if(res.tvtype == "movie") TvType.AnimeMovie else TvType.Anime,
+                            callback
+                        )
+
+                        callback.invoke(
+                            newExtractorLink(
+                                "Test3",
+                                "Test3",
+                                "$aniId  $malId",
+                            )
                         )
 
                         invokeAnimes(
