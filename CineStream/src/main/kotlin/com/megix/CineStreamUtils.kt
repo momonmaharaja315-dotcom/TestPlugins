@@ -13,6 +13,7 @@ import kotlinx.coroutines.delay
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import com.lagradost.nicehttp.RequestBodyTypes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers

@@ -109,7 +109,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeTokyoInsider(
-        title: String? = null,
+        title: String,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
@@ -671,7 +671,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 }
             },
             {
-                if(origin == "imdb") invokeTokyoInsider(
+                if(origin == "imdb" && zorotitle != null) invokeTokyoInsider(
                     zorotitle,
                     episode,
                     subtitleCallback,
@@ -679,7 +679,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 )
             },
             {
-                if(origin == "imdb") invokeAllanime(
+                if(origin == "imdb" && zorotitle != null) invokeAllanime(
                     zorotitle,
                     year,
                     episode,
@@ -688,7 +688,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 )
             },
             {
-                if(origin == "imdb") invokeAnizone(
+                if(origin == "imdb" && zorotitle != null) invokeAnizone(
                     zorotitle,
                     episode,
                     subtitleCallback,
@@ -1334,7 +1334,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeAnizone(
-        title: String? = null,
+        title: String,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
@@ -1467,7 +1467,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeAllanime(
-        name: String? = null,
+        name: String,
         year: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
