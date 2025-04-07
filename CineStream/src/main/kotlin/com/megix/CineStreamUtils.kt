@@ -395,20 +395,11 @@ suspend fun convertTmdbToAnimeId(
     title: String?,
     year: Int?,
     airedDate: String?,
-    type: TvType,
-    callback:(ExtractorLink) -> Unit
+    type: TvType
 ): AniIds {
     val sAiredDate = airedDate?.split("-")
     val airedYear = sAiredDate?.firstOrNull()?.toIntOrNull()
     val airedSeason = getSeason(sAiredDate?.get(1)?.toIntOrNull())
-
-    callback.invoke(
-        newExtractorLink(
-            "Test2",
-            "Test2",
-            "$year $airedYear $airedSeason",
-        )
-    )
 
     return if (type == TvType.AnimeMovie) {
         tmdbToAnimeId(title, year, "", type)

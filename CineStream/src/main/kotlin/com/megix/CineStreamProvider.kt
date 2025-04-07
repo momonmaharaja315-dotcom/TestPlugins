@@ -44,6 +44,7 @@ import com.megix.CineStreamExtractors.invokeMoviesflix
 import com.megix.CineStreamExtractors.invokeEmbed123
 import com.megix.CineStreamExtractors.invokeHdmovie2
 import com.megix.CineStreamExtractors.invokeHindmoviez
+import com.megix.CineStreamExtractors.invokeMostraguarda
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -70,6 +71,7 @@ open class CineStreamProvider : MainAPI() {
         const val WHVXSubsAPI = "https://subs.whvx.net"
         const val WYZIESubsAPI = "https://subs.wyzie.ru"
         const val MultiembedAPI = "https://hin.autoembed.cc"
+        const val MostraguardaAPI = "https://mostraguarda.stream"
         const val NonoembedAPI = "https://nono.autoembed.cc"
         const val WHVXAPI = "https://api.whvx.net"
         const val uhdmoviesAPI = "https://uhdmovies.wales"
@@ -811,6 +813,15 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
+                    invokeMostraguarda(
+                        res.id,
+                        res.season,
+                        res.episode,
+                        subtitleCallback,
+                        callback
+                    )
+                },
+                {
                     invokeNonoAutoembed(
                         res.id,
                         res.season,
@@ -851,34 +862,18 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     if(res.isAnime) {
-                        callback.invoke(
-                            newExtractorLink(
-                                "Test1",
-                                "Test1",
-                                "${res.year}  ${res.firstAired}",
-                            )
-                        )
                         val (aniId, malId) = convertTmdbToAnimeId(
                             res.title,
                             year,
                             res.firstAired,
-                            if(res.tvtype == "movie") TvType.AnimeMovie else TvType.Anime,
-                            callback
-                        )
-
-                        callback.invoke(
-                            newExtractorLink(
-                                "Test3",
-                                "Test3",
-                                "$aniId  $malId",
-                            )
+                            if(res.tvtype == "movie") TvType.AnimeMovie else TvType.Anime
                         )
 
                         invokeAnimes(
                             malId,
                             aniId,
                             res.episode,
-                            year,
+                            seasonYear,
                             "imdb",
                             subtitleCallback,
                             callback
