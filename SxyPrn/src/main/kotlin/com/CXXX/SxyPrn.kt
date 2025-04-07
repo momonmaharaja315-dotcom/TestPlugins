@@ -126,7 +126,7 @@ class SxyPrn : MainAPI() {
             loadExtractor(it.attr("href"), "", subtitleCallback, callback)
         }
 
-        val url = app.get(data, allowRedirects = false, interceptor = WebViewResolver(
+        val url = app.get(data, interceptor = WebViewResolver(
             Regex(""".vid""")
         )).headers["location"] ?: ""
 
