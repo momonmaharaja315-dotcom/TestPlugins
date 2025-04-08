@@ -390,17 +390,27 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    fun decodeHtml(encodedArray: List<String>): String {
+    fun decodeHtml(encodedArray: Array<String>): String {
         val joined = encodedArray.joinToString("")
 
-        return joined
+        val unescaped = joined
             .replace("\\\"", "\"")
             .replace("\\'", "'")
+
+        val cleaned = unescaped
             .replace("\\n", "\n")
             .replace("\\t", "\t")
             .replace("\\r", "\r")
-            .replace("\\", "")
+
+        val decoded = cleaned
+            .replace("&quot;", "\"")
+            .replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&amp;", "&")
+
+        return decoded
     }
+
 
     suspend fun invokeProtonmovies(
         id: String? = null,
