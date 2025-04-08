@@ -452,12 +452,12 @@ object CineStreamExtractors : CineStreamProvider() {
                     document.toString(),
                 )
             )
-            val scriptContent = document.select("script:contains(decodeURIComponent)").text()
+            val scriptContent = document.selectFirst("script:containsData(decodeURIComponent)")?.data().toString()
             callback.invoke(
                 newExtractorLink(
                     "Proton[scriptContent]",
                     "Proton[scriptContent]",
-                    scriptContent.toString(),
+                    scriptContent,
                 )
             )
             val splitByEqual = scriptContent.split(" = ")
