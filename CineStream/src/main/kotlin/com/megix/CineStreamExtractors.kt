@@ -444,7 +444,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     link,
                 )
             )
-            val scriptContent = app.get(link, headers = headers).document.select("script:contains(decodeURIComponent)").text()
+            val scriptContent = app.get("$protonmoviesAPIlink", headers = headers).document.select("script:contains(decodeURIComponent)").text()
             val splitByEqual = scriptContent.split(" = ")
             if (splitByEqual.size > 1) {
                 val partAfterEqual = splitByEqual[1]
