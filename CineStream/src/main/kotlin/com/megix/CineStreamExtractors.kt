@@ -12,7 +12,7 @@ import java.net.URLEncoder
 import okhttp3.FormBody
 import java.nio.charset.StandardCharsets
 import org.jsoup.Jsoup
-import org.json.JSONObject
+import org.json.JSONArray
 import com.lagradost.cloudstream3.argamap
 import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 import com.lagradost.cloudstream3.mvvm.safeApiCall
