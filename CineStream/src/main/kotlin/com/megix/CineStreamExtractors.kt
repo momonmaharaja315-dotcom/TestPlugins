@@ -421,43 +421,50 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
+        val headers = mapOf(
+            "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+            "Referer" to protonmoviesAPI
+        )
         val url = "$protonmoviesAPI/search/$id"
         val text = app.get(
             url,
-            headers = mapOf("User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
-                "Referer" to protonmoviesAPI
-            )
+            headers = headers
         ).text
         val regex = Regex("""\[(?=.*?\"<div class\")(.*?)\]""")
         val htmlArray = regex.findAll(text).map { it.value }.toList()
         if (htmlArray.isNotEmpty()) {
             val lastJsonArray = JSONArray(htmlArray.last())
             val html = decodeHtml(Array(lastJsonArray.length()) { i -> lastJsonArray.getString(i) })
-            callback.invoke(
-                newExtractorLink(
-                    "Proton[html]",
-                    "Proton[html]",
-                    html,
-                )
-            )
             val doc = Jsoup.parse(html)
+            val link = doc.select(".col.mb-4 h5 a").attr("href")
             callback.invoke(
                 newExtractorLink(
-                    "Proton[doc]",
-                    "Proton[doc]",
-                    doc.toString(),
+                    "Proton[link]",
+                    "Proton[link]",
+                    link,
                 )
             )
-        }
+            val scriptContent = app.get(link, headers = headers).document.select("script:contains(decodeURIComponent)").text()
+            val splitByEqual = scriptContent.split(" = ")
+            if (splitByEqual.size > 1) {
+                val partAfterEqual = splitByEqual[1]
+                val trimmed = partAfterEqual.split("protomovies")[0].trim()
+                val sliced = if (trimmed.isNotEmpty()) trimmed.dropLast(1) else ""
 
-        // val link = doc.select(".col.mb-4 h5 a").attr("href")
-        // callback.invoke(
-        //     newExtractorLink(
-        //         "Proton[link]",
-        //         "Proton[link]",
-        //         link,
-        //     )
-        // )
+                val jsonArray = JSONArray(sliced)
+                val htmlString = decodeHtml(Array(jsonArray.length()) { i -> jsonArray.getString(i) })
+
+                val decodedDoc = Jsoup.parse(htmlString)
+
+                callback.invoke(
+                    newExtractorLink(
+                        "Proton[decodedDoc]",
+                        "Proton[decodedDoc]",
+                        decodedDoc.toString(),
+                    )
+                )
+            }
+        }
     }
 
     suspend fun invokeMoviesflix(
