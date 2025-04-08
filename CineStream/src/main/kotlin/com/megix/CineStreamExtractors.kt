@@ -421,9 +421,18 @@ object CineStreamExtractors : CineStreamProvider() {
         val html = decodeHtml(listOf(htmlArray.last()))
         callback.invoke(
             newExtractorLink(
-                "Proton",
-                "Proton",
+                "Proton[html]",
+                "Proton[html]",
                 html,
+            )
+        )
+        val doc = Jsoup.parse(html)
+        val link = doc.select(".col.mb-4 h5 a").attr("href")
+        callback.invoke(
+            newExtractorLink(
+                "Proton[link]",
+                "Proton[link]",
+                link,
             )
         )
     }
