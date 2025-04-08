@@ -390,7 +390,7 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    fun decodeHtml(encodedArray: Array<String>): String {
+    fun decodeHtml(encodedArray: List<String>): String {
         val joined = encodedArray.joinToString("")
 
         val unescaped = joined
