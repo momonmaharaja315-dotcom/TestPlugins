@@ -445,7 +445,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 newExtractorLink(
                     "Proton[doc]",
                     "Proton[doc]",
-                    html,
+                    doc,
                 )
             )
         }
