@@ -12,6 +12,7 @@ import java.net.URLEncoder
 import okhttp3.FormBody
 import java.nio.charset.StandardCharsets
 import org.jsoup.Jsoup
+import org.json.JSONObject
 import com.lagradost.cloudstream3.argamap
 import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 import com.lagradost.cloudstream3.mvvm.safeApiCall
@@ -428,7 +429,7 @@ object CineStreamExtractors : CineStreamProvider() {
             )
         ).text
         val regex = Regex("""\[(?=.*?\"<div class\")(.*?)\]""")
-        val htmlArray = regex.findAll(data).map { it.value }.toList()
+        val htmlArray = regex.findAll(text).map { it.value }.toList()
         if (htmlArray.isNotEmpty()) {
             val lastJsonArray = JSONArray(htmlArray.last())
             val html = decodeHtml(Array(lastJsonArray.length()) { i -> lastJsonArray.getString(i) })
