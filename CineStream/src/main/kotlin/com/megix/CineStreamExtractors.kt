@@ -390,7 +390,7 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    fun decodeHtml(encodedArray: List<String>): String {
+    fun decodeHtml(encodedArray: Array<String>): String {
         val joined = encodedArray.joinToString("")
 
         val unescaped = joined
@@ -412,6 +412,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
 
+
     suspend fun invokeProtonmovies(
         id: String? = null,
         season: Int? = null,
@@ -427,24 +428,35 @@ object CineStreamExtractors : CineStreamProvider() {
             )
         ).text
         val regex = Regex("""\[(?=.*?\"<div class\")(.*?)\]""")
-        val htmlArray = regex.findAll(text).map { it.groupValues[0] }.toList()
-        val html = decodeHtml(listOf(htmlArray.last()))
-        callback.invoke(
-            newExtractorLink(
-                "Proton[html]",
-                "Proton[html]",
-                html,
+        val htmlArray = regex.findAll(data).map { it.value }.toList()
+        if (htmlArray.isNotEmpty()) {
+            val lastJsonArray = JSONArray(htmlArray.last())
+            val html = decodeHtml(Array(lastJsonArray.length()) { i -> lastJsonArray.getString(i) })
+            callback.invoke(
+                newExtractorLink(
+                    "Proton[html]",
+                    "Proton[html]",
+                    html,
+                )
             )
-        )
-        val doc = Jsoup.parse(html)
-        val link = doc.select(".col.mb-4 h5 a").attr("href")
-        callback.invoke(
-            newExtractorLink(
-                "Proton[link]",
-                "Proton[link]",
-                link,
+            val doc = Jsoup.parse(html)
+            callback.invoke(
+                newExtractorLink(
+                    "Proton[doc]",
+                    "Proton[doc]",
+                    html,
+                )
             )
-        )
+        }
+
+        // val link = doc.select(".col.mb-4 h5 a").attr("href")
+        // callback.invoke(
+        //     newExtractorLink(
+        //         "Proton[link]",
+        //         "Proton[link]",
+        //         link,
+        //     )
+        // )
     }
 
     suspend fun invokeMoviesflix(
