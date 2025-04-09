@@ -473,14 +473,26 @@ suspend fun gofileExtractor(
 ) {
     val mainUrl = "https://gofile.io"
     val mainApi = "https://api.gofile.io"
-    val headers = mapOf(
-        "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
+    val res = app.get(url)
+    callback.invoke(
+        newExtractorLink(
+            "res",
+            "res",
+            res.text,
+        )
     )
-    val res = app.get(url, headers = headers)
     val id = Regex("/(?:\\?c=|d/)([\\da-zA-Z-]+)").find(url)?.groupValues?.get(1) ?: return
-    val genAccountRes = app.post("$mainApi/accounts", headers = headers).text
+    val genAccountRes = app.post("$mainApi/accounts").text
     val jsonResp = JSONObject(genAccountRes)
     val token = jsonResp.getJSONObject("data").getString("token") ?: return
+
+    callback.invoke(
+        newExtractorLink(
+            "token",
+            "token",
+            token,
+        )
+    )
 
     val globalRes = app.get("$mainUrl/dist/js/global.js").text
     val wt = Regex("""appdata\.wt\s*=\s*[\"']([^\"']+)[\"']""").find(globalRes)?.groupValues?.get(1) ?: return
@@ -488,7 +500,6 @@ suspend fun gofileExtractor(
     val response = app.get("$mainApi/contents/$id?wt=$wt",
         headers = mapOf(
             "Authorization" to "Bearer $token",
-            "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
         )
     ).text
 
