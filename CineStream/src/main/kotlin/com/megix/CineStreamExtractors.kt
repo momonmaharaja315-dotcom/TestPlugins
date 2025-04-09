@@ -498,7 +498,8 @@ object CineStreamExtractors : CineStreamProvider() {
                     "Referer" to protonmoviesAPI,
                     "Content-Type" to "multipart/form-data",
                 )
-                val idData = app.post("$protonmoviesAPI/ppd.php",
+                val idData = app.post(
+                    "$protonmoviesAPI/ppd.php",
                     headers = postHeaders,
                     requestBody = requestBody
                 ).text
@@ -514,7 +515,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 ).text
 
                 JSONObject(idRes).getJSONObject("ppd")?.getJSONObject("gofile.io")?.optString("link")?.let {
-                    Gofile().getUrl(link, "", subtitleCallback, callback)
+                    Gofile().getUrl(it, "", subtitleCallback, callback)
                 }
             }
         }
