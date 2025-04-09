@@ -429,8 +429,6 @@ object CineStreamExtractors : CineStreamProvider() {
         return null
     }
 
-
-
     suspend fun invokeProtonmovies(
         id: String? = null,
         season: Int? = null,
@@ -512,7 +510,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     callback.invoke(
                         newExtractorLink(
                             "Proton[gofile]",
-                            "Proton[gofile]"
+                            "Proton[gofile]",
                             it,
                         )
                     )
