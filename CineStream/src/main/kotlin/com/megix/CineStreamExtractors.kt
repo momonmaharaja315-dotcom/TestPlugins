@@ -468,7 +468,8 @@ object CineStreamExtractors : CineStreamProvider() {
                             )
                         )
 
-                        val doc2 = app.get("${protonmoviesAPI}${source}", headers = headers).document
+                        val doc2 = app.get(source, headers = headers).document
+
                         val decodedDoc = decodeMeta(doc2)
                         if(decodedDoc != null) {
                             getProtonStream(decodedDoc, subtitleCallback, callback)
