@@ -447,7 +447,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 val htmlString = decodeHtml(Array(jsonArray.length()) { i -> jsonArray.getString(i) })
                 val decodedDoc = Jsoup.parse(htmlString)
                 if(episode == null) {
-                    getProtonStream(decodedDoc)
+                    getProtonStream(decodedDoc, subtitleCallback, callback)
                 } else{
                     //TODO
                     callback.invoke(
@@ -464,12 +464,14 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun getProtonStream(
-        doc: Document
+        doc: Document,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit,
     ) {
         doc.select("tr")
             .filter { it.text().contains("1080p") || it.text().contains("720p") || it.text().contains("480p") }
-            .amap {
-            val id = it.select("button:contains(Info)").attr("id").split("-").getOrNull(1)
+            .amap { tr ->
+            val id = tr.select("button:contains(Info)").attr("id").split("-").getOrNull(1)
 
             if(id != null) {
                 val requestBody = FormBody.Builder()
