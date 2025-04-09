@@ -462,7 +462,7 @@ object CineStreamExtractors : CineStreamProvider() {
                         newExtractorLink(
                             "Proton[id]",
                             "Proton[id]",
-                            id
+                            id.toString()
                         )
                     )
                     if(id != null) {
