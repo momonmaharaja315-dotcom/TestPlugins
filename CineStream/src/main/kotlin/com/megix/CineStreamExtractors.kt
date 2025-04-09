@@ -427,10 +427,7 @@ object CineStreamExtractors : CineStreamProvider() {
             "Referer" to protonmoviesAPI
         )
         val url = "$protonmoviesAPI/search/$id"
-        val text = app.get(
-            url,
-            headers = headers
-        ).text
+        val text = app.get(url, headers = headers).text
         val regex = Regex("""\[(?=.*?\"<div class\")(.*?)\]""")
         val htmlArray = regex.findAll(text).map { it.value }.toList()
         if (htmlArray.isNotEmpty()) {
@@ -448,57 +445,61 @@ object CineStreamExtractors : CineStreamProvider() {
                 val jsonArray = JSONArray(sliced)
                 val htmlString = decodeHtml(Array(jsonArray.length()) { i -> jsonArray.getString(i) })
                 val decodedDoc = Jsoup.parse(htmlString)
-
-                decodedDoc.select("tr")
-                    .filter { it.text().contains("1080p") || it.text().contains("720p") || it.text().contains("480p") }
-                    .amap {
-                    val id = it.select("button:contains(Info)").attr("id").split("-").getOrNull(1)
-                    callback.invoke(
-                        newExtractorLink(
-                            "Proton[id]",
-                            "Proton[id]",
-                            id.toString()
-                        )
-                    )
-                    if(id != null) {
-                        val requestBody = FormBody.Builder()
-                            .add("downloadid", id)
-                            .add("token", "ok")
-                            .build()
-                        val postHeaders = mapOf(
-                            "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
-                            "Referer" to protonmoviesAPI,
-                            "Content-Type" to "multipart/form-data",
-                        )
-                        val idData = app.post("$protonmoviesAPI/ppd.php",
-                            headers = postHeaders,
-                            requestBody = requestBody
-                        ).text
-
-                        val idRes = app.post(
-                            "$protonmoviesAPI/tmp/$idData",
-                            headers = headers
-                        ).text
-                        callback.invoke(
-                            newExtractorLink(
-                                "Proton[tmp]",
-                                "Proton[tmp]",
-                                idRes
-                            )
-                        )
-
-                        JSONObject(idRes).getJSONObject("ppd")?.getJSONObject("gofile.io")?.optString("link")?.let {
-                            callback.invoke(
-                                newExtractorLink(
-                                    "Proton[gofile]",
-                                    "Proton[gofile]",
-                                    link
-                                )
-                            )
-                        }
-                    }
+                if(episode == null) {
+                    getProtonStream(decodedDoc)
+                } else{
+                    //TODO
                 }
 
+            }
+        }
+    }
+
+    suspend fun getProtonStream(
+        doc: Document
+    ) {
+        doc.select("tr")
+            .filter { it.text().contains("1080p") || it.text().contains("720p") || it.text().contains("480p") }
+            .amap {
+            val id = it.select("button:contains(Info)").attr("id").split("-").getOrNull(1)
+
+            if(id != null) {
+                val requestBody = FormBody.Builder()
+                    .add("downloadid", id)
+                    .add("token", "ok")
+                    .build()
+                val postHeaders = mapOf(
+                    "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+                    "Referer" to protonmoviesAPI,
+                    "Content-Type" to "multipart/form-data",
+                )
+                val idData = app.post("$protonmoviesAPI/ppd.php",
+                    headers = postHeaders,
+                    requestBody = requestBody
+                ).text
+
+                val idRes = app.post(
+                    "$protonmoviesAPI/tmp/$idData",
+                    headers = headers
+                ).text
+
+                callback.invoke(
+                    newExtractorLink(
+                        "Proton[tmp]",
+                        "Proton[tmp]",
+                        idRes
+                    )
+                )
+
+                JSONObject(idRes).getJSONObject("ppd")?.getJSONObject("gofile.io")?.optString("link")?.let {
+                    callback.invoke(
+                        newExtractorLink(
+                            "Proton[gofile]",
+                            "Proton[gofile]",
+                            it
+                        )
+                    )
+                }
             }
         }
     }
