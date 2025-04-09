@@ -460,14 +460,6 @@ object CineStreamExtractors : CineStreamProvider() {
                     val episodeDiv = decodedDoc.select("div.episode-block:has(div.episode-number:matchesOwn(S${season}E${episode}))").firstOrNull()
                     episodeDiv?.selectFirst("a")?.attr("href")?.let {
                         val source = protonmoviesAPI + it
-                        callback.invoke(
-                            newExtractorLink(
-                                "Proton[source]",
-                                "Proton[source]",
-                                source,
-                            )
-                        )
-
                         val doc2 = app.get(source, headers = headers).document
 
                         val decodedDoc = decodeMeta(doc2)
@@ -517,7 +509,14 @@ object CineStreamExtractors : CineStreamProvider() {
                 ).text
 
                 JSONObject(idRes).getJSONObject("ppd")?.getJSONObject("gofile.io")?.optString("link")?.let {
-                    Gofile().getUrl(it, "", subtitleCallback, callback)
+                    callback.invoke(
+                        newExtractorLink(
+                            "Proton[gofile]",
+                            "Proton[gofile]"
+                            it,
+                        )
+                    )
+                    gofileExtractor("Protonmovies", it, "", subtitleCallback, callback)
                 }
             }
         }

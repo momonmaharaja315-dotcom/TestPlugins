@@ -515,6 +515,15 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
+                    invokeProtonmovies(
+                        res.imdb_id,
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        subtitleCallback,
+                        callback,
+                    )
+                },
+                {
                     invokeHindmoviez(
                         res.imdb_id,
                         res.imdbSeason,
