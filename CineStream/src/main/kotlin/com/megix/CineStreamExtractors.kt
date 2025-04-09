@@ -437,38 +437,15 @@ object CineStreamExtractors : CineStreamProvider() {
             val html = decodeHtml(Array(lastJsonArray.length()) { i -> lastJsonArray.getString(i) })
             val doc = Jsoup.parse(html)
             val link = doc.select(".col.mb-4 h5 a").attr("href")
-            callback.invoke(
-                newExtractorLink(
-                    "Proton[link]",
-                    "Proton[link]",
-                    link,
-                )
-            )
             val document = app.get("${protonmoviesAPI}${link}", headers = headers).document
-            callback.invoke(
-                newExtractorLink(
-                    "Proton[document]",
-                    "Proton[document]",
-                    document.toString(),
-                )
-            )
             val scriptContent = document.selectFirst("script:containsData(decodeURIComponent)")?.data().toString()
-            callback.invoke(
-                newExtractorLink(
-                    "Proton[scriptContent]",
-                    "Proton[scriptContent]",
-                    scriptContent,
-                )
-            )
             val splitByEqual = scriptContent.split(" = ")
             if (splitByEqual.size > 1) {
                 val partAfterEqual = splitByEqual[1]
                 val trimmed = partAfterEqual.split("protomovies")[0].trim()
                 val sliced = if (trimmed.isNotEmpty()) trimmed.dropLast(1) else ""
-
                 val jsonArray = JSONArray(sliced)
                 val htmlString = decodeHtml(Array(jsonArray.length()) { i -> jsonArray.getString(i) })
-
                 val decodedDoc = Jsoup.parse(htmlString)
 
                 callback.invoke(
@@ -478,6 +455,52 @@ object CineStreamExtractors : CineStreamProvider() {
                         decodedDoc.toString(),
                     )
                 )
+
+                decodedDoc.select("tr:contains(1080p|720|480p)").amap {
+                    val id = it.select("button:contains(Info)").attr("id").split("-").getOrNull(1)
+                    callback.invoke(
+                        newExtractorLink(
+                            "Proton[id]",
+                            "Proton[id]",
+                            id
+                        )
+                    )
+                    if(id != null) {
+                        val requestBody = FormBody.Builder()
+                            .add("downloadid", id)
+                            .add("token", "ok")
+                            .build()
+                        val postHeaders = mapOf(
+                            "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+                            "Referer" to protonmoviesAPI,
+                            "Content-Type" to "multipart/form-data",
+                        )
+                        val idData = app.post("$protonmoviesAPI/ppd.php",
+                            headers = postHeaders,
+                            requestBody = requestBody
+                        ).text
+                        callback.invoke(
+                            newExtractorLink(
+                                "Proton[idData]",
+                                "Proton[idData]",
+                                idData
+                            )
+                        )
+
+                        val idRes = app.post(
+                            "$protonmoviesAPI/tmp/$idData",
+                            headers = headers
+                        ).text
+                        callback.invoke(
+                            newExtractorLink(
+                                "Proton[tmp]",
+                                "Proton[tmp]",
+                                idRes
+                            )
+                        )
+                    }
+                }
+
             }
         }
     }
