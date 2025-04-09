@@ -457,8 +457,8 @@ object CineStreamExtractors : CineStreamProvider() {
                 if(episode == null) {
                     getProtonStream(decodedDoc, subtitleCallback, callback)
                 } else{
-                    val episodeDiv = document.select("div.episode-block:has(div.episode-number:matchesOwn(S1E2))").firstOrNull()
-                    episodeDiv?.selectFirst("a[href]")?.attr("href")?.let {
+                    val episodeDiv = decodedDoc.select("div.episode-block:has(div.episode-number:matchesOwn(S${season}E${episode}))").firstOrNull()
+                    episodeDiv?.selectFirst("a")?.attr("href")?.let {
                         val source = protonmoviesAPI + it
                         callback.invoke(
                             newExtractorLink(
@@ -467,6 +467,7 @@ object CineStreamExtractors : CineStreamProvider() {
                                 source,
                             )
                         )
+
                         val doc2 = app.get("${protonmoviesAPI}${source}", headers = headers).document
                         val decodedDoc = decodeMeta(doc2)
                         if(decodedDoc != null) {
