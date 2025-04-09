@@ -456,7 +456,9 @@ object CineStreamExtractors : CineStreamProvider() {
                     )
                 )
 
-                decodedDoc.select("tr:contains(1080p|720|480p)").amap {
+                decodedDoc.select("tr")
+                    .filter { it.text().contains("1080p") || it.text().contains("720p") || it.text().contains("480p") }
+                    .amap {
                     val id = it.select("button:contains(Info)").attr("id").split("-").getOrNull(1)
                     callback.invoke(
                         newExtractorLink(
