@@ -12,6 +12,7 @@ import java.net.URLEncoder
 import okhttp3.FormBody
 import java.nio.charset.StandardCharsets
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import org.json.JSONArray
 import org.json.JSONObject
 import com.lagradost.cloudstream3.argamap
@@ -449,6 +450,13 @@ object CineStreamExtractors : CineStreamProvider() {
                     getProtonStream(decodedDoc)
                 } else{
                     //TODO
+                    callback.invoke(
+                        newExtractorLink(
+                            "Proton[episodes]",
+                            "Proton[episodes]",
+                            decodedDoc.selectFirst("#episodes").toString(),
+                        )
+                    )
                 }
 
             }
@@ -478,18 +486,15 @@ object CineStreamExtractors : CineStreamProvider() {
                     requestBody = requestBody
                 ).text
 
+                val headers = mapOf(
+                    "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+                    "Referer" to protonmoviesAPI
+                )
+
                 val idRes = app.post(
                     "$protonmoviesAPI/tmp/$idData",
                     headers = headers
                 ).text
-
-                callback.invoke(
-                    newExtractorLink(
-                        "Proton[tmp]",
-                        "Proton[tmp]",
-                        idRes
-                    )
-                )
 
                 JSONObject(idRes).getJSONObject("ppd")?.getJSONObject("gofile.io")?.optString("link")?.let {
                     callback.invoke(
