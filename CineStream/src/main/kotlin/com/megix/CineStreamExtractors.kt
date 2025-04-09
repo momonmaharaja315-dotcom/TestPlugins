@@ -13,6 +13,7 @@ import okhttp3.FormBody
 import java.nio.charset.StandardCharsets
 import org.jsoup.Jsoup
 import org.json.JSONArray
+import org.json.JSONObject
 import com.lagradost.cloudstream3.argamap
 import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 import com.lagradost.cloudstream3.mvvm.safeApiCall
@@ -448,14 +449,6 @@ object CineStreamExtractors : CineStreamProvider() {
                 val htmlString = decodeHtml(Array(jsonArray.length()) { i -> jsonArray.getString(i) })
                 val decodedDoc = Jsoup.parse(htmlString)
 
-                callback.invoke(
-                    newExtractorLink(
-                        "Proton[decodedDoc]",
-                        "Proton[decodedDoc]",
-                        decodedDoc.toString(),
-                    )
-                )
-
                 decodedDoc.select("tr")
                     .filter { it.text().contains("1080p") || it.text().contains("720p") || it.text().contains("480p") }
                     .amap {
@@ -481,13 +474,6 @@ object CineStreamExtractors : CineStreamProvider() {
                             headers = postHeaders,
                             requestBody = requestBody
                         ).text
-                        callback.invoke(
-                            newExtractorLink(
-                                "Proton[idData]",
-                                "Proton[idData]",
-                                idData
-                            )
-                        )
 
                         val idRes = app.post(
                             "$protonmoviesAPI/tmp/$idData",
@@ -500,6 +486,16 @@ object CineStreamExtractors : CineStreamProvider() {
                                 idRes
                             )
                         )
+
+                        JSONObject(idRes).getJSONObject("ppd")?.getJSONObject("gofile.io")?.optString("link")?.let {
+                            callback.invoke(
+                                newExtractorLink(
+                                    "Proton[gofile]",
+                                    "Proton[gofile]",
+                                    link
+                                )
+                            )
+                        }
                     }
                 }
 
