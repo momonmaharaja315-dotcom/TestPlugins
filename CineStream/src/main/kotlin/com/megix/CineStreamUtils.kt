@@ -473,7 +473,7 @@ suspend fun gofileExtractor(
 ) {
     val mainUrl = "https://gofile.io"
     val mainApi = "https://api.gofile.io"
-    val res = app.get(url)
+    //val res = app.get(url)
     val id = Regex("/(?:\\?c=|d/)([\\da-zA-Z-]+)").find(url)?.groupValues?.get(1) ?: return
     val genAccountRes = app.post("$mainApi/accounts").text
     val jsonResp = JSONObject(genAccountRes)
