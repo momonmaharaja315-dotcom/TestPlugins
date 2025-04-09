@@ -283,30 +283,30 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    suspend fun invokeEmbed123(
-        id: String? = null,
-        season: Int? = null,
-        episode: Int? = null,
-        callback: (ExtractorLink) -> Unit,
-    ) {
-        val type = if(season == null) "movie" else "tv"
-        val url = if(season == null) "$embed123API/$type/$id" else "$embed123API/$type/$id/$season/$episode"
-        val json = app.get(url).text
-        val data = tryParseJson<Embed123>(json) ?: return
+    // suspend fun invokeEmbed123(
+    //     id: String? = null,
+    //     season: Int? = null,
+    //     episode: Int? = null,
+    //     callback: (ExtractorLink) -> Unit,
+    // ) {
+    //     val type = if(season == null) "movie" else "tv"
+    //     val url = if(season == null) "$embed123API/$type/$id" else "$embed123API/$type/$id/$season/$episode"
+    //     val json = app.get(url).text
+    //     val data = tryParseJson<Embed123>(json) ?: return
 
-        data.playlist.map {
-            callback.invoke(
-                newExtractorLink(
-                    "Embed123",
-                    "Embed123",
-                    it.file,
-                    type = if(it.type == "hls") ExtractorLinkType.M3U8 else INFER_TYPE,
-                ) {
-                    this.headers = mapOf("Origin" to "https://play2.123embed.net")
-                }
-            )
-        }
-    }
+    //     data.playlist.map {
+    //         callback.invoke(
+    //             newExtractorLink(
+    //                 "Embed123",
+    //                 "Embed123",
+    //                 it.file,
+    //                 type = if(it.type == "hls") ExtractorLinkType.M3U8 else INFER_TYPE,
+    //             ) {
+    //                 this.headers = mapOf("Origin" to "https://play2.123embed.net")
+    //             }
+    //         )
+    //     }
+    // }
 
     suspend fun invokeHdmovie2(
         title: String? = null,
@@ -509,9 +509,9 @@ object CineStreamExtractors : CineStreamProvider() {
                 JSONObject(idRes).getJSONObject("ppd")?.getJSONObject("gofile.io")?.optString("link")?.let {
                     callback.invoke(
                         newExtractorLink(
-                            "Proton[gofile]",
-                            "Proton[gofile]",
-                            it,
+                            "gofile",
+                            "gofile",
+                            it
                         )
                     )
                     gofileExtractor("Protonmovies", it, "", subtitleCallback, callback)
