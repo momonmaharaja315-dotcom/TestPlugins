@@ -414,6 +414,21 @@ object CineStreamExtractors : CineStreamProvider() {
         return decoded
     }
 
+    fun decodeMeta(document: Document): Document? {
+        val scriptContent = document.selectFirst("script:containsData(decodeURIComponent)")?.data().toString()
+        val splitByEqual = scriptContent.split(" = ")
+        if (splitByEqual.size > 1) {
+            val partAfterEqual = splitByEqual[1]
+            val trimmed = partAfterEqual.split("protomovies")[0].trim()
+            val sliced = if (trimmed.isNotEmpty()) trimmed.dropLast(1) else ""
+            val jsonArray = JSONArray(sliced)
+            val htmlString = decodeHtml(Array(jsonArray.length()) { i -> jsonArray.getString(i) })
+            val decodedDoc = Jsoup.parse(htmlString)
+            return decodedDoc
+        }
+        return null
+    }
+
 
 
     suspend fun invokeProtonmovies(
@@ -437,28 +452,28 @@ object CineStreamExtractors : CineStreamProvider() {
             val doc = Jsoup.parse(html)
             val link = doc.select(".col.mb-4 h5 a").attr("href")
             val document = app.get("${protonmoviesAPI}${link}", headers = headers).document
-            val scriptContent = document.selectFirst("script:containsData(decodeURIComponent)")?.data().toString()
-            val splitByEqual = scriptContent.split(" = ")
-            if (splitByEqual.size > 1) {
-                val partAfterEqual = splitByEqual[1]
-                val trimmed = partAfterEqual.split("protomovies")[0].trim()
-                val sliced = if (trimmed.isNotEmpty()) trimmed.dropLast(1) else ""
-                val jsonArray = JSONArray(sliced)
-                val htmlString = decodeHtml(Array(jsonArray.length()) { i -> jsonArray.getString(i) })
-                val decodedDoc = Jsoup.parse(htmlString)
+            val decodedDoc = decodeMeta(document)
+            if (decodedDoc != null) {
                 if(episode == null) {
                     getProtonStream(decodedDoc, subtitleCallback, callback)
                 } else{
-                    //TODO
-                    callback.invoke(
-                        newExtractorLink(
-                            "Proton[episodes]",
-                            "Proton[episodes]",
-                            decodedDoc.selectFirst("#episodes").toString(),
+                    val episodeDiv = document.select("div.episode-block:has(div.episode-number:matchesOwn(S1E2))").firstOrNull()
+                    episodeDiv?.selectFirst("a[href]")?.attr("href")?.let {
+                        val source = protonmoviesAPI + it
+                        callback.invoke(
+                            newExtractorLink(
+                                "Proton[source]",
+                                "Proton[source]",
+                                source,
+                            )
                         )
-                    )
+                        val doc2 = app.get("${protonmoviesAPI}${source}", headers = headers).document
+                        val decodedDoc = decodeMeta(doc2)
+                        if(decodedDoc != null) {
+                            getProtonStream(decodedDoc, subtitleCallback, callback)
+                        }
+                    }
                 }
-
             }
         }
     }
@@ -499,13 +514,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 ).text
 
                 JSONObject(idRes).getJSONObject("ppd")?.getJSONObject("gofile.io")?.optString("link")?.let {
-                    callback.invoke(
-                        newExtractorLink(
-                            "Proton[gofile]",
-                            "Proton[gofile]",
-                            it
-                        )
-                    )
+                    Gofile().getUrl(link, "", subtitleCallback, callback)
                 }
             }
         }
