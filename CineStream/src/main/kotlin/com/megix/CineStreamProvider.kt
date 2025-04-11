@@ -95,7 +95,7 @@ open class CineStreamProvider : MainAPI() {
         const val hindMoviezAPI = "https://hindmoviez.co.in"
         const val moviesflixAPI = "https://themoviesflix.gift"
         const val hdmoviesflixAPI = "https://hdmoviesflix.fit"
-        const val hdmovie2API = "https://hdmovie2.contact"
+        const val hdmovie2API = "https://hdmovie2.navy"
         const val stremio_Dramacool = "https://stremio-dramacool-addon.xyz"
         const val TRACKER_LIST_URL = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all_ip.txt"
         const val torrentioCONFIG = "providers=yts,eztv,rarbg,1337x,thepiratebay,kickasstorrents,torrentgalaxy,magnetdl,horriblesubs,nyaasi,tokyotosho,anidex|sort=seeders|qualityfilter=threed,480p,other,scr,cam,unknown|limit=10"
@@ -151,7 +151,7 @@ open class CineStreamProvider : MainAPI() {
             else 20
         val skip = (page - 1) * skipNumber
         val newRequestData = request.data.replace("###", skip.toString())
-        val json = app.get("$newRequestData.json", timeout = 5000L).text
+        val json = app.get("$newRequestData.json").text
         val movies = tryParseJson<Home>(json) ?: return newHomePageResponse(
             list = HomePageList(
                 name = request.name,
@@ -277,7 +277,7 @@ open class CineStreamProvider : MainAPI() {
         val malId = if(externalIds != null) externalIds.myanimelist else null
         val anilistId = if(externalIds != null) externalIds.anilist else null
         id = if(isKitsu) id.replace(":", "%3A") else id
-        val json = app.get("$meta_url/meta/$tvtype/$id.json", timeout = 5000L).text
+        val json = app.get("$meta_url/meta/$tvtype/$id.json").text
         val movieData = tryParseJson<ResponseData>(json)
         val title = movieData?.meta?.name.toString()
         val posterUrl = movieData ?.meta?.poster.toString()
@@ -1040,7 +1040,7 @@ open class CineStreamProvider : MainAPI() {
     ) : SearchResult? {
         for(url in urls) {
             try {
-                val json = app.get(url, timeout = 5000L).text
+                val json = app.get(url).text
                 val movieJson = tryParseJson<SearchResult>(json)
                 if(movieJson != null) {
                     return movieJson

@@ -1330,7 +1330,7 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
         val url = app.get("$uhdmoviesAPI/search/$title $year").document
-            .select("article div.entry-image a").attr("href")
+            .select("article div.entry-image a:contains($title)").attr("href")
         val doc = app.get(url).document
 
         val selector = if (season == null) {
