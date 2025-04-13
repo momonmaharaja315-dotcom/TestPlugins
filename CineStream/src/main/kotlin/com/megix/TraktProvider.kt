@@ -6,6 +6,11 @@ import com.lagradost.cloudstream3.metaproviders.TraktProvider
 
 class CineTraktProvider : TraktProvider() {
     override var name = "Trakt(CineStream)"
+    private val traktClientId =
+            base64Decode(
+                    "N2YzODYwYWQzNGI4ZTZmOTdmN2I5MTA0ZWQzMzEwOGI0MmQ3MTdlMTM0MmM2NGMxMTg5NGE1MjUyYTQ3NjE3Zg=="
+            )
+    private val traktApiUrl = base64Decode("aHR0cHM6Ly9hcGl6LnRyYWt0LnR2")
 
     override val mainPage =
             mainPageOf(
@@ -36,12 +41,11 @@ class CineTraktProvider : TraktProvider() {
             subtitleCallback: (SubtitleFile) -> Unit,
             callback: (ExtractorLink) -> Unit
     ): Boolean {
-        val mediaData = AppUtils.parseJson<UltimaLinkData>(data)
         callback.invoke(
             newExtractorLink(
                 "Trakt",
                 "Trakt",
-                mediaData.toString(),
+                data,
             )
         )
         return true
