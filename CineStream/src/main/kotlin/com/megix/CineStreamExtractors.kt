@@ -57,11 +57,25 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit
     ) {
         app.get("$api/?s=$id").document.select("h2.entry-title > a").amap {
+            callback.invoke(
+                newExtractorLink(
+                    "href",
+                    "href",
+                    it.attr("href"),
+                )
+            )
             val doc = app.get(it.attr("href")).document
             if(episode == null) {
                 doc.select("a.maxbutton").amap {
                     val res = app.get(it.attr("href")).document
                     val link = res.select("h3 > a").attr("href")
+                    callback.invoke(
+                        newExtractorLink(
+                            "link",
+                            "link",
+                            link,
+                        )
+                    )
                     getHindMoviezLinks(source, link, callback)
                 }
             }
@@ -672,7 +686,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeBollyflix(
-        id: String,
+        id: String? = null,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
@@ -1430,7 +1444,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeMoviesmod(
-        id: String,
+        id: String? = null,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
@@ -1447,7 +1461,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeModflix(
-        id: String,
+        id: String? = null,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,

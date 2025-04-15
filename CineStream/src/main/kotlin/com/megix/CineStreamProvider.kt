@@ -506,7 +506,7 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     invokeMoviesmod(
-                        res.imdb_id.toString(),
+                        res.imdb_id,
                         res.imdbSeason,
                         res.imdbEpisode,
                         subtitleCallback,
@@ -515,7 +515,7 @@ open class CineStreamProvider : MainAPI() {
                 },
                 {
                     invokeBollyflix(
-                        res.imdb_id.toString(),
+                        res.imdb_id,
                         res.imdbSeason,
                         res.imdbEpisode,
                         subtitleCallback,
