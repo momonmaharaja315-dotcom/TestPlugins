@@ -94,7 +94,7 @@ open class CineStreamProvider : MainAPI() {
         const val anizoneAPI = "https://anizone.to"
         const val netflixAPI = "https://netfree2.cc"
         const val AllanimeAPI = "https://api.allanime.day/api"
-        const val skymoviesAPI = "https://skymovieshd.beer"
+        const val skymoviesAPI = "https://skymovieshd.pink"
         const val hindMoviezAPI = "https://hindmoviez.co.in"
         const val moviesflixAPI = "https://themoviesflix.at"
         const val hdmoviesflixAPI = "https://hdmoviesflix.center"
@@ -556,6 +556,24 @@ open class CineStreamProvider : MainAPI() {
                         res.imdbEpisode,
                         imdbYear,
                         subtitleCallback,
+                        callback
+                    )
+                },
+                {
+                    invokePrimeWire(
+                        res.imdb_id,
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        subtitleCallback,
+                        callback
+                    )
+                },
+                {
+                    invokePlayer4U(
+                        imdbTitle,
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        imdbYear,
                         callback
                     )
                 },
