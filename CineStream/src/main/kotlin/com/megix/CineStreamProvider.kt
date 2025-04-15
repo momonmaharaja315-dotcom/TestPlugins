@@ -66,7 +66,7 @@ open class CineStreamProvider : MainAPI() {
         const val rogMoviesAPI = "https://rogmovies.lol"
         const val MovieDrive_API = "https://moviesdrive.xyz"
         const val tokyoInsiderAPI = "https://www.tokyoinsider.com"
-        const val topmoviesAPI = "https://topmovies.loan"
+        const val topmoviesAPI = "https://topmovies.tips"
         const val MoviesmodAPI = "https://moviesmod.email"
         const val protonmoviesAPI = "https://m2.protonmovies.top"
         const val stremifyAPI = "https://stremify.hayd.uk/YnVpbHQtaW4sZnJlbWJlZCxmcmVuY2hjbG91ZCxtZWluZWNsb3VkLGtpbm9raXN0ZSxjaW5laGRwbHVzLHZlcmhkbGluayxndWFyZGFoZCx2aXNpb25jaW5lLHdlY2ltYSxha3dhbSxkcmFtYWNvb2wsZHJhbWFjb29sX2NhdGFsb2csZ29nb2FuaW1lLGdvZ29hbmltZV9jYXRhbG9n/stream"
@@ -77,7 +77,7 @@ open class CineStreamProvider : MainAPI() {
         const val MostraguardaAPI = "https://mostraguarda.stream"
         const val NonoembedAPI = "https://nono.autoembed.cc"
         const val WHVXAPI = "https://api.whvx.net"
-        const val uhdmoviesAPI = "https://uhdmovies.wales"
+        const val uhdmoviesAPI = "https://uhdmovies.tips"
         const val BYPASS_API = BuildConfig.BYPASS_API
         const val CONSUMET_API = BuildConfig.CONSUMET_API
         // const val TwoEmbedAPI = "https://2embed.wafflehacker.io"
@@ -89,7 +89,7 @@ open class CineStreamProvider : MainAPI() {
         const val bollyflixAPI = "https://bollyflix.kiwi"
         const val torrentioAPI = "https://torrentio.strem.fun"
         const val anizoneAPI = "https://anizone.to"
-        const val netflixAPI = "https://netfree.cc"
+        const val netflixAPI = "https://netfree2.cc"
         const val AllanimeAPI = "https://api.allanime.day/api"
         const val skymoviesAPI = "https://skymovieshd.beer"
         const val hindMoviezAPI = "https://hindmoviez.co.in"
@@ -147,7 +147,8 @@ open class CineStreamProvider : MainAPI() {
         page: Int,
         request: MainPageRequest
     ): HomePageResponse {
-        val skip = if(page == 1) 0 else skipMap[request.name] ?: 0
+        if(page == 1) skipMap.clear()
+        val skip = skipMap[request.name] ?: 0
         val newRequestData = request.data.replace("###", skip.toString())
         val json = app.get("$newRequestData.json").text
         val movies = tryParseJson<Home>(json) ?: return newHomePageResponse(
