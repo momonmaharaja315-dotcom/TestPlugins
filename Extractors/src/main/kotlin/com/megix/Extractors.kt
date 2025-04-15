@@ -185,7 +185,7 @@ open class Driveleech : ExtractorApi() {
                                 "$name[Instant(Download)] $fileName[$fileSize]",
                                 instant,
                             ) {
-                                this.quality = getIndexQuality(quality)
+                                this.quality = getIndexQuality(fileName)
                             }
                         )
                     } catch (e: Exception) {
@@ -201,7 +201,7 @@ open class Driveleech : ExtractorApi() {
                                 "$name[ResumeBot] $fileName[$fileSize]",
                                 resumeLink,
                             ) {
-                                this.quality = getIndexQuality(quality)
+                                this.quality = getIndexQuality(fileName)
                             }
                         )
                     } catch (e: Exception) {
@@ -219,7 +219,7 @@ open class Driveleech : ExtractorApi() {
                                     "$name[CF Type1] $fileName[$fileSize]",
                                     it,
                                 ) {
-                                    this.quality = getIndexQuality(quality)
+                                    this.quality = getIndexQuality(fileName)
                                 }
                             )
                         }
@@ -236,7 +236,7 @@ open class Driveleech : ExtractorApi() {
                                 "$name[ResumeCloud] $fileName[$fileSize]",
                                 resumeCloud,
                             ) {
-                                this.quality = getIndexQuality(quality)
+                                this.quality = getIndexQuality(fileName)
                             }
                         )
                     } catch (e: Exception) {
