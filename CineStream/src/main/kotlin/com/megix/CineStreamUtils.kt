@@ -107,17 +107,20 @@ fun Regex.escape(input: String): String {
 }
 
 fun buildExtractedTitle(extracted: Map<String, List<String>>): String {
-    var extractedTitle = ""
-    val orderedCategories = listOf("quality", "codec", "audio", "hdr", "language", "size")
+    val orderedCategories = listOf("quality", "codec", "audio", "hdr", "language")
 
-    for (category in orderedCategories) {
-        val values = extracted[category] ?: emptyList()
-        if (values.isNotEmpty()) {
-            extractedTitle += values.joinToString(" ") + " "
-        }
+    val specs = orderedCategories
+        .flatMap { extracted[it] ?: emptyList() }
+        .distinct()
+        .joinToString(" ")
+
+    val size = extracted["size"]?.firstOrNull()
+
+    return if (size != null) {
+        "$specs [$size]"
+    } else {
+        specs
     }
-
-    return extractedTitle.trim()
 }
 
 fun String.getHost(): String {

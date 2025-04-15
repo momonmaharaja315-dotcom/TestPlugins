@@ -117,7 +117,7 @@ open class CineStreamProvider : MainAPI() {
         "$mainUrl/top/catalog/series/top/skip=###" to "Top Series",
         "$mediaFusion/catalog/movie/hindi_hdrip/skip=###" to "Trending Movie in India",
         "$mediaFusion/catalog/series/hindi_series/skip=###" to "Trending Series in India",
-        "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
+        // "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
         """$animeCatalog/{"anilist_trending-now":"on"}/catalog/anime/anilist_trending-now/skip=###""" to "Trending Anime",
         "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Top Anime",
         "$streamio_TMDB/catalog/series/tmdb.language/skip=###&genre=Korean" to "Trending Korean Series",
