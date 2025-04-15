@@ -242,6 +242,7 @@ fun getIndexQuality(str: String?): Int {
 }
 
 suspend fun getHindMoviezLinks(
+    source: String,
     url: String,
     callback: (ExtractorLink) -> Unit
 ) {
@@ -255,8 +256,8 @@ suspend fun getHindMoviezLinks(
     document.select("a.button").map {
         callback.invoke(
             newExtractorLink(
-                "HindMoviez",
-                "HindMoviez $extractedSpecs[$fileSize]",
+                source,
+                "$source $extractedSpecs[$fileSize]",
                 it.attr("href"),
             ) {
                 this.quality = getIndexQuality(name)
