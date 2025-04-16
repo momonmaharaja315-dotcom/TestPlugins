@@ -56,7 +56,7 @@ object CineStreamExtractors : CineStreamProvider() {
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit
     ) {
-        app.get("$api/?s=$id").document.select("h2.entry-title > a", timeout = 200L).amap {
+        app.get("$api/?s=$id", timeout = 200L).document.select("h2.entry-title > a").amap {
             callback.invoke(
                 newExtractorLink(
                     "doc",
