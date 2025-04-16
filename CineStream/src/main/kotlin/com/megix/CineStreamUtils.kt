@@ -251,7 +251,7 @@ suspend fun getHindMoviezLinks(
     callback.invoke(
         newExtractorLink(
             "doc",
-            "doc",
+            "doc ",
             doc.toString(),
         )
     )
