@@ -34,6 +34,22 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         "$mainUrl/anime/" to "Anime"
     )
 
+    override suspend fun getMainPage(
+        page: Int,
+        request: MainPageRequest
+    ): HomePageResponse {
+        val document = if(page == 1) {
+            app.get(request.data).document
+        }
+        else {
+            app.get(request.data + "page/" + page).document
+        }
+        val home = document.select("div.post-cards > article").mapNotNull {
+            it.toSearchResult()
+        }
+        return newHomePageResponse(request.name, home)
+    }
+
     data class RedirectUrl(
         val redirectUrl: String
     )
@@ -49,22 +65,6 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
             requestBody = requestBody
         ).text
         return parseJson<RedirectUrl>(json).redirectUrl
-    }
-
-    override suspend fun getMainPage(
-        page: Int,
-        request: MainPageRequest
-    ): HomePageResponse {
-        val document = if(page == 1) {
-            app.get(request.data).document
-        }
-        else {
-            app.get(request.data + "page/" + page).document
-        }
-        val home = document.select("div.post-cards > article").mapNotNull {
-            it.toSearchResult()
-        }
-        return newHomePageResponse(request.name, home)
     }
 
     // private suspend fun bypass(id: String): String {
