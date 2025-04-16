@@ -690,7 +690,7 @@ object CineStreamExtractors : CineStreamProvider() {
             val href = it.nextElementSibling()?.select("a")?.attr("href")
             val token = href?.substringAfter("id=")
             val encodedurl =
-                app.get("https://blog.finzoox.com/?id=$token").text.substringAfter("link\":\"")
+                app.get("https://box.tech-news.app/?id=$token").text.substringAfter("link\":\"")
                     .substringBefore("\"};")
             val decodedurl = base64Decode(encodedurl)
 
