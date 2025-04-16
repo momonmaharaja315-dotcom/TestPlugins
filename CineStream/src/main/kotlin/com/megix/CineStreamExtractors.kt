@@ -56,7 +56,7 @@ object CineStreamExtractors : CineStreamProvider() {
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit
     ) {
-        app.get("$api/?s=$id").document.select("h2.entry-title > a", timeout = 200).amap {
+        app.get("$api/?s=$id").document.select("h2.entry-title > a", timeout = 200L).amap {
             callback.invoke(
                 newExtractorLink(
                     "doc",
@@ -64,10 +64,10 @@ object CineStreamExtractors : CineStreamProvider() {
                     it.attr("href"),
                 )
             )
-            val doc = app.get(it.attr("href"), timeout = 200).document
+            val doc = app.get(it.attr("href"), timeout = 200L).document
             if(episode == null) {
                 doc.select("a.maxbutton").amap {
-                    val res = app.get(it.attr("href"), timeout = 200).document
+                    val res = app.get(it.attr("href"), timeout = 200L).document
                     val link = res.select("h3 > a").attr("href")
                     callback.invoke(
                         newExtractorLink(
@@ -83,7 +83,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 doc.select("a.maxbutton").amap {
                     val text = it.parent()?.parent()?.previousElementSibling()?.text() ?: ""
                     if(text.contains("Season $season")) {
-                        val res = app.get(it.attr("href"), timeout = 200).document
+                        val res = app.get(it.attr("href"), timeout = 200L).document
                         res.select("h3 > a").getOrNull(episode-1)?.let { link ->
                             callback.invoke(
                                 newExtractorLink(
