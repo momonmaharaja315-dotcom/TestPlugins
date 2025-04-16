@@ -7,6 +7,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.FormBody
 import org.jsoup.Jsoup
+import java.util.concurrent.TimeUnit
 import org.jsoup.nodes.Document
 import java.net.*
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
@@ -260,7 +261,7 @@ suspend fun getHindMoviezLinks(
         .url(url)
         .build()
     val res = client.newCall(request).execute().body.string()
-    val doc = Jsoup.parse(html)
+    val doc = Jsoup.parse(res)
     // val res = app.get(url.replace("https://linksfun.site/web/goto/", "")
     //     , allowRedirects = true
     // )
