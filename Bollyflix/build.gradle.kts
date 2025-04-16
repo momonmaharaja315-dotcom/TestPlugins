@@ -1,5 +1,16 @@
 version = 19
 
+import org.jetbrains.kotlin.konan.properties.Properties
+
+android {
+    defaultConfig {
+        val properties = Properties()
+        properties.load(project.rootProject.file("local.properties").inputStream())
+        android.buildFeatures.buildConfig=true
+        buildConfigField("String", "BYPASS_API", "\"${properties.getProperty("BYPASS_API")}\"")
+    }
+}
+
 cloudstream {
     language = "hi"
     // All of these properties are optional, you can safely remove them
