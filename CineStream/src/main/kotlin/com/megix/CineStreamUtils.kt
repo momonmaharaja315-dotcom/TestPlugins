@@ -3,7 +3,10 @@ package com.megix
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.base64Decode
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.FormBody
+import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.net.*
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
@@ -246,10 +249,22 @@ suspend fun getHindMoviezLinks(
     url: String,
     callback: (ExtractorLink) -> Unit
 ) {
-    val res = app.get(url.replace("https://linksfun.site/web/goto/", "")
-        , allowRedirects = true
-    )
-    val doc = res.document
+    val client = OkHttpClient.Builder()
+        .connectTimeout(5, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS)
+        .followRedirects(true)
+        .followSslRedirects(true)
+        .build()
+
+    val request = Request.Builder()
+        .url(url)
+        .build()
+    val res = client.newCall(request).execute().body.string()
+    val doc = Jsoup.parse(html)
+    // val res = app.get(url.replace("https://linksfun.site/web/goto/", "")
+    //     , allowRedirects = true
+    // )
+    //val doc = res.document
     callback.invoke(
         newExtractorLink(
             "doc",
