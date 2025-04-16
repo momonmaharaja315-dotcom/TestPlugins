@@ -3,11 +3,7 @@ package com.megix
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.base64Decode
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import okhttp3.FormBody
-import org.jsoup.Jsoup
-import java.util.concurrent.TimeUnit
 import org.jsoup.nodes.Document
 import java.net.*
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
@@ -250,29 +246,11 @@ suspend fun getHindMoviezLinks(
     url: String,
     callback: (ExtractorLink) -> Unit
 ) {
-    val client = OkHttpClient.Builder()
-        .connectTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(10, TimeUnit.SECONDS)
-        .followRedirects(true)
-        .followSslRedirects(true)
-        .build()
-
-    val request = Request.Builder()
-        .url(url)
-        .build()
-    val res = client.newCall(request).execute().body.string()
-    val doc = Jsoup.parse(res)
-    // val res = app.get(url.replace("https://linksfun.site/web/goto/", "")
-    //     , allowRedirects = true
-    // )
-    //val doc = res.document
-    callback.invoke(
-        newExtractorLink(
-            "doc",
-            "doc ",
-            doc.toString(),
-        )
+    val res = app.get(url,
+        allowRedirects = true,
+        timeout = 50L
     )
+    val doc = res.document
     val fileSize = doc.select("div.container p:contains(Size:)").text().substringAfter("Size: ") ?: ""
     val link = doc.select("a.btn-info").attr("href")
     val document = app.get(link).document

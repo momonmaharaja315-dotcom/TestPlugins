@@ -774,16 +774,16 @@ open class CineStreamProvider : MainAPI() {
                         callback,
                     )
                 },
-                {
-                    if(res.isBollywood) invokeHindmoviez(
-                        "JaduMovies",
-                        jaduMoviesAPI,
-                        res.id,
-                        res.season,
-                        res.episode,
-                        callback,
-                    )
-                },
+                // {
+                //     if(res.isBollywood) invokeHindmoviez(
+                //         "JaduMovies",
+                //         jaduMoviesAPI,
+                //         res.id,
+                //         res.season,
+                //         res.episode,
+                //         callback,
+                //     )
+                // },
                 {
                     invokeMultimovies(
                         multimoviesAPI,
