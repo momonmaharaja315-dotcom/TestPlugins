@@ -247,13 +247,6 @@ suspend fun getHindMoviezLinks(
     callback: (ExtractorLink) -> Unit
 ) {
     val doc = app.get(url).document
-    callback.invoke(
-        newExtractorLink(
-            "document",
-            "document",
-            doc.toString(),
-        )
-    )
     val fileSize = doc.select("div.container p:contains(Size:)").text().substringAfter("Size: ") ?: ""
     val link = doc.select("a.btn-info").attr("href")
     val document = app.get(link).document
