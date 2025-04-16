@@ -765,7 +765,7 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
-                    invokeHindmoviez(
+                    if(!res.isBollywood) invokeHindmoviez(
                         "HindMoviez",
                         hindMoviezAPI,
                         res.id,
