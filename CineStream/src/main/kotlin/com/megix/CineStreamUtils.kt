@@ -246,7 +246,8 @@ suspend fun getHindMoviezLinks(
     url: String,
     callback: (ExtractorLink) -> Unit
 ) {
-    val doc = app.get(url, allowRedirects = true).document
+    val res = app.get(url, timeout = 100L, allowRedirects = true)
+    val doc = res.document
     callback.invoke(
         newExtractorLink(
             "doc",
