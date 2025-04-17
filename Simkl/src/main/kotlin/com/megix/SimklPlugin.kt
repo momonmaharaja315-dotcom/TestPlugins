@@ -5,11 +5,9 @@ import com.lagradost.cloudstream3.plugins.Plugin
 import android.content.Context
 
 @CloudstreamPlugin
-class OnlyjerkProvider: Plugin() {
+class SimklPlugin: Plugin() {
     override fun load(context: Context) {
-        registerMainAPI(Onlyjerk())
-        registerExtractorAPI(Dooodster())
-        registerExtractorAPI(Listeamed())
-        registerExtractorAPI(Beamed())
+        // All providers should be added in this manner. Please don't edit the providers list directly.
+        registerMainAPI(SimklProvider())
     }
 }
