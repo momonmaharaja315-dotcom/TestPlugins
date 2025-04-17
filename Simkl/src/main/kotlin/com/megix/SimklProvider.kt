@@ -62,7 +62,7 @@ class SimklProvider: MainAPI() {
                 app.get(this.data + page).parsedSafe<Array<SimklMediaObject>>() ?: return emptyData
         Log.d("res : ", "$res")
         return res.map {
-            newMovieSearchResponse("${it.title}", "$mainUrl${it.url}") {
+            newMovieSearchResponse("${it.title}", "$mainUrl/${ids?.simkl}") {
                 this.posterUrl = getPosterUrl(it.poster.toString())
             }
         } to res.size.equals(mediaLimit)
@@ -146,11 +146,19 @@ class SimklProvider: MainAPI() {
                             "Best TV Shows",
                     // "$apiUrl/movies/best/all?client_id=$auth&extended=overview&limit=$limit&page=" to
                     //         "Best Movies",
-                    "Personal" to "Personal"
+                    // "Personal" to "Personal"
             )
 
     override suspend fun search(query: String): List<SearchResponse>? {
-        return api.search(query)
+        val data = app.get("$apiUrl/search/movie?q=$query&client_id=$auth").parsedSafe<Array<SimklMediaObject>>()
+        data?.forEach {
+            searchResponse.add(newMovieSearchResponse(it.title, "$mainUrl/${ids?.simkl}") {
+                    this.posterUrl = getPosterUrl(it.poster.toString())
+                }
+            )
+        }
+        return searchResponse ?: emptyList<SearchResponse>()
+        //return api.search(query)
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse? {
