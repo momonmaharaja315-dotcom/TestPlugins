@@ -152,28 +152,8 @@ class SimklProvider: MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse? {
-        if (request.name.contains("Personal")) {
-            // Reading and manipulating personal library
-            api.loginInfo()
-                    ?: return newHomePageResponse(
-                            "Login required for personal content.",
-                            emptyList<SearchResponse>(),
-                            false
-                    )
-            var homePageList =
-                    api.getPersonalLibrary()?.allLibraryLists?.mapNotNull {
-                        if (it.items.isEmpty()) return@mapNotNull null
-                        val libraryName =
-                                it.name.asString(plugin.activity ?: return@mapNotNull null)
-                        HomePageList("${request.name}: $libraryName", it.items)
-                    }
-                            ?: return null
-            return newHomePageResponse(homePageList, false)
-        } else {
-            // Other new sections will be generated if toSearchResponseList() is overridden
-            val data = request.toSearchResponseList(page)
-            return newHomePageResponse(request.name, data.first, data.second)
-        }
+        val data = request.toSearchResponseList(page)
+        return newHomePageResponse(request.name, data.first, data.second)
     }
 
     override suspend fun load(url: String): LoadResponse {
@@ -261,5 +241,31 @@ class SimklProvider: MainAPI() {
             @JsonProperty("tmdb") val tmdb: Int? = null,
             @JsonProperty("mal") val mal: String? = null,
             @JsonProperty("anilist") val anilist: String? = null,
+    )
+
+     data class LinkData(
+            @JsonProperty("simklId") val simklId: Int? = null,
+            @JsonProperty("traktId") val traktId: Int? = null,
+            @JsonProperty("imdbId") val imdbId: String? = null,
+            @JsonProperty("tmdbId") val tmdbId: Int? = null,
+            @JsonProperty("tvdbId") val tvdbId: Int? = null,
+            @JsonProperty("type") val type: String? = null,
+            @JsonProperty("season") val season: Int? = null,
+            @JsonProperty("episode") val episode: Int? = null,
+            @JsonProperty("aniId") val aniId: String? = null,
+            @JsonProperty("malId") val malId: String? = null,
+            @JsonProperty("title") val title: String? = null,
+            @JsonProperty("year") val year: Int? = null,
+            @JsonProperty("orgTitle") val orgTitle: String? = null,
+            @JsonProperty("isAnime") val isAnime: Boolean = false,
+            @JsonProperty("airedYear") val airedYear: Int? = null,
+            @JsonProperty("lastSeason") val lastSeason: Int? = null,
+            @JsonProperty("epsTitle") val epsTitle: String? = null,
+            @JsonProperty("jpTitle") val jpTitle: String? = null,
+            @JsonProperty("date") val date: String? = null,
+            @JsonProperty("airedDate") val airedDate: String? = null,
+            @JsonProperty("isAsian") val isAsian: Boolean = false,
+            @JsonProperty("isBollywood") val isBollywood: Boolean = false,
+            @JsonProperty("isCartoon") val isCartoon: Boolean = false,
     )
 }
