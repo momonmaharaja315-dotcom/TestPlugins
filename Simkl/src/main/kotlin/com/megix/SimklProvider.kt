@@ -62,7 +62,7 @@ class SimklProvider: MainAPI() {
                 app.get(this.data + page).parsedSafe<Array<SimklMediaObject>>() ?: return emptyData
         Log.d("res : ", "$res")
         return res.map {
-            newMovieSearchResponse("${it.title}", "$mainUrl/${ids?.simkl}") {
+            newMovieSearchResponse("${it.title}", "$mainUrl/${it.ids?.simkl}") {
                 this.posterUrl = getPosterUrl(it.poster.toString())
             }
         } to res.size.equals(mediaLimit)
@@ -150,14 +150,17 @@ class SimklProvider: MainAPI() {
             )
 
     override suspend fun search(query: String): List<SearchResponse>? {
-        val data = app.get("$apiUrl/search/movie?q=$query&client_id=$auth").parsedSafe<Array<SimklMediaObject>>()
-        data?.forEach {
-            searchResponse.add(newMovieSearchResponse(it.title, "$mainUrl/${ids?.simkl}") {
+        val searchResponse = mutableListOf<SearchResponse>()
+        val data = app.get("$apiUrl/search/movie?q=$query&client_id=$auth")
+            .parsedSafe<Array<SimklMediaObject>>() ?: return emptyList<SearchResponse>()
+
+        data.map {
+            searchResponse.add(newMovieSearchResponse(it.title, "$mainUrl/${it.ids?.simkl}") {
                     this.posterUrl = getPosterUrl(it.poster.toString())
                 }
             )
         }
-        return searchResponse ?: emptyList<SearchResponse>()
+        return searchResponse
         //return api.search(query)
     }
 
