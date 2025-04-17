@@ -210,7 +210,18 @@ open class CineStreamProvider : MainAPI() {
             "$animeCatalog/{\"search\":\"on\"}/catalog/anime/anime-catalogs-search/search=$query.json"
         )
 
-
+        suspend fun handleMetas(
+            result: SearchResult?,
+            type: TvType
+        ) {
+            result?.metas?.forEach {
+                val title = it.name ?: it.description ?: "Empty"
+                searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), type) {
+                    this.posterUrl = it.poster.toString()
+                })
+            }
+        }
+        // Launch all coroutines
         val animeDeferred = async { fetchWithRetry(animeUrls) }
         val movieDeferred = async { fetchWithRetry(movieUrls) }
         val seriesDeferred = async { fetchWithRetry(seriesUrls) }
@@ -1081,18 +1092,6 @@ open class CineStreamProvider : MainAPI() {
             }
         }
         return null
-    }
-
-    private suspend fun handleMetas(
-        result: SearchResult?,
-        type: TvType
-    ) {
-        result?.metas?.forEach {
-            val title = it.name ?: it.description ?: "Empty"
-            searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), type) {
-                this.posterUrl = it.poster.toString()
-            })
-        }
     }
 }
 
