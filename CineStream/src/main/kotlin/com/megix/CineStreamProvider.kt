@@ -46,6 +46,8 @@ import com.megix.CineStreamExtractors.invokePlayer4U
 import com.megix.CineStreamExtractors.invokePrimeWire
 import com.megix.CineStreamExtractors.invokeProtonmovies
 import com.megix.CineStreamExtractors.invokeThepiratebay
+import com.megix.CineStreamExtractors.invokeTom
+import com.megix.CineStreamExtractors.invokeAllmovieland
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -76,12 +78,14 @@ open class CineStreamProvider : MainAPI() {
         const val MultiembedAPI = "https://hin.autoembed.cc"
         const val MostraguardaAPI = "https://mostraguarda.stream"
         const val WHVXAPI = "https://api.whvx.net"
+        const val TomAPI = "https://tom.autoembed.cc"
         const val uhdmoviesAPI = "https://uhdmovies.tips"
         const val BYPASS_API = BuildConfig.BYPASS_API
         const val CONSUMET_API = BuildConfig.CONSUMET_API
         // const val RarAPI = "https://nepu.to"
         const val multimoviesAPI = "https://multimovies.guru"
         const val animepaheAPI = "https://animepahe.ru"
+        const val allmovielandAPI = "https://allmovieland.fun"
         const val cinemaluxeAPI = "https://luxecinema.in"
         const val bollyflixAPI = "https://bollyflix.yoga"
         const val torrentioAPI = "https://torrentio.strem.fun"
@@ -508,12 +512,29 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
+                    invokeTom(
+                        tmdbId,
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        callback,
+                        subtitleCallback
+                    )
+                },
+                {
                     invokeBollyflix(
                         res.imdb_id,
                         res.imdbSeason,
                         res.imdbEpisode,
                         subtitleCallback,
                         callback,
+                    )
+                },
+                {
+                    invokeAllmovieland(
+                        res.imdb_id,
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        callback
                     )
                 },
                 {
@@ -849,6 +870,14 @@ open class CineStreamProvider : MainAPI() {
                     )
                 },
                 {
+                    invokeAllmovieland(
+                        res.id,
+                        res.season,
+                        res.episode,
+                        callback
+                    )
+                },
+                {
                     invokeMultiAutoembed(
                         res.id,
                         res.season,
@@ -915,6 +944,15 @@ open class CineStreamProvider : MainAPI() {
                         res.episode,
                         subtitleCallback,
                         callback
+                    )
+                },
+                {
+                    invokeTom(
+                        res.tmdbId,
+                        res.season,
+                        res.episode,
+                        callback,
+                        subtitleCallback
                     )
                 },
                 {

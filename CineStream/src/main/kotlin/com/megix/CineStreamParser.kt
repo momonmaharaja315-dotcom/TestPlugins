@@ -3,6 +3,45 @@ package com.megix
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.gson.annotations.SerializedName
 
+//Allmovieland
+ data class AllMovielandPlaylist(
+    @JsonProperty("file") val file: String? = null,
+    @JsonProperty("key") val key: String? = null,
+    @JsonProperty("href") val href: String? = null,
+)
+
+data class AllMovielandServer(
+    @JsonProperty("title") val title: String? = null,
+    @JsonProperty("id") val id: String? = null,
+    @JsonProperty("file") val file: String? = null,
+    @JsonProperty("folder")
+    val folder: ArrayList<AllMovielandSeasonFolder>? = arrayListOf(),
+) {
+    data class AllMovielandSeasonFolder(
+        @JsonProperty("episode") val episode: String? = null,
+        @JsonProperty("id") val id: String? = null,
+        @JsonProperty("folder")
+        val folder: ArrayList<AllMovielandEpisodeFolder>? = arrayListOf(),
+    ) {
+        data class AllMovielandEpisodeFolder(
+            @JsonProperty("title") val title: String? = null,
+            @JsonProperty("id") val id: String? = null,
+            @JsonProperty("file") val file: String? = null,
+        )
+    }
+}
+
+//Tom
+data class TomResponse (
+  var videoSource    : String,
+  var subtitles      : ArrayList<TomSubtitles> = arrayListOf(),
+)
+
+data class TomSubtitles (
+  var file    : String,
+  var label   : String
+)
+
 //TMDB to mal
 data class AniMedia(
     @JsonProperty("id") var id: Int? = null,

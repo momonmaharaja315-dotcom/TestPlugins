@@ -20,6 +20,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.json.JSONObject
+import org.json.JSONArray
+import org.jsoup.Jsoup
 import javax.crypto.Cipher
 import javax.crypto.spec.SecretKeySpec
 
@@ -635,6 +637,7 @@ suspend fun generateMagnetLink(url: String, hash: String?): String {
 
 suspend fun getProtonStream(
     doc: Document,
+    protonmoviesAPI: String,
     subtitleCallback: (SubtitleFile) -> Unit,
     callback: (ExtractorLink) -> Unit,
 ) {
