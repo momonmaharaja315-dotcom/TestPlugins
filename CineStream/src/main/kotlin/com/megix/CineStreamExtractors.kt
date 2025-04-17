@@ -14,6 +14,7 @@ import java.nio.charset.StandardCharsets
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.json.JSONObject
+import org.json.JSONArray
 import com.lagradost.cloudstream3.argamap
 import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 import com.lagradost.cloudstream3.mvvm.safeApiCall
@@ -87,7 +88,7 @@ object CineStreamExtractors : CineStreamProvider() {
         servers?.amap { (server, lang) ->
             val path =
                     app.post(
-                        "${host}/playlist/${server ?: return@apmap}.txt",
+                        "${host}/playlist/${server ?: return@amap}.txt",
                         headers = headers,
                         referer = referer
                     ).text
@@ -429,19 +430,17 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = if(season == null) "$TomAPI/api/getVideoSource?type=movie&id=$id" else "$TomAPI/api/getVideoSource?type=tv&id=$id/$season/$episode"
         val headers = mapOf(
             "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0",
-            "Referer" to "$AutoembedAPI/"
+            "Referer" to "https://autoembed.cc"
         )
         val json = app.get(url, headers = headers).text
         val data = tryParseJson<TomResponse>(json) ?: return
 
         callback.invoke(
-            ExtractorLink(
+            newExtractorLink(
                 "Tom",
                 "Tom",
                 data.videoSource,
-                "",
-                Qualities.Unknown.value,
-                true
+                ExtractorLinkType.M3U8
             )
         )
 
