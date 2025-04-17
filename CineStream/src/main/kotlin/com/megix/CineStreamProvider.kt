@@ -12,6 +12,11 @@ import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import com.lagradost.cloudstream3.argamap
 import kotlin.math.roundToInt
 import com.lagradost.api.Log
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import com.lagradost.cloudstream3.network.CloudflareKiller
 import com.megix.CineStreamExtractors.invokeVegamovies
 import com.megix.CineStreamExtractors.invokeMoviesmod
@@ -187,58 +192,40 @@ open class CineStreamProvider : MainAPI() {
         )
     }
 
-    override suspend fun search(query: String): List<SearchResponse> {
+    override suspend fun search(query: String): List<SearchResponse> = coroutineScope {
         val searchResponse = mutableListOf<SearchResponse>()
 
         val movieUrls = listOf(
             "$streamio_TMDB/catalog/series/tmdb.top/search=$query.json",
-            "$cinemeta_url/catalog/movie/top/search=$query.json",
+            "$cinemeta_url/catalog/movie/top/search=$query.json"
         )
 
         val seriesUrls = listOf(
             "$streamio_TMDB/catalog/series/tmdb.top/search=$query.json",
-            "$cinemeta_url/catalog/series/top/search=$query.json",
+            "$cinemeta_url/catalog/series/top/search=$query.json"
         )
 
         val animeUrls = listOf(
             "$kitsu_url/catalog/anime/kitsu-anime-airing/search=$query.json",
-            """$animeCatalog"/{"search":"on"}/catalog/anime/anime-catalogs-search/search=$query.json""",
+            "$animeCatalog/{\"search\":\"on\"}/catalog/anime/anime-catalogs-search/search=$query.json"
         )
 
-        val animes = fetchWithRetry(animeUrls)
-        animes?.metas?.forEach {
-            val title = it.name ?: it.description ?: "Empty"
-            searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.Movie) {
-                this.posterUrl = it.poster.toString()
-            })
+
+        val animeDeferred = async { fetchWithRetry(animeUrls) }
+        val movieDeferred = async { fetchWithRetry(movieUrls) }
+        val seriesDeferred = async { fetchWithRetry(seriesUrls) }
+        val tvDeferred = async {
+            val tvJson = app.get("$mediaFusion/catalog/tv/mediafusion_search_tv/search=$query.json").text
+            tryParseJson<SearchResult>(tvJson)
         }
 
-        val movies = fetchWithRetry(movieUrls)
-        movies?.metas?.forEach {
-            val title = it.name ?: it.description ?: "Empty"
-            searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.Movie) {
-                this.posterUrl = it.poster.toString()
-            })
-        }
+        // Await all concurrently launched tasks
+        handleMetas(animeDeferred.await(), TvType.Movie)
+        handleMetas(movieDeferred.await(), TvType.Movie)
+        handleMetas(seriesDeferred.await(), TvType.TvSeries)
+        handleMetas(tvDeferred.await(), TvType.Live)
 
-        val series = fetchWithRetry(seriesUrls)
-        series?.metas?.forEach {
-            val title = it.name ?: it.description ?: "Empty"
-            searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.TvSeries) {
-                this.posterUrl = it.poster.toString()
-            })
-        }
-
-        val tvJson = app.get("$mediaFusion/catalog/tv/mediafusion_search_tv/search=$query.json").text
-        val tv = tryParseJson<SearchResult>(tvJson)
-        tv?.metas?.forEach {
-            val title = it.name ?: it.description ?: "Empty"
-            searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.Live) {
-                this.posterUrl = it.poster.toString()
-            })
-        }
-
-        return searchResponse.sortedByDescending { response ->
+        return@coroutineScope searchResponse.sortedByDescending { response ->
             calculateRelevanceScore(response.name, query)
         }
     }
@@ -1081,21 +1068,31 @@ open class CineStreamProvider : MainAPI() {
         return score
     }
 
-    private suspend fun fetchWithRetry(
-        urls: List<String>
-    ) : SearchResult? {
-        for(url in urls) {
+    private suspend fun fetchWithRetry(urls: List<String>): SearchResult? {
+        for (url in urls) {
             try {
                 val json = app.get(url).text
-                val movieJson = tryParseJson<SearchResult>(json)
-                if(movieJson != null) {
-                    return movieJson
+                val result = tryParseJson<SearchResult>(json)
+                if (result != null) {
+                    return result
                 }
             } catch (e: Exception) {
-                Log.d("CineStream", "Failed to get $url")
+                Log.d("CineStream", "Failed to get $url: ${e.message}")
             }
         }
         return null
+    }
+
+    private suspend fun handleMetas(
+        result: SearchResult?,
+        type: TvType
+    ) {
+        result?.metas?.forEach {
+            val title = it.name ?: it.description ?: "Empty"
+            searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), type) {
+                this.posterUrl = it.poster.toString()
+            })
+        }
     }
 }
 
