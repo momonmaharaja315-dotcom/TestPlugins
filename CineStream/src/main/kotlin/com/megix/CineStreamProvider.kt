@@ -331,7 +331,7 @@ open class CineStreamProvider : MainAPI() {
                     this.posterUrl = ep.thumbnail
                     this.description = ep.overview
                     this.rating = ep.rating?.toFloat()?.times(10)?.roundToInt()
-                    addDate(ep.firstAired ?: ep.released)
+                    addDate(ep.firstAired ?: ep.released, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
                 }
             } ?: emptyList()
             if(isAnime) {
