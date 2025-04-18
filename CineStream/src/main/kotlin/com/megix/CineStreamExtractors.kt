@@ -1064,9 +1064,13 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
+        // val link = app.get("$fourkhdhubAPI/?s=$title").document
+        //     .selectFirst("div.card-grid > a:has(div.movie-card-content:matches($title, $year))")
+        //     ?.attr("href") ?: return
         val link = app.get("$fourkhdhubAPI/?s=$title").document
-            .selectFirst("div.card-grid > a:has(div.movie-card-content:matches($title, $year))")
+            .selectFirst("div.card-grid > a")
             ?.attr("href") ?: return
+
         callback.invoke(
             newExtractorLink(
                 "link",
@@ -1074,6 +1078,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 link,
             )
         )
+
         val doc = app.get("$fourkhdhubAPI$link").document
         if(season == null) {
             doc.select("div.download-item a").amap {
@@ -1094,7 +1099,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 )
             }
         } else {
-            doc.select(".episode-download-item:has(div.episode-file-title:matches(S0${season}E0${episode}))").amap {
+            doc.select(".episode-download-item:has(div.episode-file-title:contains(S0${season}E0${episode}))").amap {
                 val source = it.select("div.episode-links > a").attr("href")
                 callback.invoke(
                     newExtractorLink(
