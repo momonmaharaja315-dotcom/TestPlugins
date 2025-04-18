@@ -860,15 +860,13 @@ object CineStreamExtractors : CineStreamProvider() {
             animeData?.find { it.episode == episode }?.session ?: return
         }
         val doc = app.get("$animepaheAPI/play/$id/$session", headers).document
-        doc.select("div.dropup button").amap {
-            var lang=""
-            val dub=it.select("span").text()
-            if (dub.contains("eng")) lang="DUB" else lang="SUB"
+        doc.select("div#resolutionMenu > button").amap {
+            val type = it.text().substringBefore("·").trim()
             val quality = it.attr("data-resolution")
             val href = it.attr("data-src")
             if (href.contains("kwik.si")) {
                 loadCustomExtractor(
-                    "Animepahe(VLC) [$lang]",
+                    "Animepahe(VLC) [$type]",
                     href,
                     mainUrl,
                     subtitleCallback,
@@ -879,9 +877,8 @@ object CineStreamExtractors : CineStreamProvider() {
         }
         doc.select("div#pickDownload > a").amap {
             val href = it.attr("href")
-            var type = "SUB"
-            if(it.select("span").text().contains("eng"))
-                type="DUB"
+            val type = it.text().substringBefore("·").trim()
+
             loadCustomExtractor(
                 "Animepahe [$type]",
                 href,
@@ -1064,8 +1061,10 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
+        if (title.isNullOrBlank()) return
+
         val link = app.get("$fourkhdhubAPI/?s=$title").document
-            .selectFirst("div.card-grid > a:has(div.movie-card-content:contains($year))")
+            .selectFirst("div.card-grid > a:has(div.movie-card-content:contains(${year ?: ""}))")
             ?.attr("href") ?: return
 
         val doc = app.get("$fourkhdhubAPI$link").document
@@ -1081,8 +1080,11 @@ object CineStreamExtractors : CineStreamProvider() {
                 )
             }
         } else {
-            doc.select(".episode-download-item:has(div.episode-file-title:contains(S0${season}E0${episode}))").amap {
-                val source = it.select("div.episode-links > a").attr("href")
+            val seasonText = "S" + season.toString().padStart(2, '0')
+            val episodeText = "E" + episode.toString().padStart(2, '0')
+            doc.select(".episode-download-item:has(div.episode-file-title:contains(${seasonText}${episodeText}))").amap {
+                val source = it.selectFirst("div.episode-links > a")
+                    ?.attr("href") ?: return@amap
                 loadSourceNameExtractor(
                     "4Khdhub",
                     source,
@@ -1112,12 +1114,7 @@ object CineStreamExtractors : CineStreamProvider() {
         doc.select("ul > li").amap {
             if(it.text().contains("supervideo")) {
                 val source = "https:" + it.attr("data-link")
-                loadExtractor(
-                    source,
-                    "",
-                    subtitleCallback,
-                    callback
-                )
+                SuperVideo().getUrl(source, "", subtitleCallback, callback)
             }
         }
     }

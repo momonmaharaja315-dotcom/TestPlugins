@@ -128,7 +128,7 @@ open class CineStreamProvider : MainAPI() {
         "$mediaFusion/catalog/movie/hindi_hdrip/skip=###" to "Trending Movie in India",
         "$mediaFusion/catalog/series/hindi_series/skip=###" to "Trending Series in India",
         // "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
-        """$animeCatalog/{"anilist_trending-now":"on"}/catalog/anime/anilist_trending-now/skip=###""" to "Trending Anime",
+        """$animeCatalog/{"anisearch_trending":"on"}/catalog/anime/anisearch_trending/skip=###""" to "Trending Anime",
         "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Top Anime",
         "$streamio_TMDB/catalog/series/tmdb.language/skip=###&genre=Korean" to "Trending Korean Series",
         "$mediaFusion/catalog/tv/live_tv/skip=###" to "Live TV",
@@ -189,68 +189,6 @@ open class CineStreamProvider : MainAPI() {
             hasNext = true
         )
     }
-
-    // override suspend fun search(query: String): List<SearchResponse> {
-    //     val searchResponse = mutableListOf<SearchResponse>()
-
-    //     val animeJson = app.get("$kitsu_url/catalog/anime/kitsu-anime-airing/search=$query.json").text
-    //     val animes = tryParseJson<SearchResult>(animeJson)
-    //     animes?.metas?.forEach {
-    //         val title = it.name ?: it.description ?: "Empty"
-    //         searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.Movie) {
-    //             this.posterUrl = it.poster.toString()
-    //         })
-    //     }
-
-    //     val movieJson = app.get("$cinemeta_url/catalog/movie/top/search=$query.json").text
-    //     val movies = tryParseJson<SearchResult>(movieJson)
-    //     movies?.metas?.forEach {
-    //         val title = it.name ?: it.description ?: "Empty"
-    //         searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.Movie) {
-    //             this.posterUrl = it.poster.toString()
-    //         })
-    //     }
-
-    //     val seriresJson = app.get("$cinemeta_url/catalog/series/top/search=$query.json").text
-    //     val series = tryParseJson<SearchResult>(seriresJson)
-    //     series?.metas?.forEach {
-    //         val title = it.name ?: it.description ?: "Empty"
-    //         searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.TvSeries) {
-    //             this.posterUrl = it.poster.toString()
-    //         })
-    //     }
-
-    //     val tmdbMovieJson = app.get("$streamio_TMDB/catalog/movie/tmdb.top/search=$query.json").text
-    //     val tmdbMovies = tryParseJson<SearchResult>(tmdbMovieJson)
-    //     tmdbMovies?.metas?.forEach {
-    //         val title = it.name ?: it.description ?: "Empty"
-    //         searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.Movie) {
-    //             this.posterUrl = it.poster.toString()
-    //         })
-    //     }
-
-    //     val tmdbSeriesJson = app.get("$streamio_TMDB/catalog/series/tmdb.top/search=$query.json").text
-    //     val tmdbSeries = tryParseJson<SearchResult>(tmdbSeriesJson)
-    //     tmdbSeries?.metas?.forEach {
-    //         val title = it.name ?: it.description ?: "Empty"
-    //         searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.TvSeries) {
-    //             this.posterUrl = it.poster.toString()
-    //         })
-    //     }
-
-    //     val tvJson = app.get("$mediaFusion/catalog/tv/mediafusion_search_tv/search=$query.json").text
-    //     val tv = tryParseJson<SearchResult>(tvJson)
-    //     tv?.metas?.forEach {
-    //         val title = it.name ?: it.description ?: "Empty"
-    //         searchResponse.add(newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), TvType.Live) {
-    //             this.posterUrl = it.poster.toString()
-    //         })
-    //     }
-
-    //     return searchResponse.sortedByDescending { response ->
-    //         calculateRelevanceScore(response.name, query)
-    //     }
-    // }
 
     override suspend fun search(query: String): List<SearchResponse> = coroutineScope {
         val searchResponse = mutableListOf<SearchResponse>()
