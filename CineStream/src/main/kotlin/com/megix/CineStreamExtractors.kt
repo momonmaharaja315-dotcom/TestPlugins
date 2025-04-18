@@ -1064,34 +1064,16 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        // val link = app.get("$fourkhdhubAPI/?s=$title").document
-        //     .selectFirst("div.card-grid > a:has(div.movie-card-content:matches($title, $year))")
-        //     ?.attr("href") ?: return
         val link = app.get("$fourkhdhubAPI/?s=$title").document
-            .selectFirst("div.card-grid > a")
+            .selectFirst("div.card-grid > a:has(div.movie-card-content:contains($year))")
             ?.attr("href") ?: return
-
-        callback.invoke(
-            newExtractorLink(
-                "link",
-                "link",
-                link,
-            )
-        )
 
         val doc = app.get("$fourkhdhubAPI$link").document
         if(season == null) {
             doc.select("div.download-item a").amap {
                val source = it.attr("href")
-               callback.invoke(
-                    newExtractorLink(
-                        "source",
-                        "source",
-                        source,
-                    )
-                )
                loadSourceNameExtractor(
-                    "4khdhub",
+                    "4Khdhub",
                     source,
                     "",
                     subtitleCallback,
@@ -1101,15 +1083,8 @@ object CineStreamExtractors : CineStreamProvider() {
         } else {
             doc.select(".episode-download-item:has(div.episode-file-title:contains(S0${season}E0${episode}))").amap {
                 val source = it.select("div.episode-links > a").attr("href")
-                callback.invoke(
-                    newExtractorLink(
-                        "source",
-                        "source",
-                        source,
-                    )
-                )
                 loadSourceNameExtractor(
-                    "4khdhub",
+                    "4Khdhub",
                     source,
                     "",
                     subtitleCallback,
