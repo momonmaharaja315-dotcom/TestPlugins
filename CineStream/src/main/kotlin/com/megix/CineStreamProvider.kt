@@ -81,7 +81,7 @@ open class CineStreamProvider : MainAPI() {
         const val WHVXAPI = "https://api.whvx.net"
         const val TomAPI = "https://tom.autoembed.cc"
         const val uhdmoviesAPI = "https://uhdmovies.tips"
-        const val 4khdhubAPI = "https://4khdhub.fans"
+        const val fourkhdhubAPI = "https://4khdhub.fans"
         const val BYPASS_API = BuildConfig.BYPASS_API
         const val CONSUMET_API = BuildConfig.CONSUMET_API
         // const val RarAPI = "https://nepu.to"

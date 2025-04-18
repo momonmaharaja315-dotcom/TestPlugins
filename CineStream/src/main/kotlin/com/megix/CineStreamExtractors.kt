@@ -1064,10 +1064,10 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        val link = app.get("$4khdhubAPI/?s=$query").document
+        val link = app.get("$fourkhdhubAPI/?s=$title").document
             .selectFirst("div.card-grid > a:has(div.movie-card-content:matches($title, $year))")
             ?.attr("href") ?: return
-        val doc = app.get("$4khdhubAPI$link").document
+        val doc = app.get("$fourkhdhubAPI$link").document
         if(season == null) {
             doc.select("div.download-item a").amap {
                val source = it.attr("href")
