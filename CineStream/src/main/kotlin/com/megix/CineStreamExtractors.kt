@@ -1067,10 +1067,24 @@ object CineStreamExtractors : CineStreamProvider() {
         val link = app.get("$fourkhdhubAPI/?s=$title").document
             .selectFirst("div.card-grid > a:has(div.movie-card-content:matches($title, $year))")
             ?.attr("href") ?: return
+        callback.invoke(
+            newExtractorLink(
+                "link",
+                "link",
+                link,
+            )
+        )
         val doc = app.get("$fourkhdhubAPI$link").document
         if(season == null) {
             doc.select("div.download-item a").amap {
                val source = it.attr("href")
+               callback.invoke(
+                    newExtractorLink(
+                        "source",
+                        "source",
+                        source,
+                    )
+                )
                loadSourceNameExtractor(
                     "4khdhub",
                     source,
@@ -1082,6 +1096,13 @@ object CineStreamExtractors : CineStreamProvider() {
         } else {
             doc.select(".episode-download-item:has(div.episode-file-title:matches(S0${season}E0${episode}))").amap {
                 val source = it.select("div.episode-links > a").attr("href")
+                callback.invoke(
+                    newExtractorLink(
+                        "source",
+                        "source",
+                        source,
+                    )
+                )
                 loadSourceNameExtractor(
                     "4khdhub",
                     source,
@@ -1107,24 +1128,10 @@ object CineStreamExtractors : CineStreamProvider() {
                 "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
             )
         ).document
-        callback.invoke(
-            newExtractorLink(
-                "MostraGuarda",
-                "MostraGuarda",
-                doc.toString(),
-            )
-        )
+
         doc.select("ul > li").amap {
             if(it.text().contains("supervideo")) {
                 val source = "https:" + it.attr("data-link")
-                callback.invoke(
-                    newExtractorLink(
-                        "MostraGuarda[source]",
-                        "MostraGuarda[source]",
-                        source,
-                    )
-                )
-
                 loadExtractor(
                     source,
                     "",
