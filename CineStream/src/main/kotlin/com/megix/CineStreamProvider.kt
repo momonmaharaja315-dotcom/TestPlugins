@@ -102,13 +102,13 @@ open class CineStreamProvider : MainAPI() {
         const val jaduMoviesAPI = "https://jadumovies.com"
         const val moviesflixAPI = "https://themoviesflix.at"
         const val hdmoviesflixAPI = "https://hdmoviesflix.center"
-        const val hdmovie2API = "https://hdmovie2.menu"
+        const val hdmovie2API = "https://hdmovie2.science"
         const val stremio_Dramacool = "https://stremio-dramacool-addon.xyz"
         const val TRACKER_LIST_URL = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all_ip.txt"
         const val torrentioCONFIG = "providers=yts,eztv,rarbg,1337x,thepiratebay,kickasstorrents,torrentgalaxy,magnetdl,horriblesubs,nyaasi,tokyotosho,anidex|sort=seeders|qualityfilter=threed,480p,other,scr,cam,unknown|limit=10"
-        const val Player4uApi="https://player4u.xyz"
-        const val Primewire="https://www.primewire.tf"
-        const val ThePirateBayApi="https://thepiratebay-plus.strem.fun"
+        const val Player4uApi = "https://player4u.xyz"
+        const val Primewire = "https://www.primewire.tf"
+        const val ThePirateBayApi = "https://thepiratebay-plus.strem.fun"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
@@ -331,7 +331,7 @@ open class CineStreamProvider : MainAPI() {
                     this.posterUrl = ep.thumbnail
                     this.description = ep.overview
                     this.rating = ep.rating?.toFloat()?.times(10)?.roundToInt()
-                    addDate(ep.firstAired ?: ep.released, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+                    addDate(ep.firstAired ?: ep.released)
                 }
             } ?: emptyList()
             if(isAnime) {
@@ -481,15 +481,15 @@ open class CineStreamProvider : MainAPI() {
                         subtitleCallback
                     )
                 },
-                // {
-                //     invokeBollyflix(
-                //         res.imdb_id,
-                //         res.imdbSeason,
-                //         res.imdbEpisode,
-                //         subtitleCallback,
-                //         callback,
-                //     )
-                // },
+                {
+                    invokeBollyflix(
+                        res.imdb_id,
+                        res.imdbSeason,
+                        res.imdbEpisode,
+                        subtitleCallback,
+                        callback,
+                    )
+                },
                 {
                     invokeAllmovieland(
                         res.imdb_id,
@@ -723,15 +723,15 @@ open class CineStreamProvider : MainAPI() {
                         callback,
                     )
                 },
-                // {
-                //     invokeBollyflix(
-                //         res.id,
-                //         res.season,
-                //         res.episode,
-                //         subtitleCallback,
-                //         callback,
-                //     )
-                // },
+                {
+                    invokeBollyflix(
+                        res.id,
+                        res.season,
+                        res.episode,
+                        subtitleCallback,
+                        callback,
+                    )
+                },
                 {
                     invokeTorrentio(
                         res.id,
