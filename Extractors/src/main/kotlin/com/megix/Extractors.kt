@@ -677,11 +677,11 @@ open class GDFlix : ExtractorApi() {
     }
 
     try {
-        val types = ["type=1", "type=2"]
+        val types = listOf("type=1", "type=2")
         types.amap {
-            val source = app.get(newUrl.replace("file", "wfile") + "?$it").
+            val source = app.get("""${newUrl.replace("file", "wfile")}?$it""").
                 document.select("a.btn-success").attr("href")
-            if (url.isNotEmpty()) {
+            if (source.isNotEmpty()) {
                 callback.invoke(
                     newExtractorLink(
                         "GDFlix[CF]",
