@@ -15,7 +15,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.json.JSONObject
 import org.json.JSONArray
-import com.lagradost.cloudstream3.argamap
+import com.lagradost.cloudstream3.runAllAsync
 import com.lagradost.cloudstream3.extractors.helper.GogoHelper
 import com.lagradost.cloudstream3.mvvm.safeApiCall
 import com.lagradost.nicehttp.RequestBodyTypes
@@ -26,7 +26,7 @@ import com.lagradost.cloudstream3.utils.AppUtils.toJson
 object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun invokeTvStream(
-        id: String,
+        id: String? = null,
         api: String,
         tvtype: String,
         subtitleCallback: (SubtitleFile) -> Unit,
@@ -759,7 +759,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val animepahe = malsync?.animepahe?.firstNotNullOf { it.value["url"] }
         val animepahetitle = malsync?.animepahe?.firstNotNullOf { it.value["title"] }
 
-        argamap(
+        runAllAsync(
             {
                 val hianimeurl=malsync?.zoro?.firstNotNullOf { it.value["url"] }
                 invokeHianime(hianimeurl, episode, subtitleCallback, callback)
