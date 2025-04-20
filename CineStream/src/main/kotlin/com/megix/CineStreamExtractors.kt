@@ -599,7 +599,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeCinemaluxe(
-        title: String,
+        title: String? = null,
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
@@ -1310,7 +1310,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeUhdmovies(
-        title: String,
+        title: String? = null,
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,

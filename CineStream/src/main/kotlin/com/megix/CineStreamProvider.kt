@@ -544,7 +544,7 @@ open class CineStreamProvider : MainAPI() {
     ) {
         var imdbTitle: String? = null
         var imdbYear: Int? = null
-        var tmdbId: String? = null
+        var tmdbId: Int? = null
 
         try {
             val json = app.get("$cinemeta_url/meta/${res.tvtype}/${res.imdb_id}.json").text
