@@ -93,14 +93,14 @@ open class CineStreamProvider : MainAPI() {
         const val multimoviesAPI = "https://multimovies.guru"
         const val animepaheAPI = "https://animepahe.ru"
         const val allmovielandAPI = "https://allmovieland.fun"
-        const val cinemaluxeAPI = "https://luxecinema.in"
+        const val cinemaluxeAPI = "https://cinemaluxe.foo"
         const val bollyflixAPI = "https://bollyflix.yoga"
         const val torrentioAPI = "https://torrentio.strem.fun"
         const val anizoneAPI = "https://anizone.to"
         const val netflixAPI = "https://netfree2.cc"
         const val AllanimeAPI = "https://api.allanime.day/api"
         const val skymoviesAPI = "https://skymovieshd.pink"
-        const val hindMoviezAPI = "https://hindmoviez.co.in"
+        const val hindMoviezAPI = "https://hindmoviez.email"
         const val jaduMoviesAPI = "https://jadumovies.com"
         const val moviesflixAPI = "https://themoviesflix.at"
         const val hdmoviesflixAPI = "https://hdmoviesflix.center"
@@ -619,7 +619,7 @@ open class CineStreamProvider : MainAPI() {
                 val (aniId, malId) = convertTmdbToAnimeId(res.title, year, res.firstAired, if (res.tvtype == "movie") TvType.AnimeMovie else TvType.Anime)
                 invokeAnimes(malId, aniId, res.episode, seasonYear, "imdb", subtitleCallback, callback)
             }},
-            { invokeMovies4u(res.title, year, res.season, res.episode, subtitleCallback, callback) }
+            { invokeMovies4u(res.title, year, res.season, res.episode, subtitleCallback, callback) },
             { invokePrimeWire(res.id, res.season, res.episode, subtitleCallback, callback) },
             { invokeTom(res.tmdbId, res.season, res.episode, callback, subtitleCallback) },
             { invokePlayer4U(res.title, res.season, res.episode, seasonYear, callback) },

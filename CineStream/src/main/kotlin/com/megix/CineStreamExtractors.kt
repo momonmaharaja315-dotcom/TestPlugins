@@ -341,31 +341,53 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        app.get("$movies4uAPI/?s=$title $year").document.select("article h3 a").amap {
-            val document = app.get(it.attr("href")).document
-            if(season == null) {
-                document.select("div.download-links-div a.btn").amap{
-                    app.get(it.attr("href")).document.select("div.downloads-btns-div a.btn").amap{
+        val searchQuery = "$title $year".trim()
+        val searchUrl = "$movies4uAPI/?s=$searchQuery"
+
+        val searchDoc = app.get(searchUrl).document
+        val links = searchDoc.select("article h3 a")
+
+        links.amap { element ->
+            val postUrl = element.attr("href")
+            val postDoc = app.get(postUrl).document
+
+            if (season == null) {
+                val buttons = postDoc.select("div.download-links-div a.btn")
+                buttons.amap { button ->
+                    val innerUrl = button.attr("href")
+                    val innerDoc = app.get(innerUrl).document
+                    val sourceButtons = innerDoc.select("div.downloads-btns-div a.btn")
+
+                    sourceButtons.amap { sourceButton ->
+                        val sourceLink = sourceButton.attr("href")
                         loadSourceNameExtractor(
                             "Movies4u",
                             "",
-                            it.attr("href"),
+                            sourceLink,
                             subtitleCallback,
                             callback
                         )
                     }
                 }
             } else {
-                document.select("div.downloads-btns-div").amap {
-                    val text = it.previousElementSibling().text()
-                    if(text.contains("Season $season")) {
-                        val link = it.select("a.btn").attr("href")
-                        app.get(link).document.select("div.downloads-btns-div").get(episode!! - 1).amap {
-                            it.select("a.btn").amap{
+                val seasonBlocks = postDoc.select("div.downloads-btns-div")
+                seasonBlocks.amap { block ->
+                    val headerText = block.previousElementSibling()?.text().orEmpty()
+                    if (headerText.contains("Season $season", ignoreCase = true)) {
+                        val seasonLink = block.selectFirst("a.btn")?.attr("href") ?: return@amap
+                        val episodeDoc = app.get(seasonLink).document
+                        val episodeBlocks = episodeDoc.select("div.downloads-btns-div")
+
+                        if (episode != null && episode in 1..episodeBlocks.size) {
+                            val episodeBlock = episodeBlocks[episode - 1]
+                            val episodeLinks = episodeBlock.select("a.btn")
+
+                            episodeLinks.amap { epLink ->
+                                val sourceLink = epLink.attr("href")
                                 loadSourceNameExtractor(
                                     "Movies4u",
                                     "",
-                                    it.attr("href"),
+                                    sourceLink,
                                     subtitleCallback,
                                     callback
                                 )
