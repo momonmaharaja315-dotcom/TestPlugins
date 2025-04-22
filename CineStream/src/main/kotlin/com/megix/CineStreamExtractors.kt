@@ -334,6 +334,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeMovies4u(
+        id: String? = null,
         title: String? = null,
         year: Int? = null,
         season: Int? = null,
@@ -357,31 +358,38 @@ object CineStreamExtractors : CineStreamProvider() {
                 )
             )
             val postDoc = app.get(postUrl).document
+            val imdbId = postDoc.select("p a:contains(IMDb Rating)").attr("href")
+                            .substringAfter("title/").substringBefore("/")
+
+            if(imdbId != id.toString()) { return@amap }
 
             if (season == null) {
-                val buttons = postDoc.select("div.download-links-div a.btn")
-                buttons.amap { button ->
-                    val innerUrl = button.attr("href")
+                val innerUrl = postDoc.select("div.download-links-div a.btn").attr("href")
+                callback.invoke(
+                    newExtractorLink(
+                        "innerUrl",
+                        "innerUrl",
+                        innerUrl,
+                    )
+                )
+                val innerDoc = app.get(innerUrl).document
+                val sourceButtons = innerDoc.select("div.downloads-btns-div a.btn")
+                sourceButtons.amap { sourceButton ->
+                    val sourceLink = sourceButton.attr("href")
                     callback.invoke(
                         newExtractorLink(
-                            "innerUrl",
-                            "innerUrl",
-                            innerUrl,
+                            "sourceLink",
+                            "sourceLink",
+                            sourceLink,
                         )
                     )
-                    val innerDoc = app.get(innerUrl).document
-                    val sourceButtons = innerDoc.select("div.downloads-btns-div a.btn")
-
-                    sourceButtons.amap { sourceButton ->
-                        val sourceLink = sourceButton.attr("href")
-                        loadSourceNameExtractor(
-                            "Movies4u",
-                            "",
-                            sourceLink,
-                            subtitleCallback,
-                            callback
-                        )
-                    }
+                    loadSourceNameExtractor(
+                        "Movies4u",
+                        "",
+                        sourceLink,
+                        subtitleCallback,
+                        callback
+                    )
                 }
             } else {
                 val seasonBlocks = postDoc.select("div.downloads-btns-div")
@@ -389,6 +397,14 @@ object CineStreamExtractors : CineStreamProvider() {
                     val headerText = block.previousElementSibling()?.text().orEmpty()
                     if (headerText.contains("Season $season", ignoreCase = true)) {
                         val seasonLink = block.selectFirst("a.btn")?.attr("href") ?: return@amap
+                        callback.invoke(
+                            newExtractorLink(
+                                "seasonLink",
+                                "seasonLink",
+                                seasonLink,
+                            )
+                        )
+
                         val episodeDoc = app.get(seasonLink).document
                         val episodeBlocks = episodeDoc.select("div.downloads-btns-div")
 
@@ -398,6 +414,13 @@ object CineStreamExtractors : CineStreamProvider() {
 
                             episodeLinks.amap { epLink ->
                                 val sourceLink = epLink.attr("href")
+                                callback.invoke(
+                                    newExtractorLink(
+                                        "sourceLink",
+                                        "sourceLink",
+                                        sourceLink,
+                                    )
+                                )
                                 loadSourceNameExtractor(
                                     "Movies4u",
                                     "",
