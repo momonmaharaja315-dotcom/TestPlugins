@@ -349,12 +349,26 @@ object CineStreamExtractors : CineStreamProvider() {
 
         links.amap { element ->
             val postUrl = element.attr("href")
+            callback.invoke(
+                newExtractorLink(
+                    "postUrl",
+                    "postUrl",
+                    postUrl,
+                )
+            )
             val postDoc = app.get(postUrl).document
 
             if (season == null) {
                 val buttons = postDoc.select("div.download-links-div a.btn")
                 buttons.amap { button ->
                     val innerUrl = button.attr("href")
+                    callback.invoke(
+                        newExtractorLink(
+                            "innerUrl",
+                            "innerUrl",
+                            innerUrl,
+                        )
+                    )
                     val innerDoc = app.get(innerUrl).document
                     val sourceButtons = innerDoc.select("div.downloads-btns-div a.btn")
 
