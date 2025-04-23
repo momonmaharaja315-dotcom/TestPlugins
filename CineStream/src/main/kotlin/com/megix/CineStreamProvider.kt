@@ -509,29 +509,69 @@ open class CineStreamProvider : MainAPI() {
     }
 
     private fun calculateRelevanceScore(name: String, query: String): Int {
-        val lowerCaseName = name.lowercase()
-        val lowerCaseQuery = query.lowercase()
+        fun normalize(text: String): String {
+            return text.lowercase()
+                .replace(Regex("[^a-z0-9 ]"), "")
+                .replace(Regex("\\s+"), " ")
+                .trim()
+        }
+
+        fun levenshtein(a: String, b: String): Int {
+            val dp = Array(a.length + 1) { IntArray(b.length + 1) }
+            for (i in 0..a.length) dp[i][0] = i
+            for (j in 0..b.length) dp[0][j] = j
+            for (i in 1..a.length) {
+                for (j in 1..b.length) {
+                    dp[i][j] = minOf(
+                        dp[i - 1][j] + 1,        // deletion
+                        dp[i][j - 1] + 1,        // insertion
+                        dp[i - 1][j - 1] + if (a[i - 1] == b[j - 1]) 0 else 1 // substitution
+                    )
+                }
+            }
+            return dp[a.length][b.length]
+        }
+
+        val normalizedName = normalize(name)
+        val normalizedQuery = normalize(query)
         var score = 0
 
-        if (lowerCaseName == lowerCaseQuery) {
+        if (normalizedName == normalizedQuery) {
             score += 100
         }
 
-        if (lowerCaseName.contains(lowerCaseQuery)) {
+        if (normalizedName.contains(normalizedQuery)) {
             score += 50
-
-            val index = lowerCaseName.indexOf(lowerCaseQuery)
-            if (index == 0) {
-                score += 20
-            } else if (index > 0 && index < 5) {
-                score += 10
+            val index = normalizedName.indexOf(normalizedQuery)
+            score += when {
+                index == 0 -> 20
+                index in 1..4 -> 10
+                else -> 0
             }
 
-            lowerCaseQuery.split(" ").forEach { word ->
-                if (lowerCaseName.contains(word)) {
+            val queryWords = normalizedQuery.split(" ")
+            queryWords.forEach { word ->
+                if (normalizedName.contains(word)) {
                     score += 5
                 }
             }
+
+            if (queryWords.all { normalizedName.contains(it) }) {
+                score += 15
+            }
+        }
+
+        // Fuzzy matching bonus (if not already matched well)
+        if (score < 50) {
+            val distance = levenshtein(normalizedName, normalizedQuery)
+            if (distance in 1..3) {
+                score += 30 - (distance * 5) // closer = higher score
+            }
+        }
+
+        // Slight penalty for long irrelevant names
+        if (score < 50 && normalizedName.length > 30) {
+            score -= 10
         }
 
         return score
