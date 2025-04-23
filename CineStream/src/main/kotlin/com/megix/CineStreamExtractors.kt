@@ -333,109 +333,6 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    suspend fun invokeMovies4u(
-        id: String? = null,
-        title: String? = null,
-        year: Int? = null,
-        season: Int? = null,
-        episode: Int? = null,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit,
-    ) {
-        val searchQuery = "$title $year".trim()
-        val searchUrl = "$movies4uAPI/?s=$searchQuery"
-
-        val searchDoc = app.get(searchUrl).document
-        val links = searchDoc.select("article h3 a")
-
-        links.amap { element ->
-            val postUrl = element.attr("href")
-            callback.invoke(
-                newExtractorLink(
-                    "postUrl",
-                    "postUrl",
-                    postUrl,
-                )
-            )
-            val postDoc = app.get(postUrl).document
-            val imdbId = postDoc.select("p a:contains(IMDb Rating)").attr("href")
-                            .substringAfter("title/").substringBefore("/")
-
-            if(imdbId != id.toString()) { return@amap }
-
-            if (season == null) {
-                val innerUrl = postDoc.select("div.download-links-div a.btn").attr("href")
-                callback.invoke(
-                    newExtractorLink(
-                        "innerUrl",
-                        "innerUrl",
-                        innerUrl,
-                    )
-                )
-                val innerDoc = app.get(innerUrl).document
-                val sourceButtons = innerDoc.select("div.downloads-btns-div a.btn")
-                sourceButtons.amap { sourceButton ->
-                    val sourceLink = sourceButton.attr("href")
-                    callback.invoke(
-                        newExtractorLink(
-                            "sourceLink",
-                            "sourceLink",
-                            sourceLink,
-                        )
-                    )
-                    loadSourceNameExtractor(
-                        "Movies4u",
-                        "",
-                        sourceLink,
-                        subtitleCallback,
-                        callback
-                    )
-                }
-            } else {
-                val seasonBlocks = postDoc.select("div.downloads-btns-div")
-                seasonBlocks.amap { block ->
-                    val headerText = block.previousElementSibling()?.text().orEmpty()
-                    if (headerText.contains("Season $season", ignoreCase = true)) {
-                        val seasonLink = block.selectFirst("a.btn")?.attr("href") ?: return@amap
-                        callback.invoke(
-                            newExtractorLink(
-                                "seasonLink",
-                                "seasonLink",
-                                seasonLink,
-                            )
-                        )
-
-                        val episodeDoc = app.get(seasonLink).document
-                        val episodeBlocks = episodeDoc.select("div.downloads-btns-div")
-
-                        if (episode != null && episode in 1..episodeBlocks.size) {
-                            val episodeBlock = episodeBlocks[episode - 1]
-                            val episodeLinks = episodeBlock.select("a.btn")
-
-                            episodeLinks.amap { epLink ->
-                                val sourceLink = epLink.attr("href")
-                                callback.invoke(
-                                    newExtractorLink(
-                                        "sourceLink",
-                                        "sourceLink",
-                                        sourceLink,
-                                    )
-                                )
-                                loadSourceNameExtractor(
-                                    "Movies4u",
-                                    "",
-                                    sourceLink,
-                                    subtitleCallback,
-                                    callback
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     suspend fun invokeHdmovie2(
         title: String? = null,
         year: Int? = null,
@@ -656,6 +553,74 @@ object CineStreamExtractors : CineStreamProvider() {
                                         callback,
                                     )
                                 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    suspend fun invokeMovies4u(
+        id: String? = null,
+        title: String? = null,
+        year: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        val searchQuery = "$title $year".trim()
+        val searchUrl = "$movies4uAPI/?s=$searchQuery"
+
+        val searchDoc = app.get(searchUrl).document
+        val links = searchDoc.select("article h3 a")
+
+        links.amap { element ->
+            val postUrl = element.attr("href")
+            val postDoc = app.get(postUrl).document
+            val imdbId = postDoc.select("p a:contains(IMDb Rating)").attr("href")
+                            .substringAfter("title/").substringBefore("/")
+
+            if(imdbId != id.toString()) { return@amap }
+
+            if (season == null) {
+                val innerUrl = postDoc.select("div.download-links-div a.btn").attr("href")
+                val innerDoc = app.get(innerUrl).document
+                val sourceButtons = innerDoc.select("div.downloads-btns-div a.btn")
+                sourceButtons.amap { sourceButton ->
+                    val sourceLink = sourceButton.attr("href")
+                    loadSourceNameExtractor(
+                        "Movies4u",
+                        sourceLink,
+                        "",
+                        subtitleCallback,
+                        callback
+                    )
+                }
+            } else {
+                val seasonBlocks = postDoc.select("div.downloads-btns-div")
+                seasonBlocks.amap { block ->
+                    val headerText = block.previousElementSibling()?.text().orEmpty()
+                    if (headerText.contains("Season $season", ignoreCase = true)) {
+                        val seasonLink = block.selectFirst("a.btn")?.attr("href") ?: return@amap
+
+                        val episodeDoc = app.get(seasonLink).document
+                        val episodeBlocks = episodeDoc.select("div.downloads-btns-div")
+
+                        if (episode != null && episode in 1..episodeBlocks.size) {
+                            val episodeBlock = episodeBlocks[episode - 1]
+                            val episodeLinks = episodeBlock.select("a.btn")
+
+                            episodeLinks.amap { epLink ->
+                                val sourceLink = epLink.attr("href")
+                                loadSourceNameExtractor(
+                                    "Movies4u",
+                                    sourceLink,
+                                    "",
+                                    subtitleCallback,
+                                    callback
+                                )
                             }
                         }
                     }
@@ -1175,6 +1140,14 @@ object CineStreamExtractors : CineStreamProvider() {
             .selectFirst("div.card-grid > a:has(div.movie-card-content:contains(${year ?: ""}))")
             ?.attr("href") ?: return
 
+        callback.invoke(
+            newExtractorLink(
+                "link",
+                "link",
+                link,
+            )
+        )
+
         val doc = app.get("$fourkhdhubAPI$link").document
         if(season == null) {
             doc.select("div.download-item a").amap {
@@ -1193,6 +1166,13 @@ object CineStreamExtractors : CineStreamProvider() {
             doc.select(".episode-download-item:has(div.episode-file-title:contains(${seasonText}${episodeText}))").amap {
                 val source = it.selectFirst("div.episode-links > a")
                     ?.attr("href") ?: return@amap
+                callback.invoke(
+                    newExtractorLink(
+                        "source",
+                        "source",
+                        link,
+                    )
+                )
                 loadSourceNameExtractor(
                     "4Khdhub",
                     source,
@@ -1813,7 +1793,6 @@ object CineStreamExtractors : CineStreamProvider() {
             val url = if(page == 0) {"$Player4uApi/embed?key=$fixQuery"} else {"$Player4uApi/embed?key=$fixQuery&page=$page"}
             try {
                 var document = app.get(url, timeout = 20).document
-                android.util.Log.d("salman731 html",document.html())
                 allLinks.addAll(
                     document.select(".playbtnx").map {
                         Player4uLinkData(name = it.text(), url = it.attr("onclick"))
@@ -1850,10 +1829,8 @@ object CineStreamExtractors : CineStreamProvider() {
                 val selectedQuality = getPlayer4UQuality(qualityFromName)
 
                 val subLink = "go\\('(.*)'\\)".toRegex().find(link.url)?.groups?.get(1)?.value ?: return@forEach
-                android.util.Log.d("salman731 subLink",subLink)
                 val iframeSource = app.get("$Player4uApi$subLink", timeout = 10, referer = Player4uApi)
                     .document.select("iframe").attr("src")
-                android.util.Log.d("salman731 iframeSource",iframeSource)
                 getPlayer4uUrl(
                     nameFormatted,
                     selectedQuality,
@@ -1880,9 +1857,7 @@ object CineStreamExtractors : CineStreamProvider() {
         }
         val doc = app.get(url, timeout = 10).document
         val userData = doc.select("#user-data")
-        android.util.Log.d("salman731 v",userData.toString())
         var decryptedLinks = decryptLinks(userData.attr("v"))
-        android.util.Log.d("salman731 dl",decryptedLinks.toString())
         for (link in decryptedLinks) {
             val url = "$Primewire/links/go/$link"
             val oUrl = app.get(url,timeout = 10)
@@ -1910,7 +1885,6 @@ object CineStreamExtractors : CineStreamProvider() {
                 "$ThePirateBayApi/stream/series/$imdbId:$season:$episode.json"
             }
             val res = app.get(url, timeout = 10).parsedSafe<TBPResponse>()
-            Log.d("salman731 TBP",res.toString())
             for(stream in res?.streams!!)
             {
                 val magnetLink = generateMagnetLink(TRACKER_LIST_URL,stream.infoHash)
@@ -1925,6 +1899,84 @@ object CineStreamExtractors : CineStreamProvider() {
                     }
                 )
             }
+        } catch (_: Exception) { }
+    }
+
+
+    suspend fun invokeVidJoy(
+        imdbId: Int? =null,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        try {
+            val listSrc = listOf("Camelot","Atlantis","Babylon","NYC")
+            val link = if(season != null)
+            {
+                "$VidJoyApi/embed/api/fetch2/$imdbId/$season/$episode"
+            }
+            else
+            {
+                "$VidJoyApi/embed/api/fetch2/$imdbId"
+            }
+            listSrc.forEach { src ->
+                if(src == "Camelot")
+                {
+                    (0..4).forEach { i ->
+                        try {
+                            val finalLink = "$link/?srName=Camelot&sr=$i"
+                            val encrptedText = app.get(finalLink).text;
+                            val decryptedJson = decryptOpenSSLAES(encrptedText,"b91eeba6b7c848828ba8b84d44fa38a88affef23ec270ea4cd904810280b34fa")
+                            if (decryptedJson != "> - <") {
+                                val vidjoyResponse = tryParseJson<VidjoyResponse>(decryptedJson)
+                                if (vidjoyResponse != null) {
+                                    for(url in vidjoyResponse.url)
+                                    {
+                                        callback.invoke(
+                                            newExtractorLink(
+                                                "Vidjoy ${url.lang}",
+                                                "Vidjoy ${url.lang}",
+                                                url = url.link,
+                                                type =  if(url.link.contains(".mp4")) ExtractorLinkType.VIDEO else INFER_TYPE
+                                            ) {
+                                                this.quality = getQualityFromName(url.resulation)
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        } catch (e: Exception) { }
+                    }
+                }
+                else
+                {
+                    try {
+                        val finalLink = "$link/?srName=$src"
+                        val encrptedText = app.get(finalLink).text;
+                        val decryptedJson = decryptOpenSSLAES(encrptedText,"b91eeba6b7c848828ba8b84d44fa38a88affef23ec270ea4cd904810280b34fa")
+                        if (decryptedJson != "> - <") {
+                            val vidjoyResponse = tryParseJson<VidjoyResponse>(decryptedJson)
+                            if (vidjoyResponse != null) {
+                                for(url in vidjoyResponse.url)
+                                {
+
+                                    callback.invoke(
+                                        newExtractorLink(
+                                            "Vidjoy ${url.lang}",
+                                            "Vidjoy ${url.lang}",
+                                            url = url.link,
+                                            type =  if(url.link.contains(".m3u8")) ExtractorLinkType.M3U8 else INFER_TYPE
+                                        ) {
+                                            this.quality = getQualityFromName(url.resulation)
+                                        }
+                                    )
+                                }
+                            }
+                        }
+                    } catch (e: Exception) { }
+                }
+            }
+
         } catch (_: Exception) { }
     }
 }

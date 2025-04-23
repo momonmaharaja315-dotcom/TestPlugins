@@ -52,6 +52,7 @@ import com.megix.CineStreamExtractors.invokeThepiratebay
 import com.megix.CineStreamExtractors.invokeTom
 import com.megix.CineStreamExtractors.invokeAllmovieland
 import com.megix.CineStreamExtractors.invoke4khdhub
+import com.megix.CineStreamExtractors.invokeVidJoy
 import com.megix.CineStreamExtractors.invokeMovies4u
 
 open class CineStreamProvider : MainAPI() {
@@ -83,7 +84,6 @@ open class CineStreamProvider : MainAPI() {
         const val MultiembedAPI = "https://hin.autoembed.cc"
         const val MostraguardaAPI = "https://mostraguarda.stream"
         const val WHVXAPI = "https://api.whvx.net"
-        const val movies4uAPI = "https://movies4u.show"
         const val TomAPI = "https://tom.autoembed.cc"
         const val uhdmoviesAPI = "https://uhdmovies.tips"
         const val fourkhdhubAPI = "https://4khdhub.fans"
@@ -111,6 +111,8 @@ open class CineStreamProvider : MainAPI() {
         const val Player4uApi = "https://player4u.xyz"
         const val Primewire = "https://www.primewire.tf"
         const val ThePirateBayApi = "https://thepiratebay-plus.strem.fun"
+        const val VidJoyApi ="https://vidjoy.pro"
+        const val movies4uAPI = "https://movies4u.show"
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
@@ -193,178 +195,147 @@ open class CineStreamProvider : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> = coroutineScope {
-        val searchResponse = mutableListOf<SearchResponse>()
+        val normalizedQuery = query.trim()
+        val hasTmdb = "tmdb:" in normalizedQuery.lowercase()
 
-        suspend fun fetchAndParse(url: String, tvType: TvType): List<SearchResponse> {
-            return try {
-                val json = app.get(url).text
-                val results = tryParseJson<SearchResult>(json)
-                results?.metas?.map {
-                    val title = it.name ?: it.description ?: "Empty"
-                    newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), tvType).apply {
-                        this.posterUrl = it.poster.toString()
-                    }
-                } ?: emptyList()
-            } catch (e: Exception) {
-                emptyList() // Fail-safe in case of network or parse error
-            }
-        }
+        suspend fun fetchResults(url: String, tvType: TvType): List<SearchResponse> = runCatching {
+            val json = app.get(url).text
+            tryParseJson<SearchResult>(json)?.metas?.map {
+                val title = it.aliases?.firstOrNull() ?: it.name ?: it.description ?: "Empty"
+                newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), tvType).apply {
+                    posterUrl = it.poster.toString()
+                }
+            } ?: emptyList()
+        }.getOrDefault(emptyList())
 
-        val requests = listOf(
-            async { fetchAndParse("$kitsu_url/catalog/anime/kitsu-anime-airing/search=$query.json", TvType.Movie) },
-            async { fetchAndParse("$cinemeta_url/catalog/movie/top/search=$query.json", TvType.Movie) },
-            async { fetchAndParse("$cinemeta_url/catalog/series/top/search=$query.json", TvType.TvSeries) },
-            async { fetchAndParse("$streamio_TMDB/catalog/movie/tmdb.top/search=$query.json", TvType.Movie) },
-            async { fetchAndParse("$streamio_TMDB/catalog/series/tmdb.top/search=$query.json", TvType.TvSeries) },
-            async { fetchAndParse("$mediaFusion/catalog/tv/mediafusion_search_tv/search=$query.json", TvType.Live) }
+        val endpoints = listOf(
+            "$kitsu_url/catalog/anime/kitsu-anime-airing/search=$normalizedQuery.json" to TvType.Anime,
+            "$cinemeta_url/catalog/movie/top/search=$normalizedQuery.json" to TvType.Movie,
+            "$cinemeta_url/catalog/series/top/search=$normalizedQuery.json" to TvType.TvSeries,
+            "$mediaFusion/catalog/tv/mediafusion_search_tv/search=$normalizedQuery.json" to TvType.Live
         )
 
-        // Gather all results
-        searchResponse += requests.awaitAll().flatten()
+        val tmdbCleanQuery = normalizedQuery.replace("(?i)tmdb:".toRegex(), "").trim()
+        val tmdbEndpoints = if (hasTmdb) listOf(
+            "$streamio_TMDB/catalog/movie/tmdb.top/search=$tmdbCleanQuery.json" to TvType.Movie,
+            "$streamio_TMDB/catalog/series/tmdb.top/search=$tmdbCleanQuery.json" to TvType.TvSeries
+        ) else emptyList()
 
-        return@coroutineScope searchResponse.sortedByDescending { response ->
-            calculateRelevanceScore(response.name, query)
+        val allRequests = (endpoints + tmdbEndpoints).map { (url, type) ->
+            async { fetchResults(url, type) }
         }
+
+        allRequests.awaitAll()
+            .flatten()
+            .sortedByDescending { calculateRelevanceScore(it.name, query) }
     }
 
     override suspend fun load(url: String): LoadResponse? {
         val movie = parseJson<PassData>(url)
-        val tvtype = movie.type
         var id = movie.id
-        val type =
-                if(movie.type == "tv" || movie.type == "events") TvType.Live
-                else if(movie.type == "movie") TvType.Movie
-                else TvType.TvSeries
-        val meta_url =
-            if(id.contains("kitsu")) kitsu_url
-            else if(id.contains("tmdb")) streamio_TMDB
-            else if(id.contains("mf")) mediaFusion
-            else cinemeta_url
-        val isKitsu = if(meta_url == kitsu_url) true else false
-        val isTMDB = if(meta_url == streamio_TMDB) true else false
-        val externalIds = if(isKitsu) getExternalIds(id.substringAfter("kitsu:"),"kitsu") else  null
-        val malId = if(externalIds != null) externalIds.myanimelist else null
-        val anilistId = if(externalIds != null) externalIds.anilist else null
-        id = if(isKitsu) id.replace(":", "%3A") else id
-        val json = app.get("$meta_url/meta/$tvtype/$id.json").text
-        val movieData = tryParseJson<ResponseData>(json)
-        val title = movieData?.meta?.name.toString()
-        val posterUrl = movieData ?.meta?.poster.toString()
-        val imdbRating = movieData?.meta?.imdbRating
-        val year = movieData?.meta?.year
-        val releaseInfo = movieData?.meta?.releaseInfo
-        val tmdbId = if(!isKitsu && isTMDB) id.replace("tmdb:", "").toIntOrNull() else movieData?.meta?.moviedb_id
-        id = if(!isKitsu && isTMDB) movieData?.meta?.imdb_id.toString() else id
-        var description = movieData?.meta?.description.toString()
-        val cast : List<String> = movieData?.meta?.cast ?: emptyList()
-        val genre : List<String> = movieData?.meta?.genre ?: movieData?.meta?.genres ?: emptyList()
-        val background = movieData?.meta?.background.toString()
-        val isCartoon = genre.any { it.contains("Animation", true) }
-        var isAnime = (movieData?.meta?.country.toString().contains("Japan", true) ||
-            movieData?.meta?.country.toString().contains("China", true)) && isCartoon
-        isAnime = if(isKitsu) true else isAnime
-        val isBollywood = movieData?.meta?.country.toString().contains("India", true)
-        val isAsian = (movieData?.meta?.country.toString().contains("Korea", true) ||
-                movieData?.meta?.country.toString().contains("China", true)) && !isAnime
-
-        if(tvtype == "movie" || tvtype == "tv" || tvtype == "events") {
-            val data = LoadLinksData(
-                title,
-                id,
-                tmdbId,
-                tvtype,
-                year ?: releaseInfo,
-                null,
-                null,
-                null,
-                isAnime,
-                isBollywood,
-                isAsian,
-                isCartoon,
-                null,
-                null,
-                null,
-                isKitsu,
-                anilistId,
-                malId
-            ).toJson()
-            return newMovieLoadResponse(title, url, if(isAnime) TvType.AnimeMovie  else type, data) {
-                this.posterUrl = posterUrl
-                this.plot = description
-                this.tags = genre
-                this.rating = imdbRating.toRatingInt()
-                this.year = year ?.toIntOrNull() ?: releaseInfo?.toIntOrNull() ?: year?.substringBefore("-")?.toIntOrNull()
-                this.backgroundPosterUrl = background
-                this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
-                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else if(meta_url == mediaFusion) "Mediafusion" else "IMDB"
-                addActors(cast)
-                addAniListId(anilistId)
-                addMalId(malId)
-                addImdbId(id)
-            }
+        val tvtype = movie.type
+        val type = when (tvtype) {
+            "tv", "events" -> TvType.Live
+            "movie" -> TvType.Movie
+            else -> TvType.TvSeries
         }
-        else {
+
+        val metaUrl = when {
+            "kitsu" in id -> kitsu_url
+            "tmdb" in id -> streamio_TMDB
+            "mf" in id -> mediaFusion
+            else -> cinemeta_url
+        }
+
+        val isKitsu = metaUrl == kitsu_url
+        val isTMDB = metaUrl == streamio_TMDB
+
+        val externalIds = if (isKitsu) getExternalIds(id.substringAfter("kitsu:"), "kitsu") else null
+        val (malId, anilistId) = externalIds?.let { it.myanimelist to it.anilist } ?: null to null
+        if (isKitsu) id = id.replace(":", "%3A")
+
+        val json = app.get("$metaUrl/meta/$tvtype/$id.json").text
+        val movieData = tryParseJson<ResponseData>(json)
+        val meta = movieData?.meta
+        val title = meta?.name.orEmpty()
+        val engTitle = movieData?.aliases?.firstOrNull() ?: title
+        val posterUrl = meta?.poster.orEmpty()
+        val background = meta?.background.orEmpty()
+        val description = meta?.description.orEmpty()
+        val genre = meta?.genre ?: meta?.genres ?: emptyList()
+        val cast = meta?.cast ?: emptyList()
+        val year = meta?.year
+        val releaseInfo = meta?.releaseInfo
+        val imdbRating = meta?.imdbRating
+        val duration = meta?.runtime?.replace(" min", "")?.toIntOrNull()
+        val contentRating = when {
+            isKitsu -> "Kitsu"
+            isTMDB -> "TMDB"
+            metaUrl == mediaFusion -> "Mediafusion"
+            else -> "IMDB"
+        }
+
+        val isCartoon = genre.any { it.contains("Animation", true) }
+        var isAnime = (meta?.country?.contains("Japan", true) == true || meta.country?.contains("China", true) == true) && isCartoon
+        if (isKitsu) isAnime = true
+        val isBollywood = meta?.country?.contains("India", true) == true
+        val isAsian = (meta?.country?.contains("Korea", true) == true || meta.country?.contains("China", true) == true) && !isAnime
+
+        val tmdbId = if (!isKitsu && isTMDB) id.removePrefix("tmdb:").toIntOrNull() else meta?.moviedb_id
+        if (!isKitsu && isTMDB) id = meta?.imdb_id.orEmpty()
+
+        val baseData = { season: Int?, episode: Int?, aired: String?, imdbId: String?, imdbSeason: Int?, imdbEpisode: Int? ->
+            LoadLinksData(
+                title, id, tmdbId, tvtype, year ?: releaseInfo, season, episode, aired,
+                isAnime, isBollywood, isAsian, isCartoon,
+                imdbId, imdbSeason, imdbEpisode,
+                isKitsu, anilistId, malId
+            ).toJson()
+        }
+
+        fun commonFields(builder: LoadResponseBuilder.() -> Unit) = builder.apply {
+            this.posterUrl = posterUrl
+            this.backgroundPosterUrl = background
+            this.plot = description
+            this.tags = genre
+            this.rating = imdbRating.toRatingInt()
+            this.year = year?.substringBefore("–")?.toIntOrNull()
+                ?: releaseInfo?.substringBefore("–")?.toIntOrNull()
+                ?: year?.substringBefore("-")?.toIntOrNull()
+            this.duration = duration
+            this.contentRating = contentRating
+            addActors(cast)
+            addAniListId(anilistId)
+            addMalId(malId)
+            addImdbId(id)
+        }
+
+        return if (tvtype in listOf("movie", "tv", "events")) {
+            newMovieLoadResponse(engTitle, url, if (isAnime) TvType.AnimeMovie else type, baseData(null, null, null, null, null, null)) {
+                commonFields(this)
+            }
+        } else {
             val episodes = movieData?.meta?.videos?.map { ep ->
-                newEpisode(
-                    LoadLinksData(
-                        title,
-                        id,
-                        tmdbId,
-                        tvtype,
-                        year ?: releaseInfo,
-                        ep.season,
-                        ep.episode,
-                        ep.firstAired ?: ep.released,
-                        isAnime,
-                        isBollywood,
-                        isAsian,
-                        isCartoon,
-                        ep.imdb_id,
-                        ep.imdbSeason,
-                        ep.imdbEpisode,
-                        isKitsu,
-                        anilistId,
-                        malId
-                    ).toJson()
-                ) {
+                newEpisode(baseData(ep.season, ep.episode, ep.firstAired ?: ep.released, ep.imdb_id, ep.imdbSeason, ep.imdbEpisode)) {
                     this.name = ep.name ?: ep.title
                     this.season = ep.season
                     this.episode = ep.episode
                     this.posterUrl = ep.thumbnail
                     this.description = ep.overview
-                    this.rating = ep.rating?.toFloat()?.times(10)?.roundToInt()
+                    this.rating = ep.rating?.times(10)?.roundToInt()
                     addDate(ep.firstAired ?: ep.released)
                 }
             } ?: emptyList()
-            if(isAnime) {
-                return newAnimeLoadResponse(title, url, TvType.Anime) {
-                    addEpisodes(DubStatus.Subbed, episodes)
-                    this.posterUrl = posterUrl
-                    this.backgroundPosterUrl = background
-                    this.year = year?.substringBefore("–")?.toIntOrNull() ?: releaseInfo?.substringBefore("–")?.toIntOrNull() ?: year?.substringBefore("-")?.toIntOrNull()
-                    this.plot = description
-                    this.tags = genre
-                    this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
-                    this.rating = imdbRating.toRatingInt()
-                    this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else if(meta_url == mediaFusion) "Mediafusion" else "IMDB"
-                    addActors(cast)
-                    addAniListId(anilistId)
-                    addMalId(malId)
-                    addImdbId(id)
-                }
-            }
 
-            return newTvSeriesLoadResponse(title, url, type, episodes) {
-                this.posterUrl = posterUrl
-                this.plot = description
-                this.tags = genre
-                this.rating = imdbRating.toRatingInt()
-                this.year = year?.substringBefore("–")?.toIntOrNull() ?: releaseInfo?.substringBefore("–")?.toIntOrNull() ?: year?.substringBefore("-")?.toIntOrNull()
-                this.backgroundPosterUrl = background
-                this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
-                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else if(meta_url == mediaFusion) "Mediafusion" else "IMDB"
-                addActors(cast)
-                addImdbId(id)
+            if (isAnime) {
+                newAnimeLoadResponse(engTitle, url, TvType.Anime) {
+                    addEpisodes(DubStatus.Subbed, episodes)
+                    commonFields(this)
+                }
+            } else {
+                newTvSeriesLoadResponse(engTitle, url, type, episodes) {
+                    commonFields(this)
+                }
             }
         }
     }
@@ -427,6 +398,7 @@ open class CineStreamProvider : MainAPI() {
         val id: String?,
         val imdb_id: String?,
         val type: String?,
+        val aliases: ArrayList<String>?,
         val poster: String?,
         val background: String?,
         val moviedb_id: Int?,
@@ -455,6 +427,7 @@ open class CineStreamProvider : MainAPI() {
         val name: String?,
         val poster: String?,
         val description: String?,
+        val aliases: ArrayList<String>?,
     )
 
     data class EpisodeDetails(
@@ -571,6 +544,7 @@ open class CineStreamProvider : MainAPI() {
             { invokeWHVXSubs(WYZIESubsAPI, res.imdb_id, res.imdbSeason, res.imdbEpisode, subtitleCallback) },
             { invokeMoviesmod(res.imdb_id, res.imdbSeason, res.imdbEpisode, subtitleCallback, callback) },
             { invokeTom(tmdbId, res.imdbSeason, res.imdbEpisode, callback, subtitleCallback) },
+            { invokeMovies4u(res.imdb_id, imdbTitle, imdbYear, res.imdbSeason, res.imdbEpisode, subtitleCallback, callback) },
             { invokeBollyflix(res.imdb_id, res.imdbSeason, res.imdbEpisode, subtitleCallback, callback) },
             { invokeAllmovieland(res.imdb_id, res.imdbSeason, res.imdbEpisode, callback) },
             { invokeProtonmovies(res.imdb_id, res.imdbSeason, res.imdbEpisode, subtitleCallback, callback) },
@@ -610,6 +584,7 @@ open class CineStreamProvider : MainAPI() {
             { if (!isAnime) invokeHdmovie2(res.title, seasonYear, res.episode, subtitleCallback, callback) },
             { if (!isAnime) invokeFlixhq(res.title, res.season, res.episode, subtitleCallback, callback) },
             { invokeBollyflix(res.id, res.season, res.episode, subtitleCallback, callback) },
+            { invokeMovies4u(res.id, res.title, year, res.season, res.episode, subtitleCallback, callback) },
             { invokeTorrentio(res.id, res.season, res.episode, callback) },
             { if (!isBollywood) invokeHindmoviez("HindMoviez", hindMoviezAPI, res.id, res.season, res.episode, callback) },
             { invokeW4U(res.title, year, res.id, res.season, res.episode, subtitleCallback, callback) },
@@ -619,11 +594,11 @@ open class CineStreamProvider : MainAPI() {
                 val (aniId, malId) = convertTmdbToAnimeId(res.title, year, res.firstAired, if (res.tvtype == "movie") TvType.AnimeMovie else TvType.Anime)
                 invokeAnimes(malId, aniId, res.episode, seasonYear, "imdb", subtitleCallback, callback)
             }},
-            { invokeMovies4u(res.id, res.title, year, res.season, res.episode, subtitleCallback, callback) },
             { invokePrimeWire(res.id, res.season, res.episode, subtitleCallback, callback) },
             { invokeTom(res.tmdbId, res.season, res.episode, callback, subtitleCallback) },
             { invokePlayer4U(res.title, res.season, res.episode, seasonYear, callback) },
             { invokeThepiratebay(res.id, res.season, res.episode, callback) },
+            { if (!isAnime) invokeVidJoy(res.tmdbId, res.season, res.episode, callback) },
             { invokeProtonmovies(res.id, res.season, res.episode, subtitleCallback, callback) },
             { invokeAllmovieland(res.id, res.season, res.episode, callback) },
             { invokeMultiAutoembed(res.id, res.season, res.episode, subtitleCallback, callback) },
