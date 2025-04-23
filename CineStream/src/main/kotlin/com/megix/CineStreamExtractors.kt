@@ -1163,23 +1163,17 @@ object CineStreamExtractors : CineStreamProvider() {
         } else {
             val seasonText = "S" + season.toString().padStart(2, '0')
             val episodeText = "E" + episode.toString().padStart(2, '0')
-            doc.select(".episode-download-item:has(div.episode-file-title:contains(${seasonText}${episodeText}))").amap {
-                val source = it.selectFirst("div.episode-links > a")
-                    ?.attr("href") ?: return@amap
-                callback.invoke(
-                    newExtractorLink(
-                        "source",
-                        "source",
-                        link,
+            doc.select("div.episode-download-item:has(div.episode-file-title:contains(${seasonText}${episodeText}))").amap {
+                it.select("div.episode-links > a").amap {
+                    val source = it.attr("href")
+                    loadSourceNameExtractor(
+                        "4Khdhub",
+                        source,
+                        "",
+                        subtitleCallback,
+                        callback
                     )
-                )
-                loadSourceNameExtractor(
-                    "4Khdhub",
-                    source,
-                    "",
-                    subtitleCallback,
-                    callback
-                )
+                }
             }
         }
     }

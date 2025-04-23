@@ -179,7 +179,7 @@ open class CineStreamProvider : MainAPI() {
                 if(movie.type == "tv" || movie.type == "events") TvType.Live
                 else if(movie.type == "movie") TvType.Movie
                 else TvType.TvSeries
-            val title = movie.name ?: movie.description ?: "Empty"
+            val title = movie.aliases?.firstOrNull() ?: movie.name ?: movie.description ?: "Empty"
 
             newMovieSearchResponse(title, PassData(movie.id, movie.type).toJson(), type) {
                 this.posterUrl = movie.poster.toString()
@@ -208,20 +208,23 @@ open class CineStreamProvider : MainAPI() {
             } ?: emptyList()
         }.getOrDefault(emptyList())
 
-        val endpoints = listOf(
-            "$kitsu_url/catalog/anime/kitsu-anime-airing/search=$normalizedQuery.json" to TvType.Anime,
-            "$cinemeta_url/catalog/movie/top/search=$normalizedQuery.json" to TvType.Movie,
-            "$cinemeta_url/catalog/series/top/search=$normalizedQuery.json" to TvType.TvSeries,
-            "$mediaFusion/catalog/tv/mediafusion_search_tv/search=$normalizedQuery.json" to TvType.Live
-        )
-
         val tmdbCleanQuery = normalizedQuery.replace("(?i)tmdb:".toRegex(), "").trim()
-        val tmdbEndpoints = if (hasTmdb) listOf(
-            "$streamio_TMDB/catalog/movie/tmdb.top/search=$tmdbCleanQuery.json" to TvType.Movie,
-            "$streamio_TMDB/catalog/series/tmdb.top/search=$tmdbCleanQuery.json" to TvType.TvSeries
-        ) else emptyList()
 
-        val allRequests = (endpoints + tmdbEndpoints).map { (url, type) ->
+        val endpoints = if (hasTmdb) {
+            listOf(
+                "$streamio_TMDB/catalog/movie/tmdb.top/search=$tmdbCleanQuery.json" to TvType.Movie,
+                "$streamio_TMDB/catalog/series/tmdb.top/search=$tmdbCleanQuery.json" to TvType.TvSeries
+            )
+        } else {
+            listOf(
+                "$kitsu_url/catalog/anime/kitsu-anime-airing/search=$normalizedQuery.json" to TvType.Anime,
+                "$cinemeta_url/catalog/movie/top/search=$normalizedQuery.json" to TvType.Movie,
+                "$cinemeta_url/catalog/series/top/search=$normalizedQuery.json" to TvType.TvSeries,
+                "$mediaFusion/catalog/tv/mediafusion_search_tv/search=$normalizedQuery.json" to TvType.Live
+            )
+        }
+
+        val allRequests = endpoints.map { (url, type) ->
             async { fetchResults(url, type) }
         }
 
@@ -229,6 +232,7 @@ open class CineStreamProvider : MainAPI() {
             .flatten()
             .sortedByDescending { calculateRelevanceScore(it.name, query) }
     }
+
 
     override suspend fun load(url: String): LoadResponse? {
         val movie = parseJson<PassData>(url)
