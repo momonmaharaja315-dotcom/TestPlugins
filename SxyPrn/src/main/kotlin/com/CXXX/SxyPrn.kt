@@ -7,6 +7,7 @@ import org.jsoup.nodes.Element
 import com.lagradost.cloudstream3.utils.Qualities
 import com.lagradost.cloudstream3.utils.loadExtractor
 import com.lagradost.cloudstream3.utils.newExtractorLink
+import com.lagradost.cloudstream3.utils.ExtractorLinkType
 
 class SxyPrn : MainAPI() {
     override var mainUrl = "https://sxyprn.com"
@@ -128,7 +129,7 @@ class SxyPrn : MainAPI() {
         val torrentLink = document.select("a.mpc_btn").attr("href")
         val doc = app.get(torrentLink).document
         doc.select("a.d_btn").map {
-            val type = it.text().contains("MAGNET") "Magnet" else "Torrent"
+            val type = if(it.text().contains("MAGNET")) "Magnet" else "Torrent"
             callback.invoke(
                 newExtractorLink(
                     this.name + " - " + type,
