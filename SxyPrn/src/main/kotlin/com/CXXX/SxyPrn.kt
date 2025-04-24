@@ -8,6 +8,8 @@ import com.lagradost.cloudstream3.utils.Qualities
 import com.lagradost.cloudstream3.utils.loadExtractor
 import com.lagradost.cloudstream3.utils.newExtractorLink
 import com.lagradost.cloudstream3.utils.ExtractorLinkType
+import com.lagradost.cloudstream3.runAllAsync
+import com.lagradost.cloudstream3.utils.httpsify
 
 class SxyPrn : MainAPI() {
     override var mainUrl = "https://sxyprn.com"
@@ -122,26 +124,32 @@ class SxyPrn : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         val document = app.get(data).document
-        document.select("div.post_el_wrap a.extlink").amap {
-            loadExtractor(it.attr("href"), "", subtitleCallback, callback)
-        }
+        runAllAsync(
+            {
+                document.select("div.post_el_wrap a.extlink").amap {
+                    loadExtractor(it.attr("href"), "", subtitleCallback, callback)
+                }
+            },
+            {
+                val torrentLink = document.select("a.mpc_btn").attr("href")
+                val doc = app.get(torrentLink).document
+                doc.select("a.d_btn").forEach { element ->
+                    val isMagnet = element.text().contains("MAGNET", ignoreCase = true)
+                    val type = if (isMagnet) "Magnet" else "Torrent"
+                    val linkType = if (isMagnet) ExtractorLinkType.MAGNET else ExtractorLinkType.TORRENT
+                    val link = if(isMagnet) element.attr("href") else httpsify(element.attr("href"))
+                    callback.invoke(
+                        newExtractorLink(
+                            "$name - $type",
+                            "$name - $type",
+                            link,
+                            linkType
+                        )
+                    )
+                }
+            },
+        )
 
-        val torrentLink = document.select("a.mpc_btn").attr("href")
-        val doc = app.get(torrentLink).document
-        doc.select("a.d_btn").forEach { element ->
-            val isMagnet = element.text().contains("MAGNET", ignoreCase = true)
-            val type = if (isMagnet) "Magnet" else "Torrent"
-            val linkType = if (isMagnet) ExtractorLinkType.MAGNET else ExtractorLinkType.TORRENT
-
-            callback.invoke(
-                newExtractorLink(
-                    "$name - $type",
-                    "$name - $type",
-                    element.attr("href"),
-                    linkType
-                )
-            )
-        }
         // val parsed = AppUtils.parseJson<Map<String, String>>(
         //     document.select("span.vidsnfo").attr("data-vnfo")
         // )
