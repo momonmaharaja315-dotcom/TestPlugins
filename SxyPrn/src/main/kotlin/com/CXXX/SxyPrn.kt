@@ -128,14 +128,17 @@ class SxyPrn : MainAPI() {
 
         val torrentLink = document.select("a.mpc_btn").attr("href")
         val doc = app.get(torrentLink).document
-        doc.select("a.d_btn").map {
-            val type = if(it.text().contains("MAGNET")) "Magnet" else "Torrent"
+        doc.select("a.d_btn").forEach { element ->
+            val isMagnet = element.text().contains("MAGNET", ignoreCase = true)
+            val type = if (isMagnet) "Magnet" else "Torrent"
+            val linkType = if (isMagnet) ExtractorLinkType.MAGNET else ExtractorLinkType.TORRENT
+
             callback.invoke(
                 newExtractorLink(
-                    this.name + " - " + type,
-                    this.name + " - " + type,
-                    it.attr("href"),
-                    if(type = "Magnet") ExtractorLinkType.MAGNET else ExtractorLinkType.TORRENT
+                    "$name - $type",
+                    "$name - $type",
+                    element.attr("href"),
+                    linkType
                 )
             )
         }
