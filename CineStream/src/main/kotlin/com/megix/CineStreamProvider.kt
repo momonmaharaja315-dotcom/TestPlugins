@@ -137,7 +137,7 @@ open class CineStreamProvider : MainAPI() {
                 skymoviesAPI = jsonObject.optString("skymovies")
                 hindMoviezAPI = jsonObject.optString("hindmoviez")
                 moviesflixAPI = jsonObject.optString("moviesflix")
-                hdmoviesflixAPI = JSONObject.optString("hdmoviesflix")
+                hdmoviesflixAPI = jsonObject.optString("hdmoviesflix")
                 movies4uAPI = jsonObject.optString("hdmovie2")
                 fourkhdhubAPI = jsonObject.optString("4khdhub")
                 multimoviesAPI = jsonObject.optString("multimovies")
