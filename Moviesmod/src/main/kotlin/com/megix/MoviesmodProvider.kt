@@ -106,14 +106,14 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         var background: String = posterUrl
 
         if(responseData != null) {
-            description = responseData.meta?.description ?: description
-            cast = responseData.meta?.cast ?: emptyList()
-            title = responseData.meta?.name ?: title
-            genre = responseData.meta?.genre ?: emptyList()
+            description = responseData.meta.description ?: description
+            cast = responseData.meta.cast ?: emptyList()
+            title = responseData.meta.name ?: title
+            genre = responseData.meta.genre ?: emptyList()
             imdbRating = responseData.meta?.imdbRating ?: ""
-            year = responseData.meta?.year ?: ""
-            posterUrl = responseData.meta?.poster ?: posterUrl
-            background = responseData.meta?.background ?: background
+            year = responseData.meta.year ?: ""
+            posterUrl = responseData.meta.poster ?: posterUrl
+            background = responseData.meta.background ?: background
         }
 
         if(tvtype == "series") {

@@ -4,7 +4,7 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
-import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbUrl
+import kotlinx.coroutines.runBlocking
 
 class TopmoviesProvider : MoviesmodProvider() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://modflix.xyz/?type=bollywood"
