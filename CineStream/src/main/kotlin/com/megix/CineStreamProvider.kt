@@ -97,6 +97,7 @@ open class CineStreamProvider : MainAPI() {
         const val VidJoyApi = "https://vidjoy.pro"
         const val modflixAPI = "https://modflix.xyz"
         const val MovieDriveAPI = "https://moviesdrives.com"
+        const val Vglist = "https://vglist.nl"
 
         var protonmoviesAPI = ""
         var W4UAPI = ""
