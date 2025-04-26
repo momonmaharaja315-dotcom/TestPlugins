@@ -94,26 +94,22 @@ open class CineStreamProvider : MainAPI() {
         const val Player4uApi = "https://player4u.xyz"
         const val Primewire = "https://www.primewire.tf"
         const val ThePirateBayApi = "https://thepiratebay-plus.strem.fun"
-        const val VidJoyApi ="https://vidjoy.pro"
+        const val VidJoyApi = "https://vidjoy.pro"
+        const val modflixAPI = ""
+        const val MovieDriveAPI = ""
 
-        var vegaMoviesAPI = "https://vegamovies.hi"
-        var rogMoviesAPI = "https://rogmovies.lol"
-        var MovieDrive_API = "https://moviesdrive.solutions"
-        var topmoviesAPI = "https://topmovies.tips"
-        var MoviesmodAPI = "https://moviesmod.email"
-        var protonmoviesAPI = "https://m2.protonmovies.top"
-        var W4UAPI = "https://world4ufree.rodeo"
-        var uhdmoviesAPI = "https://uhdmovies.tips"
-        var fourkhdhubAPI = "https://4khdhub.fans"
-        var multimoviesAPI = "https://multimovies.digital"
-        var cinemaluxeAPI = "https://cinemaluxe.foo"
-        var bollyflixAPI = "https://bollyflix.yoga"
-        var movies4uAPI = "https://movies4u.show"
-        var skymoviesAPI = "https://skymovieshd.pink"
-        var hindMoviezAPI = "https://hindmoviez.email"
-        var moviesflixAPI = "https://themoviesflix.at"
-        var hdmoviesflixAPI = "https://hdmoviesflix.center"
-        var hdmovie2API = "https://hdmovie2.science"
+        var protonmoviesAPI = ""
+        var W4UAPI = ""
+        var fourkhdhubAPI = ""
+        var multimoviesAPI = ""
+        var cinemaluxeAPI = ""
+        var bollyflixAPI = ""
+        var movies4uAPI = ""
+        var skymoviesAPI = ""
+        var hindMoviezAPI = ""
+        var moviesflixAPI = ""
+        var hdmoviesflixAPI = ""
+        var hdmovie2API = ""
 
         private var loaded = false
 
@@ -124,13 +120,7 @@ open class CineStreamProvider : MainAPI() {
                 val json = response.text
                 val jsonObject = JSONObject(json)
 
-                vegaMoviesAPI = jsonObject.optString("vega")
-                rogMoviesAPI = jsonObject.optString("rog")
-                MovieDrive_API = jsonObject.optString("moviesdrive")
-                topmoviesAPI = jsonObject.optString("topmovies")
-                MoviesmodAPI = jsonObject.optString("moviesmod")
                 W4UAPI = jsonObject.optString("w4u")
-                uhdmoviesAPI = jsonObject.optString("uhd")
                 protonmoviesAPI = jsonObject.optString("protonmovies")
                 cinemaluxeAPI = jsonObject.optString("cinemaluxe")
                 bollyflixAPI = jsonObject.optString("bollyflix")
@@ -601,7 +591,7 @@ open class CineStreamProvider : MainAPI() {
             { invokeAllmovieland(res.imdb_id, res.imdbSeason, res.imdbEpisode, callback) },
             { invokeProtonmovies(res.imdb_id, res.imdbSeason, res.imdbEpisode, subtitleCallback, callback) },
             { invokeHindmoviez("HindMoviez", hindMoviezAPI, res.imdb_id, res.imdbSeason, res.imdbEpisode, callback) },
-            { invokeVegamovies(vegaMoviesAPI, "VegaMovies", res.imdb_id, res.imdbSeason, res.imdbEpisode, subtitleCallback, callback) },
+            { invokeVegamovies("VegaMovies", res.imdb_id, res.imdbSeason, res.imdbEpisode, subtitleCallback, callback) },
             { invokeMoviesdrive(imdbTitle, res.imdbSeason, res.imdbEpisode, imdbYear, subtitleCallback, callback) },
             { invokePrimeWire(res.imdb_id, res.imdbSeason, res.imdbEpisode, subtitleCallback, callback) },
             { invokePlayer4U(imdbTitle, res.imdbSeason, res.imdbEpisode, seasonYear, callback) },
@@ -622,8 +612,8 @@ open class CineStreamProvider : MainAPI() {
         val isAsian = res.isAsian
 
         runAllAsync(
-            { if (!isBollywood) invokeVegamovies(vegaMoviesAPI, "VegaMovies", res.id, res.season, res.episode, subtitleCallback, callback) },
-            { if (isBollywood) invokeVegamovies(rogMoviesAPI, "RogMovies", res.id, res.season, res.episode, subtitleCallback, callback) },
+            { if (!isBollywood) invokeVegamovies("VegaMovies", res.id, res.season, res.episode, subtitleCallback, callback) },
+            { if (isBollywood) invokeVegamovies("RogMovies", res.id, res.season, res.episode, subtitleCallback, callback) },
             { invokeNetflix(res.title, year, res.season, res.episode, subtitleCallback, callback) },
             { invokePrimeVideo(res.title, year, res.season, res.episode, subtitleCallback, callback) },
             { if (res.season == null) invokeStreamify(res.id, callback) },
