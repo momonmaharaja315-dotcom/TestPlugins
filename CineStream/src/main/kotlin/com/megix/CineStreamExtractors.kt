@@ -1283,7 +1283,7 @@ object CineStreamExtractors : CineStreamProvider() {
         )
         val type = if(sourceName == "VegaMovies") "vegamovies" else "rogmovies"
         val api = try {
-            app.get("$Vglist/?re=$type",allowRedirects = false)
+            app.get("https://vglist.nl/?re=$type",allowRedirects = false)
                 .document
                 .selectFirst("meta[http-equiv=refresh]")
                 ?.attr("content")
