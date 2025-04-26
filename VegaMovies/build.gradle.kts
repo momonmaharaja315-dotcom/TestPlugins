@@ -1,10 +1,10 @@
-version = 24
+version = 61
 
 cloudstream {
-    //language = "hi"
+    language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "Includes Topmovies"
+    description = "Includes LuxMovies, Rogmovies"
      authors = listOf("megix")
 
     /**
@@ -22,5 +22,5 @@ cloudstream {
         "Anime"
     )
 
-    iconUrl = "https://github.com/SaurabhKaperwan/CSX/raw/refs/heads/master/Moviesmod/icon.png"
+    iconUrl = "https://github.com/SaurabhKaperwan/CSX/raw/refs/heads/master/VegaMovies/icon.jpg"
 }
