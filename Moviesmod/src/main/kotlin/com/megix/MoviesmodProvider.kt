@@ -26,7 +26,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
     )
 
     companion object {
-        val basemainUrl: String? by lazy {
+        open val basemainUrl: String? by lazy {
             runBlocking {
                 try {
                     val mainUrl = "https://modflix.xyz/?type=hollywood"
