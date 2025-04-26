@@ -3,7 +3,7 @@ package com.megix
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.network.WebViewResolver
-//import com.lagradost.cloudstream3.extractors.StreamWishExtractor
+import com.lagradost.cloudstream3.extractors.StreamWishExtractor
 import com.lagradost.cloudstream3.extractors.VidhideExtractor
 import com.lagradost.cloudstream3.extractors.VidHidePro
 import okhttp3.*
@@ -14,62 +14,6 @@ import java.io.IOException
 import org.json.JSONObject
 import com.lagradost.cloudstream3.utils.M3u8Helper
 import com.lagradost.cloudstream3.utils.getAndUnpack
-import com.lagradost.cloudstream3.USER_AGENT
-import com.lagradost.cloudstream3.utils.getPacked
-
-open class StreamWishExtractor : ExtractorApi() {
-    override val name = "Streamwish"
-    override val mainUrl = "https://streamwish.to"
-    override val requiresReferer = true
-
-    override suspend fun getUrl(
-        url: String,
-        referer: String?,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
-    ) {
-        val headers = mapOf(
-            "Accept" to "*/*",
-            "Connection" to "keep-alive",
-            "Sec-Fetch-Dest" to "empty",
-            "Sec-Fetch-Mode" to "cors",
-            "Sec-Fetch-Site" to "cross-site",
-            "Origin" to "$mainUrl/",
-            "User-Agent" to USER_AGENT
-        )
-        val response = app.get(getEmbedUrl(url), referer = referer)
-        val script = if (!getPacked(response.text).isNullOrEmpty()) {
-            getAndUnpack(response.text)
-        } else if (!response.document.select("script").firstOrNull {
-                it.html().contains("jwplayer(\"vplayer\").setup(")
-            }?.html().isNullOrEmpty()
-        ) {
-            response.document.select("script").firstOrNull {
-                it.html().contains("jwplayer(\"vplayer\").setup(")
-            }?.html()
-        } else {
-            response.document.selectFirst("script:containsData(sources:)")?.data()
-        }
-        val m3u8 =
-            Regex("""/https?:\/\/[^"]+?\.m3u8[^"]*/""").find(script ?: return)?.groupValues?.getOrNull(0)
-        M3u8Helper.generateM3u8(
-            name,
-            m3u8 ?: return,
-            mainUrl,
-            headers = headers
-        ).forEach(callback)
-    }
-
-    private fun getEmbedUrl(url: String): String {
-        return if (url.contains("/f/")) {
-            val videoId = url.substringAfter("/f/")
-            "$mainUrl/$videoId"
-        } else {
-            url
-        }
-    }
-
-}
 
 open class SuperVideo : ExtractorApi() {
     override val name = "SuperVideo"
