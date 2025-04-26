@@ -15,6 +15,7 @@ open class CineStream: Plugin() {
         registerExtractorAPI(Strwishcom())
         registerExtractorAPI(CdnwishCom())
         registerExtractorAPI(Asnwish())
+        registerExtractorAPI(StreamWishExtractor())
         registerExtractorAPI(Multimovies())
         registerExtractorAPI(Pahe())
         registerExtractorAPI(Smoothpre())

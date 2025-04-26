@@ -16,7 +16,6 @@ import com.lagradost.cloudstream3.utils.M3u8Helper
 import com.lagradost.cloudstream3.utils.getAndUnpack
 import com.lagradost.cloudstream3.USER_AGENT
 import com.lagradost.cloudstream3.utils.getPacked
-import com.lagradost.cloudstream3.utils.M3u8Helper
 
 open class StreamWishExtractor : ExtractorApi() {
     override val name = "Streamwish"
