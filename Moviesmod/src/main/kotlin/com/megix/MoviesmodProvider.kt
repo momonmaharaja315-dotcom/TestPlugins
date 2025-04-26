@@ -25,33 +25,20 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         TvType.Anime
     )
 
-    open val basemainUrl: String? by lazy {
-        runBlocking {
-            try {
-                val mainUrl = "https://modflix.xyz/?type=hollywood"
-                app.get(mainUrl).document
-                    .selectFirst("meta[http-equiv=refresh]")?.attr("content")
-                    ?.substringAfter("url=")
-            } catch (e: Exception) {
-                null
+    companion object {
+        val basemainUrl: String? by lazy {
+            runBlocking {
+                try {
+                    val mainUrl = "https://modflix.xyz/?type=hollywood"
+                    app.get(mainUrl).document
+                        .selectFirst("meta[http-equiv=refresh]")?.attr("content")
+                        ?.substringAfter("url=")
+                } catch (e: Exception) {
+                    null
+                }
             }
         }
     }
-
-    // companion object {
-    //     open val basemainUrl: String? by lazy {
-    //         runBlocking {
-    //             try {
-    //                 val mainUrl = "https://modflix.xyz/?type=hollywood"
-    //                 app.get(mainUrl).document
-    //                     .selectFirst("meta[http-equiv=refresh]")?.attr("content")
-    //                     ?.substringAfter("url=")
-    //             } catch (e: Exception) {
-    //                 null
-    //             }
-    //         }
-    //     }
-    // }
 
     override val mainPage = mainPageOf(
         "$basemainUrl/page/" to "Home",
@@ -153,7 +140,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                     val base64Value = link.substringAfter("url=")
                     link = base64Decode(base64Value)
                 }
-                val doc = app.get(fixUrl(link)).document
+                val doc = app.get(link).document
                 val hTags = doc.select("h3,h4")
                 var e = 1
                 hTags.mapNotNull {
@@ -211,7 +198,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
                     link = base64Decode(base64Value)
                 }
 
-                val doc = app.get(fixUrl(link)).document
+                val doc = app.get(link).document
                 val source = doc.select("a.maxbutton-1, a.maxbutton-5").attr("href")
                 EpisodeLink(
                     source
