@@ -29,6 +29,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         val basemainUrl: String? by lazy {
             runBlocking {
                 try {
+                    val mainUrl = "https://modflix.xyz/?type=hollywood"
                     app.get(mainUrl).document
                         .selectFirst("meta[http-equiv=refresh]")?.attr("content")
                         ?.substringAfter("url=")
@@ -105,14 +106,14 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         var background: String = posterUrl
 
         if(responseData != null) {
-            description = responseData.meta.description ?: description
-            cast = responseData.meta.cast ?: emptyList()
-            title = responseData.meta.name ?: title
-            genre = responseData.meta.genre ?: emptyList()
-            imdbRating = responseData.meta.imdbRating ?: ""
-            year = responseData.meta.year ?: ""
-            posterUrl = responseData.meta.poster ?: posterUrl
-            background = responseData.meta.background ?: background
+            description = responseData.meta?.description ?: description
+            cast = responseData.meta?.cast ?: emptyList()
+            title = responseData.meta?.name ?: title
+            genre = responseData.meta?.genre ?: emptyList()
+            imdbRating = responseData.meta?.imdbRating ?: ""
+            year = responseData.meta?.year ?: ""
+            posterUrl = responseData.meta?.poster ?: posterUrl
+            background = responseData.meta?.background ?: background
         }
 
         if(tvtype == "series") {
@@ -269,7 +270,7 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
     )
 
     data class ResponseData(
-        val meta: Meta?
+        val meta: Meta
     )
 
     data class EpisodeLink(
