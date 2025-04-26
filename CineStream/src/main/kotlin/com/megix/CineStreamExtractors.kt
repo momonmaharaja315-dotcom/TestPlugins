@@ -1281,7 +1281,7 @@ object CineStreamExtractors : CineStreamProvider() {
             "Upgrade-Insecure-Requests" to "1",
             "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0"
         )
-        val type = if(api == "VegaMovies") "vegamovies" else "rogmovies"
+        val type = if(sourceName == "VegaMovies") "vegamovies" else "rogmovies"
         val api = try {
             app.get("$Vglist/?re=$type",allowRedirects = false)
                 .document
