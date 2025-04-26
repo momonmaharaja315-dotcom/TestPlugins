@@ -12,7 +12,6 @@ import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import com.lagradost.cloudstream3.runAllAsync
 import kotlin.math.roundToInt
 import org.json.JSONObject
-import org.json.optString
 import com.lagradost.api.Log
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
