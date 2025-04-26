@@ -17,16 +17,29 @@ class TopmoviesProvider : MoviesmodProvider() { // all providers must be an inst
         TvType.TvSeries
     )
 
-    override val basemainUrl: String? = runBlocking {
-        try {
-            val mainUrl = "https://modflix.xyz/?type=bollywood"
-            app.get(mainUrl).document
-                .selectFirst("meta[http-equiv=refresh]")?.attr("content")
-                ?.substringAfter("url=")
-        } catch (e: Exception) {
-            null
+    override val basemainUrl: String? by lazy {
+        runBlocking {
+            try {
+                val mainUrl = "https://modflix.xyz/?type=bollywood"
+                app.get(mainUrl).document
+                    .selectFirst("meta[http-equiv=refresh]")?.attr("content")
+                    ?.substringAfter("url=")
+            } catch (e: Exception) {
+                null
+            }
         }
     }
+
+    // override val basemainUrl: String? = runBlocking {
+    //     try {
+    //         val mainUrl = "https://modflix.xyz/?type=bollywood"
+    //         app.get(mainUrl).document
+    //             .selectFirst("meta[http-equiv=refresh]")?.attr("content")
+    //             ?.substringAfter("url=")
+    //     } catch (e: Exception) {
+    //         null
+    //     }
+    // }
 
     override val mainPage = mainPageOf(
         "$basemainUrl/page/" to "Home",

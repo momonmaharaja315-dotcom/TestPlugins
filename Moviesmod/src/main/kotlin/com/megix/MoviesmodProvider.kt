@@ -25,20 +25,33 @@ open class MoviesmodProvider : MainAPI() { // all providers must be an instance 
         TvType.Anime
     )
 
-    companion object {
-        open val basemainUrl: String? by lazy {
-            runBlocking {
-                try {
-                    val mainUrl = "https://modflix.xyz/?type=hollywood"
-                    app.get(mainUrl).document
-                        .selectFirst("meta[http-equiv=refresh]")?.attr("content")
-                        ?.substringAfter("url=")
-                } catch (e: Exception) {
-                    null
-                }
+    open val basemainUrl: String? by lazy {
+        runBlocking {
+            try {
+                val mainUrl = "https://modflix.xyz/?type=hollywood"
+                app.get(mainUrl).document
+                    .selectFirst("meta[http-equiv=refresh]")?.attr("content")
+                    ?.substringAfter("url=")
+            } catch (e: Exception) {
+                null
             }
         }
     }
+
+    // companion object {
+    //     open val basemainUrl: String? by lazy {
+    //         runBlocking {
+    //             try {
+    //                 val mainUrl = "https://modflix.xyz/?type=hollywood"
+    //                 app.get(mainUrl).document
+    //                     .selectFirst("meta[http-equiv=refresh]")?.attr("content")
+    //                     ?.substringAfter("url=")
+    //             } catch (e: Exception) {
+    //                 null
+    //             }
+    //         }
+    //     }
+    // }
 
     override val mainPage = mainPageOf(
         "$basemainUrl/page/" to "Home",
