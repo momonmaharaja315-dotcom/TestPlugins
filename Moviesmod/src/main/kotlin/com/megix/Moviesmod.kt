@@ -5,8 +5,10 @@ import com.lagradost.cloudstream3.plugins.Plugin
 import android.content.Context
 
 @CloudstreamPlugin
-class Porn4fansProvider: Plugin() {
+class Moviesmod: Plugin() {
     override fun load(context: Context) {
-        registerMainAPI(Porn4fans())
+        // All providers should be added in this manner. Please don't edit the providers list directly.
+        registerMainAPI(MoviesmodProvider())
+        registerMainAPI(TopmoviesProvider())
     }
 }
