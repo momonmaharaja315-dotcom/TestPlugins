@@ -258,7 +258,7 @@ suspend fun getHindMoviezLinks(
         timeout = 50L
     )
     val doc = res.document
-    val name = document.select("div.container p:contains(Name:)").text().substringAfter("Name: ") ?: ""
+    val name = doc.select("div.container p:contains(Name:)").text().substringAfter("Name: ") ?: ""
     val fileSize = doc.select("div.container p:contains(Size:)").text().substringAfter("Size: ") ?: ""
     val extracted = extractSpecs(name)
     val extractedSpecs = buildExtractedTitle(extracted)
@@ -283,7 +283,9 @@ suspend fun getHindMoviezLinks(
             val link = doc.select("a.btn-dark").attr("href")
             callback.invoke(
                 newExtractorLink(
+                    "$source[HCloud]",
                     "$source[HCloud] $extractedSpecs[$fileSize]",
+                    link
                 )
             )
         },
