@@ -241,9 +241,9 @@ open class CineStreamProvider : MainAPI() {
             )
         } else {
             listOf(
-                "$kitsu_url/catalog/anime/kitsu-anime-airing/search=$normalizedQuery.json" to TvType.Anime,
                 "$cinemeta_url/catalog/movie/top/search=$normalizedQuery.json" to TvType.Movie,
                 "$cinemeta_url/catalog/series/top/search=$normalizedQuery.json" to TvType.TvSeries,
+                "$kitsu_url/catalog/anime/kitsu-anime-airing/search=$normalizedQuery.json" to TvType.Anime,
                 "$mediaFusion/catalog/tv/mediafusion_search_tv/search=$normalizedQuery.json" to TvType.Live
             )
         }
@@ -419,7 +419,6 @@ open class CineStreamProvider : MainAPI() {
         val res = parseJson<LoadLinksData>(data)
         val year = getYear(res)
         val seasonYear = getSeasonYear(res)
-        if (!loaded) loadApiUrls()
 
         return when {
             res.tvtype in listOf("tv", "events") -> {
