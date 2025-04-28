@@ -1,60 +1,16 @@
 package com.megix
 
 import com.lagradost.cloudstream3.*
+import com.lagradost.cloudstream3.LoadResponse.Companion.*
+import com.lagradost.cloudstream3.network.CloudflareKiller
 import com.lagradost.cloudstream3.utils.*
-import com.lagradost.cloudstream3.LoadResponse.Companion.addImdbId
-import com.lagradost.cloudstream3.LoadResponse.Companion.addAniListId
-import com.lagradost.cloudstream3.LoadResponse.Companion.addMalId
-import com.lagradost.cloudstream3.LoadResponse.Companion.addActors
-import com.lagradost.cloudstream3.utils.AppUtils.toJson
-import com.lagradost.cloudstream3.utils.AppUtils.parseJson
-import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
-import com.lagradost.cloudstream3.runAllAsync
-import kotlin.math.roundToInt
-import org.json.JSONObject
+import com.lagradost.cloudstream3.utils.AppUtils.*
 import com.lagradost.api.Log
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import com.lagradost.cloudstream3.network.CloudflareKiller
-import com.megix.CineStreamExtractors.invokeVegamovies
-import com.megix.CineStreamExtractors.invokeMoviesmod
-import com.megix.CineStreamExtractors.invokeTopMovies
-import com.megix.CineStreamExtractors.invokeMoviesdrive
-import com.megix.CineStreamExtractors.invokeW4U
-import com.megix.CineStreamExtractors.invokeWHVXSubs
-import com.megix.CineStreamExtractors.invokeAnizone
-import com.megix.CineStreamExtractors.invokeMultiAutoembed
-// import com.megix.CineStreamExtractors.invokeVidbinge
-import com.megix.CineStreamExtractors.invokeUhdmovies
-// import com.megix.CineStreamExtractors.invokeRar
-import com.megix.CineStreamExtractors.invokeAnimes
-import com.megix.CineStreamExtractors.invokeMultimovies
-import com.megix.CineStreamExtractors.invokeStreamify
-import com.megix.CineStreamExtractors.invokeCinemaluxe
-import com.megix.CineStreamExtractors.invokeBollyflix
-import com.megix.CineStreamExtractors.invokeTorrentio
-import com.megix.CineStreamExtractors.invokeTokyoInsider
-import com.megix.CineStreamExtractors.invokeTvStream
-import com.megix.CineStreamExtractors.invokeAllanime
-import com.megix.CineStreamExtractors.invokeDramacool
-import com.megix.CineStreamExtractors.invokeNetflix
-import com.megix.CineStreamExtractors.invokePrimeVideo
-import com.megix.CineStreamExtractors.invokeFlixhq
-import com.megix.CineStreamExtractors.invokeSkymovies
-import com.megix.CineStreamExtractors.invokeMoviesflix
-import com.megix.CineStreamExtractors.invokeHdmovie2
-import com.megix.CineStreamExtractors.invokeHindmoviez
-import com.megix.CineStreamExtractors.invokeMostraguarda
-import com.megix.CineStreamExtractors.invokePlayer4U
-import com.megix.CineStreamExtractors.invokePrimeWire
-import com.megix.CineStreamExtractors.invokeProtonmovies
-import com.megix.CineStreamExtractors.invokeThepiratebay
-import com.megix.CineStreamExtractors.invokeTom
-import com.megix.CineStreamExtractors.invokeAllmovieland
-import com.megix.CineStreamExtractors.invoke4khdhub
-import com.megix.CineStreamExtractors.invokeVidJoy
-import com.megix.CineStreamExtractors.invokeMovies4u
+import org.json.JSONObject
+import com.megix.CineStreamExtractors.*
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -112,6 +68,7 @@ open class CineStreamProvider : MainAPI() {
         var hdmoviesflixAPI = ""
         var hdmovie2API = ""
         var jaduMoviesAPI = ""
+
         private var loaded = false
 
         suspend fun loadApiUrls() {
@@ -132,8 +89,7 @@ open class CineStreamProvider : MainAPI() {
                 movies4uAPI = jsonObject.optString("movies4u")
                 fourkhdhubAPI = jsonObject.optString("4khdhub")
                 multimoviesAPI = jsonObject.optString("multimovies")
-                hdmovie2API = jsonObject.optString("hdmovie2")
-                jaduMoviesAPI = jsonObject.optString("jaduMovies")
+                jaduMoviesAPI = jsonObject.optString("jadumovies")
 
                 loaded = true
             } catch (e: Exception) {

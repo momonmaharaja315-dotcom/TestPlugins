@@ -30,7 +30,6 @@ import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import com.lagradost.cloudstream3.runAllAsync
 
-
 val SPEC_OPTIONS = mapOf(
     "quality" to listOf(
         mapOf("value" to "BluRay", "label" to "BluRay"),
