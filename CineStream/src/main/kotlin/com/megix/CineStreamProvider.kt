@@ -99,44 +99,47 @@ open class CineStreamProvider : MainAPI() {
         const val MovieDriveAPI = "https://moviesdrives.com"
         const val Vglist = "https://vglist.nl"
 
-        val apiUrls: Map<String, String> by lazy {
-            runCatching {
+        var protonmoviesAPI = ""
+        var W4UAPI = ""
+        var fourkhdhubAPI = ""
+        var multimoviesAPI = ""
+        var cinemaluxeAPI = ""
+        var bollyflixAPI = ""
+        var movies4uAPI = ""
+        var skymoviesAPI = ""
+        var hindMoviezAPI = ""
+        var moviesflixAPI = ""
+        var hdmoviesflixAPI = ""
+        var hdmovie2API = ""
+        var jaduMoviesAPI = ""
+        private var loaded = false
+
+        suspend fun loadApiUrls() {
+            if (loaded) return // already loaded
+            try {
                 val response = app.get("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/refs/heads/main/urls.json")
-                val json = JSONObject(response.text)
-                mapOf(
-                    "protonmovies" to json.optString("protonmovies"),
-                    "w4u" to json.optString("w4u"),
-                    "cinemaluxe" to json.optString("cinemaluxe"),
-                    "bollyflix" to json.optString("bollyflix"),
-                    "skymovies" to json.optString("skymovies"),
-                    "hindmoviez" to json.optString("hindmoviez"),
-                    "moviesflix" to json.optString("moviesflix"),
-                    "hdmoviesflix" to json.optString("hdmoviesflix"),
-                    "movies4u" to json.optString("movies4u"),
-                    "4khdhub" to json.optString("4khdhub"),
-                    "multimovies" to json.optString("multimovies"),
-                    "jadumovies" to json.optString("jadumovies"),
-                    "hdmovie2" to json.optString("hdmovie2")
-                )
-            }.getOrElse {
-                Log.e("CineStreamProvider", "Failed to load API URLs: $it")
-                emptyMap()
+                val json = response.text
+                val jsonObject = JSONObject(json)
+
+                W4UAPI = jsonObject.optString("w4u")
+                protonmoviesAPI = jsonObject.optString("protonmovies")
+                cinemaluxeAPI = jsonObject.optString("cinemaluxe")
+                bollyflixAPI = jsonObject.optString("bollyflix")
+                skymoviesAPI = jsonObject.optString("skymovies")
+                hindMoviezAPI = jsonObject.optString("hindmoviez")
+                moviesflixAPI = jsonObject.optString("moviesflix")
+                hdmoviesflixAPI = jsonObject.optString("hdmoviesflix")
+                movies4uAPI = jsonObject.optString("movies4u")
+                fourkhdhubAPI = jsonObject.optString("4khdhub")
+                multimoviesAPI = jsonObject.optString("multimovies")
+                hdmovie2API = jsonObject.optString("hdmovie2")
+                jaduMoviesAPI = jsonObject.optString("jaduMovies")
+
+                loaded = true
+            } catch (e: Exception) {
+                Log.e("Error:", "Error during getting base urls: $e")
             }
         }
-
-        val protonmoviesAPI get() = apiUrls["protonmovies"].orEmpty()
-        val W4UAPI get() = apiUrls["w4u"].orEmpty()
-        val fourkhdhubAPI get() = apiUrls["4khdhub"].orEmpty()
-        val multimoviesAPI get() = apiUrls["multimovies"].orEmpty()
-        val cinemaluxeAPI get() = apiUrls["cinemaluxe"].orEmpty()
-        val bollyflixAPI get() = apiUrls["bollyflix"].orEmpty()
-        val movies4uAPI get() = apiUrls["movies4u"].orEmpty()
-        val skymoviesAPI get() = apiUrls["skymovies"].orEmpty()
-        val hindMoviezAPI get() = apiUrls["hindmoviez"].orEmpty()
-        val moviesflixAPI get() = apiUrls["moviesflix"].orEmpty()
-        val hdmoviesflixAPI get() = apiUrls["hdmoviesflix"].orEmpty()
-        val hdmovie2API get() = apiUrls["hdmovie2"].orEmpty()
-        val jaduMoviesAPI get() = apiUrls["jadumovies"].orEmpty()
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
@@ -419,6 +422,7 @@ open class CineStreamProvider : MainAPI() {
         val res = parseJson<LoadLinksData>(data)
         val year = getYear(res)
         val seasonYear = getSeasonYear(res)
+        if (!loaded) loadApiUrls()
 
         return when {
             res.tvtype in listOf("tv", "events") -> {
