@@ -37,7 +37,7 @@ import com.megix.CineStreamExtractors.invokeTorrentio
 import com.megix.CineStreamExtractors.invokeTokyoInsider
 import com.megix.CineStreamExtractors.invokeTvStream
 import com.megix.CineStreamExtractors.invokeAllanime
-import com.megix.CineStreamExtractors.invokeDramacool
+import com.megix.CineStreamExtractors.invokeStreamAsia
 import com.megix.CineStreamExtractors.invokeNetflix
 import com.megix.CineStreamExtractors.invokePrimeVideo
 import com.megix.CineStreamExtractors.invokeFlixhq
@@ -88,11 +88,12 @@ open class CineStreamProvider : MainAPI() {
         const val anizoneAPI = "https://anizone.to"
         const val netflixAPI = "https://netfree2.cc"
         const val AllanimeAPI = "https://api.allanime.day/api"
-        const val stremio_Dramacool = "https://stremio-dramacool-addon.xyz"
+        const val StreamAsiaAPI = "https://stremio-dramacool-addon.xyz"
         const val TRACKER_LIST_URL = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all_ip.txt"
         const val torrentioCONFIG = "providers=yts,eztv,rarbg,1337x,thepiratebay,kickasstorrents,torrentgalaxy,magnetdl,horriblesubs,nyaasi,tokyotosho,anidex|sort=seeders|qualityfilter=threed,480p,other,scr,cam,unknown|limit=10"
         const val Player4uApi = "https://player4u.xyz"
         const val Primewire = "https://www.primewire.tf"
+        const val AnimeOwlAPI = "https://animeowl.me"
         const val ThePirateBayApi = "https://thepiratebay-plus.strem.fun"
         const val VidJoyApi = "https://vidjoy.pro"
         const val modflixAPI = "https://modflix.xyz"
@@ -623,7 +624,7 @@ open class CineStreamProvider : MainAPI() {
             { if (res.season == null) invokeStreamify(res.id, callback) },
             { if (isBollywood) invokeTopMovies(res.title, year, res.season, res.episode, subtitleCallback, callback) },
             { if (!isBollywood) invokeMoviesmod(res.id, res.season, res.episode, subtitleCallback, callback) },
-            { if (isAsian && res.season != null) invokeDramacool(res.title, "kdhd", res.season, res.episode, subtitleCallback, callback) },
+            { if (isAsian && res.season != null) invokeStreamAsia(res.title, "kdhd", res.season, res.episode, subtitleCallback, callback) },
             { invokeMoviesdrive(res.title, res.season, res.episode, year, subtitleCallback, callback) },
             { invokeCinemaluxe(res.title, year, res.season, res.episode, callback, subtitleCallback) },
             { if (!isAnime) invokeSkymovies(res.title, seasonYear, res.episode, subtitleCallback, callback) },

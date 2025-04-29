@@ -273,6 +273,7 @@ suspend fun getHindMoviezLinks(
                         source,
                         "$source $extractedSpecs[$fileSize]",
                         it.attr("href"),
+                        ExtractorLinkType.VIDEO,
                     ) {
                         this.quality = getIndexQuality(name)
                     }
@@ -285,8 +286,11 @@ suspend fun getHindMoviezLinks(
                 newExtractorLink(
                     "$source[HCloud]",
                     "$source[HCloud] $extractedSpecs[$fileSize]",
-                    link
-                )
+                    link,
+                    ExtractorLinkType.VIDEO,
+                ) {
+                    this.quality = getIndexQuality(name)
+                }
             )
         },
     )
