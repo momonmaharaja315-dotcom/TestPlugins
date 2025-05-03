@@ -94,7 +94,6 @@ open class CineStreamProvider : MainAPI() {
         const val torrentioCONFIG = "providers=yts,eztv,rarbg,1337x,thepiratebay,kickasstorrents,torrentgalaxy,magnetdl,horriblesubs,nyaasi,tokyotosho,anidex|sort=seeders|qualityfilter=threed,480p,other,scr,cam,unknown|limit=10"
         const val Player4uApi = "https://player4u.xyz"
         const val Primewire = "https://www.primewire.tf"
-        const val AnimeOwlAPI = "https://animeowl.me"
         const val ThePirateBayApi = "https://thepiratebay-plus.strem.fun"
         const val VidJoyApi = "https://vidjoy.pro"
         const val modflixAPI = "https://modflix.xyz"
