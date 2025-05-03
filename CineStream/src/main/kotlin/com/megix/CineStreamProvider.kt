@@ -83,6 +83,7 @@ open class CineStreamProvider : MainAPI() {
         const val CONSUMET_API = BuildConfig.CONSUMET_API
         // const val RarAPI = "https://nepu.to"
         const val animepaheAPI = "https://animepahe.ru"
+        const val AnimeOwlAPI = "https://animeowl.me"
         const val allmovielandAPI = "https://allmovieland.fun"
         const val torrentioAPI = "https://torrentio.strem.fun"
         const val anizoneAPI = "https://anizone.to"
