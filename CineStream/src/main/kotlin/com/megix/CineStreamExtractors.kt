@@ -344,9 +344,9 @@ object CineStreamExtractors : CineStreamProvider() {
         val document = app.get("$hdmovie2API/movies/${title.createSlug()}-$year", headers = headers, allowRedirects = true).document
         callback.invoke(
             newExtractorLink(
-                "document",
-                "document",
-                document.toString(),
+                "link",
+                "link",
+                "$hdmovie2API/movies/${title.createSlug()}-$year",
             )
         )
         document.select("div.wp-content p a").amap {
