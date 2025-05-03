@@ -342,27 +342,22 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val headers = mapOf("User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36")
         val document = app.get("$hdmovie2API/movies/${title.createSlug()}-$year", headers = headers, allowRedirects = true).document
-        callback.invoke(
-            newExtractorLink(
-                "link",
-                "link",
-                "$hdmovie2API/movies/${title.createSlug()}-$year",
-            )
-        )
+
         document.select("div.wp-content p a").amap {
-             callback.invoke(
-                newExtractorLink(
-                    "href",
-                    "href",
-                    it.attr("href"),
-                )
-            )
+
             if(episode != null && it.text().contains("EP")) {
                 if(
                     it.text().contains("EP$episode")||
                     it.text().contains("EP0$episode")
                 ) {
                     app.get(it.attr("href")).document.select("div > p > a").amap {
+                        callback.invoke(
+                            newExtractorLink(
+                                "Hdmovie2",
+                                "Hdmovie2",
+                                it.attr("href"),
+                            )
+                        )
                         loadSourceNameExtractor(
                             "Hdmovie2",
                             it.attr("href"),
@@ -371,13 +366,18 @@ object CineStreamExtractors : CineStreamProvider() {
                             callback,
                         )
                     }
-                } else {
-                    return@amap;
                 }
             }
             else {
                 val type = if(episode != null) "(Combined)" else ""
                 app.get(it.attr("href")).document.select("div > p > a").amap {
+                    callback.invoke(
+                        newExtractorLink(
+                            "Hdmovie2",
+                            "Hdmovie2",
+                            it.attr("href"),
+                        )
+                    )
                     loadSourceNameExtractor(
                         "Hdmovie2$type",
                         it.attr("href"),
