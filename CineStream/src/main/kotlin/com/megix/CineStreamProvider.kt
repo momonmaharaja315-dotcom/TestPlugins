@@ -649,7 +649,7 @@ open class CineStreamProvider : MainAPI() {
             { if (!isAnime) invokeVidJoy(res.tmdbId, res.season, res.episode, callback) },
             { invokeProtonmovies(res.id, res.season, res.episode, subtitleCallback, callback) },
             { invokeAllmovieland(res.id, res.season, res.episode, callback) },
-            { if(season == null)invokeMostraguarda(res.id, subtitleCallback, callback) },
+            { if(res.season == null) invokeMostraguarda(res.id, subtitleCallback, callback) },
             { if (!isBollywood || !isAnime) invokeMoviesflix("Moviesflix", moviesflixAPI, res.id, res.season, res.episode, subtitleCallback, callback) },
             { if (isBollywood) invokeMoviesflix("Hdmoviesflix", hdmoviesflixAPI, res.id, res.season, res.episode, subtitleCallback, callback) },
             { if (!isBollywood) invokeUhdmovies(res.title, year, res.season, res.episode, callback, subtitleCallback) },
