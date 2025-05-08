@@ -22,6 +22,7 @@ import com.lagradost.nicehttp.RequestBodyTypes
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
+import java.net.URI
 
 object CineStreamExtractors : CineStreamProvider() {
 
@@ -1689,15 +1690,16 @@ object CineStreamExtractors : CineStreamProvider() {
                             )
                         val sourceUrl = source.sourceUrl
                         if (sourceUrl.startsWith("http")) {
-                                val sourcename = sourceUrl.getHost()
-                                loadCustomExtractor(
-                                    "Allanime [${i.uppercase()}] [$sourcename]",
-                                    sourceUrl ?: "",
-                                    "",
-                                    subtitleCallback,
-                                    callback,
-                                )
-                            } else {
+                            val sourcename = sourceUrl.getHost()
+                            loadCustomExtractor(
+                                "Allanime [${i.uppercase()}] [$sourcename]",
+                                sourceUrl ?: "",
+                                "",
+                                subtitleCallback,
+                                callback,
+                            )
+                        }
+                        else {
                             val decodedlink = if (sourceUrl.startsWith("--"))
                             {
                                 decrypthex(sourceUrl)
@@ -1752,7 +1754,6 @@ object CineStreamExtractors : CineStreamProvider() {
                                         }
                                     }
                                 }
-                            }
                             }
                         }
                     }

@@ -7,6 +7,7 @@ import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.base64Decode
 import okhttp3.FormBody
 import org.jsoup.nodes.Document
+import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import java.net.*
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.lagradost.api.Log

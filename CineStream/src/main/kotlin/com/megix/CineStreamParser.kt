@@ -121,6 +121,10 @@ data class StreamAsiaStreams (
 
 //Anichi
 
+data class AkIframe(
+    @JsonProperty("idUrl") val idUrl: String? = null,
+)
+
 data class AnichiVideoApiResponse(@JsonProperty("links") val links: List<AnichiLinks>)
 
 data class AnichiStream(
