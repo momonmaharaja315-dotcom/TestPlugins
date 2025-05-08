@@ -1069,7 +1069,8 @@ object CineStreamExtractors : CineStreamProvider() {
 
         val link = elements.firstOrNull { element ->
             val content = element.selectFirst("div.movie-card-content")?.text()?.lowercase() ?: ""
-            content.contains((title ?: "").lowercase()) && content.contains((year ?: "").lowercase())
+            content.contains(title.lowercase()) &&
+            content.contains((year?.toString() ?: "").lowercase())
         }?.attr("href") ?: return
 
         val doc = app.get("$fourkhdhubAPI$link").document

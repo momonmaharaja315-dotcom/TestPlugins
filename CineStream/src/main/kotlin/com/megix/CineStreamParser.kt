@@ -521,7 +521,7 @@ data class TBPStream(
 )
 
 data class VidjoyResponse(
-    val headers: Headers,
+    val headers: VidjoyHeaders,
     val proxy: Boolean,
     val servers: List<Any?>,
     val tracks: List<Track>,
@@ -530,7 +530,7 @@ data class VidjoyResponse(
     val url: List<Url>,
 )
 
-data class Headers(
+data class VidjoyHeaders(
     @JsonProperty("Referer")
     val referer: String,
 )
