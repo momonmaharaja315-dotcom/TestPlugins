@@ -138,7 +138,7 @@ object CineStreamExtractors : CineStreamProvider() {
                                 newExtractorLink(
                                     "link",
                                     "link",
-                                    link,
+                                    link.attr("href"),
                                 )
                             )
                             getHindMoviezLinks(source, link.attr("href"), callback)
