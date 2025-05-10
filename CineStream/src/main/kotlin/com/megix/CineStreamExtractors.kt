@@ -120,13 +120,6 @@ object CineStreamExtractors : CineStreamProvider() {
                     if(text.contains("Season $season")) {
                         val res = app.get(it.attr("href"), timeout = 50L).document
                         res.select("h3 > a").getOrNull(episode-1)?.let { link ->
-                            callback.invoke(
-                                newExtractorLink(
-                                    "link",
-                                    "link",
-                                    link.attr("href"),
-                                )
-                            )
                             getHindMoviezLinks(source, link.attr("href"), callback)
                         }
                     }
