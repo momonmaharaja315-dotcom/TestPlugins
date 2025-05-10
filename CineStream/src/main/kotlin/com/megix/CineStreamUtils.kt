@@ -254,7 +254,8 @@ suspend fun getHindMoviezLinks(
     url: String,
     callback: (ExtractorLink) -> Unit
 ) {
-    val doc = app.get(url).document
+    val response = app.get(url)
+    val doc = response.document
     val name = doc.select("div.container p:contains(Name:)").text().substringAfter("Name: ") ?: ""
     val fileSize = doc.select("div.container p:contains(Size:)").text().substringAfter("Size: ") ?: ""
     val extracted = extractSpecs(name)
@@ -263,21 +264,8 @@ suspend fun getHindMoviezLinks(
     runAllAsync(
         {
             val link = doc.select("a.btn-info").attr("href")
-            callback.invoke(
-                newExtractorLink(
-                    "hind link",
-                    "hind link",
-                    link,
-                )
-            )
-            val location = app.get(link).headers["location"] ?: return@runAllAsync
-            callback.invoke(
-                newExtractorLink(
-                    "hind location",
-                    "hind location",
-                    location,
-                )
-            )
+            val referer = response.url
+            val location = app.get(link, referer = referer).headers["location"] ?: return@runAllAsync
             val document = app.get(location).document
             document.select("a.button").map {
                 callback.invoke(

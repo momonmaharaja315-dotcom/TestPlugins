@@ -802,13 +802,6 @@ object CineStreamExtractors : CineStreamProvider() {
                     headers = mapOf("X-Requested-With" to "XMLHttpRequest")
                 ).parsed<ResponseHash>().embed_url
                 val link = source.substringAfter("\"").substringBefore("\"")
-                callback.invoke(
-                    newExtractorLink(
-                        "mutli link",
-                        "multi link",
-                        link,
-                    )
-                )
                 when {
                     !link.contains("youtube") -> {
                         loadSourceNameExtractor("Multimovies",link, referer = apiUrl, subtitleCallback, callback)
