@@ -51,10 +51,6 @@ class Smoothpre: VidHidePro() {
     override var mainUrl = "https://smoothpre.com"
 }
 
-class Dhcplay: VidHidePro() {
-    override var mainUrl = "https://dhcplay.com"
-}
-
 class MultimoviesAIO: StreamWishExtractor() {
     override var name = "Multimovies Cloud AIO"
     override var mainUrl = "https://allinonedownloader.fun"

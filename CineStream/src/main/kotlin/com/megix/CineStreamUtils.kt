@@ -263,7 +263,21 @@ suspend fun getHindMoviezLinks(
     runAllAsync(
         {
             val link = doc.select("a.btn-info").attr("href")
+            callback.invoke(
+                newExtractorLink(
+                    "hind link",
+                    "hind link",
+                    link,
+                )
+            )
             val location = app.get(link).headers["location"] ?: return@runAllAsync
+            callback.invoke(
+                newExtractorLink(
+                    "hind location",
+                    "hind location",
+                    location,
+                )
+            )
             val document = app.get(location).document
             document.select("a.button").map {
                 callback.invoke(
