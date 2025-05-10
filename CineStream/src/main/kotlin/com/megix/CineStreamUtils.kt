@@ -265,8 +265,7 @@ suspend fun getHindMoviezLinks(
         {
             val link = doc.select("a.btn-info").attr("href")
             val referer = response.url
-            val location = app.get(link, referer = referer).headers["location"] ?: return@runAllAsync
-            val document = app.get(location).document
+            val document = app.get(link, referer = referer).document
             document.select("a.button").map {
                 callback.invoke(
                     newExtractorLink(
