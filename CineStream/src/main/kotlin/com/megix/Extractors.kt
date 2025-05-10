@@ -51,7 +51,7 @@ class Smoothpre: VidHidePro() {
     override var mainUrl = "https://smoothpre.com"
 }
 
-class Dhcplay: StreamWishExtractor() {
+class Dhcplay: VidHidePro() {
     override var mainUrl = "https://dhcplay.com"
 }
 

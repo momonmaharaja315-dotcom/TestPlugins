@@ -254,17 +254,7 @@ suspend fun getHindMoviezLinks(
     url: String,
     callback: (ExtractorLink) -> Unit
 ) {
-    // val location = app.get(
-    //     url,
-    // ).headers["location"] ?: return
     val doc = app.get(url).document
-    callback.invoke(
-        newExtractorLink(
-            "hind",
-            "hind",
-            doc.toString()
-        )
-    )
     val name = doc.select("div.container p:contains(Name:)").text().substringAfter("Name: ") ?: ""
     val fileSize = doc.select("div.container p:contains(Size:)").text().substringAfter("Size: ") ?: ""
     val extracted = extractSpecs(name)
@@ -273,7 +263,8 @@ suspend fun getHindMoviezLinks(
     runAllAsync(
         {
             val link = doc.select("a.btn-info").attr("href")
-            val document = app.get(link).document
+            val location = app.get(link).headers["location"] ?: return@runAllAsync
+            val document = app.get(location).document
             document.select("a.button").map {
                 callback.invoke(
                     newExtractorLink(
@@ -527,7 +518,7 @@ suspend fun gofileExtractor(
     val mainUrl = "https://gofile.io"
     val mainApi = "https://api.gofile.io"
     //val res = app.get(url)
-    val id =  url.substringAfterLast("/")
+    val id = Regex("/(?:\\?c=|d/)([\\da-zA-Z-]+)").find(url)?.groupValues?.get(1) ?: return
     val genAccountRes = app.post("$mainApi/accounts").text
     val jsonResp = JSONObject(genAccountRes)
     val token = jsonResp.getJSONObject("data").getString("token") ?: return
