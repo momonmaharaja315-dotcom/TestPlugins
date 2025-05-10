@@ -106,25 +106,11 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit
     ) {
         app.get("$api/?s=$id", timeout = 50L).document.select("h2.entry-title > a").amap {
-            callback.invoke(
-                newExtractorLink(
-                    "url",
-                    "url",
-                    it.attr("href"),
-                )
-            )
             val doc = app.get(it.attr("href"), timeout = 50L).document
             if(episode == null) {
                 doc.select("a.maxbutton").amap {
                     val res = app.get(it.attr("href"), timeout = 50L).document
                     val link = res.select("h3 > a").attr("href")
-                    callback.invoke(
-                        newExtractorLink(
-                            "link",
-                            "link",
-                            link,
-                        )
-                    )
                     getHindMoviezLinks(source, link, callback)
                 }
             }
