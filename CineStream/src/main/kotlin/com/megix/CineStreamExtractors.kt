@@ -1901,6 +1901,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeSoaper(
+        imdbId: String? = null,
         tmdbId: Int? = null,
         title: String? = null,
         season: Int? = null,
@@ -1912,7 +1913,7 @@ object CineStreamExtractors : CineStreamProvider() {
             "Referer" to soaperAPI,
             "Origin" to soaperAPI
         )
-        val document = app.get("$soaperAPI/$title", headers = headers).document
+        val document = app.get("$soaperAPI/search.html?keyword=$title", headers = headers).document
         callback.invoke(
             newExtractorLink(
                 "document",
@@ -1920,7 +1921,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 document.toString()
             )
         )
-        val href = document.selectFirst("div.img-group a:has(img[src*='$tmdbId'])")?.attr("href") ?: return
+        val href = document.selectFirst("div.img-group a:has(img[src*='$tmdbId']), div.img-group a:has(img[src*='$imdbId'])")?.attr("href") ?: return
         callback.invoke(
             newExtractorLink(
                 "href",
