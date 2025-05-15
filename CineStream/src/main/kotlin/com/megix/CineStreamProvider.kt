@@ -644,7 +644,7 @@ open class CineStreamProvider : MainAPI() {
                 invokeAnimes(malId, aniId, res.episode, seasonYear, "imdb", subtitleCallback, callback)
             }},
             { invokePrimeWire(res.id, res.season, res.episode, subtitleCallback, callback) },
-            { invokeSoaper(res.tmdbId, res.title, res.season, res.episode, subtitleCallback, callback) },
+            { invokeSoaper(res.id, res.tmdbId, res.title, res.season, res.episode, subtitleCallback, callback) },
             { invokeTom(res.tmdbId, res.season, res.episode, callback, subtitleCallback) },
             { invokePlayer4U(res.title, res.season, res.episode, seasonYear, callback) },
             { invokeThepiratebay(res.id, res.season, res.episode, callback) },
