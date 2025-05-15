@@ -1881,7 +1881,15 @@ object CineStreamExtractors : CineStreamProvider() {
             "server" to "0",
         )
 
-        val res = app.post(url, data = data, headers = headers).text
+        callback.invoke(
+            newExtractorLink(
+                "eId hIsW",
+                "eId hIsW",
+                "$eId  $hIsW"
+            )
+        )
+
+        val res = app.post("$soaperAPI/home/index/Get${type}InfoAjax", data = data, headers = headers).text
         callback.invoke(
             newExtractorLink(
                 "Soaper",
@@ -1905,7 +1913,21 @@ object CineStreamExtractors : CineStreamProvider() {
             "Origin" to soaperAPI
         )
         val document = app.get("$soaperAPI/$title", headers = headers).document
+        callback.invoke(
+            newExtractorLink(
+                "document",
+                "document",
+                document.toString()
+            )
+        )
         val href = document.selectFirst("div.img-group a:has(img[src*='$tmdbId'])")?.attr("href") ?: return
+        callback.invoke(
+            newExtractorLink(
+                "href",
+                "href",
+                href
+            )
+        )
         if(season == null) {
             getSoaperLinks("$soaperAPI$href", "M", subtitleCallback, callback)
         } else {
