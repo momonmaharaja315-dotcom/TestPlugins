@@ -1884,25 +1884,10 @@ object CineStreamExtractors : CineStreamProvider() {
                 div.selectFirst("h4")?.text()?.contains("Season$season", ignoreCase = true) == true
             }
 
-            callback.invoke(
-                newExtractorLink(
-                    "Seasondiv",
-                    "Seasondiv",
-                    seasonDiv.toString(),
-                )
-            )
-
             val episodeLink = seasonDiv?.select("a")?.firstOrNull { a ->
                 a.text().trim().startsWith("$episode.")
-            } ?: return
+            }?.attr("href") ?: return
 
-            callback.invoke(
-                newExtractorLink(
-                    "episodeLink",
-                    "episodeLink",
-                    episodeLink.toString(),
-                )
-            )
             getSoaperLinks(soaperAPI ,"$soaperAPI$episodeLink", "E", subtitleCallback, callback)
         }
     }
