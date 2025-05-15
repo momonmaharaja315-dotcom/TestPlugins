@@ -1877,7 +1877,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val href = document.selectFirst("div.img-group a:has(img[src*='$tmdbId']), div.img-group a:has(img[src*='$imdbId'])")?.attr("href") ?: return
 
         if(season == null) {
-            getSoaperLinks("$soaperAPI$href", "M", subtitleCallback, callback)
+            getSoaperLinks(soaperAPI, "$soaperAPI$href", "M", subtitleCallback, callback)
         } else {
             val doc = app.get("$soaperAPI$href", headers = headers).document
             val seasonDiv = doc.select("div.alert-info-ex").firstOrNull { div ->
@@ -1903,7 +1903,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     episodeLink.toString(),
                 )
             )
-            getSoaperLinks("$soaperAPI$episodeLink", "E", subtitleCallback, callback)
+            getSoaperLinks(soaperAPI ,"$soaperAPI$episodeLink", "E", subtitleCallback, callback)
         }
     }
 
