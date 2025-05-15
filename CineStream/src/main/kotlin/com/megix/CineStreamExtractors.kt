@@ -1871,8 +1871,8 @@ object CineStreamExtractors : CineStreamProvider() {
             "Origin" to soaperAPI
         )
         val document = app.get(url, headers = headers).document
-        val eId = body.select("#hId").attr("value")
-        val hIsW = body.select("#hIsW").attr("value")
+        val eId = document.select("#hId").attr("value")
+        val hIsW = document.select("#hIsW").attr("value")
         val data = mapOf(
             "pass" to eId,
             "param" to "",
@@ -1905,9 +1905,9 @@ object CineStreamExtractors : CineStreamProvider() {
             "Origin" to soaperAPI
         )
         val document = app.get("$soaperAPI/$title", headers = headers).document
-        val href = document.selectFirst("div.img-group a:has(img[src*='$tmdbId'])").attr("href") ?: return
+        val href = document.selectFirst("div.img-group a:has(img[src*='$tmdbId'])")?.attr("href") ?: return
         if(season == null) {
-            getSoaperLinks("$soaperAPI$href", "M")
+            getSoaperLinks("$soaperAPI$href", "M", subtitleCallback, callback)
         } else {
 
         }
