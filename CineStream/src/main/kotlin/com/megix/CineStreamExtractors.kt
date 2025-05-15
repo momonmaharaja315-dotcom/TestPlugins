@@ -1881,23 +1881,30 @@ object CineStreamExtractors : CineStreamProvider() {
             "server" to "0",
         )
 
-        callback.invoke(
-            newExtractorLink(
-                "eId hIsW",
-                "eId hIsW",
-                "$eId  $hIsW"
-            )
-        )
-
         val res = app.post("$soaperAPI/home/index/Get${type}InfoAjax", data = data, headers = headers).text
+        val json = JSONObject(res)
+        val videoPath = json.getString("val").replace("\\/", "/")
+        val videoUrl = soaperAPI + videoPath
         callback.invoke(
             newExtractorLink(
                 "Soaper",
                 "Soaper",
-                res,
+                videoUrl,
             )
         )
 
+        for (i in 0 until subs.length()) {
+            val sub = subs.getJSONObject(i)
+            val name = sub.getString("name")
+            val path = sub.getString("path").replace("\\/", "/")
+            val subUrl = soaperAPI + path
+            subtitleCallback.invoke(
+                SubtitleFile(
+                    name,
+                    subUrl
+                )
+            )
+        }
     }
 
     suspend fun invokeSoaper(
@@ -1914,25 +1921,19 @@ object CineStreamExtractors : CineStreamProvider() {
             "Origin" to soaperAPI
         )
         val document = app.get("$soaperAPI/search.html?keyword=$title", headers = headers).document
-        callback.invoke(
-            newExtractorLink(
-                "document",
-                "document",
-                document.toString()
-            )
-        )
         val href = document.selectFirst("div.img-group a:has(img[src*='$tmdbId']), div.img-group a:has(img[src*='$imdbId'])")?.attr("href") ?: return
-        callback.invoke(
-            newExtractorLink(
-                "href",
-                "href",
-                href
-            )
-        )
+
         if(season == null) {
             getSoaperLinks("$soaperAPI$href", "M", subtitleCallback, callback)
         } else {
-
+            val doc = app.get("$soaperAPI$href", headers = headers).document
+            val seasonDiv = doc.select("div.alert-info-ex").firstOrNull { div ->
+                div.selectFirst("h4")?.text()?.contains("Season$season", ignoreCase = true) == true
+            }
+            val episodeLink = seasonDiv?.select("a")?.firstOrNull { a ->
+                a.text().trim().startsWith("$episode.")
+            } ?: return
+            getSoaperLinks("$soaperAPI$episodeLink", "E", subtitleCallback, callback)
         }
     }
 
