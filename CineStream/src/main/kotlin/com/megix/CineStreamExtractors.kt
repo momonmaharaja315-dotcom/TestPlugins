@@ -1890,8 +1890,14 @@ object CineStreamExtractors : CineStreamProvider() {
                 "Soaper",
                 "Soaper",
                 videoUrl,
-            )
+                ExtractorLinkType.M3U8
+            ) {
+                this.referer = url
+                this.quality = Qualities.P1080.value
+            }
         )
+
+        val subs = json.getJSONArray("subs")
 
         for (i in 0 until subs.length()) {
             val sub = subs.getJSONObject(i)
