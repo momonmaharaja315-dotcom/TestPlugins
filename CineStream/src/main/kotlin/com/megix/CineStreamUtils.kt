@@ -701,6 +701,13 @@ suspend fun getProtonStream(
             ).text
 
             JSONObject(idRes).getJSONObject("ppd")?.getJSONObject("gofile.io")?.optString("link")?.let {
+                callback.invoke(
+                    newExtractorLink(
+                        "gofile",
+                        "gofile",
+                        it,
+                    )
+                )
                 gofileExtractor("Protonmovies", it, "", subtitleCallback, callback)
             }
         }
@@ -839,6 +846,7 @@ suspend fun getSoaperLinks(
         "Referer" to soaperAPI,
         "Origin" to soaperAPI
     )
+
     val document = app.get(url, headers = headers).document
     val eId = document.select("#hId").attr("value")
     val hIsW = document.select("#hIsW").attr("value")

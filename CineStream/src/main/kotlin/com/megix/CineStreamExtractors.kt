@@ -466,7 +466,7 @@ object CineStreamExtractors : CineStreamProvider() {
             "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
             "Referer" to protonmoviesAPI
         )
-        val url = "$protonmoviesAPI/search/$id"
+        val url = "$protonmoviesAPI/search/$id/"
         val text = app.get(url, headers = headers).text
         val regex = Regex("""\[(?=.*?\"<div class\")(.*?)\]""")
         val htmlArray = regex.findAll(text).map { it.value }.toList()
@@ -1875,7 +1875,13 @@ object CineStreamExtractors : CineStreamProvider() {
         )
         val document = app.get("$soaperAPI/search.html?keyword=$title", headers = headers).document
         val href = document.selectFirst("div.img-group a:has(img[src*='$tmdbId']), div.img-group a:has(img[src*='$imdbId'])")?.attr("href") ?: return
-
+        callback.invoke(
+            newExtractorLink(
+                "Soaper href",
+                "Soaper href",
+                href,
+            )
+        )
         if(season == null) {
             getSoaperLinks(soaperAPI, "$soaperAPI$href", "M", subtitleCallback, callback)
         } else {
@@ -1884,9 +1890,25 @@ object CineStreamExtractors : CineStreamProvider() {
                 div.selectFirst("h4")?.text()?.contains("Season$season", ignoreCase = true) == true
             }
 
+            callback.invoke(
+                newExtractorLink(
+                    "Soaper seasonDiv",
+                    "Soaper seasonDiv",
+                    seasonDiv.toString(),
+                )
+            )
+
             val episodeLink = seasonDiv?.select("a")?.firstOrNull { a ->
                 a.text().trim().startsWith("$episode.")
             }?.attr("href") ?: return
+
+            callback.invoke(
+                newExtractorLink(
+                    "Soaper episodeLink",
+                    "Soaper episodeLink",
+                    episodeLink,
+                )
+            )
 
             getSoaperLinks(soaperAPI ,"$soaperAPI$episodeLink", "E", subtitleCallback, callback)
         }
