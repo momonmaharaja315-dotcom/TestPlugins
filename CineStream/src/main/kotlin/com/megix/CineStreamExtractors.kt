@@ -475,6 +475,15 @@ object CineStreamExtractors : CineStreamProvider() {
             val html = decodeHtml(Array(lastJsonArray.length()) { i -> lastJsonArray.getString(i) })
             val doc = Jsoup.parse(html)
             val link = doc.select(".col.mb-4 h5 a").attr("href")
+
+            callback.invoke(
+                newExtractorLink(
+                    "Proton[link]",
+                    "Proton[link]",
+                    "$protonmoviesAPI$link",
+                )
+            )
+
             val document = app.get("${protonmoviesAPI}${link}", headers = headers).document
             val decodedDoc = decodeMeta(document)
             if (decodedDoc != null) {
@@ -484,6 +493,15 @@ object CineStreamExtractors : CineStreamProvider() {
                     val episodeDiv = decodedDoc.select("div.episode-block:has(div.episode-number:matchesOwn(S${season}E${episode}))").firstOrNull()
                     episodeDiv?.selectFirst("a")?.attr("href")?.let {
                         val source = protonmoviesAPI + it
+
+                        callback.invoke(
+                            newExtractorLink(
+                                "Proton[source]",
+                                "Proton[source]",
+                                source,
+                            )
+                        )
+
                         val doc2 = app.get(source, headers = headers).document
 
                         val decodedDoc = decodeMeta(doc2)
@@ -1875,13 +1893,7 @@ object CineStreamExtractors : CineStreamProvider() {
         )
         val document = app.get("$soaperAPI/search.html?keyword=$title", headers = headers).document
         val href = document.selectFirst("div.img-group a:has(img[src*='$tmdbId']), div.img-group a:has(img[src*='$imdbId'])")?.attr("href") ?: return
-        callback.invoke(
-            newExtractorLink(
-                "Soaper href",
-                "Soaper href",
-                href,
-            )
-        )
+
         if(season == null) {
             getSoaperLinks(soaperAPI, "$soaperAPI$href", "M", subtitleCallback, callback)
         } else {
@@ -1890,25 +1902,9 @@ object CineStreamExtractors : CineStreamProvider() {
                 div.selectFirst("h4")?.text()?.contains("Season$season", ignoreCase = true) == true
             }
 
-            callback.invoke(
-                newExtractorLink(
-                    "Soaper seasonDiv",
-                    "Soaper seasonDiv",
-                    seasonDiv.toString(),
-                )
-            )
-
             val episodeLink = seasonDiv?.select("a")?.firstOrNull { a ->
                 a.text().trim().startsWith("$episode.")
             }?.attr("href") ?: return
-
-            callback.invoke(
-                newExtractorLink(
-                    "Soaper episodeLink",
-                    "Soaper episodeLink",
-                    episodeLink,
-                )
-            )
 
             getSoaperLinks(soaperAPI ,"$soaperAPI$episodeLink", "E", subtitleCallback, callback)
         }
