@@ -476,14 +476,6 @@ object CineStreamExtractors : CineStreamProvider() {
             val doc = Jsoup.parse(html)
             val link = doc.select(".col.mb-4 h5 a").attr("href")
 
-            callback.invoke(
-                newExtractorLink(
-                    "Proton[link]",
-                    "Proton[link]",
-                    "$protonmoviesAPI$link",
-                )
-            )
-
             val document = app.get("${protonmoviesAPI}${link}", headers = headers).document
             val decodedDoc = decodeMeta(document)
             if (decodedDoc != null) {
@@ -494,18 +486,17 @@ object CineStreamExtractors : CineStreamProvider() {
                     episodeDiv?.selectFirst("a")?.attr("href")?.let {
                         val source = protonmoviesAPI + it
 
-                        callback.invoke(
-                            newExtractorLink(
-                                "Proton[source]",
-                                "Proton[source]",
-                                source,
-                            )
-                        )
-
                         val doc2 = app.get(source, headers = headers).document
 
                         val decodedDoc = decodeMeta(doc2)
                         if(decodedDoc != null) {
+                            callback.invoke(
+                                newExtractorLink(
+                                    "Proton[decodedDoc]",
+                                    "Proton[decodedDoc]",
+                                    decodedDoc.toString(),
+                                )
+                            )
                             getProtonStream(decodedDoc, protonmoviesAPI, subtitleCallback, callback)
                         }
                     }
