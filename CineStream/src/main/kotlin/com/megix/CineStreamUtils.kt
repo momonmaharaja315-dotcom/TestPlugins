@@ -703,7 +703,7 @@ suspend fun getProtonStream(
                 headers = headers
             ).text
 
-            JSONObject(idRes).getJSONObject("ppd")?.getJSONObject("gofile")?.optString("link")?.let {
+            JSONObject(idRes).getJSONObject("ppd")?.getJSONObject("gofile.io")?.optString("link")?.let {
                 callback.invoke(
                     newExtractorLink(
                         "gofile",
