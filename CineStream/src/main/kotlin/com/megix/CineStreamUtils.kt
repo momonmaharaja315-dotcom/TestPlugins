@@ -31,7 +31,6 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import com.lagradost.cloudstream3.runAllAsync
-import com.lagradost.cloudstream3.network.CloudflareKiller
 
 val SPEC_OPTIONS = mapOf(
     "quality" to listOf(
@@ -690,16 +689,17 @@ suspend fun getProtonStream(
     subtitleCallback: (SubtitleFile) -> Unit,
     callback: (ExtractorLink) -> Unit,
 ) {
-    val wpRedisInterceptor by lazy { CloudflareKiller() }
     doc.select("tr.infotr").amap { tr ->
         val id = tr.select("button:contains(Info)").attr("id").split("-").getOrNull(1)
 
         if(id != null) {
 
+            val uid = "uid_${System.currentTimeMillis()}_${(Math.random().toString(36).substring(2, 11))}"
+
             val requestBody = FormBody.Builder()
                 .add("downloadid", id)
                 .add("token", "ok")
-                .add("uid", "uid_1747658983915_4s4tfdikc")
+                .add("uid", uid)
                 .build()
             val postHeaders = mapOf(
                 "User-Agent" to USER_AGENT,
@@ -709,8 +709,7 @@ suspend fun getProtonStream(
             val idData = app.post(
                 "$protonmoviesAPI/ppd.php",
                 headers = postHeaders,
-                requestBody = requestBody,
-                interceptor = wpRedisInterceptor
+                requestBody = requestBody
             ).text
 
             val headers = mapOf(
