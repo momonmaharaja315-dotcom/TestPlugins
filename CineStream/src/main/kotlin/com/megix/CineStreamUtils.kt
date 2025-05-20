@@ -665,18 +665,46 @@ suspend fun getProtonEmbed(
     subtitleCallback: (SubtitleFile) -> Unit,
     callback: (ExtractorLink) -> Unit,
 ) {
+    callback.invoke(
+        newExtractorLink(
+            "Proton[text]",
+            "Proton[text]",
+            text
+        )
+    )
     val regex = """([^\"]*strm\.json)""".toRegex()
     val match = regex.find(text)
 
     if (match != null) {
         val url = match.groupValues[1]
+        callback.invoke(
+            newExtractorLink(
+                "Proton[url]",
+                "Proton[url]",
+                protonmoviesAPI + url
+            )
+        )
         val headers = mapOf(
             "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
             "Referer" to protonmoviesAPI
         )
         val json = app.get(protonmoviesAPI + url, headers = headers).text
+        callback.invoke(
+            newExtractorLink(
+                "Proton[json]",
+                "Proton[json]",
+                json
+            )
+        )
         JSONObject(json).getJSONObject("ppd")?.getJSONObject("mixdrop.ag")?.optString("link")?.let {
             val source = it.replace("/f/", "/e/").replace("mxdrop.to", "mixdrop.ps")
+            callback.invoke(
+                newExtractorLink(
+                    "Proton[source]",
+                    "Proton[source]",
+                    source
+                )
+            )
             loadSourceNameExtractor("Protonmovies", source, "", subtitleCallback, callback)
         }
     }
