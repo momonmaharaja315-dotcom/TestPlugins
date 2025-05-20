@@ -31,6 +31,8 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 import com.lagradost.cloudstream3.runAllAsync
+import kotlin.math.pow
+import kotlin.random.Random
 
 val SPEC_OPTIONS = mapOf(
     "quality" to listOf(
@@ -691,9 +693,21 @@ suspend fun getProtonStream(
 ) {
     doc.select("tr.infotr").amap { tr ->
         val id = tr.select("button:contains(Info)").attr("id").split("-").getOrNull(1)
+        callback.invoke(
+            newExtractorLink(
+                "id",
+                "id",
+                id
+            )
+        )
 
         if(id != null) {
-            val uid = "uid_${System.currentTimeMillis()}_${(Math.random() * 1_000_000_000).toLong().toString(36).substring(0, 9)}"
+            val uid = "uid_${System.currentTimeMillis()}_${
+                (Random.nextDouble() * 36.0.pow(9))
+                .toLong()
+                .toString(36)
+                .padStart(9, '0')
+            }"
 
             callback.invoke(
                 newExtractorLink(
