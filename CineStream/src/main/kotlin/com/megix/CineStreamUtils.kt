@@ -659,6 +659,25 @@ suspend fun generateMagnetLink(url: String, hash: String?): String {
     }
 }
 
+suspend fun getProtonEmbed(
+    text: String,
+    protonmoviesAPI: String,
+    subtitleCallback: (SubtitleFile) -> Unit,
+    callback: (ExtractorLink) -> Unit,
+) {
+    val regex = """([^\"]*strm\.json)""".toRegex()
+    val match = regex.find(text)
+
+    if (match != null) {
+        val url = match.groupValues[1]
+        val json = app.get(protonmoviesAPI + url, headers = headers).text
+        JSONObject(json).getJSONObject("ppd")?.getJSONObject("mixdrop.ag")?.optString("link")?.let {
+            val source = it.replace("/f/", "/e/").replace("mxdrop.to", "mixdrop.ps")
+            loadSourceNameExtractor("Protonmovies", source, "", subtitleCallback, callback)
+        }
+    }
+}
+
 suspend fun getProtonStream(
     doc: Document,
     protonmoviesAPI: String,
@@ -685,14 +704,6 @@ suspend fun getProtonStream(
                 requestBody = requestBody
             ).text
 
-            callback.invoke(
-                newExtractorLink(
-                    "Protonmovies[idData]",
-                    "Protonmovies[idData]",
-                    idData
-                )
-            )
-
             val headers = mapOf(
                 "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
                 "Referer" to protonmoviesAPI
@@ -704,13 +715,6 @@ suspend fun getProtonStream(
             ).text
 
             JSONObject(idRes).getJSONObject("ppd")?.getJSONObject("gofile.io")?.optString("link")?.let {
-                callback.invoke(
-                    newExtractorLink(
-                        "gofile",
-                        "gofile",
-                        it,
-                    )
-                )
                 gofileExtractor("Protonmovies", it, "", subtitleCallback, callback)
             }
         }
