@@ -1302,7 +1302,7 @@ object CineStreamExtractors : CineStreamProvider() {
             newExtractorLink(
                 "MoviesDrive_API",
                 "MovieDrive_API",
-                MovieDrive_API,
+                MovieDrive_API.toString(),
             )
         )
 
