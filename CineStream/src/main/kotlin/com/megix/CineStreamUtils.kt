@@ -697,7 +697,7 @@ suspend fun getProtonStream(
             newExtractorLink(
                 "id",
                 "id",
-                id
+                id.toString()
             )
         )
 
