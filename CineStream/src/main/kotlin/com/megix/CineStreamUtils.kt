@@ -693,13 +693,6 @@ suspend fun getProtonStream(
 ) {
     doc.select("tr.infotr").amap { tr ->
         val id = tr.select("button:contains(Info)").attr("id").split("-").getOrNull(1)
-        callback.invoke(
-            newExtractorLink(
-                "id",
-                "id",
-                id.toString()
-            )
-        )
 
         if(id != null) {
             val uid = "uid_${System.currentTimeMillis()}_${
@@ -708,14 +701,6 @@ suspend fun getProtonStream(
                 .toString(36)
                 .padStart(9, '0')
             }"
-
-            callback.invoke(
-                newExtractorLink(
-                    "uid",
-                    "uid",
-                    uid
-                )
-            )
 
             val requestBody = FormBody.Builder()
                 .add("downloadid", id)
@@ -733,14 +718,6 @@ suspend fun getProtonStream(
                 requestBody = requestBody
             ).text
 
-            callback.invoke(
-                newExtractorLink(
-                    "idData",
-                    "idData",
-                    idData
-                )
-            )
-
             val headers = mapOf(
                 "User-Agent" to USER_AGENT,
                 "Referer" to protonmoviesAPI
@@ -751,15 +728,8 @@ suspend fun getProtonStream(
                 headers = headers
             ).text
 
-            callback.invoke(
-                newExtractorLink(
-                    "idRes",
-                    "idRes",
-                    idRes
-                )
-            )
-
             JSONObject(idRes).getJSONObject("ppd")?.getJSONObject("gofile.io")?.optString("link")?.let {
+                val source = it.replace("\\/", "/")
                 gofileExtractor("Protonmovies", it, "", subtitleCallback, callback)
             }
         }
