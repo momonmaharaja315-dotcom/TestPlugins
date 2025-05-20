@@ -1314,7 +1314,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val res = app.get(url, interceptor = wpRedisInterceptor).document
         val match = res.select("li.thumb > figcaption > a").firstOrNull { a ->
             val text = a.text()
-            text.contains(title, ignoreCase = true)
+            text.contains(title.toString(), ignoreCase = true)
         }?.attr("href") ?: return
 
         callback.invoke(
