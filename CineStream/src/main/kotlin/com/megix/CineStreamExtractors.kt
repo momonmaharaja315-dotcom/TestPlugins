@@ -884,6 +884,7 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val headers = mapOf(
             "User-Agent" to USER_AGENT,
+            "Referer" to animepaheAPI,
             "Cookie" to "__ddg2_=1234567890"
         )
         val id = app.get(url ?: "", headers).document.selectFirst("meta[property=og:url]")
@@ -1297,6 +1298,14 @@ object CineStreamExtractors : CineStreamProvider() {
                 ?.attr("href")
         }
 
+        callback.invoke(
+            newExtractorLink(
+                "MoviesDrive_API",
+                "MovieDrive_API",
+                MovieDrive_API,
+            )
+        )
+
         val fixTitle = title?.substringBefore("-")?.replace(":", " ")?.replace("&", " ")
         val searchtitle = title?.substringBefore("-").createSlug()
         val url = if (season == null) {
@@ -1310,10 +1319,24 @@ object CineStreamExtractors : CineStreamProvider() {
         val hrefpattern =
             Regex("""(?i)<a\s+href="([^"]*\b$searchtitle\b[^"]*)\"""").find(res1)?.groupValues?.get(1)
                 ?: ""
+        callback.invoke(
+            newExtractorLink(
+                "hrefpattern",
+                "hrefpattern",
+                hrefpattern,
+            )
+        )
         val document = app.get(hrefpattern).document
         if (season == null) {
             document.select("h5 > a").amap {
                 val href = it.attr("href")
+                callback.invoke(
+                    newExtractorLink(
+                        "href",
+                        "href",
+                        href,
+                    )
+                )
                 val server = extractMdrive(href)
                 server.amap {
                     loadSourceNameExtractor("MoviesDrive",it, "", subtitleCallback, callback)
@@ -1334,6 +1357,13 @@ object CineStreamExtractors : CineStreamProvider() {
                     if (source1 != null) linklist.add(source1)
                     if (source2 != null) linklist.add(source2)
                     linklist.forEach { url ->
+                        callback.invoke(
+                            newExtractorLink(
+                                "source",
+                                "source",
+                                url,
+                            )
+                        )
                         loadSourceNameExtractor(
                             "MoviesDrive",
                             url,
