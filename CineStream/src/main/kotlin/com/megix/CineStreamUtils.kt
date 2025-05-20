@@ -16,6 +16,7 @@ import kotlinx.coroutines.delay
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
+import com.lagradost.cloudstream3.USER_AGENT
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import com.lagradost.nicehttp.RequestBodyTypes
 import kotlinx.coroutines.CoroutineScope
@@ -665,46 +666,18 @@ suspend fun getProtonEmbed(
     subtitleCallback: (SubtitleFile) -> Unit,
     callback: (ExtractorLink) -> Unit,
 ) {
-    callback.invoke(
-        newExtractorLink(
-            "Proton[text]",
-            "Proton[text]",
-            text
-        )
-    )
     val regex = """([^\"]*strm\.json)""".toRegex()
     val match = regex.find(text)
 
     if (match != null) {
         val url = match.groupValues[1]
-        callback.invoke(
-            newExtractorLink(
-                "Proton[url]",
-                "Proton[url]",
-                protonmoviesAPI + url
-            )
-        )
         val headers = mapOf(
-            "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+            "User-Agent" to USER_AGENT,
             "Referer" to protonmoviesAPI
         )
         val json = app.get(protonmoviesAPI + url, headers = headers).text
-        callback.invoke(
-            newExtractorLink(
-                "Proton[json]",
-                "Proton[json]",
-                json
-            )
-        )
         JSONObject(json).getJSONObject("ppd")?.getJSONObject("mixdrop.ag")?.optString("link")?.let {
             val source = it.replace("/f/", "/e/").replace("mxdrop.to", "mixdrop.ps")
-            callback.invoke(
-                newExtractorLink(
-                    "Proton[source]",
-                    "Proton[source]",
-                    source
-                )
-            )
             loadSourceNameExtractor("Protonmovies", source, "", subtitleCallback, callback)
         }
     }
@@ -720,13 +693,6 @@ suspend fun getProtonStream(
         val id = tr.select("button:contains(Info)").attr("id").split("-").getOrNull(1)
 
         if(id != null) {
-            callback.invoke(
-                newExtractorLink(
-                    "Proton[id]",
-                    "Proton[id]",
-                    id
-                )
-            )
 
             val requestBody = FormBody.Builder()
                 .add("downloadid", id)
@@ -734,7 +700,7 @@ suspend fun getProtonStream(
                 .add("uid", "uid_1747658983915_4s4tfdikc")
                 .build()
             val postHeaders = mapOf(
-                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+                "User-Agent" to USER_AGENT,
                 "Referer" to protonmoviesAPI,
                 "Content-Type" to "multipart/form-data",
             )
@@ -744,16 +710,8 @@ suspend fun getProtonStream(
                 requestBody = requestBody
             ).text
 
-            callback.invoke(
-                newExtractorLink(
-                    "Proton[idData]",
-                    "Proton[idData]",
-                    idData
-                )
-            )
-
             val headers = mapOf(
-                "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
+                "User-Agent" to USER_AGENT,
                 "Referer" to protonmoviesAPI
             )
 
@@ -762,22 +720,7 @@ suspend fun getProtonStream(
                 headers = headers
             ).text
 
-            callback.invoke(
-                newExtractorLink(
-                    "Proton[idRes]",
-                    "Proton[idRes]",
-                    idRes
-                )
-            )
-
             JSONObject(idRes).getJSONObject("ppd")?.getJSONObject("gofile.io")?.optString("link")?.let {
-                callback.invoke(
-                    newExtractorLink(
-                        "Proton[gofile]",
-                        "Proton[gofile]",
-                        it
-                    )
-                )
                 gofileExtractor("Protonmovies", it, "", subtitleCallback, callback)
             }
         }
