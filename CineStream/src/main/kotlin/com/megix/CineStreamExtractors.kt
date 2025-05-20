@@ -884,10 +884,9 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val headers = mapOf(
             "User-Agent" to USER_AGENT,
-            "Referer" to animepaheAPI,
             "Cookie" to "__ddg2_=1234567890"
         )
-        val id = app.get(url ?: "", headers).document.selectFirst("meta[property=og:url]")
+        val id = app.get(url ?: "", headers, interceptor = wpRedisInterceptor).document.selectFirst("meta[property=og:url]")
             ?.attr("content").toString().substringAfterLast("/")
         val animeData =
             app.get("$animepaheAPI/api?m=release&id=$id&sort=episode_desc&page=1", headers)
@@ -1298,45 +1297,17 @@ object CineStreamExtractors : CineStreamProvider() {
                 ?.attr("href")
         }
 
-        callback.invoke(
-            newExtractorLink(
-                "MoviesDrive_API",
-                "MovieDrive_API",
-                MovieDrive_API.toString(),
-            )
-        )
-
-        val url = if (season == null) {
-            "$MovieDrive_API/search/$title $year"
-        } else {
-            "$MovieDrive_API/search/$title Season $season"
-        }
+        val url = "$MovieDrive_API/search/$title $year"
         val res = app.get(url, interceptor = wpRedisInterceptor).document
         val match = res.select("li.thumb > figcaption > a").firstOrNull { a ->
             val text = a.text()
             text.contains(title.toString(), ignoreCase = true)
         }?.attr("href") ?: return
 
-        callback.invoke(
-            newExtractorLink(
-                "MoviesDrive",
-                "MoviesDrive",
-                match,
-            )
-        )
-
-
         val document = app.get(match).document
         if (season == null) {
             document.select("h5 > a").amap {
                 val href = it.attr("href")
-                callback.invoke(
-                    newExtractorLink(
-                        "href",
-                        "href",
-                        href,
-                    )
-                )
                 val server = extractMdrive(href)
                 server.amap {
                     loadSourceNameExtractor("MoviesDrive",it, "", subtitleCallback, callback)
@@ -1357,13 +1328,6 @@ object CineStreamExtractors : CineStreamProvider() {
                     if (source1 != null) linklist.add(source1)
                     if (source2 != null) linklist.add(source2)
                     linklist.forEach { url ->
-                        callback.invoke(
-                            newExtractorLink(
-                                "source",
-                                "source",
-                                url,
-                            )
-                        )
                         loadSourceNameExtractor(
                             "MoviesDrive",
                             url,
