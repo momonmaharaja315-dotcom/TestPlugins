@@ -489,10 +489,8 @@ object CineStreamExtractors : CineStreamProvider() {
                         val doc2 = app.get(source, headers = headers).document
                         runAllAsync(
                             {
-                                val scriptText = document.selectFirst("script:containsData(strm.json)")
-                                if(scriptText != null) {
-                                    getProtonEmbed(scriptText, protonmoviesAPI, subtitleCallback, callback)
-                                }
+                                val scriptText = document.selectFirst("script:containsData(strm.json)").toString()
+                                getProtonEmbed(scriptText, protonmoviesAPI, subtitleCallback, callback)
                             },
                             {
                                 val decodedDoc = decodeMeta(doc2)
