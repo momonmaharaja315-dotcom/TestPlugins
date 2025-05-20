@@ -1306,27 +1306,27 @@ object CineStreamExtractors : CineStreamProvider() {
             )
         )
 
-        val fixTitle = title?.substringBefore("-")?.replace(":", " ")?.replace("&", " ")
-        val searchtitle = title?.substringBefore("-").createSlug()
         val url = if (season == null) {
-            "$MovieDrive_API/search/$fixTitle $year"
+            "$MovieDrive_API/search/$title $year"
         } else {
-            "$MovieDrive_API/search/$fixTitle"
+            "$MovieDrive_API/search/$title Season $season"
         }
-        val res1 =
-            app.get(url, interceptor = wpRedisInterceptor).document.select("figure")
-                .toString()
-        val hrefpattern =
-            Regex("""(?i)<a\s+href="([^"]*\b$searchtitle\b[^"]*)\"""").find(res1)?.groupValues?.get(1)
-                ?: ""
+        val res = app.get(url, interceptor = wpRedisInterceptor).document
+        val match = res.select("li.thumb > figcaption > a").firstOrNull { a ->
+            val text = a.text()
+            text.contains(title, ignoreCase = true)
+        }?.attr("href") ?: return
+
         callback.invoke(
             newExtractorLink(
-                "hrefpattern",
-                "hrefpattern",
-                hrefpattern,
+                "MoviesDrive",
+                "MoviesDrive",
+                match,
             )
         )
-        val document = app.get(hrefpattern).document
+
+
+        val document = app.get(match).document
         if (season == null) {
             document.select("h5 > a").amap {
                 val href = it.attr("href")
