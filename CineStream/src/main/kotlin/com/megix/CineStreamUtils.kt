@@ -720,6 +720,14 @@ suspend fun getProtonStream(
         val id = tr.select("button:contains(Info)").attr("id").split("-").getOrNull(1)
 
         if(id != null) {
+            callback.invoke(
+                newExtractorLink(
+                    "Proton[id]",
+                    "Proton[id]",
+                    id
+                )
+            )
+
             val requestBody = FormBody.Builder()
                 .add("downloadid", id)
                 .add("token", "ok")
@@ -736,6 +744,14 @@ suspend fun getProtonStream(
                 requestBody = requestBody
             ).text
 
+            callback.invoke(
+                newExtractorLink(
+                    "Proton[idData]",
+                    "Proton[idData]",
+                    idData
+                )
+            )
+
             val headers = mapOf(
                 "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0",
                 "Referer" to protonmoviesAPI
@@ -745,6 +761,14 @@ suspend fun getProtonStream(
                 "$protonmoviesAPI/tmp/$idData",
                 headers = headers
             ).text
+
+            callback.invoke(
+                newExtractorLink(
+                    "Proton[idRes]",
+                    "Proton[idRes]",
+                    idRes
+                )
+            )
 
             JSONObject(idRes).getJSONObject("ppd")?.getJSONObject("gofile.io")?.optString("link")?.let {
                 callback.invoke(
