@@ -693,8 +693,7 @@ suspend fun getProtonStream(
         val id = tr.select("button:contains(Info)").attr("id").split("-").getOrNull(1)
 
         if(id != null) {
-
-            val uid = "uid_${System.currentTimeMillis()}_${(Math.random().toString(36).substring(2, 11))}"
+            val uid = "uid_${System.currentTimeMillis()}_${(Math.random() * 1_000_000_000).toLong().toString(36).substring(0, 9)}"
 
             val requestBody = FormBody.Builder()
                 .add("downloadid", id)
