@@ -69,7 +69,7 @@ object CineStreamExtractors : CineStreamProvider() {
 
             regex.findAll(scriptText).forEach { match ->
                 val streamSection = match.groupValues[1]
-                urlRegex.findAll(streamSection).amap { urlMatch ->
+                urlRegex.findAll(streamSection).forEach { urlMatch ->
                     val source = urlMatch.groupValues[1]
                     loadSourceNameExtractor("Asiaflix", source, episodeUrl, subtitleCallback, callback)
                 }
