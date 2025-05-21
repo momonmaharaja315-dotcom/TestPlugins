@@ -40,7 +40,7 @@ object CineStreamExtractors : CineStreamProvider() {
             "Referer" to asiaflixAPI,
             "X-Access-Control" to "web"
         )
-        val jsonString = app.get(searchUrl).text
+        val jsonString = app.get(searchUrl, headers = headers).text
 
         callback.invoke(
             newExtractorLink(
