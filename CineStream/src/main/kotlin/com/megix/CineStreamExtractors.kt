@@ -41,6 +41,15 @@ object CineStreamExtractors : CineStreamProvider() {
             "X-Access-Control" to "web"
         )
         val jsonString = app.get(searchUrl).text
+
+        callback.invoke(
+            newExtractorLink(
+                "jsonString",
+                "jsonString",
+                jsonString,
+            )
+        )
+
         val jsonObject = JSONObject(jsonString)
         val bodyArray = jsonObject.getJSONArray("body")
 
@@ -62,6 +71,13 @@ object CineStreamExtractors : CineStreamProvider() {
         if(matchedId != null && matchedName != null) {
             val titleSlug = matchedName.replace(" ", "-")
             val episodeUrl = "$asiaflixAPI/play/$titleSlug-${episode ?: 1}/$matchedId/${episode ?: 1}"
+            callback.invoke(
+                newExtractorLink(
+                    "episodeUrl",
+                    "episodeUrl",
+                    episodeUrl,
+                )
+            )
 
             val scriptText = app.get(episodeUrl).document.selectFirst("script#ng-state")?.data().toString()
             val regex = Regex("""\"streamUrls\"\s*:\s*\[\s*(.*?)\s*](?=\s*[,}])""", RegexOption.DOT_MATCHES_ALL)
@@ -69,8 +85,22 @@ object CineStreamExtractors : CineStreamProvider() {
 
             regex.findAll(scriptText).forEach { match ->
                 val streamSection = match.groupValues[1]
+                callback.invoke(
+                    newExtractorLink(
+                        "streamSection",
+                        "streamSection",
+                        streamSection,
+                    )
+                )
                 urlRegex.findAll(streamSection).forEach { urlMatch ->
-                    val source = urlMatch.groupValues[1]
+                    val source = httpsify(urlMatch.groupValues[1])
+                    callback.invoke(
+                        newExtractorLink(
+                            "source",
+                            "source",
+                            source,
+                        )
+                    )
                     loadSourceNameExtractor("Asiaflix", source, episodeUrl, subtitleCallback, callback)
                 }
             }
