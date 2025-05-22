@@ -700,15 +700,6 @@ open class GDFlix : ExtractorApi() {
                         Log.d("Instant DL", e.toString())
                     }
                 }
-
-                text.contains("CLOUD DOWNLOAD") -> {
-                    callback.invoke(
-                        newExtractorLink("GDFlix[CLOUD]", "GDFlix[CLOUD] $fileName[$fileSize]", anchor.attr("href")) {
-                            this.quality = getIndexQuality(fileName)
-                        }
-                    )
-                }
-
                 text.contains("GoFile") -> {
                     try {
                         app.get(anchor.attr("href")).document
@@ -764,7 +755,7 @@ class Gofile : ExtractorApi() {
         callback: (ExtractorLink) -> Unit
     ) {
 
-        val res = app.get(url)
+        //val res = app.get(url)
         val id = Regex("/(?:\\?c=|d/)([\\da-zA-Z-]+)").find(url)?.groupValues?.get(1) ?: return
         val genAccountRes = app.post("$mainApi/accounts").text
         val jsonResp = JSONObject(genAccountRes)

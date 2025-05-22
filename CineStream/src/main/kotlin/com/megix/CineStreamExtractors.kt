@@ -739,28 +739,15 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
-        val url = "$cinemaluxeAPI/?s=$title $year"
-        val link = app.get(url).document.selectFirst("div.title > a:matches((?i)($title $year))")?.attr("href") ?: return
+        val titleSlug = "$title $year"?.replace(" ", "-") ?: ""
+        val link = if(season == null) "$cinemaluxeAPI/movies/titleSlug/" else "$cinemaluxeAPI/series/titleSlug/"
         val document = app.get(link).document
 
         if(season == null) {
             document.select("div.wp-content div.ep-button-container > a").amap {
                 var link = it.attr("href")
-                callback.invoke(
-                    newExtractorLink(
-                        "link1",
-                        "link1",
-                        link,
-                    )
-                )
                 link = cinemaluxeBypass(link)
-                callback.invoke(
-                    newExtractorLink(
-                        "link",
-                        "link",
-                        link,
-                    )
-                )
+
                 val selector = if(link.contains("linkstore")) "div.ep-button-container > a" else "div.mirror-buttons a"
                 app.get(link).document.select(selector).amap {
                     loadSourceNameExtractor(
@@ -777,21 +764,7 @@ object CineStreamExtractors : CineStreamProvider() {
             val season = document.select("div.wp-content div.ep-button-container > a:matches((?i)(Season 0?$season))")
             season.amap { div ->
                 var link = div.select("a").attr("href")
-                callback.invoke(
-                    newExtractorLink(
-                        "link1",
-                        "link1",
-                        link,
-                    )
-                )
                 link = cinemaluxeBypass(link)
-                callback.invoke(
-                    newExtractorLink(
-                        "link",
-                        "link",
-                        link,
-                    )
-                )
                  app.get(link).document.select("""div.ep-button-container > a:matches((?i)(?:episode\s*[-]?\s*)(0?$episode\b))""").amap {
                     loadSourceNameExtractor(
                         "Cinemaluxe",
