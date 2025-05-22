@@ -77,7 +77,7 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
         val posterUrl = document.select("div.poster > img").attr("data-src")
         val description = document.selectFirst("div.wp-content")?.ownText() ?: ""
 
-        val tvType = if (url.contains("tvshow")) {
+        val tvType = if (url.contains("series")) {
             "series"
         } else {
             "movie"
@@ -85,7 +85,7 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
 
         if(tvType == "series") {
             val tvSeriesEpisodes = mutableListOf<Episode>()
-            val aTags = document.select("div.ep-button-container > a")
+            val aTags = document.select("div.wp-content div.ep-button-container > a")
             val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
 
             aTags.mapNotNull{ aTag ->
@@ -132,7 +132,7 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
             }
         }
         else {
-            val buttons = document.select("div.ep-button-container > a")
+            val buttons = document.select("div.wp-content div.ep-button-container > a")
             val data = buttons.flatMap { button ->
                 var link = button.attr("href")
                 link = bypass(link)
