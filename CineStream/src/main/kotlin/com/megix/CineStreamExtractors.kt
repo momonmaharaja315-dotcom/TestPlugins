@@ -41,15 +41,6 @@ object CineStreamExtractors : CineStreamProvider() {
             "X-Access-Control" to "web"
         )
         val jsonString = app.get(searchUrl, headers = headers).text
-
-        callback.invoke(
-            newExtractorLink(
-                "jsonString",
-                "jsonString",
-                jsonString,
-            )
-        )
-
         val jsonObject = JSONObject(jsonString)
         val bodyArray = jsonObject.getJSONArray("body")
 
@@ -70,37 +61,19 @@ object CineStreamExtractors : CineStreamProvider() {
 
         if(matchedId != null && matchedName != null) {
             val titleSlug = matchedName.replace(" ", "-")
-            val episodeUrl = "$asiaflixAPI/play/$titleSlug-${episode ?: 1}/$matchedId/${episode ?: 1}"
-            callback.invoke(
-                newExtractorLink(
-                    "episodeUrl",
-                    "episodeUrl",
-                    episodeUrl,
-                )
+            val episodeUrl = "$asiaflixAPI/play/$titleSlug-1/$matchedId/1"
+            val scriptText = app.get(episodeUrl).document.selectFirst("script#ng-state")?.data().toString()
+            val regex = Regex(
+                """"number"\s*:\s*${'$'}{episode ?: 1}\s*,[^{}]*?"streamUrls"\s*:\s*\[\s*(.*?)\s*](?=\s*[,}])""",
+                RegexOption.DOT_MATCHES_ALL
             )
 
-            val scriptText = app.get(episodeUrl).document.selectFirst("script#ng-state")?.data().toString()
-            val regex = Regex("""\"streamUrls\"\s*:\s*\[\s*(.*?)\s*](?=\s*[,}])""", RegexOption.DOT_MATCHES_ALL)
             val urlRegex = Regex("""\"url\"\s*:\s*\"(.*?)\"""")
 
             regex.findAll(scriptText).forEach { match ->
                 val streamSection = match.groupValues[1]
-                callback.invoke(
-                    newExtractorLink(
-                        "streamSection",
-                        "streamSection",
-                        streamSection,
-                    )
-                )
                 urlRegex.findAll(streamSection).forEach { urlMatch ->
                     val source = httpsify(urlMatch.groupValues[1])
-                    callback.invoke(
-                        newExtractorLink(
-                            "source",
-                            "source",
-                            source,
-                        )
-                    )
                     loadSourceNameExtractor("Asiaflix", source, episodeUrl, subtitleCallback, callback)
                 }
             }
@@ -1808,15 +1781,15 @@ object CineStreamExtractors : CineStreamProvider() {
                                         getM3u8Qualities(
                                             server.link,
                                             "https://static.crunchyroll.com/",
-                                            host
+                                            "Allanime [SUB] $host"
                                         ).forEach(callback)
                                     }
 
                                     server.hls == null -> {
                                         callback.invoke(
                                             newExtractorLink(
-                                                "Allanime ${host.capitalize()}",
-                                                "Allanime ${host.capitalize()}",
+                                                "Allanime [${i.uppercase()}] ${host.capitalize()}",
+                                                "Allanime [${i.uppercase()}] ${host.capitalize()}",
                                                 server.link,
                                                 INFER_TYPE
                                             )
@@ -1832,7 +1805,7 @@ object CineStreamExtractors : CineStreamProvider() {
                                                     server.link
                                                 else "https://allanime.day" + URI(server.link).path)
 
-                                        getM3u8Qualities(server.link, server.headers?.referer ?: endpoint, host).forEach(callback)
+                                        getM3u8Qualities(server.link, server.headers?.referer ?: endpoint, "Allanime [SUB] $host").forEach(callback)
                                     }
 
                                     else -> {
