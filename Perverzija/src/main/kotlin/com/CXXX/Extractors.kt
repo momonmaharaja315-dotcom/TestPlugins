@@ -41,7 +41,8 @@ open class Xtremestream : ExtractorApi() {
                     newExtractorLink(
                         name,
                         name,
-                        "${m3u8LoaderUrl}/${videoId}&q=1080"
+                        "${m3u8LoaderUrl}/${videoId}&q=1080",
+                        type = ExtractorLinkType.M3U8
                     ) {
                         this.referer = url
                         this.headers = mapOf(
