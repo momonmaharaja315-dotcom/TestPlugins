@@ -744,8 +744,15 @@ object CineStreamExtractors : CineStreamProvider() {
         val document = app.get(link).document
 
         if(season == null) {
-            document.select("div.ep-button-container > a").amap {
+            document.select("div.wp-content div.ep-button-container > a").amap {
                 var link = it.attr("href")
+                callback.invoke(
+                    newExtractorLink(
+                        "link1",
+                        "link1",
+                        link,
+                    )
+                )
                 link = cinemaluxeBypass(link)
                 callback.invoke(
                     newExtractorLink(
@@ -767,9 +774,16 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
         else {
-            val season = document.select("div.ep-button-container > a:matches((?i)(Season 0?$season))")
+            val season = document.select("div.wp-content div.ep-button-container > a:matches((?i)(Season 0?$season))")
             season.amap { div ->
                 var link = div.select("a").attr("href")
+                callback.invoke(
+                    newExtractorLink(
+                        "link1",
+                        "link1",
+                        link,
+                    )
+                )
                 link = cinemaluxeBypass(link)
                 callback.invoke(
                     newExtractorLink(
