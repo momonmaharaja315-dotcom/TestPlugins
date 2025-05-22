@@ -761,18 +761,23 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
         else {
-            val season = document.select("div.wp-content div.ep-button-container > a:matches((?i)(Season 0?$season))")
+            val season = document.select("div.wp-content div.ep-button-container")
             season.amap { div ->
-                var link = div.select("a").attr("href")
-                link = cinemaluxeBypass(link)
-                 app.get(link).document.select("""div.ep-button-container > a:matches((?i)(?:episode\s*[-]?\s*)(0?$episode\b))""").amap {
-                    loadSourceNameExtractor(
-                        "Cinemaluxe",
-                        it.attr("href"),
-                        "",
-                        subtitleCallback,
-                        callback,
-                    )
+                val text = div.parent()?.text() ?: ""
+                if(text.contains("Season $season", ignoreCase = true) ||
+                    text.contains("Season 0$season", ignoreCase = true)
+                ) {
+                    var link = div.select("a").attr("href")
+                    link = cinemaluxeBypass(link)
+                    app.get(link).document.select("""div.ep-button-container > a:matches((?i)(?:episode\s*[-]?\s*)(0?$episode\b))""").amap {
+                        loadSourceNameExtractor(
+                            "Cinemaluxe",
+                            it.attr("href"),
+                            "",
+                            subtitleCallback,
+                            callback,
+                        )
+                    }
                 }
             }
         }
