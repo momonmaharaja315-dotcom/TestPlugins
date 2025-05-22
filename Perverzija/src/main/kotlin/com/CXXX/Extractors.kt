@@ -10,8 +10,6 @@ import okhttp3.Request
 import com.lagradost.cloudstream3.USER_AGENT
 import org.jsoup.Jsoup
 
-//https://pervl4.xtremestream.xyz/player/index.php?data=9c36b930df0e0e8b05d4e1fcb4cdef27
-//https://pervl4.xtremestream.xyz/player/xs1.php?data=9c36b930df0e0e8b05d4e1fcb4cdef27
 open class Xtremestream : ExtractorApi() {
     override var name = "Xtremestream"
     override var mainUrl = "https://pervl4.xtremestream.xyz"
@@ -43,8 +41,7 @@ open class Xtremestream : ExtractorApi() {
                     newExtractorLink(
                         name,
                         name,
-                        "$m3u8LoaderUrl/$videoId",
-                        type = ExtractorLinkType.M3U8
+                        "${m3u8LoaderUrl}/${videoId}&q=1080"
                     ) {
                         this.referer = url
                         this.headers = mapOf(
