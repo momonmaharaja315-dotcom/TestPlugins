@@ -70,31 +70,18 @@ object CineStreamExtractors : CineStreamProvider() {
                 )
             )
             val scriptText = app.get(episodeUrl).document.selectFirst("script#ng-state")?.data().toString()
-            val regex = Regex(
-                """"number"\s*:\s*${'$'}{episode ?: 1}\s*,[^{}]*?"streamUrls"\s*:\s*\[\s*(.*?)\s*](?=\s*[,}])""",
-                RegexOption.DOT_MATCHES_ALL
-            )
 
+            val regex = Regex("""\"streamUrls\"\s*:\s*\[\s*(.*?)\s*](?=\s*[,}])""", RegexOption.DOT_MATCHES_ALL)
             val urlRegex = Regex("""\"url\"\s*:\s*\"(.*?)\"""")
 
-            regex.findAll(scriptText).forEach { match ->
-                val streamSection = match.groupValues[1]
-                callback.invoke(
-                    newExtractorLink(
-                        "streamSection",
-                        "streamSection",
-                        streamSection
-                    )
-                )
+            val matches = regex.findAll(scriptText).toList()
+
+            val newEp = episode ?: 1
+
+            if (matches.size >= newEp) {
+                val streamSection = matches[newEp-1].groupValues[1]
                 urlRegex.findAll(streamSection).forEach { urlMatch ->
                     val source = httpsify(urlMatch.groupValues[1])
-                    callback.invoke(
-                        newExtractorLink(
-                            "source",
-                            "source",
-                            source
-                        )
-                    )
                     loadSourceNameExtractor("Asiaflix", source, episodeUrl, subtitleCallback, callback)
                 }
             }
