@@ -739,8 +739,8 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
-        val titleSlug = "$title $year"?.replace(" ", "-") ?: ""
-        val url = if(season == null) "$cinemaluxeAPI/movies/$titleSlug/" else "$cinemaluxeAPI/series/$titleSlug/"
+        val url = app.get("$cinemaluxeAPI/?s=$title $year").document
+        .select("div.title > a:contains($title $year)").attr("href")
         callback.invoke(
             newExtractorLink(
                 "url",
