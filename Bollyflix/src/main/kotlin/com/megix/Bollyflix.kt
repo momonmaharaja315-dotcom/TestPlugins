@@ -5,9 +5,9 @@ import com.lagradost.cloudstream3.plugins.Plugin
 import android.content.Context
 
 @CloudstreamPlugin
-class Cinemaluxe: Plugin() {
+class Bollyflix: Plugin() {
     override fun load(context: Context) {
-        registerMainAPI(CinemaluxeProvider())
-        registerExtractorAPI(Sharepoint())
+        // All providers should be added in this manner. Please don't edit the providers list directly.
+        registerMainAPI(BollyflixProvider())
     }
 }
