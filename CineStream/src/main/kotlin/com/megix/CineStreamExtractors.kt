@@ -739,11 +739,9 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
-        val query = "$title $year".trim()
+        val query = "$title $year"
         val url = app.get("$cinemaluxeAPI/?s=$query").document
-            .select("div.title > a")
-            .firstOrNull { it.text().trim() == query }
-        ?.attr("href") ?: return
+            .select("div.title > a:contains($query)").attr("href")
         callback.invoke(
             newExtractorLink(
                 "url",
