@@ -29,7 +29,16 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         val basemainUrl: String? by lazy {
             runBlocking {
                 try {
-                     app.get("https://bollyflix.to/?re=bollyflix").url
+                    val maxTries = 5
+                    var tries = 0
+                    var link = "https://bollyflix.to/?re=bollyflix"
+                    while (tries < maxTries) {
+                        link = app.get(link).url
+                        if(!link.contains("tinyurl")) {
+                            break
+                        }
+                    }
+                    link
                 } catch (e: Exception) {
                     null
                 }
@@ -65,7 +74,7 @@ class BollyflixProvider : MainAPI() { // all providers must be an instance of Ma
         val url = "https://web.sidexfee.com/?id=$id"
         val document = app.get(url).text
         val encodeUrl = Regex("""link":"([^"]+)""").find(document) ?. groupValues ?. get(1) ?: ""
-        return base64Decode(encodeUrl)
+        return base64Decode(encodeUrl.replace("\\/", "/"))
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
