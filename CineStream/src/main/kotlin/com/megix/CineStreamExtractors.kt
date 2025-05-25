@@ -739,8 +739,10 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
-        val url = app.get("$cinemaluxeAPI/?s=$title $year").document
-        .select("div.title > a:contains($title $year)").attr("href")
+        val url = app.get("$cinemaluxeAPI/?s=$query").document
+            .select("div.title > a")
+            .firstOrNull { it.text().trim() == "$title $year" }
+        ?.attr("href") ?: return
         callback.invoke(
             newExtractorLink(
                 "url",
@@ -771,7 +773,7 @@ object CineStreamExtractors : CineStreamProvider() {
         else {
             val season = document.select("div.wp-content div.ep-button-container")
             season.amap { div ->
-                val text = div.text() + div.previousElementSibling()?.text() ?: ""
+                val text = div.toString()
                 if(text.contains("Season $season", ignoreCase = true) ||
                     text.contains("Season 0$season", ignoreCase = true)
                 ) {
