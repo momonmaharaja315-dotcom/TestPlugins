@@ -740,7 +740,7 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit
     ) {
         val titleSlug = "$title $year"?.replace(" ", "-") ?: ""
-        val url = if(season == null) "$cinemaluxeAPI/movies/titleSlug/" else "$cinemaluxeAPI/series/titleSlug/"
+        val url = if(season == null) "$cinemaluxeAPI/movies/$titleSlug/" else "$cinemaluxeAPI/series/$titleSlug/"
         callback.invoke(
             newExtractorLink(
                 "url",
