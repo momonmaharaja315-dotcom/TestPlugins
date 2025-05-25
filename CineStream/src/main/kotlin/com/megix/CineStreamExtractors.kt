@@ -741,10 +741,24 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val titleSlug = "$title $year"?.replace(" ", "-") ?: ""
         val link = if(season == null) "$cinemaluxeAPI/movies/titleSlug/" else "$cinemaluxeAPI/series/titleSlug/"
+        callback.invoke(
+            newExtractorLink(
+                "link",
+                "link",
+                link,
+            )
+        )
         val document = app.get(link).document
 
         if(season == null) {
             document.select("div.wp-content div.ep-button-container > a").amap {
+                callback.invoke(
+                    newExtractorLink(
+                        "href",
+                        "href",
+                        it.attr("href"),
+                    )
+                )
                 loadSourceNameExtractor(
                     "Cinemaluxe",
                     it.attr("href"),
@@ -762,7 +776,23 @@ object CineStreamExtractors : CineStreamProvider() {
                     text.contains("Season 0$season", ignoreCase = true)
                 ) {
                     val link = div.select("a").attr("href")
+                    callback.invoke(
+                        newExtractorLink(
+                            "link",
+                            "link",
+                            it.attr("link"),
+                        )
+                    )
                     app.get(link).document.select("""div.ep-button-container > a:matches((?i)(?:episode\s*[-]?\s*)(0?$episode\b))""").amap {
+
+                        callback.invoke(
+                            newExtractorLink(
+                                "href",
+                                "href",
+                                it.attr("href"),
+                            )
+                        )
+
                         loadSourceNameExtractor(
                             "Cinemaluxe",
                             it.attr("href"),
