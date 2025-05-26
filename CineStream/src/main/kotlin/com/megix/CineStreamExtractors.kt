@@ -776,7 +776,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     newExtractorLink(
                         "text",
                         "text",
-                        link,
+                        text,
                     )
                 )
                 if(text.contains("Season $season", ignoreCase = true) ||
