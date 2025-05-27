@@ -35,7 +35,7 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit
     ) {
         val headers = mapOf(
-            "Referer" to "https://2embed.cc",
+            "Referer" to twoembedAPI,
             "sec-fetch-dest" to "iframe"
         )
 
@@ -45,7 +45,7 @@ object CineStreamExtractors : CineStreamProvider() {
             "embed/$id"
         }
 
-        val api = "https://2embed.cc/$slug"
+        val api = "$twoembedAPI/$slug"
 
         val text = app.get(api, headers = headers).text
         var sKey = "swish?id="
@@ -87,7 +87,8 @@ object CineStreamExtractors : CineStreamProvider() {
             newExtractorLink(
                 "2Embed",
                 "2Embed",
-                streamUrl
+                streamUrl,
+                type = ExtractorLinkType.M3U8
             ) {
                 this.headers = headers
             }
@@ -1403,9 +1404,9 @@ object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun invokeMoviesdrive(
         title: String? = null,
+        id: String? = null,
         season: Int? = null,
         episode: Int? = null,
-        year: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
@@ -1423,44 +1424,44 @@ object CineStreamExtractors : CineStreamProvider() {
                 ?.attr("href")
         }
 
-        val url = "$MovieDrive_API/search/$title $year"
+        val url = "$MovieDrive_API/search/$title"
         val res = app.get(url, interceptor = wpRedisInterceptor).document
-        val match = res.select("li.thumb > figcaption > a").firstOrNull { a ->
-            val text = a.text()
-            text.contains(title.toString(), ignoreCase = true)
-        }?.attr("href") ?: return
-
-        val document = app.get(match).document
-        if (season == null) {
-            document.select("h5 > a").amap {
-                val href = it.attr("href")
-                val server = extractMdrive(href)
-                server.amap {
-                    loadSourceNameExtractor("MoviesDrive",it, "", subtitleCallback, callback)
+        res.select("li.thumb > figcaption > a").amap {
+            val href = it.attr("href")
+            val document = app.get(match).document
+            val imdbUrl = document.select("a:contains(IMDb)").attr("href")
+            if(!imdbUrl.contains("$id")) return@amap
+            if (season == null) {
+                document.select("h5 > a").amap {
+                    val href = it.attr("href")
+                    val server = extractMdrive(href)
+                    server.amap {
+                        loadSourceNameExtractor("MoviesDrive",it, "", subtitleCallback, callback)
+                    }
                 }
-            }
-        } else {
-            val stag = "Season $season|S0$season"
-            val sep = "Ep0$episode|Ep$episode"
-            val entries = document.select("h5:matches((?i)$stag)")
-            entries.amap { entry ->
-                val href = entry.nextElementSibling()?.selectFirst("a")?.attr("href") ?: ""
-                if (href.isNotBlank()) {
-                    val doc = app.get(href).document
-                    val fEp = doc.selectFirst("h5:matches((?i)$sep)")
-                    val linklist = mutableListOf<String>()
-                    val source1 = fEp?.nextElementSibling()?.selectFirst("a")?.attr("href")
-                    val source2 = fEp?.nextElementSibling()?.nextElementSibling()?.selectFirst("a")?.attr("href")
-                    if (source1 != null) linklist.add(source1)
-                    if (source2 != null) linklist.add(source2)
-                    linklist.forEach { url ->
-                        loadSourceNameExtractor(
-                            "MoviesDrive",
-                            url,
-                            referer = "",
-                            subtitleCallback,
-                            callback
-                        )
+            } else {
+                val stag = "Season $season|S0$season"
+                val sep = "Ep0$episode|Ep$episode"
+                val entries = document.select("h5:matches((?i)$stag)")
+                entries.amap { entry ->
+                    val href = entry.nextElementSibling()?.selectFirst("a")?.attr("href") ?: ""
+                    if (href.isNotBlank()) {
+                        val doc = app.get(href).document
+                        val fEp = doc.selectFirst("h5:matches((?i)$sep)")
+                        val linklist = mutableListOf<String>()
+                        val source1 = fEp?.nextElementSibling()?.selectFirst("a")?.attr("href")
+                        val source2 = fEp?.nextElementSibling()?.nextElementSibling()?.selectFirst("a")?.attr("href")
+                        if (source1 != null) linklist.add(source1)
+                        if (source2 != null) linklist.add(source2)
+                        linklist.amap { url ->
+                            loadSourceNameExtractor(
+                                "MoviesDrive",
+                                url,
+                                referer = "",
+                                subtitleCallback,
+                                callback
+                            )
+                        }
                     }
                 }
             }
