@@ -1444,10 +1444,24 @@ object CineStreamExtractors : CineStreamProvider() {
             val document = app.get(it.attr("href")).document
             val imdbUrl = document.select("a:contains(IMDb)").attr("href")
             if(!imdbUrl.contains("$id")) return@amap
+            callback.invoke(
+                newExtractorLink(
+                    "imdbUrl",
+                    "imdbUrl",
+                    imdbUrl,
+                )
+            )
             if (season == null) {
                 document.select("h5 > a").amap {
                     val href = it.attr("href")
                     val server = extractMdrive(href)
+                    callback.invoke(
+                        newExtractorLink(
+                            "server",
+                            "server",
+                            server.toString(),
+                        )
+                    )
                     server.amap {
                         loadSourceNameExtractor("MoviesDrive",it, "", subtitleCallback, callback)
                     }
@@ -1458,6 +1472,13 @@ object CineStreamExtractors : CineStreamProvider() {
                 val entries = document.select("h5:matches((?i)$stag)")
                 entries.amap { entry ->
                     val href = entry.nextElementSibling()?.selectFirst("a")?.attr("href") ?: ""
+                    callback.invoke(
+                        newExtractorLink(
+                            "season href",
+                            "season href",
+                            href,
+                        )
+                    )
                     if (href.isNotBlank()) {
                         val doc = app.get(href).document
                         val fEp = doc.selectFirst("h5:matches((?i)$sep)")
@@ -1466,6 +1487,13 @@ object CineStreamExtractors : CineStreamProvider() {
                         val source2 = fEp?.nextElementSibling()?.nextElementSibling()?.selectFirst("a")?.attr("href")
                         if (source1 != null) linklist.add(source1)
                         if (source2 != null) linklist.add(source2)
+                        callback.invoke(
+                            newExtractorLink(
+                                "linklist",
+                                "linklist",
+                                linklist.toString(),
+                            )
+                        )
                         linklist.amap { url ->
                             loadSourceNameExtractor(
                                 "MoviesDrive",
