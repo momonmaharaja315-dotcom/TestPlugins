@@ -1428,7 +1428,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val res = app.get(url, interceptor = wpRedisInterceptor).document
         res.select("li.thumb > figcaption > a").amap {
             val href = it.attr("href")
-            val document = app.get(match).document
+            val document = app.get(href).document
             val imdbUrl = document.select("a:contains(IMDb)").attr("href")
             if(!imdbUrl.contains("$id")) return@amap
             if (season == null) {
