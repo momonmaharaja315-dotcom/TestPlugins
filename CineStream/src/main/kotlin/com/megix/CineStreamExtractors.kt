@@ -597,11 +597,32 @@ object CineStreamExtractors : CineStreamProvider() {
         )
         val url = "$protonmoviesAPI/search/$id/"
         val text = app.get(url, headers = headers).text
+        callback.invoke(
+            newExtractorLink(
+                "text",
+                "text",
+                text
+            )
+        )
         val regex = Regex("""\[(?=.*?\"<div class\")(.*?)\]""")
         val htmlArray = regex.findAll(text).map { it.value }.toList()
         if (htmlArray.isNotEmpty()) {
             val lastJsonArray = JSONArray(htmlArray.last())
+            callback.invoke(
+                newExtractorLink(
+                    "lastJsonArray",
+                    "lastJsonArray",
+                    lastJsonArray.toString()
+                )
+            )
             val html = decodeHtml(Array(lastJsonArray.length()) { i -> lastJsonArray.getString(i) })
+            callback.invoke(
+                newExtractorLink(
+                    "html",
+                    "html",
+                    html.toString()
+                )
+            )
             val doc = Jsoup.parse(html)
             val link = doc.select(".col.mb-4 h5 a").attr("href")
 
@@ -1439,50 +1460,15 @@ object CineStreamExtractors : CineStreamProvider() {
         }
 
         val url = "$MovieDrive_API/search/$title"
-        callback.invoke(
-            newExtractorLink(
-                "url",
-                "url",
-                url,
-            )
-        )
         val res = app.get(url, interceptor = wpRedisInterceptor).document
         res.select("li.thumb > figcaption > a").amap {
-            callback.invoke(
-                newExtractorLink(
-                    "href",
-                    "href",
-                    it.attr("href"),
-                )
-            )
             val document = app.get(it.attr("href"), interceptor = wpRedisInterceptor).document
             val imdbId =  document.select("a[href*=\"imdb\"]").attr("href").substringAfter("title/").substringBefore("/")
-            callback.invoke(
-                newExtractorLink(
-                    "imdbId",
-                    "imdbId",
-                    imdbId,
-                )
-            )
             if(imdbId == id.orEmpty()) {
-                callback.invoke(
-                    newExtractorLink(
-                        "imdbId",
-                        "imdbId",
-                        imdbId,
-                    )
-                )
                 if (season == null) {
                     document.select("h5 > a").amap {
                         val href = it.attr("href")
                         val server = extractMdrive(href)
-                        callback.invoke(
-                            newExtractorLink(
-                                "server",
-                                "server",
-                                server.toString(),
-                            )
-                        )
                         server.amap {
                             loadSourceNameExtractor("MoviesDrive",it, "", subtitleCallback, callback)
                         }
@@ -1493,13 +1479,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     val entries = document.select("h5:matches((?i)$stag)")
                     entries.amap { entry ->
                         val href = entry.nextElementSibling()?.selectFirst("a")?.attr("href") ?: ""
-                        callback.invoke(
-                            newExtractorLink(
-                                "season href",
-                                "season href",
-                                href,
-                            )
-                        )
+
                         if (href.isNotBlank()) {
                             val doc = app.get(href).document
                             val fEp = doc.selectFirst("h5:matches((?i)$sep)")
@@ -1508,13 +1488,7 @@ object CineStreamExtractors : CineStreamProvider() {
                             val source2 = fEp?.nextElementSibling()?.nextElementSibling()?.selectFirst("a")?.attr("href")
                             if (source1 != null) linklist.add(source1)
                             if (source2 != null) linklist.add(source2)
-                            callback.invoke(
-                                newExtractorLink(
-                                    "linklist",
-                                    "linklist",
-                                    linklist.toString(),
-                                )
-                            )
+
                             linklist.amap { url ->
                                 loadSourceNameExtractor(
                                     "MoviesDrive",
