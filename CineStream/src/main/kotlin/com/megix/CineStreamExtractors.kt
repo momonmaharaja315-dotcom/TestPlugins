@@ -39,8 +39,8 @@ object CineStreamExtractors : CineStreamProvider() {
             "sec-fetch-dest" to "iframe"
         )
 
-        val slug = if (mediaType == "tv") {
-            "embedtv/$id&s=$s&e=$e"
+        val slug = if (season != null) {
+            "embedtv/$id&s=$season&e=$episode"
             } else {
             "embed/$id"
         }
@@ -53,7 +53,7 @@ object CineStreamExtractors : CineStreamProvider() {
 
         if(start < 0) return
 
-        tart += sKey.length
+        start += sKey.length
 
         val eKey = "'"
         var end = text.indexOf(eKey, start)
