@@ -592,7 +592,6 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         val headers = mapOf(
-            "User-Agent" to USER_AGENT,
             "Referer" to protonmoviesAPI
         )
         val url = "$protonmoviesAPI/search/$id/"
@@ -608,32 +607,9 @@ object CineStreamExtractors : CineStreamProvider() {
         val htmlArray = regex.findAll(text).map { it.value }.toList()
         if (htmlArray.isNotEmpty()) {
             val lastJsonArray = JSONArray(htmlArray.last())
-            callback.invoke(
-                newExtractorLink(
-                    "lastJsonArray",
-                    "lastJsonArray",
-                    lastJsonArray.toString()
-                )
-            )
             val html = decodeHtml(Array(lastJsonArray.length()) { i -> lastJsonArray.getString(i) })
-            callback.invoke(
-                newExtractorLink(
-                    "html",
-                    "html",
-                    html.toString()
-                )
-            )
             val doc = Jsoup.parse(html)
             val link = doc.select(".col.mb-4 h5 a").attr("href")
-
-            callback.invoke(
-                newExtractorLink(
-                    "link",
-                    "link",
-                    link
-                )
-            )
-
             val document = app.get("${protonmoviesAPI}${link}", headers = headers).document
             val decodedDoc = decodeMeta(document)
             if (decodedDoc != null) {
@@ -643,13 +619,6 @@ object CineStreamExtractors : CineStreamProvider() {
                     val episodeDiv = decodedDoc.select("div.episode-block:has(div.episode-number:matchesOwn(S${season}E${episode}))").firstOrNull()
                     episodeDiv?.selectFirst("a")?.attr("href")?.let {
                         val source = protonmoviesAPI + it
-                        callback.invoke(
-                            newExtractorLink(
-                                "source",
-                                "source",
-                                source
-                            )
-                        )
                         val doc2 = app.get(source, headers = headers).document
                         runAllAsync(
                             {
