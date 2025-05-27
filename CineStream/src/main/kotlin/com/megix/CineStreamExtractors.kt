@@ -605,6 +605,14 @@ object CineStreamExtractors : CineStreamProvider() {
             val doc = Jsoup.parse(html)
             val link = doc.select(".col.mb-4 h5 a").attr("href")
 
+            callback.invoke(
+                newExtractorLink(
+                    "link",
+                    "link",
+                    link
+                )
+            )
+
             val document = app.get("${protonmoviesAPI}${link}", headers = headers).document
             val decodedDoc = decodeMeta(document)
             if (decodedDoc != null) {
@@ -614,7 +622,13 @@ object CineStreamExtractors : CineStreamProvider() {
                     val episodeDiv = decodedDoc.select("div.episode-block:has(div.episode-number:matchesOwn(S${season}E${episode}))").firstOrNull()
                     episodeDiv?.selectFirst("a")?.attr("href")?.let {
                         val source = protonmoviesAPI + it
-
+                        callback.invoke(
+                            newExtractorLink(
+                                "source",
+                                "source",
+                                source
+                            )
+                        )
                         val doc2 = app.get(source, headers = headers).document
                         runAllAsync(
                             {
@@ -1441,9 +1455,9 @@ object CineStreamExtractors : CineStreamProvider() {
                     it.attr("href"),
                 )
             )
-            val document = app.get(it.attr("href")).document
-            val imdbUrl = document.select("a:contains(IMDb)").attr("href")
-            if(imdbUrl.contains("$id")) {
+            val document = app.get(it.attr("href"), interceptor = wpRedisInterceptor).document
+            val imdbId = document.select("a:contains(IMDb)").attr("href").substringAfter("title/").substringBefore("/")
+            if(imdbId == id.orEmpty()) {
                 callback.invoke(
                     newExtractorLink(
                         "imdbUrl",
