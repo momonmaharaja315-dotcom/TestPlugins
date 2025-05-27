@@ -23,9 +23,76 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import java.net.URI
+import com.lagradost.cloudstream3.utils.JsUnpacker
 import com.lagradost.cloudstream3.USER_AGENT
 
 object CineStreamExtractors : CineStreamProvider() {
+
+    suspend fun invoke2embed(
+        id: String? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val headers = mapOf(
+            "Referer" to "https://2embed.cc",
+            "sec-fetch-dest" to "iframe"
+        )
+
+        val slug = if (mediaType == "tv") {
+            "embedtv/$id&s=$s&e=$e"
+            } else {
+            "embed/$id"
+        }
+
+        val api = "https://2embed.cc/$slug"
+
+        val text = app.get(api, headers = headers).text
+        var sKey = "swish?id="
+        var start = text.indexOf(sKey)
+
+        if(start < 0) return
+
+        tart += sKey.length
+
+        val eKey = "'"
+        var end = text.indexOf(eKey, start)
+        val strmId = text.substring(start, end)
+
+        val uplUrl = "https://uqloads.xyz/e/$strmId"
+
+        val res = app.get(uplUrl, headers = headers).text
+
+        sKey = "eval(function"
+        start = res.indexOf(sKey)
+
+        if(start < 0) return
+
+        val eKey2 = "split('|')))"
+        end = res.indexOf(eKey2, start) + eKey2.length
+        val data = res.substring(start, end)
+
+        val strmData = JsUnpacker(data).unpack() ?: return
+
+        sKey = "\"hls2\":\""
+        start = strmData.indexOf(sKey)
+
+        if(start < 0) return
+
+        start += sKey.length
+        end = strmData.indexOf("\"}", start)
+        val streamUrl = strmData.substring(start, end)
+
+        callback.invoke(
+            newExtractorLink(
+                "2Embed",
+                "2Embed",
+                streamUrl
+            ) {
+                this.headers = headers
+            }
+        )
+    }
 
     suspend fun invokeAsiaflix(
         title: String? = null,
@@ -254,7 +321,10 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
+        if(netflixAPI.isEmpty()) return
+
         NfCookie = NFBypass(netflixAPI)
+
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
             "ott" to "pv",
@@ -327,7 +397,10 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
+        if(netflixAPI.isEmpty()) return
+
         NfCookie = NFBypass(netflixAPI)
+
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
             "hd" to "on"
@@ -742,24 +815,10 @@ object CineStreamExtractors : CineStreamProvider() {
         val query = "$title $year"
         val url = app.get("$cinemaluxeAPI/?s=$query").document
             .select("div.title > a:contains($query)").attr("href")
-        callback.invoke(
-            newExtractorLink(
-                "url",
-                "url",
-                url,
-            )
-        )
         val document = app.get(url).document
 
         if(season == null) {
             document.select("div.wp-content div.ep-button-container > a").amap {
-                callback.invoke(
-                    newExtractorLink(
-                        "href",
-                        "href",
-                        it.attr("href"),
-                    )
-                )
                 loadSourceNameExtractor(
                     "Cinemaluxe",
                     it.attr("href"),
@@ -772,34 +831,12 @@ object CineStreamExtractors : CineStreamProvider() {
         else {
             document.select("div.wp-content div.ep-button-container").amap { div ->
                 val text = div.toString()
-                callback.invoke(
-                    newExtractorLink(
-                        "text",
-                        "text",
-                        text,
-                    )
-                )
                 if(text.contains("Season $season", ignoreCase = true) ||
                     text.contains("Season 0$season", ignoreCase = true)
                 ) {
                     val link = div.select("a").attr("href")
-                    callback.invoke(
-                        newExtractorLink(
-                            "link",
-                            "link",
-                            link,
-                        )
-                    )
 
                     app.get(link).document.select("""div.ep-button-container > a:matches((?i)(?:episode\s*[-]?\s*)(0?$episode\b))""").amap {
-                        callback.invoke(
-                            newExtractorLink(
-                                "href",
-                                "href",
-                                it.attr("href"),
-                            )
-                        )
-
                         loadSourceNameExtractor(
                             "Cinemaluxe",
                             it.attr("href"),

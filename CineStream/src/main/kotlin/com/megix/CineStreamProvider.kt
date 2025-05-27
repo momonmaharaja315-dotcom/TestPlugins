@@ -56,6 +56,7 @@ import com.megix.CineStreamExtractors.invokeVidJoy
 import com.megix.CineStreamExtractors.invokeMovies4u
 import com.megix.CineStreamExtractors.invokeSoaper
 import com.megix.CineStreamExtractors.invokeAsiaflix
+import com.megix.CineStreamExtractors.invoke2embed
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -86,7 +87,6 @@ open class CineStreamProvider : MainAPI() {
         const val allmovielandAPI = "https://allmovieland.fun"
         const val torrentioAPI = "https://torrentio.strem.fun"
         const val anizoneAPI = "https://anizone.to"
-        const val netflixAPI = "https://netfree2.cc"
         const val AllanimeAPI = "https://api.allanime.day/api"
         const val StreamAsiaAPI = "https://stremio-dramacool-addon.xyz"
         const val TRACKER_LIST_URL = "https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_all_ip.txt"
@@ -114,6 +114,7 @@ open class CineStreamProvider : MainAPI() {
         var hdmoviesflixAPI = ""
         var hdmovie2API = ""
         var jaduMoviesAPI = ""
+        var netflixAPI = ""
 
         private var loaded = false
 
@@ -647,6 +648,7 @@ open class CineStreamProvider : MainAPI() {
                 invokeAnimes(malId, aniId, res.episode, seasonYear, "imdb", subtitleCallback, callback)
             }},
             { invokePrimeWire(res.id, res.season, res.episode, subtitleCallback, callback) },
+            { invoke2embed(res.id, res.season, res.episode, callback) },
             { invokeSoaper(res.id, res.tmdbId, res.title, res.season, res.episode, subtitleCallback, callback) },
             { invokeTom(res.tmdbId, res.season, res.episode, callback, subtitleCallback) },
             { invokePlayer4U(res.title, res.season, res.episode, seasonYear, callback) },

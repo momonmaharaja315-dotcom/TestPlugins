@@ -519,14 +519,6 @@ suspend fun gofileExtractor(
         "Origin" to mainUrl,
         "Referer" to mainUrl,
     )
-
-    callback.invoke(
-        newExtractorLink(
-            "gofile",
-            "gofile",
-            url,
-        )
-    )
     //val res = app.get(url)
     val id = Regex("/(?:\\?c=|d/)([\\da-zA-Z-]+)").find(url)?.groupValues?.get(1) ?: return
     val genAccountRes = app.post("$mainApi/accounts", headers = headers).text
