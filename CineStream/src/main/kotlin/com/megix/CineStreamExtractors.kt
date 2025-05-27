@@ -1460,9 +1460,9 @@ object CineStreamExtractors : CineStreamProvider() {
             if(imdbId == id.orEmpty()) {
                 callback.invoke(
                     newExtractorLink(
-                        "imdbUrl",
-                        "imdbUrl",
-                        imdbUrl,
+                        "imdbId",
+                        "imdbId",
+                        imdbId,
                     )
                 )
                 if (season == null) {
