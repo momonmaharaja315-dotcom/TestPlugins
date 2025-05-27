@@ -592,10 +592,11 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         val headers = mapOf(
+            "User-Agent" to USER_AGENT,
             "Referer" to protonmoviesAPI
         )
         val url = "$protonmoviesAPI/search/$id/"
-        val text = app.get(url, headers = headers).text
+        val text = app.get(url, headers = headers, interceptor = wpRedisInterceptor).text
         callback.invoke(
             newExtractorLink(
                 "text",
@@ -610,7 +611,7 @@ object CineStreamExtractors : CineStreamProvider() {
             val html = decodeHtml(Array(lastJsonArray.length()) { i -> lastJsonArray.getString(i) })
             val doc = Jsoup.parse(html)
             val link = doc.select(".col.mb-4 h5 a").attr("href")
-            val document = app.get("${protonmoviesAPI}${link}", headers = headers).document
+            val document = app.get("${protonmoviesAPI}${link}", headers = headers, interceptor = wpRedisInterceptor).document
             val decodedDoc = decodeMeta(document)
             if (decodedDoc != null) {
                 if(episode == null) {
@@ -1217,10 +1218,25 @@ object CineStreamExtractors : CineStreamProvider() {
             content.contains((year?.toString() ?: "").lowercase())
         }?.attr("href") ?: return
 
+        callback.invoke(
+            newExtractorLink(
+               "link",
+               "link",
+               "$fourkhdhubAPI$link",
+            )
+        )
+
         val doc = app.get("$fourkhdhubAPI$link").document
         if(season == null) {
             doc.select("div.download-item a").amap {
                val source = it.attr("href")
+               callback.invoke(
+                    newExtractorLink(
+                        "source",
+                        "source",
+                        source,
+                    )
+                )
                loadSourceNameExtractor(
                     "4Khdhub",
                     source,
@@ -1235,6 +1251,13 @@ object CineStreamExtractors : CineStreamProvider() {
             doc.select("div.episode-download-item:has(div.episode-file-title:contains(${seasonText}${episodeText}))").amap {
                 it.select("div.episode-links > a").amap {
                     val source = it.attr("href")
+                    callback.invoke(
+                        newExtractorLink(
+                            "source",
+                            "source",
+                            source,
+                        )
+                    )
                     loadSourceNameExtractor(
                         "4Khdhub",
                         source,
