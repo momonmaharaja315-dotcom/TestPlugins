@@ -693,7 +693,13 @@ suspend fun getProtonStream(
 ) {
     doc.select("tr.infotr").amap { tr ->
         val id = tr.select("button:contains(Info)").attr("id").split("-").getOrNull(1)
-
+        callback.invoke(
+            newExtractorLink(
+                "id",
+                "id",
+                id ?: "id",
+            )
+        )
         if(id != null) {
             val uid = "uid_${System.currentTimeMillis()}_${
                 (Random.nextDouble() * 36.0.pow(9))
