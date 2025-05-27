@@ -1457,6 +1457,13 @@ object CineStreamExtractors : CineStreamProvider() {
             )
             val document = app.get(it.attr("href"), interceptor = wpRedisInterceptor).document
             val imdbId = document.select("a:contains(IMDb)").attr("href").substringAfter("title/").substringBefore("/")
+            callback.invoke(
+                newExtractorLink(
+                    "imdbId",
+                    "imdbId",
+                    imdbId,
+                )
+            )
             if(imdbId == id.orEmpty()) {
                 callback.invoke(
                     newExtractorLink(
