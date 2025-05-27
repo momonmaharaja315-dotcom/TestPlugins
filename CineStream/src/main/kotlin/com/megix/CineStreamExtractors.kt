@@ -591,6 +591,13 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
+        callback.invoke(
+            newExtractorLink(
+               "protonmoviesAPI",
+               "protonmoviesAPI",
+                protonmoviesAPI,
+            )
+        )
         val headers = mapOf(
             "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
             "Referer" to "$protonmoviesAPI/"
@@ -1207,6 +1214,14 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
+        callback.invoke(
+            newExtractorLink(
+               "fourkhdhubAPI",
+               "fourkhdhubAPI",
+                fourkhdhubAPI,
+            )
+        )
+
         val document = app.get("$fourkhdhubAPI/?s=$title").document
 
         callback.invoke(
