@@ -593,7 +593,7 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val headers = mapOf(
             "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
-            "Referer" to "protonmoviesAPI/"
+            "Referer" to "$protonmoviesAPI/"
         )
         val url = "$protonmoviesAPI/search/$id/"
         val text = app.get(url, headers = headers).text
@@ -1207,12 +1207,18 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        if (title.isNullOrBlank()) return
+        val document = app.get("$fourkhdhubAPI/?s=$title").document
 
-        val link = app.get("$fourkhdhubAPI/?s=$title").document
-            .selectFirst("div.card-grid > a:has(div.movie-card-content:contains(${year ?: ""}))")
+        callback.invoke(
+            newExtractorLink(
+               "document",
+               "document",
+                document.toString(),
+            )
+        )
+
+        val link = document.selectFirst("div.card-grid > a:has(div.movie-card-content:contains(${year ?: ""}))")
             ?.attr("href") ?: return
-
         callback.invoke(
             newExtractorLink(
                "link",
