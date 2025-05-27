@@ -592,11 +592,11 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         val headers = mapOf(
-            "User-Agent" to USER_AGENT,
-            "Referer" to protonmoviesAPI
+            "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+            "Referer" to "protonmoviesAPI/"
         )
         val url = "$protonmoviesAPI/search/$id/"
-        val text = app.get(url, headers = headers, interceptor = wpRedisInterceptor).text
+        val text = app.get(url, headers = headers).text
         callback.invoke(
             newExtractorLink(
                 "text",
@@ -611,7 +611,7 @@ object CineStreamExtractors : CineStreamProvider() {
             val html = decodeHtml(Array(lastJsonArray.length()) { i -> lastJsonArray.getString(i) })
             val doc = Jsoup.parse(html)
             val link = doc.select(".col.mb-4 h5 a").attr("href")
-            val document = app.get("${protonmoviesAPI}${link}", headers = headers, interceptor = wpRedisInterceptor).document
+            val document = app.get("${protonmoviesAPI}${link}", headers = headers).document
             val decodedDoc = decodeMeta(document)
             if (decodedDoc != null) {
                 if(episode == null) {
@@ -1209,14 +1209,9 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         if (title.isNullOrBlank()) return
 
-        val elements = app.get("$fourkhdhubAPI/?s=$title").document
-            .select("div.card-grid > a:has(div.movie-card-content)")
-
-        val link = elements.firstOrNull { element ->
-            val content = element.selectFirst("div.movie-card-content")?.text()?.lowercase() ?: ""
-            content.contains(title.lowercase()) &&
-            content.contains((year?.toString() ?: "").lowercase())
-        }?.attr("href") ?: return
+        val link = app.get("$fourkhdhubAPI/?s=$title").document
+            .selectFirst("div.card-grid > a:has(div.movie-card-content:contains(${year ?: ""}))")
+            ?.attr("href") ?: return
 
         callback.invoke(
             newExtractorLink(
