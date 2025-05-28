@@ -41,9 +41,29 @@ object CineStreamExtractors : CineStreamProvider() {
             "Origin" to xprimeBaseAPI,
         )
 
-        val url = "$xprimeAPI/primebox?name=$title&fallback_year=$year"
+        val url = if(season == null) {
+            "$xprimeAPI/primebox?name=$title&fallback_year=$year"
+        } else {
+            "$xprimeAPI/primebox?name=$title&fallback_year=$year&season=$season&episode=$episode"
+        }
         val json = app.get(url).text
+
+        callback.invoke(
+            newExtractorLink(
+                "json",
+                "json",
+                json,
+            )
+        )
         val data = tryParseJson<Primebox>(json) ?: return
+
+        callback.invoke(
+            newExtractorLink(
+                "data",
+                "data",
+                data.toString(),
+            )
+        )
 
         data.streams?.let { streams ->
             listOf(
