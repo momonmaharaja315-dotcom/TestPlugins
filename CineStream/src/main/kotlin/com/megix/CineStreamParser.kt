@@ -5,23 +5,23 @@ import com.google.gson.annotations.SerializedName
 
 //Primebox
 data class Primebox(
-    @SerializedName("available_qualities") val availableQualities: List<String> = emptyList(),
-    @SerializedName("has_subtitles") val hasSubtitles: Boolean = false,
-    @SerializedName("status") val status: String? = null,
-    @SerializedName("streams") val streams: PrimeboxStreams? = null,
-    @SerializedName("subtitles") val subtitles: List<PrimeboxSubtitles> = emptyList(),
-    @SerializedName("title") val title: String? = null
+    @JsonProperty("available_qualities") val availableQualities: List<String> = emptyList(),
+    @JsonProperty("has_subtitles") val hasSubtitles: Boolean = false,
+    @JsonProperty("status") val status: String? = null,
+    @JsonProperty("streams") val streams: PrimeboxStreams? = null,
+    @JsonProperty("subtitles") val subtitles: List<PrimeboxSubtitles> = emptyList(),
+    @JsonProperty("title") val title: String? = null
 )
 
 data class PrimeboxStreams(
-    @SerializedName("360P") val quality360P: String? = null,
-    @SerializedName("720P") val quality720P: String? = null,
-    @SerializedName("1080P") val quality1080P: String? = null
+    @JsonProperty("360P") val quality360P: String? = null,
+    @JsonProperty("720P") val quality720P: String? = null,
+    @JsonProperty("1080P") val quality1080P: String? = null
 )
 
 data class PrimeboxSubtitles(
-    @SerializedName("file") val file: String? = null,
-    @SerializedName("label") val label: String? = null
+    @JsonProperty("file") val file: String? = null,
+    @JsonProperty("label") val label: String? = null
 )
 
 //Allmovieland
