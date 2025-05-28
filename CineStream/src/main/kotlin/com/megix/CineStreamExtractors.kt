@@ -29,7 +29,7 @@ import com.lagradost.cloudstream3.USER_AGENT
 object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun invokePrimebox(
-        title: String?= null,
+        title: String? = null,
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
@@ -40,27 +40,24 @@ object CineStreamExtractors : CineStreamProvider() {
             "Referer" to xprimeBaseAPI,
             "Origin" to xprimeBaseAPI,
         )
-        val url = if(season == null) {
-            "$xprimeAPI/primebox?name=$title&fallback_year=$year"
-        } else {
-            "$xprimeAPI/primebox?name==$title&fallback_year=$year&season=$season&episode=$episode"
-        }
+
+        val url = "$xprimeAPI/primebox?name=$title&fallback_year=$year"
         val json = app.get(url).text
-        val data = tryParseJson<PrimeBox>(json) ?: return
+        val data = tryParseJson<Primebox>(json) ?: return
 
         data.streams?.let { streams ->
             listOf(
-                360 to streams.`360P`,
-                720 to streams.`720P`,
-                1080 to streams.`1080P`
-        ).forEach { (quality, link) ->
+                360 to streams.quality360P,
+                720 to streams.quality720P,
+                1080 to streams.quality1080P
+            ).forEach { (quality, link) ->
                 if (!link.isNullOrBlank()) {
                     callback.invoke(
                         newExtractorLink(
                             "PrimeBox",
                             "PrimeBox",
                             link,
-                            this.type = ExtractorLinkType.VIDEO,
+                            type = ExtractorLinkType.VIDEO,
                         ) {
                             this.quality = quality
                             this.headers = headers
@@ -70,13 +67,15 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
 
-        if (data.hasSubtitles == true && data.subtitles.isNotEmpty()) {
+        if (data.hasSubtitles && data.subtitles.isNotEmpty()) {
             data.subtitles.forEach { sub ->
-                if (!sub.file.isNullOrBlank() && !sub.label.isNullOrBlank()) {
+                val file = sub.file
+                val label = sub.label
+                if (!file.isNullOrBlank() && !label.isNullOrBlank()) {
                     subtitleCallback.invoke(
                         SubtitleFile(
-                            sub.label,
-                            sub.file,
+                            label,
+                            file
                         )
                     )
                 }

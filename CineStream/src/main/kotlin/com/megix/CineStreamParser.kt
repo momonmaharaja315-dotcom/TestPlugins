@@ -4,24 +4,24 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.gson.annotations.SerializedName
 
 //Primebox
-data class Primebox (
-  @SerializedName("available_qualities" ) var availableQualities : ArrayList<String>    = arrayListOf(),
-  @SerializedName("has_subtitles"       ) var hasSubtitles       : Boolean?             = null,
-  @SerializedName("status"              ) var status             : String?              = null,
-  @SerializedName("streams"             ) var streams            : PrimeboxStreams?     = PrimeboxStreams(),
-  @SerializedName("subtitles"           ) var subtitles          : ArrayList<PrimeboxSubtitles> = arrayListOf(),
-  @SerializedName("title"               ) var title              : String?              = null
+data class Primebox(
+    @SerializedName("available_qualities") val availableQualities: List<String> = emptyList(),
+    @SerializedName("has_subtitles") val hasSubtitles: Boolean = false,
+    @SerializedName("status") val status: String? = null,
+    @SerializedName("streams") val streams: PrimeboxStreams? = null,
+    @SerializedName("subtitles") val subtitles: List<PrimeboxSubtitles> = emptyList(),
+    @SerializedName("title") val title: String? = null
 )
 
-data class PrimeboxStreams (
-  @SerializedName("360P" ) var 360P : String? = null,
-  @SerializedName("720P" ) var 720P : String? = null,
-  @SerializedName("1080P") var 1080P: String? = null
+data class PrimeboxStreams(
+    @SerializedName("360P") val quality360P: String? = null,
+    @SerializedName("720P") val quality720P: String? = null,
+    @SerializedName("1080P") val quality1080P: String? = null
 )
 
-data class PrimeboxSubtitles (
-  @SerializedName("file"  ) var file  : String? = null,
-  @SerializedName("label" ) var label : String? = null
+data class PrimeboxSubtitles(
+    @SerializedName("file") val file: String? = null,
+    @SerializedName("label") val label: String? = null
 )
 
 //Allmovieland
