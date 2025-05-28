@@ -28,6 +28,62 @@ import com.lagradost.cloudstream3.USER_AGENT
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend fun invokePrimebox(
+        title: String?= null,
+        year: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val headers = mapOf(
+            "Referer" to xprimeBaseAPI,
+            "Origin" to xprimeBaseAPI,
+        )
+        val url = if(season == null) {
+            "$xprimeAPI/primebox?name=$title&fallback_year=$year"
+        } else {
+            "$xprimeAPI/primebox?name==$title&fallback_year=$year&season=$season&episode=$episode"
+        }
+        val json = app.get(url).text
+        val data = tryParseJson<PrimeBox>(json) ?: return
+
+        data.streams?.let { streams ->
+            listOf(
+                360 to streams.`360P`,
+                720 to streams.`720P`,
+                1080 to streams.`1080P`
+        ).forEach { (quality, link) ->
+                if (!link.isNullOrBlank()) {
+                    callback.invoke(
+                        newExtractorLink(
+                            "PrimeBox",
+                            "PrimeBox",
+                            link,
+                            this.type = ExtractorLinkType.VIDEO,
+                        ) {
+                            this.quality = quality
+                            this.headers = headers
+                        }
+                    )
+                }
+            }
+        }
+
+        if (data.hasSubtitles == true && data.subtitles.isNotEmpty()) {
+            data.subtitles.forEach { sub ->
+                if (!sub.file.isNullOrBlank() && !sub.label.isNullOrBlank()) {
+                    subtitleCallback.invoke(
+                        SubtitleFile(
+                            sub.label,
+                            sub.file,
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     suspend fun invoke2embed(
         id: String? = null,
         season: Int? = null,
@@ -591,26 +647,12 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        callback.invoke(
-            newExtractorLink(
-               "protonmoviesAPI",
-               "protonmoviesAPI",
-                protonmoviesAPI,
-            )
-        )
         val headers = mapOf(
-            "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+            "User-Agent" to USER_AGENT,
             "Referer" to "$protonmoviesAPI/"
         )
         val url = "$protonmoviesAPI/search/$id/"
         val text = app.get(url, headers = headers).text
-        callback.invoke(
-            newExtractorLink(
-                "text",
-                "text",
-                text
-            )
-        )
         val regex = Regex("""\[(?=.*?\"<div class\")(.*?)\]""")
         val htmlArray = regex.findAll(text).map { it.value }.toList()
         if (htmlArray.isNotEmpty()) {
@@ -832,9 +874,10 @@ object CineStreamExtractors : CineStreamProvider() {
 
         if(season == null) {
             document.select("div.wp-content div.ep-button-container > a").amap {
+                val link = cinemaluxeBypass(it.attr("href"))
                 loadSourceNameExtractor(
                     "Cinemaluxe",
-                    it.attr("href"),
+                    link,
                     "",
                     subtitleCallback,
                     callback,
@@ -847,7 +890,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 if(text.contains("Season $season", ignoreCase = true) ||
                     text.contains("Season 0$season", ignoreCase = true)
                 ) {
-                    val link = div.select("a").attr("href")
+                    val link = cinemaluxeBypass(div.select("a").attr("href"))
 
                     app.get(link).document.select("""div.ep-button-container > a:matches((?i)(?:episode\s*[-]?\s*)(0?$episode\b))""").amap {
                         loadSourceNameExtractor(
@@ -1214,45 +1257,13 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        callback.invoke(
-            newExtractorLink(
-               "fourkhdhubAPI",
-               "fourkhdhubAPI",
-                fourkhdhubAPI,
-            )
-        )
-
         val document = app.get("$fourkhdhubAPI/?s=$title").document
-
-        callback.invoke(
-            newExtractorLink(
-               "document",
-               "document",
-                document.toString(),
-            )
-        )
-
         val link = document.selectFirst("div.card-grid > a:has(div.movie-card-content:contains(${year ?: ""}))")
             ?.attr("href") ?: return
-        callback.invoke(
-            newExtractorLink(
-               "link",
-               "link",
-               "$fourkhdhubAPI$link",
-            )
-        )
-
         val doc = app.get("$fourkhdhubAPI$link").document
         if(season == null) {
             doc.select("div.download-item a").amap {
                val source = it.attr("href")
-               callback.invoke(
-                    newExtractorLink(
-                        "source",
-                        "source",
-                        source,
-                    )
-                )
                loadSourceNameExtractor(
                     "4Khdhub",
                     source,
@@ -1267,13 +1278,6 @@ object CineStreamExtractors : CineStreamProvider() {
             doc.select("div.episode-download-item:has(div.episode-file-title:contains(${seasonText}${episodeText}))").amap {
                 it.select("div.episode-links > a").amap {
                     val source = it.attr("href")
-                    callback.invoke(
-                        newExtractorLink(
-                            "source",
-                            "source",
-                            source,
-                        )
-                    )
                     loadSourceNameExtractor(
                         "4Khdhub",
                         source,
