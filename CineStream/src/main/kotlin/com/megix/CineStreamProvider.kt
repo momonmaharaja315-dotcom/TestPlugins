@@ -68,6 +68,11 @@ open class CineStreamProvider : MainAPI(private val context: Context) {
     override var lang = "en"
     override val hasDownloadSupport = true
     private val skipMap: MutableMap<String, Int> = mutableMapOf()
+    private lateinit var context: Context
+
+    fun setContext(ctx: Context) {
+        context = ctx
+    }
     val cinemeta_url = "https://v3-cinemeta.strem.io"
     val kitsu_url = "https://anime-kitsu.strem.fun"
     val haglund_url = "https://arm.haglund.dev/api/v2"
