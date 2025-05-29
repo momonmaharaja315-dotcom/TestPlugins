@@ -57,11 +57,11 @@ object CineStreamExtractors : CineStreamProvider() {
                     .getJSONObject("pageProps")
                     .getJSONObject("episode")
 
-                    val streamUrl = epJson.optString("streamLink")
-                    //val backupUrl = epJson.optString("streamLinkBackup")
+                    //val streamUrl = epJson.optString("streamLink")
+                    val backupUrl = epJson.optString("streamLinkBackup")
                     M3u8Helper.generateM3u8(
-                        "Animeparadise[SUB]",
-                        streamUrl,
+                        "Animeparadise [SUB]",
+                        backupUrl,
                         animeparadiseBaseAPI,
                     ).forEach(callback)
 
@@ -82,44 +82,20 @@ object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun invokeAnimez(
         title: String? = null,
-        anilistId: Int? = null,
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit
     ) {
-        if(anilistId == null || title == null) return
         val document = app.get("$animezAPI/?act=search&f[keyword]=$title").document
         document.select("article > a").amap {
-            val url = animezAPI + it.attr("href")
-            callback.invoke(
-                newExtractorLink(
-                    "Animez url",
-                    "Animez url",
-                    url
-                )
-            )
-            val doc = app.get(url).document
-            val aniId = doc.select("h2.SubTitle").attr("data-manga")
-            callback.invoke(
-                newExtractorLink(
-                    "Animez id",
-                    "Animez id",
-                    "$anilistId, $aniId"
-                )
-            )
-            if(aniId != anilistId.toString()) return@amap
+            val doc = app.get(animezAPI + it.attr("href")).document
+            val titles = doc.select("ul.InfoList > li").text()
+            if(!titles.contains("title")) return@amap
             doc.select("li.wp-manga-chapter > a:contains(${episode ?: 1})").amap {
                 val type = if(it.text().contains("Dub")) "DUB" else "SUB"
-                callback.invoke(
-                    newExtractorLink(
-                        "Animez epLink",
-                        "Animez epLink",
-                        animezAPI + it.attr("href")
-                    )
-                )
                 val epDoc = app.get(animezAPI + it.attr("href")).document
                 val source = epDoc.select("iframe").attr("src").replace("/embed/", "/anime/")
                 M3u8Helper.generateM3u8(
-                    "Animez",
+                    "Animez [$type]",
                     source,
                     source,
                 ).forEach(callback)
@@ -1196,8 +1172,16 @@ object CineStreamExtractors : CineStreamProvider() {
             {
                 if(origin == "imdb" && zorotitle != null) invokeAnimez(
                     zorotitle,
-                    aniId,
                     episode,
+                    callback
+                )
+            },
+            {
+                if(origin == "imdb" && zorotitle != null) invokeAnimeparadise(
+                    zorotitle,
+                    malId,
+                    episode,
+                    subtitleCallback,
                     callback
                 )
             },
