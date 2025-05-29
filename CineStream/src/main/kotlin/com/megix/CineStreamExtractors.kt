@@ -67,16 +67,16 @@ object CineStreamExtractors : CineStreamProvider() {
                             animeparadiseBaseAPI,
                         ).forEach(callback)
                     }
-                }
-                val subData = epJson.optJSONArray("subData") ?: return
-                for (i in 0 until subData.length()) {
-                    val sub = subData.getJSONObject(i)
-                    subtitleCallback.invoke(
-                        SubtitleFile(
-                            sub.optString("label"),
-                            sub.optString("src")
+                    val subData = epJson.optJSONArray("subData") ?: return
+                    for (i in 0 until subData.length()) {
+                        val sub = subData.getJSONObject(i)
+                        subtitleCallback.invoke(
+                            SubtitleFile(
+                                sub.optString("label"),
+                                sub.optString("src")
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
