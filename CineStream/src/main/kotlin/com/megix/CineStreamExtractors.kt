@@ -60,11 +60,17 @@ object CineStreamExtractors : CineStreamProvider() {
                     val streamUrl = epJson.optString("streamLink")
                     val backupUrl = epJson.optString("streamLinkBackup")
                     val streamLinks = listOf(streamUrl, backupUrl).filter { it.isNotEmpty() }
+                    val headers = mapOf(
+                        "Referer" to animeparadiseBaseAPI,
+                        "Origin" to animeparadiseBaseAPI,
+                        "User-Agent" to USER_AGENT
+                    )
                     streamLinks.forEach {
                         M3u8Helper.generateM3u8(
                             "Animeparadise",
-                            it,
-                            "https://stream.animeparadise.moe/m3u8?url=" + animeparadiseBaseAPI,
+                            "https://stream.animeparadise.moe/m3u8?url=" + it,
+                            animeparadiseBaseAPI,
+                            headers = headers
                         ).forEach(callback)
                     }
 
@@ -91,12 +97,26 @@ object CineStreamExtractors : CineStreamProvider() {
         val document = app.get("$animezAPI/?act=search&f[keyword]=$title").document
         document.select("article > a").amap {
             val doc = app.get(animezAPI + it.attr("href")).document
+            callback.invoke(
+                newExtractorLink(
+                    "href",
+                    "href",
+                    animezAPI + it.attr("href")
+                )
+            )
             val titles = doc.select("ul.InfoList > li").text()
-            if(!titles.contains("title")) return@amap
             callback.invoke(
                 newExtractorLink(
                     "titles",
                     "titles",
+                    titles
+                )
+            )
+            if(!titles.contains("title")) return@amap
+            callback.invoke(
+                newExtractorLink(
+                    "titles1",
+                    "titles1",
                     titles
                 )
             )
@@ -114,7 +134,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 M3u8Helper.generateM3u8(
                     "Animez [$type]",
                     source,
-                    source,
+                    animezAPI,
                 ).forEach(callback)
             }
         }
