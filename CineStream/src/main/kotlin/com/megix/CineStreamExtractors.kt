@@ -58,15 +58,13 @@ object CineStreamExtractors : CineStreamProvider() {
                     .getJSONObject("episode")
 
                     val streamUrl = epJson.optString("streamLink")
-                    val backupUrl = epJson.optString("streamLinkBackup")
-                    val streamLinks = listOf(streamUrl, backupUrl).filter { it.isNotEmpty() }
-                    streamLinks.forEach {
-                        M3u8Helper.generateM3u8(
-                            "Animeparadise",
-                            it,
-                            "https://stream.animeparadise.moe/m3u8?url=" + animeparadiseBaseAPI,
-                        ).forEach(callback)
-                    }
+                    //val backupUrl = epJson.optString("streamLinkBackup")
+                    M3u8Helper.generateM3u8(
+                        "Animeparadise[SUB]",
+                        streamUrl,
+                        animeparadiseBaseAPI,
+                    ).forEach(callback)
+
                     val subData = epJson.optJSONArray("subData") ?: return
                     for (i in 0 until subData.length()) {
                         val sub = subData.getJSONObject(i)
@@ -84,11 +82,11 @@ object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun invokeAnimez(
         title: String? = null,
-        malId: Int? = null,
+        anilistId: Int? = null,
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit
     ) {
-        if(malId == null || title == null) return
+        if(anilistId == null || title == null) return
         val document = app.get("$animezAPI/?act=search&f[keyword]=$title").document
         document.select("article > a").amap {
             val url = animezAPI + it.attr("href")
@@ -100,22 +98,15 @@ object CineStreamExtractors : CineStreamProvider() {
                 )
             )
             val doc = app.get(url).document
-            val malid = doc.select("h2.SubTitle").attr("data-manga")
+            val aniId = doc.select("h2.SubTitle").attr("data-manga")
             callback.invoke(
                 newExtractorLink(
-                    "Animez malid",
-                    "Animez malid",
-                    "$malid , $malId"
+                    "Animez id",
+                    "Animez id",
+                    "$anilistId, $aniId"
                 )
             )
-            if(malid != malId.toString()) return@amap
-            callback.invoke(
-                newExtractorLink(
-                    "Animez malid",
-                    "Animez malid",
-                    malid
-                )
-            )
+            if(aniId != anilistId.toString()) return@amap
             doc.select("li.wp-manga-chapter > a:contains(${episode ?: 1})").amap {
                 val type = if(it.text().contains("Dub")) "DUB" else "SUB"
                 callback.invoke(
@@ -157,16 +148,12 @@ object CineStreamExtractors : CineStreamProvider() {
         val json = app.get(url, headers = headers).text
         val sourceUrl = JSONObject(json).getString("url")
 
-        callback.invoke(
-            newExtractorLink(
-                "PrimeNet",
-                "PrimeNet",
-                sourceUrl,
-                type = ExtractorLinkType.M3U8
-            ) {
-                this.headers = headers
-            }
-        )
+        M3u8Helper.generateM3u8(
+            "Primenet",
+            sourceUrl,
+            xprimeAPI,
+            headers = headers
+        ).forEach(callback)
     }
 
     suspend fun invokePrimebox(
@@ -180,6 +167,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val headers = mapOf(
             "Referer" to xprimeBaseAPI,
             "Origin" to xprimeBaseAPI,
+            "User-Agent" to USER_AGENT
         )
 
         val url = if(season == null) {
@@ -1208,7 +1196,7 @@ object CineStreamExtractors : CineStreamProvider() {
             {
                 if(origin == "imdb" && zorotitle != null) invokeAnimez(
                     zorotitle,
-                    malId,
+                    aniId,
                     episode,
                     callback
                 )

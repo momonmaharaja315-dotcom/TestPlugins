@@ -602,7 +602,7 @@ open class CineStreamProvider : MainAPI() {
 
         runAllAsync(
             { invokeAnimes(res.malId, res.anilistId, res.episode, year, "kitsu", subtitleCallback, callback) },
-            { invokeAnimez(res.title, res.malId, res.episode, callback) },
+            { invokeAnimez(res.title, res.anilistId, res.episode, callback) },
             { invokeAnimeparadise(res.title, res.malId, res.episode, subtitleCallback, callback) },
             { invokeTokyoInsider(res.title, res.episode, subtitleCallback, callback) },
             { invokeAllanime(res.title, year, res.episode, subtitleCallback, callback) },
