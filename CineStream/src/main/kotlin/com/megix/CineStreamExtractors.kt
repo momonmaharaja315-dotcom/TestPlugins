@@ -51,12 +51,27 @@ object CineStreamExtractors : CineStreamProvider() {
                     val episodeId = episodes.getString(episode - 1)
                     val epUrl = "$animeparadiseBaseAPI/watch/$episodeId?origin=$animeId"
                     val epDoc = app.get(epUrl).document
-                    val epJson = epDoc.selectFirst("script#__NEXT_DATA__")?.data() ?: return
+                    val epJsonString = epDoc.selectFirst("script#__NEXT_DATA__")?.data() ?: return
                     callback.invoke(
                         newExtractorLink(
-                            "epJson",
-                            "epJson",
-                            epJson
+                            "epJsonString",
+                            "epJsonString",
+                            epJsonString
+                        )
+                    )
+
+                    val epJson = JSONObject(epJsonString)
+                    .getJSONObject("props")
+                    .getJSONObject("pageProps")
+                    .getJSONObject("episode")
+
+                    val streamUrl = epJson.optString("streamLink")
+                    //val backupUrl = epJson.optString("streamLinkBackup")
+                    callback.invoke(
+                        newExtractorLink(
+                            "Animeparadise",
+                            "Animeparadise",
+                            streamUrl
                         )
                     )
                 }
@@ -1175,7 +1190,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 )
             },
             {
-                if(origin == "imdb" && zorotitle != null) invokeAnizone(
+                if(origin == "imdb" && zorotitle != null) invokeAnimez(
                     zorotitle,
                     malId,
                     episode,
