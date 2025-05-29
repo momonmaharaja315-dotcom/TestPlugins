@@ -64,7 +64,7 @@ object CineStreamExtractors : CineStreamProvider() {
                         M3u8Helper.generateM3u8(
                             "Animeparadise",
                             it,
-                            animeparadiseBaseAPI,
+                            "https://stream.animeparadise.moe/m3u8?url=" + animeparadiseBaseAPI,
                         ).forEach(callback)
                     }
                     val subData = epJson.optJSONArray("subData") ?: return
@@ -101,6 +101,13 @@ object CineStreamExtractors : CineStreamProvider() {
             )
             val doc = app.get(url).document
             val malid = doc.select("h2.SubTitle").attr("data-manga")
+            callback.invoke(
+                newExtractorLink(
+                    "Animez malid",
+                    "Animez malid",
+                    "$malid , $malId"
+                )
+            )
             if(malid != malId.toString()) return@amap
             callback.invoke(
                 newExtractorLink(
@@ -147,24 +154,7 @@ object CineStreamExtractors : CineStreamProvider() {
             "$xprimeAPI/primenet?id=$tmdbId&season=$season&episode=$episode"
         }
 
-        callback.invoke(
-            newExtractorLink(
-                "xprime url",
-                "xprime url",
-                url
-            )
-
-        )
-
         val json = app.get(url, headers = headers).text
-        callback.invoke(
-            newExtractorLink(
-                "xprime json",
-                "xprime json",
-                json
-            )
-
-        )
         val sourceUrl = JSONObject(json).getString("url")
 
         callback.invoke(
@@ -172,6 +162,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 "PrimeNet",
                 "PrimeNet",
                 sourceUrl,
+                type = ExtractorLinkType.M3U8
             ) {
                 this.headers = headers
             }
