@@ -112,7 +112,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     titles
                 )
             )
-            if(!titles.contains("title")) return@amap
+            if(!titles.contains("$title")) return@amap
             callback.invoke(
                 newExtractorLink(
                     "titles1",
