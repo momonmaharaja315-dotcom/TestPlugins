@@ -59,6 +59,8 @@ import com.megix.CineStreamExtractors.invokeAsiaflix
 import com.megix.CineStreamExtractors.invoke2embed
 import com.megix.CineStreamExtractors.invokePrimebox
 import com.megix.CineStreamExtractors.invokePrimenet
+import com.megix.CineStreamExtractors.invokeAnimez
+import com.megix.CineStreamExtractors.invokeAnimeparadise
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -105,6 +107,8 @@ open class CineStreamProvider : MainAPI() {
         const val twoembedAPI = "https://2embed.cc"
         const val xprimeBaseAPI = "https://xprime.tv"
         const val xprimeAPI = "https://backend.xprime.tv"
+        const val animeparadiseBaseAPI = "https://www.animeparadise.moe"
+        const val animeparadiseAPI = "https://api.animeparadise.moe"
 
         var protonmoviesAPI = ""
         var W4UAPI = ""
@@ -597,6 +601,8 @@ open class CineStreamProvider : MainAPI() {
 
         runAllAsync(
             { invokeAnimes(res.malId, res.anilistId, res.episode, year, "kitsu", subtitleCallback, callback) },
+            { invokeAnimez(res.title, res.malId, res.episode, callback) },
+            { invokeAnimeparadise(res.title, res.malId, res.episode, subtitleCallback, callback) }
             { invokeTokyoInsider(res.title, res.episode, subtitleCallback, callback) },
             { invokeAllanime(res.title, year, res.episode, subtitleCallback, callback) },
             { invokeAnizone(res.title, res.episode, subtitleCallback, callback) },

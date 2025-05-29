@@ -28,6 +28,68 @@ import com.lagradost.cloudstream3.USER_AGENT
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend fun invokeAnimeparadise(
+        title: String? = null,
+        malId: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        if(malId == null || title == null || episode == null) return
+        val searchJson = app.get("$animeparadiseAPI/search?q=$title").text
+        val root = JSONObject(searchJson)
+        val dataArray = root.getJSONArray("data")
+
+        for (i in 0 until dataArray.length()) {
+            val anime = dataArray.getJSONObject(i)
+            val mappings = anime.getJSONObject("mappings")
+
+            if (mappings.optInt("myanimelist") == malId) {
+                val animeId = anime.getString("_id")
+                val episodes = anime.getJSONArray("ep")
+                if (episode in 1..episodes.length()) {
+                    val episodeId = episodes.getString(episode - 1)
+                    val epUrl = "$animeparadiseBaseAPI/watch/$episodeId?origin=$animeId"
+                    val epDoc = app.get(epUrl).document
+                    val epJson = epDoc.selectFirst("script#__NEXT_DATA__")?.data() ?: return
+                    callback.invoke(
+                        newExtractorLink(
+                            "epJson",
+                            "epJson",
+                            epJson
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    suspend fun invokeAnimez(
+        title: String? = null,
+        malId: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        if(malId == null || title == null) return
+        val document = app.get("$animezAPI/?act=search&f[keyword]=$title").document
+        document.select("article > a").amap {
+            val url = animezAPI + it.attr("href")
+            val doc = app.get(url).document
+            val malid = doc.select("h2.SubTitle").attr("data-manga")
+            if(malid != malId.toString()) return@amap
+            doc.select("li.wp-manga-chapter > a:contains(${episode ?: 1})").amap {
+                val type = if(it.text().contains("Dub")) "DUB" else "SUB"
+                val epDoc = app.get(animezAPI + it.attr("href")).document
+                val source = epDoc.select("iframe").attr("src").replace("/embed/", "/anime/")
+                M3u8Helper.generateM3u8(
+                    "Animez",
+                    source,
+                    source,
+                ).forEach(callback)
+            }
+        }
+    }
+
     suspend fun invokePrimenet(
         tmdbId: Int? = null,
         season: Int? = null,
@@ -45,7 +107,24 @@ object CineStreamExtractors : CineStreamProvider() {
             "$xprimeAPI/primenet?id=$tmdbId&season=$season&episode=$episode"
         }
 
+        callback.invoke(
+            newExtractorLink(
+                "xprime url",
+                "xprime url",
+                url
+            )
+
+        )
+
         val json = app.get(url, headers = headers).text
+        callback.invoke(
+            newExtractorLink(
+                "xprime json",
+                "xprime json",
+                json
+            )
+
+        )
         val sourceUrl = JSONObject(json).getString("url")
 
         callback.invoke(
@@ -1095,6 +1174,14 @@ object CineStreamExtractors : CineStreamProvider() {
                     callback
                 )
             },
+            {
+                if(origin == "imdb" && zorotitle != null) invokeAnizone(
+                    zorotitle,
+                    malId,
+                    episode,
+                    callback
+                )
+            }
         )
     }
 
