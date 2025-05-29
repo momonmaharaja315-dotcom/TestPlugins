@@ -1181,7 +1181,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     episode,
                     callback
                 )
-            }
+            },
         )
     }
 
