@@ -25,7 +25,6 @@ import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import java.net.URI
 import com.lagradost.cloudstream3.utils.JsUnpacker
 import com.lagradost.cloudstream3.USER_AGENT
-import android.content.Context
 
 object CineStreamExtractors : CineStreamProvider() {
 
@@ -47,22 +46,7 @@ object CineStreamExtractors : CineStreamProvider() {
         }
 
         val json = app.get(url, headers = headers).text
-        callback.invoke(
-            newExtractorLink(
-                "json",
-                "json",
-                json,
-            )
-        )
         val sourceUrl = JSONObject(json).getString("url")
-
-        callback.invoke(
-            newExtractorLink(
-                "sourceUrl",
-                "sourceUrl",
-                sourceUrl,
-            )
-        )
 
         callback.invoke(
             newExtractorLink(
@@ -427,11 +411,10 @@ object CineStreamExtractors : CineStreamProvider() {
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
-        context: Context
     ) {
         if(netflixAPI.isEmpty()) return
 
-        val NfCookie = NFBypass(context, netflixAPI)
+        NfCookie = NFBypass(netflixAPI)
 
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
@@ -504,11 +487,10 @@ object CineStreamExtractors : CineStreamProvider() {
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
-        context: Context
     ) {
         if(netflixAPI.isEmpty()) return
 
-        val NfCookie = NFBypass(context, netflixAPI)
+        NfCookie = NFBypass(netflixAPI)
 
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
