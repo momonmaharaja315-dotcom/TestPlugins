@@ -16,6 +16,7 @@ import com.lagradost.api.Log
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import android.content.Context
 import com.lagradost.cloudstream3.network.CloudflareKiller
 import com.megix.CineStreamExtractors.invokeVegamovies
 import com.megix.CineStreamExtractors.invokeMoviesmod
@@ -58,8 +59,9 @@ import com.megix.CineStreamExtractors.invokeSoaper
 import com.megix.CineStreamExtractors.invokeAsiaflix
 import com.megix.CineStreamExtractors.invoke2embed
 import com.megix.CineStreamExtractors.invokePrimebox
+import com.megix.CineStreamExtractors.invokePrimenet
 
-open class CineStreamProvider : MainAPI() {
+open class CineStreamProvider : MainAPI(private val context: Context) {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
     override var name = "CineStream"
     override val hasMainPage = true
@@ -616,6 +618,7 @@ open class CineStreamProvider : MainAPI() {
             { invokePrimeWire(res.imdb_id, res.imdbSeason, res.imdbEpisode, subtitleCallback, callback) },
             { invokePlayer4U(imdbTitle, res.imdbSeason, res.imdbEpisode, seasonYear, callback) },
             { invokeCinemaluxe(imdbTitle, imdbYear, res.imdbSeason, res.imdbEpisode, callback, subtitleCallback) },
+            { invokePrimebox(imdbTitle, imdbYear, res.imdbSeason, res.imdbEpisode, subtitleCallback, callback)},
             { invokeUhdmovies(imdbTitle, imdbYear, res.imdbSeason, res.imdbEpisode, callback, subtitleCallback) },
         )
     }
@@ -634,8 +637,8 @@ open class CineStreamProvider : MainAPI() {
         runAllAsync(
             { if (!isBollywood) invokeVegamovies("VegaMovies", res.id, res.season, res.episode, subtitleCallback, callback) },
             { if (isBollywood) invokeVegamovies("RogMovies", res.id, res.season, res.episode, subtitleCallback, callback) },
-            { invokeNetflix(res.title, year, res.season, res.episode, subtitleCallback, callback) },
-            { invokePrimeVideo(res.title, year, res.season, res.episode, subtitleCallback, callback) },
+            { invokeNetflix(res.title, year, res.season, res.episode, subtitleCallback, callback, context) },
+            { invokePrimeVideo(res.title, year, res.season, res.episode, subtitleCallback, callback, context) },
             { if (res.season == null) invokeStreamify(res.id, callback) },
             { invokeMultimovies(multimoviesAPI, res.title, res.season, res.episode, subtitleCallback, callback) },
             { if (isBollywood) invokeTopMovies(res.title, year, res.season, res.episode, subtitleCallback, callback) },
@@ -664,6 +667,7 @@ open class CineStreamProvider : MainAPI() {
             { if (!isAnime) invoke2embed(res.id, res.season, res.episode, callback) },
             { invokeSoaper(res.id, res.tmdbId, res.title, res.season, res.episode, subtitleCallback, callback) },
             { invokeTom(res.tmdbId, res.season, res.episode, callback, subtitleCallback) },
+            { invokePrimenet(res.tmdbId, res.season, res.episode, callback) },
             { invokePlayer4U(res.title, res.season, res.episode, seasonYear, callback) },
             { invokeThepiratebay(res.id, res.season, res.episode, callback) },
             { if (!isAnime) invokeVidJoy(res.tmdbId, res.season, res.episode, callback) },

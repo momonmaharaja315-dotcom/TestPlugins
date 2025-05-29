@@ -25,8 +25,55 @@ import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import java.net.URI
 import com.lagradost.cloudstream3.utils.JsUnpacker
 import com.lagradost.cloudstream3.USER_AGENT
+import android.content.Context
 
 object CineStreamExtractors : CineStreamProvider() {
+
+    suspend fun invokePrimenet(
+        tmdbId: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val headers = mapOf(
+            "Referer" to xprimeBaseAPI,
+            "Origin" to xprimeBaseAPI,
+        )
+
+        val url = if(season == null) {
+            "$xprimeAPI/primenet?id=$tmdbId"
+        } else {
+            "$xprimeAPI/primenet?id=$tmdbId&season=$season&episode=$episode"
+        }
+
+        val json = app.get(url, headers = headers).text
+        callback.invoke(
+            newExtractorLink(
+                "json",
+                "json",
+                json,
+            )
+        )
+        val sourceUrl = JSONObject(json).getString("url")
+
+        callback.invoke(
+            newExtractorLink(
+                "sourceUrl",
+                "sourceUrl",
+                sourceUrl,
+            )
+        )
+
+        callback.invoke(
+            newExtractorLink(
+                "PrimeNet",
+                "PrimeNet",
+                sourceUrl,
+            ) {
+                this.headers = headers
+            }
+        )
+    }
 
     suspend fun invokePrimebox(
         title: String? = null,
@@ -46,24 +93,8 @@ object CineStreamExtractors : CineStreamProvider() {
         } else {
             "$xprimeAPI/primebox?name=$title&fallback_year=$year&season=$season&episode=$episode"
         }
-        val json = app.get(url).text
-
-        callback.invoke(
-            newExtractorLink(
-                "json",
-                "json",
-                json,
-            )
-        )
+        val json = app.get(url, headers = headers).text
         val data = tryParseJson<Primebox>(json) ?: return
-
-        callback.invoke(
-            newExtractorLink(
-                "data",
-                "data",
-                data.toString(),
-            )
-        )
 
         data.streams?.let { streams ->
             listOf(
@@ -399,7 +430,7 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         if(netflixAPI.isEmpty()) return
 
-        NfCookie = NFBypass(netflixAPI)
+        val NfCookie = NFBypass(context, netflixAPI)
 
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
@@ -475,7 +506,7 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         if(netflixAPI.isEmpty()) return
 
-        NfCookie = NFBypass(netflixAPI)
+        val NfCookie = NFBypass(context, netflixAPI)
 
         val cookies = mapOf(
             "t_hash_t" to NfCookie,

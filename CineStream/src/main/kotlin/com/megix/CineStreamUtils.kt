@@ -33,6 +33,7 @@ import javax.crypto.spec.SecretKeySpec
 import com.lagradost.cloudstream3.runAllAsync
 import kotlin.math.pow
 import kotlin.random.Random
+import android.content.Context
 
 val SPEC_OPTIONS = mapOf(
     "quality" to listOf(
@@ -140,22 +141,28 @@ fun String.getHost(): String {
     return fixTitle(URI(this).host.substringBeforeLast(".").substringAfterLast("."))
 }
 
-var NfCookie = ""
+suspend fun NFBypass(context: Context, mainUrl: String): String {
+    val sharedPref = context.getSharedPreferences("CineStreamPrefs", Context.MODE_PRIVATE)
+    val savedCookie = sharedPref.getString("NfCookie", "")
+    val savedTime = sharedPref.getLong("NfCookieTimestamp", 0L)
 
-suspend fun NFBypass(mainUrl : String): String {
-    if(NfCookie != "") {
-        return NfCookie
+    val currentTime = System.currentTimeMillis()
+    val twentyFourHours = 24 * 60 * 60 * 1000L // 24 hrs in milliseconds
+
+    if (!savedCookie.isNullOrEmpty() && (currentTime - savedTime < twentyFourHours)) {
+        return savedCookie
     }
-    val homePageDocument = app.get("${mainUrl}/mobile/home").document
-    val addHash          = homePageDocument.select("body").attr("data-addhash")
-    val time             = homePageDocument.select("body").attr("data-time")
 
-    var verificationUrl  = "https://raw.githubusercontent.com/SaurabhKaperwan/Utils/refs/heads/main/NF.json"
-    verificationUrl      = app.get(verificationUrl).parsed<NFVerifyUrl>().url.replace("###", addHash)
+    val homePageDocument = app.get("${mainUrl}/mobile/home").document
+    val addHash = homePageDocument.select("body").attr("data-addhash")
+    val time = homePageDocument.select("body").attr("data-time")
+
+    var verificationUrl = "https://raw.githubusercontent.com/SaurabhKaperwan/Utils/refs/heads/main/NF.json"
+    verificationUrl = app.get(verificationUrl).parsed<NFVerifyUrl>().url.replace("###", addHash)
     // val hashDigits       = addHash.filter { it.isDigit() }
     // val first16Digits    = hashDigits.take(16)
     // app.get("${verificationUrl}&t=0.${first16Digits}")
-    app.get(verificationUrl + "&t=${time}")
+    app.get("$verificationUrl&t=$time")
 
     var verifyCheck: String
     var verifyResponse: NiceResponse
@@ -165,11 +172,18 @@ suspend fun NFBypass(mainUrl : String): String {
         delay(1000)
         tries++
         val requestBody = FormBody.Builder().add("verify", addHash).build()
-        verifyResponse  = app.post("${mainUrl}/mobile/verify2.php", requestBody = requestBody)
-        verifyCheck     = verifyResponse.text
-    } while (!verifyCheck.contains("\"statusup\":\"All Done\"") || tries < 7)
+        verifyResponse = app.post("${mainUrl}/mobile/verify2.php", requestBody = requestBody)
+        verifyCheck = verifyResponse.text
+    } while (!verifyCheck.contains("\"statusup\":\"All Done\"") && tries < 7)
 
-    return verifyResponse.cookies["t_hash_t"].orEmpty()
+    val finalCookie = verifyResponse.cookies["t_hash_t"].orEmpty()
+
+    sharedPref.edit()
+        .putString("NfCookie", finalCookie)
+        .putLong("NfCookieTimestamp", currentTime)
+        .apply()
+
+    return finalCookie
 }
 
 suspend fun cinemaluxeBypass(url: String): String {
