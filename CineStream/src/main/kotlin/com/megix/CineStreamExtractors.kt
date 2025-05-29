@@ -52,26 +52,29 @@ object CineStreamExtractors : CineStreamProvider() {
                     val epUrl = "$animeparadiseBaseAPI/watch/$episodeId?origin=$animeId"
                     val epDoc = app.get(epUrl).document
                     val epJsonString = epDoc.selectFirst("script#__NEXT_DATA__")?.data() ?: return
-                    callback.invoke(
-                        newExtractorLink(
-                            "epJsonString",
-                            "epJsonString",
-                            epJsonString
-                        )
-                    )
-
                     val epJson = JSONObject(epJsonString)
                     .getJSONObject("props")
                     .getJSONObject("pageProps")
                     .getJSONObject("episode")
 
                     val streamUrl = epJson.optString("streamLink")
-                    //val backupUrl = epJson.optString("streamLinkBackup")
-                    callback.invoke(
-                        newExtractorLink(
+                    val backupUrl = epJson.optString("streamLinkBackup")
+                    val streamLinks = listOf(streamUrl, backupUrl).filter { it.isNotEmpty() }
+                    streamLinks.forEach {
+                        M3u8Helper.generateM3u8(
                             "Animeparadise",
-                            "Animeparadise",
-                            streamUrl
+                            it,
+                            animeparadiseBaseAPI,
+                        ).forEach(callback)
+                    }
+                }
+                val subData = epJson.optJSONArray("subData") ?: return
+                for (i in 0 until subData.length()) {
+                    val sub = subData.getJSONObject(i)
+                    subtitleCallback.invoke(
+                        SubtitleFile(
+                            sub.optString("label"),
+                            sub.optString("src")
                         )
                     )
                 }
@@ -89,11 +92,32 @@ object CineStreamExtractors : CineStreamProvider() {
         val document = app.get("$animezAPI/?act=search&f[keyword]=$title").document
         document.select("article > a").amap {
             val url = animezAPI + it.attr("href")
+            callback.invoke(
+                newExtractorLink(
+                    "Animez url",
+                    "Animez url",
+                    url
+                )
+            )
             val doc = app.get(url).document
             val malid = doc.select("h2.SubTitle").attr("data-manga")
             if(malid != malId.toString()) return@amap
+            callback.invoke(
+                newExtractorLink(
+                    "Animez malid",
+                    "Animez malid",
+                    malid
+                )
+            )
             doc.select("li.wp-manga-chapter > a:contains(${episode ?: 1})").amap {
                 val type = if(it.text().contains("Dub")) "DUB" else "SUB"
+                callback.invoke(
+                    newExtractorLink(
+                        "Animez epLink",
+                        "Animez epLink",
+                        animezAPI + it.attr("href")
+                    )
+                )
                 val epDoc = app.get(animezAPI + it.attr("href")).document
                 val source = epDoc.select("iframe").attr("src").replace("/embed/", "/anime/")
                 M3u8Helper.generateM3u8(
@@ -114,6 +138,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val headers = mapOf(
             "Referer" to xprimeBaseAPI,
             "Origin" to xprimeBaseAPI,
+            "User-Agent" to USER_AGENT
         )
 
         val url = if(season == null) {
