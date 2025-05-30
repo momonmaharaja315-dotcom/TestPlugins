@@ -63,6 +63,7 @@ import com.megix.CineStreamExtractors.invokePrimenet
 import com.megix.CineStreamExtractors.invokeAnimeparadise
 import com.megix.CineStreamExtractors.invokeGojo
 import com.megix.CineStreamExtractors.invokeSudatchi
+import com.megix.CineStreamExtractors.invokePhoenix
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -679,6 +680,7 @@ open class CineStreamProvider : MainAPI() {
             { invokePrimeWire(res.id, res.season, res.episode, subtitleCallback, callback) },
             { if (!isAnime) invoke2embed(res.id, res.season, res.episode, callback) },
             { invokeSoaper(res.id, res.tmdbId, res.title, res.season, res.episode, subtitleCallback, callback) },
+            { invokePhoenix(res.title, res.id, res.tmdbId, year, res.season, res.episode, callback) },
             { invokeTom(res.tmdbId, res.season, res.episode, callback, subtitleCallback) },
             { invokePrimenet(res.tmdbId, res.season, res.episode, callback) },
             { invokePlayer4U(res.title, res.season, res.episode, seasonYear, callback) },

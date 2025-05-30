@@ -51,6 +51,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 url,
                 type = ExtractorLinkType.M3U8
             ) {
+                this.quality = 1080
                 this.headers = headers
             }
         )
@@ -167,6 +168,38 @@ object CineStreamExtractors : CineStreamProvider() {
                 }
             }
         }
+    }
+
+    suspend fun invokePhoenix(
+        title: String? = null,
+        imdbId: Int? = null,
+        tmdbId: Int? = null,
+        year: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val headers = mapOf(
+            "Referer" to xprimeBaseAPI,
+            "Origin" to xprimeBaseAPI,
+            "User-Agent" to USER_AGENT
+        )
+
+        val url = if(season == null) {
+            "$xprimeAPI/phoenix?name=$title&year=$year&id=$tmdbId&imdb=imdbId"
+        } else {
+            "$xprimeAPI/phoenix?name=$title&year=$year&id=$tmdbId&imdb=imdbId&season=$season&episode=$episode"
+        }
+
+        val json = app.get(url, headers = headers).text
+        val sourceUrl = JSONObject(json).getString("url")
+
+        M3u8Helper.generateM3u8(
+            "Phoenix",
+            sourceUrl,
+            xprimeAPI,
+            headers = headers
+        ).forEach(callback)
     }
 
     suspend fun invokePrimenet(
@@ -1246,6 +1279,14 @@ object CineStreamExtractors : CineStreamProvider() {
                 if(origin == "imdb") invokeGojo(
                     aniId,
                     episode,
+                    callback
+                )
+            },
+            {
+                if(origin == "imdb") invokeSudatchi(
+                    aniId,
+                    episode,
+                    subtitleCallback,
                     callback
                 )
             },
