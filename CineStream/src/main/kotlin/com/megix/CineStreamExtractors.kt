@@ -40,8 +40,8 @@ object CineStreamExtractors : CineStreamProvider() {
         val providers = listOf("strix", "pahe")
         val types = listOf("sub", "dub")
         providers.forEach { provider ->
-            types.forEach { type ->
-                val json = app.get("$gojoAPI/api/anime/tiddies?provider=$provider&id=$aniId&num=$episode&subType=$type&watchId=$episode&dub_id=null", headers = headers).text
+            types.forEach { lang ->
+                val json = app.get("$gojoAPI/api/anime/tiddies?provider=$provider&id=$aniId&num=$episode&subType=$lang&watchId=$episode&dub_id=null", headers = headers).text
                 val jsonObject = JSONObject(json)
                 val sourcesArray = jsonObject.getJSONArray("sources")
 
@@ -49,14 +49,14 @@ object CineStreamExtractors : CineStreamProvider() {
                     val source = sourcesArray.getJSONObject(i)
                     val quality = source.getString("quality").replace("p", "").toIntOrNull()
                     val url = source.getString("url")
-                    val type = if (source.has("type")) source.getString("type") else "m3u8"
+                    val videoType = if (source.has("type")) source.getString("type") else "m3u8"
 
                     callback.invoke(
                         newExtractorLink(
-                            "Gojo [${type.uppercase()}] [${provider.uppercase()}]",
-                            "Gojo [${type.uppercase()}] [${provider.uppercase()}]",
+                            "Gojo [${lang.uppercase()}] [${provider.uppercase()}]",
+                            "Gojo [${lang.uppercase()}] [${provider.uppercase()}]",
                             url,
-                            this.type = if(type == "m3u8") ExtractorLinkType.M3U8 else INFER_TYPE
+                            this.type = if(videoType == "m3u8") ExtractorLinkType.M3U8 else INFER_TYPE
                         ) {
                             this.quality = quality ?: Qualities.Unknown.value
                         }
