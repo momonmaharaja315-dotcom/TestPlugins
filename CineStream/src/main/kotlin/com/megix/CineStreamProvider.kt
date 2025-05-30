@@ -62,6 +62,7 @@ import com.megix.CineStreamExtractors.invokePrimenet
 // import com.megix.CineStreamExtractors.invokeAnimez
 import com.megix.CineStreamExtractors.invokeAnimeparadise
 import com.megix.CineStreamExtractors.invokeGojo
+import com.megix.CineStreamExtractors.invokeSudatchi
 
 open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
@@ -112,6 +113,7 @@ open class CineStreamProvider : MainAPI() {
         const val animeparadiseAPI = "https://api.animeparadise.moe"
         const val gojoBaseAPI = "https://gojo.live"
         const val gojoAPI = "https://backend.gojo.live"
+        const val sudatchiAPI = "https://sudatchi.com"
         // const val animezAPI = "https://animez.org"
 
         var protonmoviesAPI = ""
@@ -605,6 +607,7 @@ open class CineStreamProvider : MainAPI() {
 
         runAllAsync(
             { invokeAnimes(res.malId, res.anilistId, res.episode, year, "kitsu", subtitleCallback, callback) },
+            { invokeSudatchi(res.anilistId, res.episode, subtitleCallback, callback) },
             { invokeGojo(res.anilistId, res.episode, callback) },
             { invokeAnimeparadise(res.title, res.malId, res.episode, subtitleCallback, callback) },
             { invokeTokyoInsider(res.title, res.episode, subtitleCallback, callback) },

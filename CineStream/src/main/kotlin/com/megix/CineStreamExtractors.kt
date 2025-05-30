@@ -28,6 +28,34 @@ import com.lagradost.cloudstream3.USER_AGENT
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend fun invokeSudatchi(
+        aniId: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val headers = mapOf(
+            "Referer" to sudatchiAPI,
+            "Origin" to sudatchiAPI,
+        )
+
+        val json = app.get("$sudatchiAPI/api/episode/$aniId/$episode", headers = headers).text
+        val jsonObject = JSONObject(json)
+        val episode = jsonObject.getJSONObject("episode")
+        val epId = episode.getInt("id")
+        val url = "$sudatchiAPI/api/streams?episodeId=$epId"
+        callback.invoke(
+            newExtractorLink(
+                "Sudatchi",
+                "Sudatchi",
+                url
+                type = ExtractorLinkType.M3U8
+            ) {
+                this.headers = headers
+            }
+        )
+    }
+
     suspend fun invokeGojo(
         aniId: Int? = null,
         episode: Int? = null,
@@ -48,7 +76,12 @@ object CineStreamExtractors : CineStreamProvider() {
                 for (i in 0 until sourcesArray.length()) {
                     val source = sourcesArray.getJSONObject(i)
                     val quality = source.getString("quality").replace("p", "").toIntOrNull()
-                    val url = source.getString("url")
+                    val fullUrl = source.getString("url")
+                    val url = if (fullUrl.startsWith("https://pahe.gojo.live/")) {
+                        fullUrl.removePrefix("https://pahe.gojo.live/")
+                    } else {
+                        fullUrl
+                    }
                     val videoType = if (source.has("type")) source.getString("type") else "m3u8"
 
                     callback.invoke(
