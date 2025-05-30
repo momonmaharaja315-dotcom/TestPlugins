@@ -28,6 +28,44 @@ import com.lagradost.cloudstream3.USER_AGENT
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend fun invokeGojo(
+        aniId: Int? = null,
+        episode: Int? = null,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val headers = mapOf(
+            "Referer" to gojoBaseAPI,
+            "Origin" to gojoBaseAPI,
+        )
+        val providers = listOf("strix", "pahe")
+        val types = listOf("sub", "dub")
+        providers.forEach { provider ->
+            types.forEach { type ->
+                val json = app.get("$gojoAPI/api/anime/tiddies?provider=$provider&id=$aniId&num=$episode&subType=$type&watchId=$episode&dub_id=null", headers = headers).text
+                val jsonObject = JSONObject(json)
+                val sourcesArray = jsonObject.getJSONArray("sources")
+
+                for (i in 0 until sourcesArray.length()) {
+                    val source = sourcesArray.getJSONObject(i)
+                    val quality = source.getString("quality").replace("p", "").toIntOrNull()
+                    val url = source.getString("url")
+                    val type = if (source.has("type")) source.getString("type") else "m3u8"
+
+                    callback.invoke(
+                        newExtractorLink(
+                            "Gojo [${type.uppercase()}] [${provider.uppercase()}]",
+                            "Gojo [${type.uppercase()}] [${provider.uppercase()}]",
+                            url,
+                            this.type = if(type == "m3u8") ExtractorLinkType.M3U8 else INFER_TYPE
+                        ) {
+                            this.quality = quality ?: Qualities.Unknown.value
+                        }
+                    )
+                }
+            }
+        }
+    }
+
     suspend fun invokeAnimeparadise(
         title: String? = null,
         malId: Int? = null,
@@ -58,84 +96,42 @@ object CineStreamExtractors : CineStreamProvider() {
                     .getJSONObject("episode")
 
                     val streamUrl = epJson.optString("streamLink")
-                    val backupUrl = epJson.optString("streamLinkBackup")
-                    val streamLinks = listOf(streamUrl, backupUrl).filter { it.isNotEmpty() }
+                    //val backupUrl = epJson.optString("streamLinkBackup")
                     val headers = mapOf(
                         "Referer" to animeparadiseBaseAPI,
                         "Origin" to animeparadiseBaseAPI,
                         "User-Agent" to USER_AGENT
                     )
-                    streamLinks.forEach {
-                        M3u8Helper.generateM3u8(
-                            "Animeparadise",
-                            "https://stream.animeparadise.moe/m3u8?url=" + it,
-                            animeparadiseBaseAPI,
-                            headers = headers
-                        ).forEach(callback)
-                    }
+
+                    callback.invoke(
+                        newExtractorLink(
+                            "Animeparadise [SUB]",
+                            "Animeparadise [SUB]",
+                            "https://stream.animeparadise.moe/m3u8?url=" + streamUrl,
+                            type = ExtractorLinkType.M3U8,
+                        ) {
+                            this.referer = animeparadiseBaseAPI
+                            this.quality = 1080
+                            this.headers = headers
+                        }
+                    )
 
                     val subData = epJson.optJSONArray("subData") ?: return
                     for (i in 0 until subData.length()) {
                         val sub = subData.getJSONObject(i)
+                        val label = sub.optString("label")
+                        var subUrl = sub.optString("src")
+                        if(!subUrl.contains("https")) {
+                            subUrl = "$animeparadiseAPI/stream/file/$subUrl"
+                        }
                         subtitleCallback.invoke(
                             SubtitleFile(
-                                sub.optString("label"),
-                                sub.optString("src")
+                                label,
+                                subUrl
                             )
                         )
                     }
                 }
-            }
-        }
-    }
-
-    suspend fun invokeAnimez(
-        title: String? = null,
-        episode: Int? = null,
-        callback: (ExtractorLink) -> Unit
-    ) {
-        val document = app.get("$animezAPI/?act=search&f[keyword]=$title").document
-        document.select("article > a").amap {
-            val doc = app.get(animezAPI + it.attr("href")).document
-            callback.invoke(
-                newExtractorLink(
-                    "href",
-                    "href",
-                    animezAPI + it.attr("href")
-                )
-            )
-            val titles = doc.select("ul.InfoList > li").text()
-            callback.invoke(
-                newExtractorLink(
-                    "titles",
-                    "titles",
-                    titles
-                )
-            )
-            if(!titles.contains("$title")) return@amap
-            callback.invoke(
-                newExtractorLink(
-                    "titles1",
-                    "titles1",
-                    titles
-                )
-            )
-            doc.select("li.wp-manga-chapter > a:contains(${episode ?: 1})").amap {
-                val type = if(it.text().contains("Dub")) "DUB" else "SUB"
-                val epDoc = app.get(animezAPI + it.attr("href")).document
-                callback.invoke(
-                    newExtractorLink(
-                        "epLink",
-                        "epLink",
-                        animezAPI + it.attr("href")
-                    )
-                )
-                val source = epDoc.select("iframe").attr("src").replace("/embed/", "/anime/")
-                M3u8Helper.generateM3u8(
-                    "Animez [$type]",
-                    source,
-                    animezAPI,
-                ).forEach(callback)
             }
         }
     }
@@ -1181,13 +1177,13 @@ object CineStreamExtractors : CineStreamProvider() {
                 if (animepahe!=null)
                     invokeAnimepahe(animepahe, episode, subtitleCallback, callback)
             },
-            {
-                if(zorotitle != null) invokeAnimez(
-                    zorotitle,
-                    episode,
-                    callback
-                )
-            },
+            // {
+            //     if(zorotitle != null) invokeAnimez(
+            //         zorotitle,
+            //         episode,
+            //         callback
+            //     )
+            // },
             {
                 if(origin == "imdb" && zorotitle != null) invokeTokyoInsider(
                     zorotitle,
@@ -1210,6 +1206,13 @@ object CineStreamExtractors : CineStreamProvider() {
                     zorotitle,
                     episode,
                     subtitleCallback,
+                    callback
+                )
+            },
+            {
+                if(origin == "imdb") invokeGojo(
+                    aniId,
+                    episode,
                     callback
                 )
             },
@@ -2241,6 +2244,35 @@ object CineStreamExtractors : CineStreamProvider() {
             getSoaperLinks(soaperAPI ,"$soaperAPI$episodeLink", "E", subtitleCallback, callback)
         }
     }
+
+    // suspend fun invokeAnimez(
+    //     title: String? = null,
+    //     episode: Int? = null,
+    //     callback: (ExtractorLink) -> Unit
+    // ) {
+    //     val document = app.get("$animezAPI/?act=search&f[keyword]=$title").document
+    //     document.select("article > a").amap {
+    //         val doc = app.get(animezAPI + it.attr("href")).document
+    //         val titles = doc.select("ul.InfoList > li").text()
+
+    //         if(!titles.contains("$title")) return@amap
+
+    //         doc.select("li.wp-manga-chapter > a:contains(${episode ?: 1})").amap {
+    //             val type = if(it.text().contains("Dub")) "DUB" else "SUB"
+    //             val epDoc = app.get(animezAPI + it.attr("href")).document
+    //             val source = epDoc.select("iframe").attr("src")
+    //             callback.invoke(
+    //                 newExtractorLink(
+    //                     "Animez [$type]",
+    //                     "Animez [$type]",
+    //                     source.replace("/embed/", "/anime/"),
+    //                 ) {
+    //                     this.referer = source
+    //                 }
+    //             )
+    //         }
+    //     }
+    // }
 
     suspend fun invokeThepiratebay(
         imdbId: String? =null,
