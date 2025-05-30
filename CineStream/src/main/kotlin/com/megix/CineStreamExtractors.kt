@@ -48,7 +48,7 @@ object CineStreamExtractors : CineStreamProvider() {
             newExtractorLink(
                 "Sudatchi",
                 "Sudatchi",
-                url
+                url,
                 type = ExtractorLinkType.M3U8
             ) {
                 this.headers = headers
