@@ -56,7 +56,7 @@ object CineStreamExtractors : CineStreamProvider() {
                             "Gojo [${lang.uppercase()}] [${provider.uppercase()}]",
                             "Gojo [${lang.uppercase()}] [${provider.uppercase()}]",
                             url,
-                            this.type = if(videoType == "m3u8") ExtractorLinkType.M3U8 else INFER_TYPE
+                            type = if(videoType == "m3u8") ExtractorLinkType.M3U8 else INFER_TYPE
                         ) {
                             this.quality = quality ?: Qualities.Unknown.value
                         }
