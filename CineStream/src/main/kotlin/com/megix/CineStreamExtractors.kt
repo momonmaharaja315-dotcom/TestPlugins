@@ -61,7 +61,7 @@ object CineStreamExtractors : CineStreamProvider() {
         for (i in 0 until subsJson.length()) {
             val sub = subsJson.getJSONObject(i)
             val subUrl = sub.getString("url").replace("\\", "")
-            val file = "https://ipfs.sudatchi.com$subUrl"
+            val file = "https://sudatchi.com/api/proxy$subUrl"
             val label = sub.getJSONObject("SubtitlesName").getString("name")
             callback.invoke(
                 newExtractorLink(

@@ -110,7 +110,7 @@ suspend fun bypass(context: Context, mainUrl: String): String {
         val requestBody = FormBody.Builder().add("verify", addHash).build()
         verifyResponse = app.post("${mainUrl}/mobile/verify2.php", requestBody = requestBody)
         verifyCheck = verifyResponse.text
-    } while (!verifyCheck.contains("\"statusup\":\"All Done\"") && tries < 7)
+    } while (!verifyCheck.contains("\"statusup\":\"All Done\"") && tries < 12)
 
     val cookie = verifyResponse.cookies["t_hash_t"].orEmpty()
 
