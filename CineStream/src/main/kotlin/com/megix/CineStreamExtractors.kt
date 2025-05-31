@@ -618,7 +618,7 @@ object CineStreamExtractors : CineStreamProvider() {
         )
         val headers = mapOf("X-Requested-With" to "XMLHttpRequest")
         val url = "$netflixAPI/mobile/pv/search.php?s=$title&t=${APIHolder.unixTime}"
-        val data = app.get(url, headers = headers, cookies = cookies, timeout = 10000L).parsedSafe<NfSearchData>()
+        val data = app.get(url, headers = headers, cookies = cookies).parsedSafe<NfSearchData>()
         val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals(title.trim(), ignoreCase = true) }?.id
 
         val (nfTitle, id) = app.get(
@@ -626,7 +626,6 @@ object CineStreamExtractors : CineStreamProvider() {
             headers = headers,
             cookies = cookies,
             referer = "$netflixAPI/",
-            timeout = 10000L
         ).parsedSafe<NetflixResponse>().let { media ->
             if (season == null && year.toString() == media?.year.toString()) {
                 media?.title to netflixId
@@ -641,7 +640,6 @@ object CineStreamExtractors : CineStreamProvider() {
                         headers = headers,
                         cookies = cookies,
                         referer = "$netflixAPI/",
-                        timeout = 10000L
                     ).parsedSafe<NetflixResponse>()
                     episodeId = data?.episodes?.find { it.ep == "E$episode" }?.id
                     if(data?.nextPageShow != 1) { break }
@@ -660,7 +658,6 @@ object CineStreamExtractors : CineStreamProvider() {
             headers = headers,
             cookies = cookies,
             referer = "$netflixAPI/",
-            timeout = 10000L
         ).text.let {
             tryParseJson<ArrayList<NetflixResponse>>(it)
         }?.firstOrNull()?.sources?.map {
@@ -696,7 +693,7 @@ object CineStreamExtractors : CineStreamProvider() {
         )
         val headers = mapOf("X-Requested-With" to "XMLHttpRequest")
         val url = "$netflixAPI/mobile/search.php?s=$title&t=${APIHolder.unixTime}"
-        val data = app.get(url, headers = headers, cookies = cookies, timeout = 1000L).parsedSafe<NfSearchData>()
+        val data = app.get(url, headers = headers, cookies = cookies).parsedSafe<NfSearchData>()
         val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals(title.trim(), ignoreCase = true) }?.id
 
         val (nfTitle, id) = app.get(
@@ -704,7 +701,6 @@ object CineStreamExtractors : CineStreamProvider() {
             headers = headers,
             cookies = cookies,
             referer = "$netflixAPI/",
-            timeout = 10000L
         ).parsedSafe<NetflixResponse>().let { media ->
             if (season == null && year.toString() == media?.year.toString()) {
                 media?.title to netflixId
@@ -718,7 +714,6 @@ object CineStreamExtractors : CineStreamProvider() {
                         headers = headers,
                         cookies = cookies,
                         referer = "$netflixAPI/",
-                        timeout = 10000L
                     ).parsedSafe<NetflixResponse>()
                     episodeId = data?.episodes?.find { it.ep == "E$episode" }?.id
                     if(data?.nextPageShow != 1) { break }
@@ -736,7 +731,6 @@ object CineStreamExtractors : CineStreamProvider() {
             headers = headers,
             cookies = cookies,
             referer = "$netflixAPI/",
-            timeout = 10000L
         ).text.let {
             tryParseJson<ArrayList<NetflixResponse>>(it)
         }?.firstOrNull()?.sources?.map {
@@ -1729,20 +1723,6 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val firstRedirectUrl = app.get(MovieDriveAPI)
-            .document
-            .selectFirst("meta[http-equiv=refresh]")
-            ?.attr("content")
-            ?.substringAfter("url=")
-            ?.takeIf { it.startsWith("http") }
-
-        val MovieDrive_API = firstRedirectUrl?.let { redirect ->
-            app.get(redirect, allowRedirects = false)
-                .document
-                .selectFirst("a[href]")
-                ?.attr("href")
-        }
-
         val url = "$MovieDrive_API/search/$title"
         val res = app.get(url, interceptor = wpRedisInterceptor).document
         res.select("li.thumb > figcaption > a").amap {

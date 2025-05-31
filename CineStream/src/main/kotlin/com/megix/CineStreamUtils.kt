@@ -146,7 +146,7 @@ suspend fun NFBypass(mainUrl : String): String {
     if(NfCookie != "") {
         return NfCookie
     }
-    val homePageDocument = app.get("${mainUrl}/mobile/home", timeout = 10000L).document
+    val homePageDocument = app.get("${mainUrl}/mobile/home").document
     val addHash          = homePageDocument.select("body").attr("data-addhash")
     val time             = homePageDocument.select("body").attr("data-time")
 
@@ -155,15 +155,14 @@ suspend fun NFBypass(mainUrl : String): String {
     // val hashDigits       = addHash.filter { it.isDigit() }
     // val first16Digits    = hashDigits.take(16)
     // app.get("${verificationUrl}&t=0.${first16Digits}")
-    val res = app.get(verificationUrl + "&t=${time}")
+    app.get(verificationUrl + "&t=${time}")
 
     var verifyCheck: String
     var verifyResponse: NiceResponse
     var tries = 0
-    delay(15000)
 
     do {
-        delay(1000)
+        delay(3000)
         tries++
         val requestBody = FormBody.Builder().add("verify", addHash).build()
         verifyResponse  = app.post("${mainUrl}/mobile/verify2.php", requestBody = requestBody)
