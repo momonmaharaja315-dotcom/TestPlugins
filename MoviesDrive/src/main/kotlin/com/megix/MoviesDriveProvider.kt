@@ -54,7 +54,7 @@ class MoviesDriveProvider : MainAPI() { // all providers must be an instance of 
         page: Int,
         request: MainPageRequest
     ): HomePageResponse {
-        val document = app.get(request.data + page).document
+        val document = app.get("${basemainUrl ?: mainUrl}${request.data}${page}").document
         val home = document.select("ul.recent-movies > li").mapNotNull {
             it.toSearchResult()
         }

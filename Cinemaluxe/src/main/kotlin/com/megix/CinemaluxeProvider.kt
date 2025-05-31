@@ -8,6 +8,9 @@ import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.lagradost.cloudstream3.base64Decode
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
 class CinemaluxeProvider : MainAPI() { // all providers must be an instance of MainAPI
     override var mainUrl = "https://cinemalux.space"
@@ -101,41 +104,41 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
             "movie"
         }
 
-        if(tvType == "series") {
+        if (tvType == "series") {
             val tvSeriesEpisodes = mutableListOf<Episode>()
             val aTags = document.select("div.wp-content div.ep-button-container > a")
-            val episodesMap: MutableMap<Pair<Int, Int>, List<String>> = mutableMapOf()
+            val episodesMap: MutableMap<Pair<Int, Int>, MutableList<String>> = mutableMapOf()
 
-            aTags.mapNotNull{ aTag ->
-                val seasonText = aTag.text()
-                val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
-                val matchResult = realSeasonRegex.find(seasonText)
-                val realSeason = matchResult?.groupValues?.get(1)?.toIntOrNull() ?: 0
-                val seasonLink = bypass(aTag.attr("href"))
-                val doc = app.get(seasonLink).document
-                var innerATags = doc.select("div.ep-button-container > a:matches((?i)(Episode))")
-                
-                innerATags.mapNotNull { innerATag ->
-                    val epText = innerATag.text()
-                    val e = Regex("""(?i)(?:episode\s*[-]?\s*)(\d{1,2})""").find(epText)?.groups?.get(1)?.value ?.toIntOrNull() ?: 0
-                    val epUrl = innerATag.attr("href")
-                    val key = Pair(realSeason, e)
-                    if (episodesMap.containsKey(key)) {
-                        val currentList = episodesMap[key] ?: emptyList()
-                        val newList = currentList.toMutableList()
-                        newList.add(epUrl)
-                        episodesMap[key] = newList
-                    } else {
-                        episodesMap[key] = mutableListOf(epUrl)
+            coroutineScope {
+                aTags.map { aTag ->
+                    async {
+                        val seasonText = aTag.text()
+                        val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
+                        val matchResult = realSeasonRegex.find(seasonText)
+                        val realSeason = matchResult?.groupValues?.get(1)?.toIntOrNull() ?: 0
+
+                        val seasonLink = bypass(aTag.attr("href"))
+                        val doc = app.get(seasonLink).document
+                        val innerATags = doc.select("div.ep-button-container > a:matches((?i)(Episode))")
+
+                        for (innerATag in innerATags) {
+                            val epText = innerATag.text()
+                            val epNumber = Regex("""(?i)(?:episode\s*[-]?\s*)(\d{1,2})""")
+                                .find(epText)?.groups?.get(1)?.value?.toIntOrNull() ?: 0
+                            val epUrl = innerATag.attr("href")
+                            val key = Pair(realSeason, epNumber)
+
+                            synchronized(episodesMap) {
+                                episodesMap.getOrPut(key) { mutableListOf() }.add(epUrl)
+                            }
+                        }
                     }
-                }
+                }.awaitAll()
             }
 
             for ((key, value) in episodesMap) {
-                val data = value.map { source->
-                    EpisodeLink(
-                        source
-                    )
+                val data = value.map { source ->
+                    EpisodeLink(source)
                 }
                 tvSeriesEpisodes.add(
                     newEpisode(data) {
@@ -144,6 +147,7 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
                     }
                 )
             }
+
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, tvSeriesEpisodes) {
                 this.posterUrl = posterUrl
                 this.plot = description
@@ -151,12 +155,16 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
         }
         else {
             val buttons = document.select("div.wp-content div.ep-button-container > a")
-            val data = buttons.map { button ->
-                val link = bypass(button.attr("href"))
-                EpisodeLink(
-                    link
-                )
+
+            val data = coroutineScope {
+                buttons.map { button ->
+                    async {
+                        val link = bypass(button.attr("href"))
+                        EpisodeLink(link)
+                    }
+                }.awaitAll()
             }
+
             return newMovieLoadResponse(title, url, TvType.Movie, data) {
                 this.posterUrl = posterUrl
                 this.plot = description
