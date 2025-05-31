@@ -16,7 +16,6 @@ import com.lagradost.api.Log
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import android.content.Context
 import com.lagradost.cloudstream3.network.CloudflareKiller
 import com.megix.CineStreamExtractors.invokeVegamovies
 import com.megix.CineStreamExtractors.invokeMoviesmod
@@ -66,7 +65,7 @@ import com.megix.CineStreamExtractors.invokeGojo
 import com.megix.CineStreamExtractors.invokeSudatchi
 import com.megix.CineStreamExtractors.invokePhoenix
 
-open class CineStreamProvider(private val context: Context) : MainAPI() {
+open class CineStreamProvider : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
     override var name = "CineStream"
     override val hasMainPage = true
@@ -328,7 +327,26 @@ open class CineStreamProvider(private val context: Context) : MainAPI() {
         val tmdbId = if(!isKitsu && isTMDB) id.replace("tmdb:", "").toIntOrNull() else movieData?.meta?.moviedb_id
         id = if(!isKitsu && isTMDB) movieData?.meta?.imdb_id.toString() else id
         var description = movieData?.meta?.description.toString()
-        val cast : List<String> = movieData?.meta?.cast ?: emptyList()
+
+        val actors = if (!movieData?.meta?.cast.isNullOrEmpty()) {
+            movieData?.meta?.cast?.mapNotNull { name ->
+                ActorData(
+                    actor = Actor(name, null),
+                    roleString = null
+                )
+            } ?: emptyList()
+        } else {
+            movieData?.meta?.app_extras?.cast?.mapNotNull { cast ->
+                val name = cast.name ?: return@mapNotNull null
+                val image = cast.photo
+                val role = cast.character
+                ActorData(
+                    actor = Actor(name, image),
+                    roleString = role
+                )
+            } ?: emptyList()
+        }
+
         val genre : List<String> = movieData?.meta?.genre ?: movieData?.meta?.genres ?: emptyList()
         val background = movieData?.meta?.background.toString()
         val isCartoon = genre.any { it.contains("Animation", true) }
@@ -369,7 +387,7 @@ open class CineStreamProvider(private val context: Context) : MainAPI() {
                 this.backgroundPosterUrl = background
                 this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
                 this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else if(meta_url == mediaFusion) "Mediafusion" else "IMDB"
-                addActors(cast)
+                this.actors = actors
                 addAniListId(anilistId)
                 addMalId(malId)
                 addImdbId(id)
@@ -419,7 +437,7 @@ open class CineStreamProvider(private val context: Context) : MainAPI() {
                     this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
                     this.rating = imdbRating.toRatingInt()
                     this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else if(meta_url == mediaFusion) "Mediafusion" else "IMDB"
-                    addActors(cast)
+                    this.actors = actors
                     addAniListId(anilistId)
                     addMalId(malId)
                     addImdbId(id)
@@ -435,7 +453,7 @@ open class CineStreamProvider(private val context: Context) : MainAPI() {
                 this.backgroundPosterUrl = background
                 this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
                 this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else if(meta_url == mediaFusion) "Mediafusion" else "IMDB"
-                addActors(cast)
+                this.actors = actors
                 addImdbId(id)
             }
         }
@@ -512,11 +530,22 @@ open class CineStreamProvider(private val context: Context) : MainAPI() {
         val status: String?,
         val runtime: String?,
         val cast: List<String>?,
+        val app_extras: AppExtras? = null,
         val language: String?,
         val country: String?,
         val imdbRating: String?,
         val year: String?,
         val videos: List<EpisodeDetails>?,
+    )
+
+    data class AppExtras (
+        val cast: List<Cast> = emptyList()
+    )
+
+    data class Cast (
+        val name      : String? = null,
+        val character : String? = null,
+        val photo     : String? = null
     )
 
     data class SearchResult(
@@ -652,14 +681,8 @@ open class CineStreamProvider(private val context: Context) : MainAPI() {
         runAllAsync(
             { if (!isBollywood) invokeVegamovies("VegaMovies", res.id, res.season, res.episode, subtitleCallback, callback) },
             { if (isBollywood) invokeVegamovies("RogMovies", res.id, res.season, res.episode, subtitleCallback, callback) },
-            {
-                val NfCookie = NFBypass(context, netflixAPI)
-                invokeNetflix(res.title, year, res.season, res.episode, NfCookie, subtitleCallback, callback)
-            },
-            {
-                val NfCookie = NFBypass(context, netflixAPI)
-                invokePrimeVideo(res.title, year, res.season, res.episode, NfCookie, subtitleCallback, callback)
-            },
+            { invokeNetflix(res.title, year, res.season, res.episode, subtitleCallback, callback) },
+            { invokePrimeVideo(res.title, year, res.season, res.episode, subtitleCallback, callback) },
             { if (res.season == null) invokeStreamify(res.id, callback) },
             { invokeMultimovies(multimoviesAPI, res.title, res.season, res.episode, subtitleCallback, callback) },
             { if (isBollywood) invokeTopMovies(res.title, year, res.season, res.episode, subtitleCallback, callback) },

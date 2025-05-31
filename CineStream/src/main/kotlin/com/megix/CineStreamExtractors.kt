@@ -25,7 +25,6 @@ import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import java.net.URI
 import com.lagradost.cloudstream3.utils.JsUnpacker
 import com.lagradost.cloudstream3.USER_AGENT
-import android.content.Context
 
 object CineStreamExtractors : CineStreamProvider() {
 
@@ -56,6 +55,37 @@ object CineStreamExtractors : CineStreamProvider() {
                 this.headers = headers
             }
         )
+
+        val subsJson = JSONArray(jsonObject.getString("subtitlesJson"))
+
+        callback.invoke(
+            newExtractorLink(
+                "subsJson",
+                "subsJson",
+                subsJson.toString(),
+            )
+        )
+
+        for (i in 0 until subsJson.length()) {
+            val sub = subsJson.getJSONObject(i)
+
+            callback.invoke(
+                newExtractorLink(
+                    "sub",
+                    "subs",
+                    sub.toString(),
+                )
+            )
+
+            val file = "https://ipfs.sudatchi.com${sub.getString("url")}"
+            val label = sub.getJSONObject("SubtitlesName").getString("name")
+            subtitleCallback.invoke(
+                SubtitleFile(
+                    "sud $label",
+                    file
+                )
+            )
+        }
     }
 
     suspend fun invokeGojo(
@@ -78,12 +108,8 @@ object CineStreamExtractors : CineStreamProvider() {
                 for (i in 0 until sourcesArray.length()) {
                     val source = sourcesArray.getJSONObject(i)
                     val quality = source.getString("quality").replace("p", "").toIntOrNull()
-                    val fullUrl = source.getString("url")
-                    val url = if (fullUrl.startsWith("https://pahe.gojo.live/")) {
-                        fullUrl.removePrefix("https://pahe.gojo.live/")
-                    } else {
-                        fullUrl
-                    }
+                    val fullUrl = source.getString("url").substringAfterLast("https:")
+                    val url = "https:" + fullUrl
                     val videoType = if (source.has("type")) source.getString("type") else "m3u8"
 
                     callback.invoke(
@@ -201,6 +227,7 @@ object CineStreamExtractors : CineStreamProvider() {
         )
 
         val json = app.get(url, headers = headers).text
+
         callback.invoke(
             newExtractorLink(
                 "json",
@@ -208,6 +235,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 json,
             )
         )
+
         val sourceUrl = JSONObject(json).getString("url")
 
         callback.invoke(
@@ -606,11 +634,12 @@ object CineStreamExtractors : CineStreamProvider() {
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
-        NfCookie: String,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        //if(netflixAPI.isEmpty()) return
+        if(netflixAPI.isEmpty()) return
+
+        NfCookie = NFBypass(netflixAPI)
 
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
@@ -681,13 +710,12 @@ object CineStreamExtractors : CineStreamProvider() {
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
-        NfCookie: String,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        //if(netflixAPI.isEmpty()) return
+        if(netflixAPI.isEmpty()) return
 
-        //val NfCookie = NFBypass(context, netflixAPI)
+        NfCookie = NFBypass(netflixAPI)
 
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
@@ -994,11 +1022,7 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        val searchQuery = if(season == null) {
-            "$title $year"
-        } else {
-            "$title season $season"
-        }
+        val searchQuery = "$title $year".trim()
         val searchUrl = "$movies4uAPI/?s=$searchQuery"
 
         val searchDoc = app.get(searchUrl).document

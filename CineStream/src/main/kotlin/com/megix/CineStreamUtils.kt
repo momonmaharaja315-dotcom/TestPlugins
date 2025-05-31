@@ -33,8 +33,6 @@ import javax.crypto.spec.SecretKeySpec
 import com.lagradost.cloudstream3.runAllAsync
 import kotlin.math.pow
 import kotlin.random.Random
-import android.content.Context
-import android.content.SharedPreferences
 
 val SPEC_OPTIONS = mapOf(
     "quality" to listOf(
@@ -142,45 +140,21 @@ fun String.getHost(): String {
     return fixTitle(URI(this).host.substringBeforeLast(".").substringAfterLast("."))
 }
 
-object CineStreamPrefs {
-    private const val PREF_NAME = "cine_stream_prefs"
-    private const val KEY_COOKIE = "nf_cookie"
-    private const val KEY_TIMESTAMP = "nf_cookie_timestamp"
+var NfCookie = ""
 
-    fun saveCookie(context: Context, cookie: String) {
-        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        prefs.edit().putString(KEY_COOKIE, cookie)
-            .putLong(KEY_TIMESTAMP, System.currentTimeMillis())
-            .apply()
+suspend fun NFBypass(mainUrl : String): String {
+    if(NfCookie != "") {
+        return NfCookie
     }
-
-    fun getCookie(context: Context): String {
-        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return prefs.getString(KEY_COOKIE, "") ?: ""
-    }
-
-    fun getLastUpdate(context: Context): Long {
-        val prefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-        return prefs.getLong(KEY_TIMESTAMP, 0L)
-    }
-}
-
-suspend fun NFBypass(context: Context, mainUrl: String): String {
-    val savedCookie = CineStreamPrefs.getCookie(context)
-    val lastUpdated = CineStreamPrefs.getLastUpdate(context)
-    val currentTime = System.currentTimeMillis()
-    val twentyFourHours = 24 * 60 * 60 * 1000
-
-    if (savedCookie.isNotEmpty() && currentTime - lastUpdated < twentyFourHours) {
-        return savedCookie
-    }
-
     val homePageDocument = app.get("${mainUrl}/mobile/home").document
-    val addHash = homePageDocument.select("body").attr("data-addhash")
-    val time = homePageDocument.select("body").attr("data-time")
+    val addHash          = homePageDocument.select("body").attr("data-addhash")
+    val time             = homePageDocument.select("body").attr("data-time")
 
-    var verificationUrl = "https://raw.githubusercontent.com/SaurabhKaperwan/Utils/refs/heads/main/NF.json"
-    verificationUrl = app.get(verificationUrl).parsed<NFVerifyUrl>().url.replace("###", addHash)
+    var verificationUrl  = "https://raw.githubusercontent.com/SaurabhKaperwan/Utils/refs/heads/main/NF.json"
+    verificationUrl      = app.get(verificationUrl).parsed<NFVerifyUrl>().url.replace("###", addHash)
+    // val hashDigits       = addHash.filter { it.isDigit() }
+    // val first16Digits    = hashDigits.take(16)
+    // app.get("${verificationUrl}&t=0.${first16Digits}")
     app.get(verificationUrl + "&t=${time}")
 
     var verifyCheck: String
@@ -191,17 +165,12 @@ suspend fun NFBypass(context: Context, mainUrl: String): String {
         delay(1000)
         tries++
         val requestBody = FormBody.Builder().add("verify", addHash).build()
-        verifyResponse = app.post("${mainUrl}/mobile/verify2.php", requestBody = requestBody)
-        verifyCheck = verifyResponse.text
-    } while (!verifyCheck.contains("\"statusup\":\"All Done\"") && tries < 7)
+        verifyResponse  = app.post("${mainUrl}/mobile/verify2.php", requestBody = requestBody)
+        verifyCheck     = verifyResponse.text
+    } while (!verifyCheck.contains("\"statusup\":\"All Done\"") || tries < 7)
 
-    val cookie = verifyResponse.cookies["t_hash_t"].orEmpty()
-
-    CineStreamPrefs.saveCookie(context, cookie)
-
-    return cookie
+    return verifyResponse.cookies["t_hash_t"].orEmpty()
 }
-
 
 suspend fun cinemaluxeBypass(url: String): String {
     val text = app.get(url).text
