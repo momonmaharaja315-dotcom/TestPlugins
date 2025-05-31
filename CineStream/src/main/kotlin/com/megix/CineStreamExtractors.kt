@@ -25,6 +25,7 @@ import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import java.net.URI
 import com.lagradost.cloudstream3.utils.JsUnpacker
 import com.lagradost.cloudstream3.USER_AGENT
+import android.content.Context
 
 object CineStreamExtractors : CineStreamProvider() {
 
@@ -172,7 +173,7 @@ object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun invokePhoenix(
         title: String? = null,
-        imdbId: Int? = null,
+        imdbId: String? = null,
         tmdbId: Int? = null,
         year: Int? = null,
         season: Int? = null,
@@ -191,8 +192,31 @@ object CineStreamExtractors : CineStreamProvider() {
             "$xprimeAPI/phoenix?name=$title&year=$year&id=$tmdbId&imdb=imdbId&season=$season&episode=$episode"
         }
 
+        callback.invoke(
+            newExtractorLink(
+                "url",
+                "url",
+                url,
+            )
+        )
+
         val json = app.get(url, headers = headers).text
+        callback.invoke(
+            newExtractorLink(
+                "json",
+                "json",
+                json,
+            )
+        )
         val sourceUrl = JSONObject(json).getString("url")
+
+        callback.invoke(
+            newExtractorLink(
+                "sourceUrl",
+                "sourceUrl",
+                sourceUrl,
+            )
+        )
 
         M3u8Helper.generateM3u8(
             "Phoenix",
@@ -587,7 +611,7 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         if(netflixAPI.isEmpty()) return
 
-        NfCookie = NFBypass(netflixAPI)
+        val NfCookie = NFBypass(context, netflixAPI)
 
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
@@ -663,7 +687,7 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         if(netflixAPI.isEmpty()) return
 
-        NfCookie = NFBypass(netflixAPI)
+        val NfCookie = NFBypass(context, netflixAPI)
 
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
@@ -970,7 +994,11 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        val searchQuery = "$title $year".trim()
+        val searchQuery = if(season == null) {
+            "$title $year"
+        } else {
+            "$title season $season"
+        }
         val searchUrl = "$movies4uAPI/?s=$searchQuery"
 
         val searchDoc = app.get(searchUrl).document

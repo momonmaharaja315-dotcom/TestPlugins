@@ -65,7 +65,7 @@ import com.megix.CineStreamExtractors.invokeGojo
 import com.megix.CineStreamExtractors.invokeSudatchi
 import com.megix.CineStreamExtractors.invokePhoenix
 
-open class CineStreamProvider : MainAPI() {
+open class CineStreamProvider(private val context: Context) : MainAPI() {
     override var mainUrl = "https://cinemeta-catalogs.strem.io"
     override var name = "CineStream"
     override val hasMainPage = true
