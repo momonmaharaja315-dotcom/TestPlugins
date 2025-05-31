@@ -105,7 +105,7 @@ suspend fun bypass(context: Context, mainUrl: String): String {
     var tries = 0
 
     do {
-        delay(1000)
+        delay(10000)
         tries++
         val requestBody = FormBody.Builder().add("verify", addHash).build()
         verifyResponse = app.post("${mainUrl}/mobile/verify2.php", requestBody = requestBody)
