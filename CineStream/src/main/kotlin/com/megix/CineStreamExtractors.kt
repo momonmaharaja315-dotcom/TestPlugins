@@ -618,7 +618,7 @@ object CineStreamExtractors : CineStreamProvider() {
         )
         val headers = mapOf("X-Requested-With" to "XMLHttpRequest")
         val url = "$netflixAPI/mobile/pv/search.php?s=$title&t=${APIHolder.unixTime}"
-        val data = app.get(url, headers = headers, cookies = cookies, timeout = 1000L).parsedSafe<NfSearchData>()
+        val data = app.get(url, headers = headers, cookies = cookies, timeout = 10000L).parsedSafe<NfSearchData>()
         val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals(title.trim(), ignoreCase = true) }?.id
 
         val (nfTitle, id) = app.get(
@@ -626,7 +626,7 @@ object CineStreamExtractors : CineStreamProvider() {
             headers = headers,
             cookies = cookies,
             referer = "$netflixAPI/",
-            timeout = 1000L
+            timeout = 10000L
         ).parsedSafe<NetflixResponse>().let { media ->
             if (season == null && year.toString() == media?.year.toString()) {
                 media?.title to netflixId
@@ -641,7 +641,7 @@ object CineStreamExtractors : CineStreamProvider() {
                         headers = headers,
                         cookies = cookies,
                         referer = "$netflixAPI/",
-                        timeout = 1000L
+                        timeout = 10000L
                     ).parsedSafe<NetflixResponse>()
                     episodeId = data?.episodes?.find { it.ep == "E$episode" }?.id
                     if(data?.nextPageShow != 1) { break }
@@ -660,7 +660,7 @@ object CineStreamExtractors : CineStreamProvider() {
             headers = headers,
             cookies = cookies,
             referer = "$netflixAPI/",
-            timeout = 1000L
+            timeout = 10000L
         ).text.let {
             tryParseJson<ArrayList<NetflixResponse>>(it)
         }?.firstOrNull()?.sources?.map {
@@ -704,7 +704,7 @@ object CineStreamExtractors : CineStreamProvider() {
             headers = headers,
             cookies = cookies,
             referer = "$netflixAPI/",
-            timeout = 1000L
+            timeout = 10000L
         ).parsedSafe<NetflixResponse>().let { media ->
             if (season == null && year.toString() == media?.year.toString()) {
                 media?.title to netflixId
@@ -718,7 +718,7 @@ object CineStreamExtractors : CineStreamProvider() {
                         headers = headers,
                         cookies = cookies,
                         referer = "$netflixAPI/",
-                        timeout = 1000L
+                        timeout = 10000L
                     ).parsedSafe<NetflixResponse>()
                     episodeId = data?.episodes?.find { it.ep == "E$episode" }?.id
                     if(data?.nextPageShow != 1) { break }
@@ -736,7 +736,7 @@ object CineStreamExtractors : CineStreamProvider() {
             headers = headers,
             cookies = cookies,
             referer = "$netflixAPI/",
-            timeout = 1000L
+            timeout = 10000L
         ).text.let {
             tryParseJson<ArrayList<NetflixResponse>>(it)
         }?.firstOrNull()?.sources?.map {

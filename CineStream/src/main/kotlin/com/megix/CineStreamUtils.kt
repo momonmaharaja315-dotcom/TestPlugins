@@ -146,7 +146,7 @@ suspend fun NFBypass(mainUrl : String): String {
     if(NfCookie != "") {
         return NfCookie
     }
-    val homePageDocument = app.get("${mainUrl}/mobile/home").document
+    val homePageDocument = app.get("${mainUrl}/mobile/home", timeout = 10000L).document
     val addHash          = homePageDocument.select("body").attr("data-addhash")
     val time             = homePageDocument.select("body").attr("data-time")
 
@@ -160,7 +160,7 @@ suspend fun NFBypass(mainUrl : String): String {
     var verifyCheck: String
     var verifyResponse: NiceResponse
     var tries = 0
-    delay(12000)
+    delay(15000)
 
     do {
         delay(1000)
