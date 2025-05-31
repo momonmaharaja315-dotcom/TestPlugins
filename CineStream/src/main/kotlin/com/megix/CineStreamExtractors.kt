@@ -58,27 +58,18 @@ object CineStreamExtractors : CineStreamProvider() {
 
         val subsJson = JSONArray(jsonObject.getString("subtitlesJson"))
 
-        callback.invoke(
-            newExtractorLink(
-                "subsJson",
-                "subsJson",
-                subsJson.toString(),
-            )
-        )
-
         for (i in 0 until subsJson.length()) {
             val sub = subsJson.getJSONObject(i)
-
+            val subUrl = sub.getString("url").replace("\\", "")
+            val file = "https://ipfs.sudatchi.com/$subUrl"
+            val label = sub.getJSONObject("SubtitlesName").getString("name")
             callback.invoke(
                 newExtractorLink(
-                    "sub",
-                    "subs",
-                    sub.toString(),
+                    "label",
+                    "label",
+                    file,
                 )
             )
-
-            val file = "https://ipfs.sudatchi.com${sub.getString("url")}"
-            val label = sub.getJSONObject("SubtitlesName").getString("name")
             subtitleCallback.invoke(
                 SubtitleFile(
                     "sud $label",
@@ -213,9 +204,9 @@ object CineStreamExtractors : CineStreamProvider() {
         )
 
         val url = if(season == null) {
-            "$xprimeAPI/phoenix?name=$title&year=$year&id=$tmdbId&imdb=imdbId"
+            "$xprimeAPI/phoenix?name=$title&year=$year&id=$tmdbId&imdb=$imdbId"
         } else {
-            "$xprimeAPI/phoenix?name=$title&year=$year&id=$tmdbId&imdb=imdbId&season=$season&episode=$episode"
+            "$xprimeAPI/phoenix?name=$title&year=$year&id=$tmdbId&imdb=$imdbId&season=$season&episode=$episode"
         }
 
         callback.invoke(
