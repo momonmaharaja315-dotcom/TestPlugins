@@ -606,12 +606,11 @@ object CineStreamExtractors : CineStreamProvider() {
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
+        NfCookie: String,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        if(netflixAPI.isEmpty()) return
-
-        val NfCookie = NFBypass(context, netflixAPI)
+        //if(netflixAPI.isEmpty()) return
 
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
@@ -682,12 +681,13 @@ object CineStreamExtractors : CineStreamProvider() {
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
+        NfCookie: String,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        if(netflixAPI.isEmpty()) return
+        //if(netflixAPI.isEmpty()) return
 
-        val NfCookie = NFBypass(context, netflixAPI)
+        //val NfCookie = NFBypass(context, netflixAPI)
 
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
