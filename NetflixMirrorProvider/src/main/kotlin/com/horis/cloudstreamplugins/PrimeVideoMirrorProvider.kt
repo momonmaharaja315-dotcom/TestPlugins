@@ -17,9 +17,8 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import org.jsoup.nodes.Element
 import com.lagradost.cloudstream3.APIHolder.unixTime
-import android.content.Context
 
-class PrimeVideoMirrorProvider(private val context: Context) : MainAPI() {
+class PrimeVideoMirrorProvider : MainAPI() {
     override val supportedTypes = setOf(
         TvType.Movie,
         TvType.TvSeries,
@@ -36,7 +35,7 @@ class PrimeVideoMirrorProvider(private val context: Context) : MainAPI() {
     )
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse? {
-        cookie_value = if(cookie_value.isEmpty()) bypass(context, mainUrl) else cookie_value
+        cookie_value = if(cookie_value.isEmpty()) bypass(mainUrl) else cookie_value
         val cookies = mapOf(
             "t_hash_t" to cookie_value,
             "ott" to "pv",
@@ -72,7 +71,7 @@ class PrimeVideoMirrorProvider(private val context: Context) : MainAPI() {
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
-        cookie_value = if(cookie_value.isEmpty()) bypass(context, mainUrl) else cookie_value
+        cookie_value = if(cookie_value.isEmpty()) bypass(mainUrl) else cookie_value
         val cookies = mapOf(
             "t_hash_t" to cookie_value,
             "ott" to "pv",
@@ -91,7 +90,7 @@ class PrimeVideoMirrorProvider(private val context: Context) : MainAPI() {
 
     override suspend fun load(url: String): LoadResponse? {
         val id = parseJson<Id>(url).id
-        cookie_value = if(cookie_value.isEmpty()) bypass(context, mainUrl) else cookie_value
+        cookie_value = if(cookie_value.isEmpty()) bypass(mainUrl) else cookie_value
         val cookies = mapOf(
             "t_hash_t" to cookie_value,
             "ott" to "pv",
@@ -99,7 +98,8 @@ class PrimeVideoMirrorProvider(private val context: Context) : MainAPI() {
         )
         val data = app.get(
             "$mainUrl/mobile/pv/post.php?id=$id&t=${APIHolder.unixTime}",
-            headers, referer = "$mainUrl/",
+            headers,
+            referer = "$mainUrl/",
             cookies = cookies,
             timeout = 1000L
         ).parsed<PostData>()
