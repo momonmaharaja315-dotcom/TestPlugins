@@ -61,12 +61,12 @@ object CineStreamExtractors : CineStreamProvider() {
         for (i in 0 until subsJson.length()) {
             val sub = subsJson.getJSONObject(i)
             val subUrl = sub.getString("url").replace("\\", "")
-            val file = "https://ipfs.sudatchi.com/$subUrl"
+            val file = "https://ipfs.sudatchi.com$subUrl"
             val label = sub.getJSONObject("SubtitlesName").getString("name")
             callback.invoke(
                 newExtractorLink(
-                    "label",
-                    "label",
+                    "$label",
+                    "$label",
                     file,
                 )
             )
@@ -209,40 +209,21 @@ object CineStreamExtractors : CineStreamProvider() {
             "$xprimeAPI/phoenix?name=$title&year=$year&id=$tmdbId&imdb=$imdbId&season=$season&episode=$episode"
         }
 
-        callback.invoke(
-            newExtractorLink(
-                "url",
-                "url",
-                url,
-            )
-        )
-
         val json = app.get(url, headers = headers).text
-
-        callback.invoke(
-            newExtractorLink(
-                "json",
-                "json",
-                json,
-            )
-        )
 
         val sourceUrl = JSONObject(json).getString("url")
 
         callback.invoke(
             newExtractorLink(
-                "sourceUrl",
-                "sourceUrl",
+                "Phoenix",
+                "Phoenix",
                 sourceUrl,
-            )
+                type = ExtractorLinkType.M3U8
+            ) {
+                this.referer = xprimeBaseAPI
+                this.headers = headers
+            }
         )
-
-        M3u8Helper.generateM3u8(
-            "Phoenix",
-            sourceUrl,
-            xprimeAPI,
-            headers = headers
-        ).forEach(callback)
     }
 
     suspend fun invokePrimenet(
@@ -266,12 +247,17 @@ object CineStreamExtractors : CineStreamProvider() {
         val json = app.get(url, headers = headers).text
         val sourceUrl = JSONObject(json).getString("url")
 
-        M3u8Helper.generateM3u8(
-            "Primenet",
-            sourceUrl,
-            xprimeAPI,
-            headers = headers
-        ).forEach(callback)
+        callback.invoke(
+            newExtractorLink(
+                "Primenet",
+                "Primenet",
+                sourceUrl,
+                type = ExtractorLinkType.M3U8
+            ) {
+                this.referer = xprimeBaseAPI
+                this.headers = headers
+            }
+        )
     }
 
     suspend fun invokePrimebox(
