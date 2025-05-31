@@ -160,7 +160,7 @@ suspend fun NFBypass(mainUrl : String): String {
     var verifyCheck: String
     var verifyResponse: NiceResponse
     var tries = 0
-
+    delay(15000)
     do {
         delay(1000)
         tries++

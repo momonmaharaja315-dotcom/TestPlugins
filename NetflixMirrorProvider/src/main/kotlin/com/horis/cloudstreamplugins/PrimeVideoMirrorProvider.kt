@@ -42,7 +42,7 @@ class PrimeVideoMirrorProvider(private val context: Context) : MainAPI() {
             "ott" to "pv",
             "hd" to "on"
         )
-        val document = app.get("$mainUrl/mobile/home", cookies = cookies).document
+        val document = app.get("$mainUrl/mobile/home", cookies = cookies, timeout = 1000L).document
         val items = document.select(".tray-container, #top10").map {
             it.toHomePageList()
         }
@@ -79,7 +79,7 @@ class PrimeVideoMirrorProvider(private val context: Context) : MainAPI() {
             "hd" to "on"
         )
         val url = "$mainUrl/mobile/pv/search.php?s=$query&t=${APIHolder.unixTime}"
-        val data = app.get(url, referer = "$mainUrl/", cookies = cookies).parsed<SearchData>()
+        val data = app.get(url, referer = "$mainUrl/", cookies = cookies, timeout = 1000L).parsed<SearchData>()
 
         return data.searchResult.map {
             newAnimeSearchResponse(it.t, Id(it.id).toJson()) {
@@ -98,7 +98,10 @@ class PrimeVideoMirrorProvider(private val context: Context) : MainAPI() {
             "hd" to "on"
         )
         val data = app.get(
-            "$mainUrl/mobile/pv/post.php?id=$id&t=${APIHolder.unixTime}", headers, referer = "$mainUrl/", cookies = cookies
+            "$mainUrl/mobile/pv/post.php?id=$id&t=${APIHolder.unixTime}",
+            headers, referer = "$mainUrl/",
+            cookies = cookies,
+            timeout = 1000L
         ).parsed<PostData>()
 
         val episodes = arrayListOf<Episode>()
@@ -170,7 +173,8 @@ class PrimeVideoMirrorProvider(private val context: Context) : MainAPI() {
                 "$mainUrl/mobile/pv/episodes.php?s=$sid&series=$eid&t=${APIHolder.unixTime}&page=$pg",
                 headers,
                 referer = "$mainUrl/",
-                cookies = cookies
+                cookies = cookies,
+                timeout = 1000L
             ).parsed<EpisodesData>()
             data.episodes?.mapTo(episodes) {
                 newEpisode(LoadData(title, it.id)) {
@@ -203,7 +207,8 @@ class PrimeVideoMirrorProvider(private val context: Context) : MainAPI() {
             "$mainUrl/mobile/pv/playlist.php?id=$id&t=$title&tm=${APIHolder.unixTime}",
             headers,
             referer = "$mainUrl/",
-            cookies = cookies
+            cookies = cookies,
+            timeout = 1000L
         ).parsed<PlayList>()
 
         playlist.forEach { item ->
