@@ -99,13 +99,13 @@ suspend fun bypass(context: Context, mainUrl: String): String {
     var verificationUrl = "https://raw.githubusercontent.com/SaurabhKaperwan/Utils/refs/heads/main/NF.json"
     verificationUrl = app.get(verificationUrl).parsed<VerifyUrl>().url.replace("###", addHash)
     app.get(verificationUrl + "&t=${time}")
-
+    delay(12000)
     var verifyCheck: String
     var verifyResponse: NiceResponse
     var tries = 0
 
     do {
-        delay(10000)
+        delay(1000)
         tries++
         val requestBody = FormBody.Builder().add("verify", addHash).build()
         verifyResponse = app.post("${mainUrl}/mobile/verify2.php", requestBody = requestBody)
