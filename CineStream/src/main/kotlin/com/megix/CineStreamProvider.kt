@@ -73,6 +73,7 @@ open class CineStreamProvider(private val context: Context) : MainAPI() {
     override var lang = "en"
     override val hasDownloadSupport = true
     private val skipMap: MutableMap<String, Int> = mutableMapOf()
+    protected lateinit var context: Context
     val cinemeta_url = "https://v3-cinemeta.strem.io"
     val kitsu_url = "https://anime-kitsu.strem.fun"
     val haglund_url = "https://arm.haglund.dev/api/v2"
@@ -652,8 +653,8 @@ open class CineStreamProvider(private val context: Context) : MainAPI() {
         runAllAsync(
             { if (!isBollywood) invokeVegamovies("VegaMovies", res.id, res.season, res.episode, subtitleCallback, callback) },
             { if (isBollywood) invokeVegamovies("RogMovies", res.id, res.season, res.episode, subtitleCallback, callback) },
-            { invokeNetflix(res.title, year, res.season, res.episode, subtitleCallback, callback, context) },
-            { invokePrimeVideo(res.title, year, res.season, res.episode, subtitleCallback, callback, context) },
+            { invokeNetflix(res.title, year, res.season, res.episode, subtitleCallback, callback) },
+            { invokePrimeVideo(res.title, year, res.season, res.episode, subtitleCallback, callback) },
             { if (res.season == null) invokeStreamify(res.id, callback) },
             { invokeMultimovies(multimoviesAPI, res.title, res.season, res.episode, subtitleCallback, callback) },
             { if (isBollywood) invokeTopMovies(res.title, year, res.season, res.episode, subtitleCallback, callback) },
