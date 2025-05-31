@@ -16,6 +16,7 @@ import com.lagradost.api.Log
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import android.content.Context
 import com.lagradost.cloudstream3.network.CloudflareKiller
 import com.megix.CineStreamExtractors.invokeVegamovies
 import com.megix.CineStreamExtractors.invokeMoviesmod
@@ -651,8 +652,8 @@ open class CineStreamProvider(private val context: Context) : MainAPI() {
         runAllAsync(
             { if (!isBollywood) invokeVegamovies("VegaMovies", res.id, res.season, res.episode, subtitleCallback, callback) },
             { if (isBollywood) invokeVegamovies("RogMovies", res.id, res.season, res.episode, subtitleCallback, callback) },
-            { invokeNetflix(res.title, year, res.season, res.episode, subtitleCallback, callback) },
-            { invokePrimeVideo(res.title, year, res.season, res.episode, subtitleCallback, callback) },
+            { invokeNetflix(res.title, year, res.season, res.episode, subtitleCallback, callback, context) },
+            { invokePrimeVideo(res.title, year, res.season, res.episode, subtitleCallback, callback, context) },
             { if (res.season == null) invokeStreamify(res.id, callback) },
             { invokeMultimovies(multimoviesAPI, res.title, res.season, res.episode, subtitleCallback, callback) },
             { if (isBollywood) invokeTopMovies(res.title, year, res.season, res.episode, subtitleCallback, callback) },

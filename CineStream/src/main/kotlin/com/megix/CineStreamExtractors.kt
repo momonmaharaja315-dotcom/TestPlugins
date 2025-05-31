@@ -608,6 +608,7 @@ object CineStreamExtractors : CineStreamProvider() {
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
+        context: Context
     ) {
         if(netflixAPI.isEmpty()) return
 
@@ -684,6 +685,7 @@ object CineStreamExtractors : CineStreamProvider() {
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
+        context: Context
     ) {
         if(netflixAPI.isEmpty()) return
 
