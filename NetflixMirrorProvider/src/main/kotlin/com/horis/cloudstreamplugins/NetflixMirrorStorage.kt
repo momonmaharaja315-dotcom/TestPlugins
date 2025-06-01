@@ -1,4 +1,4 @@
-package com.megix
+package com.horis.cloudstreamplugins
 
 import android.content.Context
 import android.content.SharedPreferences

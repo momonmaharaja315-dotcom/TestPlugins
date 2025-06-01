@@ -2178,8 +2178,8 @@ object CineStreamExtractors : CineStreamProvider() {
                                     server.hls == null -> {
                                         callback.invoke(
                                             newExtractorLink(
-                                                "Allanime [${i.uppercase()}] ${host.replaceFirstChar()}",
-                                                "Allanime [${i.uppercase()}] ${host.replaceFirstChar()}",
+                                                "Allanime [${i.uppercase()}] ${host.replaceFirstChar { it.uppercase() }}",
+                                                "Allanime [${i.uppercase()}] ${host.replaceFirstChar { it.uppercase() }}",
                                                 server.link,
                                                 INFER_TYPE
                                             )
