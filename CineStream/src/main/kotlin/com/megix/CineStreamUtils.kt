@@ -145,8 +145,8 @@ suspend fun NFBypass(mainUrl: String): String {
     // Check persistent storage first
     val (savedCookie, savedTimestamp) = CineStreamStorage.getCookie()
 
-    // Return cached cookie if valid (≤24 hours old)
-    if (!savedCookie.isNullOrEmpty() && System.currentTimeMillis() - savedTimestamp < 86_400_000) {
+    // Return cached cookie if valid (≤15 hours old)
+    if (!savedCookie.isNullOrEmpty() && System.currentTimeMillis() - savedTimestamp < 54_000_000) {
         return savedCookie
     }
 
@@ -163,6 +163,7 @@ suspend fun NFBypass(mainUrl: String): String {
         var verifyCheck: String
         var verifyResponse: NiceResponse
         var tries = 0
+        delay(5000)
 
         do {
             delay(1000)
