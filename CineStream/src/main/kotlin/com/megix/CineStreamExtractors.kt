@@ -608,24 +608,7 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         if(netflixAPI.isEmpty()) return
-        callback.invoke(
-            newExtractorLink(
-                "netflixAPI",
-                "netflixAPI",
-                netflixAPI
-            )
-        )
-
         val NfCookie = NFBypass(netflixAPI)
-
-        callback.invoke(
-            newExtractorLink(
-                "NfCookie",
-                "NfCookie",
-                NfCookie
-            )
-        )
-
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
             "ott" to "pv",

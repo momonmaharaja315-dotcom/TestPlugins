@@ -102,8 +102,6 @@ suspend fun bypass(mainUrl: String): String {
 
         var verifyCheck: String
         var verifyResponse: NiceResponse
-        var tries = 0
-        delay(5000)
 
         do {
             delay(1000)
@@ -111,7 +109,7 @@ suspend fun bypass(mainUrl: String): String {
             val requestBody = FormBody.Builder().add("verify", addHash).build()
             verifyResponse = app.post("${mainUrl}/mobile/verify2.php", requestBody = requestBody)
             verifyCheck = verifyResponse.text
-        } while (!verifyCheck.contains("\"statusup\":\"All Done\"") && tries < 12)
+        } while (!verifyCheck.contains("\"statusup\":\"All Done\""))
 
         verifyResponse.cookies["t_hash_t"].orEmpty()
     } catch (e: Exception) {
