@@ -97,7 +97,7 @@ suspend fun bypass(mainUrl: String): String {
         val time = homePageDocument.select("body").attr("data-time")
 
         var verificationUrl = "https://raw.githubusercontent.com/SaurabhKaperwan/Utils/refs/heads/main/NF.json"
-        verificationUrl = app.get(verificationUrl).parsed<NFVerifyUrl>().url.replace("###", addHash)
+        verificationUrl = app.get(verificationUrl).parsed<VerifyUrl>().url.replace("###", addHash)
         app.get("$verificationUrl&t=$time")
 
         var verifyCheck: String
