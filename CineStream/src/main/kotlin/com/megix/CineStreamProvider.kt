@@ -124,7 +124,7 @@ open class CineStreamProvider : MainAPI() {
                 runCatching {
                     JSONObject(app.get("https://raw.githubusercontent.com/SaurabhKaperwan/Utils/refs/heads/main/urls.json").text)
                 }.getOrElse {
-                    Log.e("CineStream", "Error loading API URLs", it)
+                    Log.e("CineStream", "Error loading API URLs")
                     JSONObject()
                 }
             }
