@@ -1,24 +1,22 @@
 package com.megix
 
 import android.content.Context
-import androidx.core.content.edit
+import android.content.SharedPreferences
 
 object CineStreamStorage {
     private lateinit var context: Context
+    private lateinit var prefs: SharedPreferences
 
     fun init(context: Context) {
         this.context = context.applicationContext
-    }
-
-    private val prefs by lazy {
-        context.getSharedPreferences("CineStreamPrefs", Context.MODE_PRIVATE)
+        this.prefs = context.getSharedPreferences("CineStreamPrefs", Context.MODE_PRIVATE)
     }
 
     fun saveCookie(cookie: String) {
-        prefs.edit {
-            putString("nf_cookie", cookie)
-            putLong("nf_cookie_timestamp", System.currentTimeMillis())
-        }
+        val editor = prefs.edit()
+        editor.putString("nf_cookie", cookie)
+        editor.putLong("nf_cookie_timestamp", System.currentTimeMillis())
+        editor.apply()
     }
 
     fun getCookie(): Pair<String?, Long> {
@@ -27,11 +25,11 @@ object CineStreamStorage {
             prefs.getLong("nf_cookie_timestamp", 0L)
         )
     }
-    
+
     fun clearCookie() {
-        prefs.edit {
-            remove("nf_cookie")
-            remove("nf_cookie_timestamp")
-        }
+        val editor = prefs.edit()
+        editor.remove("nf_cookie")
+        editor.remove("nf_cookie_timestamp")
+        editor.apply()
     }
 }
