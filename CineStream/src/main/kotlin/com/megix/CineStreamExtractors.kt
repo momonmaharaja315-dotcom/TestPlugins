@@ -518,7 +518,7 @@ object CineStreamExtractors : CineStreamProvider() {
             if(episode == null) {
                 doc.select("a.maxbutton").amap {
                     val res = app.get(it.attr("href"), timeout = 50L).document
-                    val link = res.select("h3 > a").attr("href")
+                    val link = res.select("a.get-link-btn").attr("href")
                     getHindMoviezLinks(source, link, callback)
                 }
             }
