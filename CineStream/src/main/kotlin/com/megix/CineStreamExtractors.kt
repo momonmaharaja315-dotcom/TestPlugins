@@ -609,7 +609,7 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         if(netflixAPI.isEmpty()) return
 
-        NfCookie = NFBypass(netflixAPI)
+        val NfCookie = NFBypass(netflixAPI)
 
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
@@ -685,7 +685,7 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         if(netflixAPI.isEmpty()) return
 
-        NfCookie = NFBypass(netflixAPI)
+        val = NfCookie = NFBypass(netflixAPI)
 
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
