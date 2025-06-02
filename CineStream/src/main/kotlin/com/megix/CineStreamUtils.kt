@@ -811,7 +811,7 @@ fun evpKDF(password: ByteArray, salt: ByteArray, keySize: Int, ivSize: Int): Pai
 }
 
 fun decryptOpenSSLAES(base64Cipher: String, passphrase: String): String {
-    val cipherData = android.util.Base64.decode(base64Cipher, android.util.Base64..DEFAULT)
+    val cipherData = android.util.Base64.decode(base64Cipher, android.util.Base64.DEFAULT)
 
     // OpenSSL prefix: "Salted__" + 8 bytes salt
     val prefix = cipherData.copyOfRange(0, 8).toString(Charsets.US_ASCII)
