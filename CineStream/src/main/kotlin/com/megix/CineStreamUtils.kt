@@ -1,6 +1,5 @@
 package com.megix
 
-import android.util.Base64
 import com.google.gson.JsonParser
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
