@@ -1494,13 +1494,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = if(season != null) "$api/search?id=$id&season=$season&episode=$episode" else "$api/search?id=$id"
         val json = app.get(url).text
         val data = parseJson<ArrayList<WYZIESubtitle>>(json)
-        callback.invoke(
-            newExtractorLink(
-               "data",
-               "data",
-               data.toString(),
-            )
-        )
+
         data.forEach {
             subtitleCallback.invoke(
                 SubtitleFile(
