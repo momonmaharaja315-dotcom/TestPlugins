@@ -77,16 +77,32 @@ object CineStreamExtractors : CineStreamProvider() {
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit
     ) {
+        callback.invoke(
+            newExtractorLink(
+                "Gojo Url",
+                "Gojo Url",
+                "$gojoAPI ||||| $gojoBaseAPI",
+            )
+        )
         val headers = mapOf(
             "Referer" to gojoBaseAPI,
             "Origin" to gojoBaseAPI,
         )
         val providers = listOf("strix", "pahe")
         val types = listOf("sub", "dub")
-        providers.amap { provider ->
-            types.amap { lang ->
+        providers.forEach { provider ->
+            types.forEach { lang ->
                 val json = app.get("$gojoAPI/api/anime/tiddies?provider=$provider&id=$aniId&num=$episode&subType=$lang&watchId=$episode&dub_id=null", headers = headers).text
                 val jsonObject = JSONObject(json)
+
+                callback.invoke(
+                    newExtractorLink(
+                        "jsonObject",
+                        "jsonObject",
+                        jsonObject.toString(),
+                    )
+                )
+
                 val sourcesArray = jsonObject.getJSONArray("sources")
 
                 for (i in 0 until sourcesArray.length()) {
@@ -1478,6 +1494,13 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = if(season != null) "$api/search?id=$id&season=$season&episode=$episode" else "$api/search?id=$id"
         val json = app.get(url).text
         val data = parseJson<ArrayList<WYZIESubtitle>>(json)
+        callback.invoke(
+            newExtractorLink(
+               "data",
+               "data",
+               data.toString(),
+            )
+        )
         data.forEach {
             subtitleCallback.invoke(
                 SubtitleFile(
