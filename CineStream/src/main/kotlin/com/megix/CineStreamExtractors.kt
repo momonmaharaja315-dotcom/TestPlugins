@@ -77,13 +77,6 @@ object CineStreamExtractors : CineStreamProvider() {
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit
     ) {
-        callback.invoke(
-            newExtractorLink(
-                "Gojo Url",
-                "Gojo Url",
-                "$gojoAPI ||||| $gojoBaseAPI",
-            )
-        )
         val headers = mapOf(
             "Referer" to gojoBaseAPI,
             "Origin" to gojoBaseAPI,
@@ -94,15 +87,6 @@ object CineStreamExtractors : CineStreamProvider() {
             types.forEach { lang ->
                 val json = app.get("$gojoAPI/api/anime/tiddies?provider=$provider&id=$aniId&num=$episode&subType=$lang&watchId=$episode&dub_id=null", headers = headers).text
                 val jsonObject = JSONObject(json)
-
-                callback.invoke(
-                    newExtractorLink(
-                        "jsonObject",
-                        "jsonObject",
-                        jsonObject.toString(),
-                    )
-                )
-
                 val sourcesArray = jsonObject.getJSONArray("sources")
 
                 for (i in 0 until sourcesArray.length()) {
@@ -320,7 +304,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 if (!file.isNullOrBlank() && !label.isNullOrBlank()) {
                     subtitleCallback.invoke(
                         SubtitleFile(
-                            label,
+                            "PrimeBox $label",
                             file
                         )
                     )
@@ -578,7 +562,7 @@ object CineStreamExtractors : CineStreamProvider() {
             it.subtitles.forEach {
                 subtitleCallback.invoke(
                     SubtitleFile(
-                        it.lang,
+                        "streamAsia ${it.lang}",
                         it.url
                     )
                 )
@@ -876,7 +860,7 @@ object CineStreamExtractors : CineStreamProvider() {
         data.subtitles.map {
             subtitleCallback.invoke(
                 SubtitleFile(
-                    it.label,
+                    "${it.label}",
                     it.file,
                 )
             )
@@ -1496,9 +1480,10 @@ object CineStreamExtractors : CineStreamProvider() {
         val data = parseJson<ArrayList<WYZIESubtitle>>(json)
 
         data.forEach {
+            val name = "WYZIE" + it.display ?: it.language ?: "Unknown"
             subtitleCallback.invoke(
                 SubtitleFile(
-                    it.display ?: it.language ?: "Unknown",
+                    name,
                     it.url
                 )
             )
@@ -1940,7 +1925,7 @@ object CineStreamExtractors : CineStreamProvider() {
             epData.subtitles.map {
                 subtitleCallback.invoke(
                     SubtitleFile(
-                        it.lang,
+                        "Flixhq ${it.lang}",
                         it.url
                     )
                 )
@@ -1987,7 +1972,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 epData.subtitles.map {
                     subtitleCallback.invoke(
                         SubtitleFile(
-                            it.lang,
+                            "Hianime ${it.lang}",
                             it.url,
                         )
                     )

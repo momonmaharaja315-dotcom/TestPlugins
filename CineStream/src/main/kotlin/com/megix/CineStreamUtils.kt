@@ -920,7 +920,7 @@ suspend fun getSoaperLinks(
         val subUrl = soaperAPI + path
         subtitleCallback.invoke(
             SubtitleFile(
-                name,
+                "Soaper $name",
                 subUrl
             )
         )
