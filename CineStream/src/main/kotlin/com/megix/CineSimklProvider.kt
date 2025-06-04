@@ -40,7 +40,7 @@ class CineSimklProvider: MainAPI() {
     override val mainPage = mainPageOf(
         "/movies/trending/month?client_id=$auth&extended=overview&limit=$mediaLimit&page=" to "Trending Movies",
         "/tv/trending/month?type=series&client_id=$auth&extended=overview&limit=$mediaLimit&page=" to "Trending TV Shows",
-        "/anime/trending?client_id=$auth&limit=$mediaLimit&page=" to "Trending Anime",
+        "/anime/trending/?extended=overview,metadata,tmdb,genres,trailer&client_id=$auth&limit=$mediaLimit&page=" to "Trending Anime",
     )
 
     override suspend fun search(query: String): List<SearchResponse> = coroutineScope {
