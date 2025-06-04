@@ -43,16 +43,16 @@ class CineSimklProvider: MainAPI() {
         "/anime/trending?client_id=$auth&limit=$mediaLimit&page=" to "Trending Anime",
     )
 
-    override suspend fun search(query: String): List<SearchResponse>? {
+    override suspend fun search(query: String): List<SearchResponse> = coroutineScope {
 
         suspend fun fetchResults(type: String): List<SearchResponse> {
             val result = runCatching {
                 val json = app.get("$apiUrl/search/$type?q=$query&client_id=$auth").text
-                tryParseJson<Array<SimklResponse>>(json).map {
+                parseJson<Array<SimklResponse>>(json).map {
                     newMovieSearchResponse("${it.title}", "$mainUrl/${it.ids?.simkl_id}") {
                         posterUrl = getPosterUrl(it.poster.toString())
                     }
-                } ?: emptyList()
+                }
             }.getOrDefault(emptyList())
 
             if (result.isNotEmpty()) return result
