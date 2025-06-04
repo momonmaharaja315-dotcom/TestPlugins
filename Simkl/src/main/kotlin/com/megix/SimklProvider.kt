@@ -90,7 +90,7 @@ class SimklProvider: MainAPI() {
             ).toJson()
             return newMovieLoadResponse("${json.en_title ?: json.title}", url, TvType.Movie, data) {
                 this.posterUrl = getPosterUrl(json.poster.toString())
-                this.backgroundPosterUrl = getPosterUrl(json.fanart.toString())
+                this.backgroundPosterUrl = "https://simkl.in/fanart/${json.fanart}_medium.webp"
                 this.plot = json.overview
                 this.tags = genres
                 this.rating = json.ratings?.simkl?.rating.toString().toRatingInt()
@@ -121,7 +121,7 @@ class SimklProvider: MainAPI() {
 
             return newTvSeriesLoadResponse("${json.en_title ?: json.title}", url, TvType.TvSeries, episodes) {
                 this.posterUrl = getPosterUrl(json.poster.toString())
-                this.backgroundPosterUrl = getPosterUrl(json.fanart.toString())
+                this.backgroundPosterUrl = "https://simkl.in/fanart/${json.fanart}_medium.webp"
                 this.plot = json.overview
                 this.tags = genres
                 this.rating = json.ratings?.simkl?.rating.toString().toRatingInt()
