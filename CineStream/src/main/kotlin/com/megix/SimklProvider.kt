@@ -148,14 +148,17 @@ class SimklProvider: MainAPI() {
             callback: (ExtractorLink) -> Unit
     ): Boolean {
         val res = parseJson<LoadLinksData>(data)
-        if(res.tvType?.equals("anime") == true) {
-            { invokeAnimes(res.malId, res.anilistId, res.episode, year, "kitsu", subtitleCallback, callback) },
-            { invokeSudatchi(res.anilistId, res.episode, subtitleCallback, callback) },
-            { invokeGojo(res.anilistId, res.episode, callback) },
-            { invokeAnimeparadise(res.title, res.malId, res.episode, subtitleCallback, callback) },
-            { invokeAllanime(res.title, res.year, res.episode, subtitleCallback, callback) },
-            { invokeAnizone(res.title, res.episode, subtitleCallback, callback) },
-            { invokeTorrentio(res.imdbId, res.imdbSeason, res.episode, callback) },
+        if(res.tvtype?.equals("anime") == true) {
+            val imdbSeason = if(episode != null && res.imdbSeason == null) 1 else res.imdbSeason
+            runAllAsync(
+                { invokeAnimes(res.malId, res.anilistId, res.episode, year, "kitsu", subtitleCallback, callback) },
+                { invokeSudatchi(res.anilistId, res.episode, subtitleCallback, callback) },
+                { invokeGojo(res.anilistId, res.episode, callback) },
+                { invokeAnimeparadise(res.title, res.malId, res.episode, subtitleCallback, callback) },
+                { invokeAllanime(res.title, res.year, res.episode, subtitleCallback, callback) },
+                { invokeAnizone(res.title, res.episode, subtitleCallback, callback) },
+                { invokeTorrentio(res.imdbId, res.imdbSeason, res.episode, callback) },
+            )
         }
         return true
     }
