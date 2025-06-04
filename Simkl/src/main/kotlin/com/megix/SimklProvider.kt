@@ -32,7 +32,7 @@ class SimklProvider: MainAPI() {
         val jsonString = app.get("$apiUrl/search/movie?q=$query&client_id=$auth").text
         val json = parseJson<Array<SimklResponse>>(jsonString)
         val data = json.map {
-            newMovieSearchResponse(it.title, "$mainUrl/${it.ids.simkl_id}") {
+            newMovieSearchResponse(it.title, "$mainUrl/${it.ids?.simkl_id}") {
                 this.posterUrl = getPosterUrl(it.poster.toString())
             }
         }
@@ -43,7 +43,7 @@ class SimklProvider: MainAPI() {
         val jsonString = app.get(apiUrl + request.data + page).text
         val json = parseJson<Array<SimklResponse>>(jsonString)
         val data = json.map {
-            newMovieSearchResponse("it.title", "$mainUrl/${it.ids.simkl_id}") {
+            newMovieSearchResponse("it.title", "$mainUrl/${it.ids?.simkl_id}") {
                 this.posterUrl = getPosterUrl(it.poster.toString())
             }
         }
@@ -75,7 +75,7 @@ class SimklProvider: MainAPI() {
             this.posterUrl = json.poster
             this.plot = json.overview
             this.tags = genres
-            this.rating = json.ratings?.simkl?.rating?.toIntOrNull()
+            this.rating = json.ratings?.simkl?.rating?.toInt()
             this.year = json.year
             this.addSimklId(simklId.toInt())
         }
