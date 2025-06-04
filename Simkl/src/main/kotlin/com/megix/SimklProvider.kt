@@ -5,6 +5,7 @@ import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.lagradost.cloudstream3.syncproviders.providers.SimklApi.Companion.getPosterUrl
 import com.lagradost.cloudstream3.LoadResponse.Companion.addSimklId
+import com.lagradost.cloudstream3.LoadResponse.Companion.addAniListId
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 
 class SimklProvider: MainAPI() {
@@ -31,7 +32,7 @@ class SimklProvider: MainAPI() {
     )
 
     private fun extractId(url: String): Pair<String, String> {
-        val regex = Regex("""simkl\.com/(tv|movie|anime)/(\d+)""")
+        val regex = Regex("""simkl\.com/(tv|movies|anime)/(\d+)""")
         val match = regex.find(url)
         return if (match != null) {
             val tvType = match.groupValues[1]
@@ -72,7 +73,7 @@ class SimklProvider: MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse {
-        val (simklId, tvType) = extractId(url)
+        val (simklId, tvType) = extractId(url.replace("/movie/", "/movies/"))
         val jsonString = app.get("$apiUrl/$tvType/$simklId?extended=full&client_id=$auth").text
         val json = parseJson<SimklResponse>(jsonString)
         val genres = json.genres?.map { it.toString() }
@@ -87,6 +88,10 @@ class SimklProvider: MainAPI() {
                 json.ids?.imdb,
                 json.ids?.tmdb?.toIntOrNull(),
                 json.year,
+                json.ids?.anilist?.toIntOrNull(),
+                json.ids?.mal?.toIntOrNull(),
+                null,
+                null,
             ).toJson()
             return newMovieLoadResponse("${json.en_title ?: json.title}", url, TvType.Movie, data) {
                 this.posterUrl = getPosterUrl(json.poster.toString())
@@ -96,6 +101,7 @@ class SimklProvider: MainAPI() {
                 this.rating = json.ratings?.simkl?.rating.toString().toRatingInt()
                 this.year = json.year
                 this.addSimklId(simklId.toInt())
+                this.addAniListId(json.ids?.anilist?.toIntOrNull())
             }
         } else {
             val epsJson = app.get("$apiUrl/$tvType/episodes/$simklId?client_id=$auth").text
@@ -110,6 +116,10 @@ class SimklProvider: MainAPI() {
                         json.ids?.imdb,
                         json.ids?.tmdb?.toIntOrNull(),
                         json.year,
+                        json.ids?.anilist?.toIntOrNull(),
+                        json.ids?.mal?.toIntOrNull(),
+                        it.season,
+                        it.episode,
                     ).toJson()
                 ) {
                     this.season = it.season
@@ -127,6 +137,7 @@ class SimklProvider: MainAPI() {
                 this.rating = json.ratings?.simkl?.rating.toString().toRatingInt()
                 this.year = json.year
                 this.addSimklId(simklId.toInt())
+                this.addAniListId(json.ids?.anilist?.toIntOrNull())
             }
         }
     }
@@ -215,5 +226,9 @@ class SimklProvider: MainAPI() {
         val imdbId: String? = null,
         val tmdbId: Int? = null,
         val year: Int? = null,
+        val anilistId: Int? = null,
+        val malId: Int? = null,
+        val season: Int? = null,
+        val episode: Int? = null,
     )
 }
