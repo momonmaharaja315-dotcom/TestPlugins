@@ -7,6 +7,14 @@ import com.lagradost.cloudstream3.syncproviders.providers.SimklApi.Companion.get
 import com.lagradost.cloudstream3.LoadResponse.Companion.addSimklId
 import com.lagradost.cloudstream3.LoadResponse.Companion.addAniListId
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
+import com.lagradost.cloudstream3.runAllAsync
+import com.megix.CineStreamExtractors.invokeAnimeparadise
+import com.megix.CineStreamExtractors.invokeGojo
+import com.megix.CineStreamExtractors.invokeSudatchi
+import com.megix.CineStreamExtractors.invokeAnimes
+import com.megix.CineStreamExtractors.invokeAnizone
+import com.megix.CineStreamExtractors.invokeTorrentio
+import com.megix.CineStreamExtractors.invokeAllanime
 
 class SimklProvider: MainAPI() {
     override var name = "Simkl"
@@ -81,6 +89,7 @@ class SimklProvider: MainAPI() {
                 json.ids?.mal?.toIntOrNull(),
                 null,
                 null,
+                null,
             ).toJson()
             return newMovieLoadResponse("${json.en_title ?: json.title}", url, TvType.Movie, data) {
                 this.posterUrl = getPosterUrl(json.poster.toString())
@@ -93,7 +102,7 @@ class SimklProvider: MainAPI() {
                 this.addAniListId(json.ids?.anilist?.toIntOrNull())
             }
         } else {
-            val epsJson = app.get("$apiUrl/$tvType/episodes/$simklId?client_id=$auth").text
+            val epsJson = app.get("$apiUrl/tv/episodes/$simklId?client_id=$auth").text
             val eps = parseJson<Array<Episodes>>(epsJson)
             val episodes = eps.map {
                 newEpisode(
@@ -109,6 +118,7 @@ class SimklProvider: MainAPI() {
                         json.ids?.mal?.toIntOrNull(),
                         it.season,
                         it.episode,
+                        json.season?.toIntOrNull(),
                     ).toJson()
                 ) {
                     this.season = it.season
@@ -137,13 +147,16 @@ class SimklProvider: MainAPI() {
             subtitleCallback: (SubtitleFile) -> Unit,
             callback: (ExtractorLink) -> Unit
     ): Boolean {
-        callback.invoke(
-            newExtractorLink(
-                "test",
-                "test",
-                data,
-            )
-        )
+        val res = parseJson<LoadLinksData>(data)
+        if(res.tvType?.equals("anime") == true) {
+            { invokeAnimes(res.malId, res.anilistId, res.episode, year, "kitsu", subtitleCallback, callback) },
+            { invokeSudatchi(res.anilistId, res.episode, subtitleCallback, callback) },
+            { invokeGojo(res.anilistId, res.episode, callback) },
+            { invokeAnimeparadise(res.title, res.malId, res.episode, subtitleCallback, callback) },
+            { invokeAllanime(res.title, res.year, res.episode, subtitleCallback, callback) },
+            { invokeAnizone(res.title, res.episode, subtitleCallback, callback) },
+            { invokeTorrentio(res.imdbId, res.imdbSeason, res.episode, callback) },
+        }
         return true
     }
 
@@ -219,5 +232,6 @@ class SimklProvider: MainAPI() {
         val malId: Int? = null,
         val season: Int? = null,
         val episode: Int? = null,
+        val imdbSeason: Int? = null,
     )
 }
