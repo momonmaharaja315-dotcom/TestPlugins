@@ -149,9 +149,9 @@ class SimklProvider: MainAPI() {
     ): Boolean {
         val res = parseJson<LoadLinksData>(data)
         if(res.tvtype?.equals("anime") == true) {
-            val imdbSeason = if(episode != null && res.imdbSeason == null) 1 else res.imdbSeason
+            val imdbSeason = if(res.episode != null && res.imdbSeason == null) 1 else res.imdbSeason
             runAllAsync(
-                { invokeAnimes(res.malId, res.anilistId, res.episode, year, "kitsu", subtitleCallback, callback) },
+                { invokeAnimes(res.malId, res.anilistId, res.episode, res.year, "kitsu", subtitleCallback, callback) },
                 { invokeSudatchi(res.anilistId, res.episode, subtitleCallback, callback) },
                 { invokeGojo(res.anilistId, res.episode, callback) },
                 { invokeAnimeparadise(res.title, res.malId, res.episode, subtitleCallback, callback) },
