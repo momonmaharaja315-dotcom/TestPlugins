@@ -46,7 +46,7 @@ class SimklProvider: MainAPI() {
         val jsonString = app.get("$apiUrl/search/movie?q=$query&client_id=$auth").text
         val json = parseJson<Array<SimklResponse>>(jsonString)
         val data = json.map {
-            newMovieSearchResponse("${it.title}", "$mainUrl/${it.url}") {
+            newMovieSearchResponse("${it.title}", "$mainUrl${it.url}") {
                 this.posterUrl = getPosterUrl(it.poster.toString())
             }
         }
@@ -57,7 +57,7 @@ class SimklProvider: MainAPI() {
         val jsonString = app.get(apiUrl + request.data + page).text
         val json = parseJson<Array<SimklResponse>>(jsonString)
         val data = json.map {
-            newMovieSearchResponse("${it.title}", "$mainUrl/${it.url}") {
+            newMovieSearchResponse("${it.title}", "$mainUrl${it.url}") {
                 this.posterUrl = getPosterUrl(it.poster.toString())
             }
         }
