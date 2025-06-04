@@ -68,16 +68,16 @@ class SimklProvider: MainAPI() {
         val overview = json.overview
         val genres = json.genres?.map { it.toString() }
         val country = json.country
-        val imdbId = json.ids.imdb
-        val tmdbId = json.ids.tmdb
+        val imdbId = json.ids?.imdb
+        val tmdbId = json.ids?.tmdb
         //val recommendations = json.users_recommendations?.map { it.toSearchResponse() }
         return newMovieLoadResponse(json.title, url, TvType.Movie, url) {
             this.posterUrl = json.poster
             this.plot = json.overview
             this.tags = genres
-            this.rating = json.ratings.simkl.rating
+            this.rating = json.ratings?.simkl?.rating?.toIntOrNull()
             this.year = json.year
-            this.addSimklId(simklId)
+            this.addSimklId(simklId.toInt())
         }
     }
 
@@ -104,7 +104,7 @@ class SimklProvider: MainAPI() {
         var url            : String?  = null,
         var poster         : String?  = null,
         var fanart         : String?  = null,
-        var ids            : Ids      = Ids(),
+        var ids            : Ids?     = Ids(),
         var release_date   : String?  = null,
         var ratings        : Ratings = Ratings(),
         var country        : String?  = null,
@@ -119,19 +119,19 @@ class SimklProvider: MainAPI() {
     )
 
     data class Ids (
-        var simkl_id : Int,
+        var simkl_id : Int?    = null,
         var tmdb     : String? = null,
         var imdb     : String? = null,
         var slug     : String? = null
     )
 
     data class Ratings (
-        var simkl : Simkl = Simkl(),
+        var simkl : Simkl? = Simkl(),
     )
 
     data class Simkl (
-        var rating : Double,
-        var votes  : Int
+        var rating : Double? = null,
+        var votes  : Int?    = null
     )
 
     data class UsersRecommendations (
