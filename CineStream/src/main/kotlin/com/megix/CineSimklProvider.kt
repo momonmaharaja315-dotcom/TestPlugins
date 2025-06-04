@@ -3,11 +3,15 @@ package com.megix
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
+import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import com.lagradost.cloudstream3.syncproviders.providers.SimklApi.Companion.getPosterUrl
 import com.lagradost.cloudstream3.LoadResponse.Companion.addSimklId
 import com.lagradost.cloudstream3.LoadResponse.Companion.addAniListId
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.runAllAsync
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import com.megix.CineStreamExtractors.invokeAnimeparadise
 import com.megix.CineStreamExtractors.invokeGojo
 import com.megix.CineStreamExtractors.invokeSudatchi
@@ -16,8 +20,8 @@ import com.megix.CineStreamExtractors.invokeAnizone
 import com.megix.CineStreamExtractors.invokeTorrentio
 import com.megix.CineStreamExtractors.invokeAllanime
 
-class SimklProvider: MainAPI() {
-    override var name = "Simkl"
+class CineSimklProvider: MainAPI() {
+    override var name = "CineStream Simkl"
     override var mainUrl = "https://simkl.com"
     override var supportedTypes = setOf(
         TvType.Movie,
@@ -36,18 +40,39 @@ class SimklProvider: MainAPI() {
     override val mainPage = mainPageOf(
         "/movies/trending/month?client_id=$auth&extended=overview&limit=$mediaLimit&page=" to "Trending Movies",
         "/tv/trending/month?type=series&client_id=$auth&extended=overview&limit=$mediaLimit&page=" to "Trending TV Shows",
-        "/anime/trending/?extended=overview,metadata,tmdb,genres,trailer&client_id=$auth&limit=$mediaLimit&page=" to "Trending Anime",
+        "/anime/trending?client_id=$auth&limit=$mediaLimit&page=" to "Trending Anime",
     )
 
     override suspend fun search(query: String): List<SearchResponse>? {
-        val jsonString = app.get("$apiUrl/search/movie?q=$query&client_id=$auth").text
-        val json = parseJson<Array<SimklResponse>>(jsonString)
-        val data = json.map {
-            newMovieSearchResponse("${it.title}", "$mainUrl/${it.ids?.simkl_id}") {
-                this.posterUrl = getPosterUrl(it.poster.toString())
+
+        suspend fun fetchResults(type: String): List<SearchResponse> {
+            val result = runCatching {
+                val json = app.get("$apiUrl/search/$type?q=$query&client_id=$auth").text
+                tryParseJson<Array<SimklResponse>>(json).map {
+                    newMovieSearchResponse("${it.title}", "$mainUrl/${it.ids?.simkl_id}") {
+                        posterUrl = getPosterUrl(it.poster.toString())
+                    }
+                } ?: emptyList()
+            }.getOrDefault(emptyList())
+
+            if (result.isNotEmpty()) return result
+            return emptyList()
+        }
+
+        val types = listOf( "movie", "tv", "anime")
+        val resultsLists = types.map {
+            async { fetchResults(it) }
+        }.awaitAll()
+
+        val maxSize = resultsLists.maxOfOrNull { it.size } ?: 0
+
+        buildList {
+            for (i in 0 until maxSize) {
+                for (list in resultsLists) {
+                    if (i < list.size) add(list[i])
+                }
             }
         }
-        return data
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse? {
