@@ -31,7 +31,7 @@ class SimklProvider: MainAPI() {
     )
 
     private fun extractId(url: String): Pair<String, String> {
-        val regex = Regex("""simkl\.com/(tv|movies|anime)/(\d+)""")
+        val regex = Regex("""simkl\.com/(tv|movie|anime)/(\d+)""")
         val match = regex.find(url)
         return if (match != null) {
             val tvType = match.groupValues[1]
@@ -78,7 +78,7 @@ class SimklProvider: MainAPI() {
         val genres = json.genres?.map { it.toString() }
         val country = json.country
 
-        if (tvType == "movies" || (tvType == "anime" && json.anime_type?.equals("movie") == true)) {
+        if (tvType == "movie" || (tvType == "anime" && json.anime_type?.equals("movie") == true)) {
             val data = LoadLinksData(
                 json.title,
                 json.en_title,
