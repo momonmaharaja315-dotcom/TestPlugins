@@ -60,7 +60,7 @@ class SimklProvider: MainAPI() {
     override suspend fun load(url: String): LoadResponse {
         val simklId = url.substringAfterLast("/")
         val jsonString = app.get("$apiUrl/movies/$simklId?extended=full&client_id=$auth").text
-        val json = parseJson<Array<SimklResponse>>(jsonString)
+        val json = parseJson<SimklResponse>(jsonString)
         val title = json.title
         val poster = json.poster
         val type = json.type
@@ -115,8 +115,6 @@ class SimklProvider: MainAPI() {
         var network        : String?  = null,
         var overview       : String?  = null,
         var genres         : ArrayList<String> = arrayListOf(),
-        var country        : String?  = null,
-        var runtime        : Int?     = null,
         var users_recommendations : ArrayList<UsersRecommendations> = arrayListOf()
     )
 
