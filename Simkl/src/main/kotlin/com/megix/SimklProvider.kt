@@ -5,6 +5,7 @@ import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.lagradost.cloudstream3.syncproviders.providers.SimklApi.Companion.getPosterUrl
 import com.lagradost.cloudstream3.LoadResponse.Companion.addSimklId
+import com.lagradost.cloudstream3.utils.AppUtils.toJson
 
 class SimklProvider: MainAPI() {
     override var name = "Simkl"
@@ -43,7 +44,7 @@ class SimklProvider: MainAPI() {
         val jsonString = app.get(apiUrl + request.data + page).text
         val json = parseJson<Array<SimklResponse>>(jsonString)
         val data = json.map {
-            newMovieSearchResponse("it.title", "$mainUrl/${it.ids?.simkl_id}") {
+            newMovieSearchResponse(it.title, "$mainUrl/${it.ids?.simkl_id}") {
                 this.posterUrl = getPosterUrl(it.poster.toString())
             }
         }
@@ -61,21 +62,25 @@ class SimklProvider: MainAPI() {
         val simklId = url.substringAfterLast("/")
         val jsonString = app.get("$apiUrl/movies/$simklId?extended=full&client_id=$auth").text
         val json = parseJson<SimklResponse>(jsonString)
-        val title = json.title
-        val poster = json.poster
-        val type = json.type
-        val year = json.year
-        val overview = json.overview
         val genres = json.genres?.map { it.toString() }
         val country = json.country
         val imdbId = json.ids?.imdb
         val tmdbId = json.ids?.tmdb
+
+        val data = LoadLinksData(
+                json.title,
+                json.type,
+                simklId?.toIntOrNull(),
+                json.ids?.imdb,
+                json.ids?.tmdb?.toIntOrNull(),
+                json.year,
+        ).toJson()
         //val recommendations = json.users_recommendations?.map { it.toSearchResponse() }
-        return newMovieLoadResponse(json.title, url, TvType.Movie, url) {
-            this.posterUrl = json.poster
+        return newMovieLoadResponse(json.title, url, TvType.Movie, data) {
+            this.posterUrl = getPosterUrl(json.poster.toString())
             this.plot = json.overview
             this.tags = genres
-            this.rating = json.ratings?.simkl?.rating?.toInt()
+            this.rating = json.ratings?.simkl?.rating.toString().toRatingInt()
             this.year = json.year
             this.addSimklId(simklId.toInt())
         }
@@ -140,5 +145,14 @@ class SimklProvider: MainAPI() {
         var poster : String? = null,
         var type   : String? = null,
         var ids    : Ids   = Ids()
+    )
+
+    data class LoadLinksData(
+        val title: String? = null,
+        val tvtype: String? = null,
+        val simklId: Int? = null,
+        val imdbId: String? = null,
+        val tmdbId: Int? = null,
+        val year: Int? = null,
     )
 }
