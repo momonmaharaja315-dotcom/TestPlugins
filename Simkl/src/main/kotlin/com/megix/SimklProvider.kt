@@ -30,8 +30,8 @@ class SimklProvider: MainAPI() {
 
     override suspend fun search(query: String): List<SearchResponse>? {
         val jsonString = app.get("$apiUrl/search/movie?q=$query&client_id=$auth").text
-        val json = parseJson<SimklResponse>(jsonString)
-        val data = json.forEach {
+        val json = parseJson<Array<SimklResponse>>(jsonString)
+        val data = json.map {
             newMovieSearchResponse("${it.title}", "$mainUrl/${it.ids?.simkl_id}") {
                 this.posterUrl = getPosterUrl(it.poster.toString())
             }
@@ -41,8 +41,8 @@ class SimklProvider: MainAPI() {
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse? {
         val jsonString = app.get(apiUrl + request.data + page).text
-        val json = parseJson<SimklResponse>(jsonString)
-        val data = json.forEach {
+        val json = parseJson<Array<SimklResponse>>(jsonString)
+        val data = json.map {
             newMovieSearchResponse("${it.title}", "$mainUrl/${it.ids?.simkl_id}") {
                 this.posterUrl = getPosterUrl(it.poster.toString())
             }
