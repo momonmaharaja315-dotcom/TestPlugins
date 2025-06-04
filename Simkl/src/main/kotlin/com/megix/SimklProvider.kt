@@ -31,23 +31,11 @@ class SimklProvider: MainAPI() {
         "/anime/trending/?extended=overview,metadata,tmdb,genres,trailer&client_id=$auth&limit=$mediaLimit&page=" to "Trending Anime",
     )
 
-    private fun extractId(url: String): Pair<String, String> {
-        val regex = Regex("""simkl\.com/(tv|movies|anime)/(\d+)""")
-        val match = regex.find(url)
-        return if (match != null) {
-            val tvType = match.groupValues[1]
-            val id = match.groupValues[2]
-            Pair(id, tvType)
-        } else {
-            Pair("", "")
-        }
-    }
-
     override suspend fun search(query: String): List<SearchResponse>? {
         val jsonString = app.get("$apiUrl/search/movie?q=$query&client_id=$auth").text
         val json = parseJson<Array<SimklResponse>>(jsonString)
         val data = json.map {
-            newMovieSearchResponse("${it.title}", "$mainUrl${it.url}") {
+            newMovieSearchResponse("${it.title}", "$mainUrl/${it.ids?.simkl_id}") {
                 this.posterUrl = getPosterUrl(it.poster.toString())
             }
         }
@@ -58,7 +46,7 @@ class SimklProvider: MainAPI() {
         val jsonString = app.get(apiUrl + request.data + page).text
         val json = parseJson<Array<SimklResponse>>(jsonString)
         val data = json.map {
-            newMovieSearchResponse("${it.title}", "$mainUrl${it.url}") {
+            newMovieSearchResponse("${it.title}", "$mainUrl/${it.ids?.simkl_id}") {
                 this.posterUrl = getPosterUrl(it.poster.toString())
             }
         }
@@ -73,11 +61,12 @@ class SimklProvider: MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse {
-        val (simklId, tvType) = extractId(url.replace("/movie/", "/movies/"))
-        val jsonString = app.get("$apiUrl/$tvType/$simklId?extended=full&client_id=$auth").text
+        val simklId = url.substringAfterLast("/")
+        val jsonString = app.get("$apiUrl/tv/$simklId?extended=full&client_id=$auth").text
         val json = parseJson<SimklResponse>(jsonString)
         val genres = json.genres?.map { it.toString() }
         val country = json.country
+        val tvType = json.type.toString()
 
         if (tvType == "movie" || (tvType == "anime" && json.anime_type?.equals("movie") == true)) {
             val data = LoadLinksData(
