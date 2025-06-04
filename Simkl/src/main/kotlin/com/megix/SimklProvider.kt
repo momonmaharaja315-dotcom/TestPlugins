@@ -97,7 +97,6 @@ class SimklProvider: MainAPI() {
         var total_episodes : Int?     = null,
         var network        : String?  = null,
         var overview       : String?  = null
-
     )
 
     data class Ids (
