@@ -209,7 +209,7 @@ class CineSimklProvider: MainAPI() {
         } else {
             val epsJson = app.get("$apiUrl/tv/episodes/$simklId", headers = headers).text
             val eps = parseJson<Array<Episodes>>(epsJson)
-            val episodes = eps.map {
+            val episodes = eps.filter { it.season != 0 }.map {
                 newEpisode(
                     LoadLinksData(
                         json.title,
@@ -221,7 +221,7 @@ class CineSimklProvider: MainAPI() {
                         json.year,
                         json.ids?.anilist?.toIntOrNull(),
                         json.ids?.mal?.toIntOrNull(),
-                        json.season ?: imdbSeason ?: it.season,
+                        json.season?.toIntOrNull() ?: imdbSeason ?: it.season,
                         it.episode,
                         it.date.toString().substringBefore("-").toIntOrNull(),
                         isAnime,
