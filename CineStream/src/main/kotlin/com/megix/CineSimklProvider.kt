@@ -76,6 +76,7 @@ class CineSimklProvider: MainAPI() {
     private final val mediaLimit = 20
     private val auth = BuildConfig.SIMKL_API
     private val headers = mapOf("Content-Type" to "application/json")
+    private val api = AccountManager.simklApi
 
     override val mainPage = mainPageOf(
         "Personal" to "Personal",
