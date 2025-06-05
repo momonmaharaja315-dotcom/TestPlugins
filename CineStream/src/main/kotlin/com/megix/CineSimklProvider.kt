@@ -164,7 +164,7 @@ class CineSimklProvider: MainAPI() {
                     api.getPersonalLibrary()?.allLibraryLists?.mapNotNull {
                         if (it.items.isEmpty()) return@mapNotNull null
                         val libraryName =
-                                it.name.asString(plugin.activity ?: return@mapNotNull null)
+                                it.name.asString(activity ?: return@mapNotNull null)
                         HomePageList("${request.name}: $libraryName", it.items)
                     }
                             ?: return null
