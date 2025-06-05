@@ -86,6 +86,17 @@ class CineSimklProvider: MainAPI() {
         return regex.find(url)?.groupValues?.get(1) ?: ""
     }
 
+    fun extractSeasonAndCleanTitle(title: String): Pair<Int?, String> {
+        val regex = Regex("""(?i)\bseason\s+(\d+)\b""")
+        val match = regex.find(title)
+
+        val seasonNumber = match?.groupValues?.get(1)?.toIntOrNull()
+
+        val cleanedTitle = match?.range?.first?.let { title.substring(0, it).trim() } ?: title.trim()
+
+        return Pair(seasonNumber, cleanedTitle)
+    }
+
     private fun getPosterUrl(
         url: String? = null,
         type: String,
@@ -158,11 +169,14 @@ class CineSimklProvider: MainAPI() {
         val json = parseJson<SimklResponse>(jsonString)
         val genres = json.genres?.map { it.toString() }
         val tvType = json.type ?: ""
-        val en_title = json.en_title ?: json.title
         val country = json.country ?: ""
         val isAnime = if(tvType == "anime") true else false
         val isBollywood = if(country == "IN") true else false
         val isAsian = if(!isAnime && (country == "JP" || country == "KR" || country == "CN")) true else false
+
+        val (imdbSeason, en_title) = if(isAnime) {
+            extractSeasonAndCleanTitle(json.en_title ?: json.title ?: "")
+        } else Pair(null, json.en_title ?: json.title)
 
         if (tvType == "movie" || (tvType == "anime" && json.anime_type?.equals("movie") == true)) {
             val data = LoadLinksData(
@@ -209,7 +223,7 @@ class CineSimklProvider: MainAPI() {
                         json.year,
                         json.ids?.anilist?.toIntOrNull(),
                         json.ids?.mal?.toIntOrNull(),
-                        json.season?.toIntOrNull() ?: it.season,
+                        imdbSeason ?: it.season,
                         it.episode,
                         it.date.toString().substringBefore("-").toIntOrNull(),
                         isAnime,
