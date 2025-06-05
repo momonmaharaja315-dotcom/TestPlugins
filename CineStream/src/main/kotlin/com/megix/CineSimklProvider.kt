@@ -21,7 +21,7 @@ import com.megix.CineStreamExtractors.invokeTorrentio
 import com.megix.CineStreamExtractors.invokeAllanime
 
 class CineSimklProvider: MainAPI() {
-    override var name = "CineSimkl"
+    override var name = "Simkl"
     override var mainUrl = "https://simkl.com"
     override var supportedTypes = setOf(
         TvType.Movie,
@@ -54,7 +54,7 @@ class CineSimklProvider: MainAPI() {
             val result = runCatching {
                 val json = app.get("$apiUrl/search/$type?q=$query&client_id=$auth").text
                 parseJson<Array<SimklResponse>>(json).map {
-                    newMovieSearchResponse("${it.title}", "$mainUrl${it.url}") {
+                    newMovieSearchResponse("${it.title}", "$mainUrl/${it.endpoint_type}/${it.ids?.simkl}/${it.ids?.slug}") {
                         posterUrl = getPosterUrl(it.poster.toString())
                     }
                 }
@@ -212,6 +212,7 @@ class CineSimklProvider: MainAPI() {
         var overview       : String?  = null,
         var anime_type     : String?  = null,
         var season         : String?  = null,
+        var endpoint_type  : String?  = null,
         var genres         : ArrayList<String> = arrayListOf(),
         var users_recommendations : ArrayList<UsersRecommendations> = arrayListOf()
     )
