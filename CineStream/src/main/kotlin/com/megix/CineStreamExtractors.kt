@@ -1216,7 +1216,7 @@ object CineStreamExtractors : CineStreamProvider() {
         }.amap { (id, nume, type) ->
             if (!nume.contains("trailer")) {
                 val source = app.post(
-                    url = "$apiUrl/wp-admin/admin-ajax.php",
+                    url = "$multimoviesAPI/wp-admin/admin-ajax.php",
                     data = mapOf(
                         "action" to "doo_player_ajax",
                         "post" to id,
@@ -1229,7 +1229,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 val link = source.substringAfter("\"").substringBefore("\"")
                 when {
                     !link.contains("youtube") -> {
-                        loadSourceNameExtractor("Multimovies",link, referer = apiUrl, subtitleCallback, callback)
+                        loadSourceNameExtractor("Multimovies", link, referer = multimoviesAPI, subtitleCallback, callback)
                     }
                     else -> ""
                 }
@@ -1474,7 +1474,7 @@ object CineStreamExtractors : CineStreamProvider() {
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
     ) {
-        val url = if(season != null) "$WYZIESubsAPI/search?id=$id&season=$season&episode=$episode" else "$api/search?id=$id"
+        val url = if(season != null) "$WYZIESubsAPI/search?id=$id&season=$season&episode=$episode" else "$WYZIESubsAPI/search?id=$id"
         val json = app.get(url).text
         val data = parseJson<ArrayList<WYZIESubtitle>>(json)
 
