@@ -264,7 +264,7 @@ class CineSimklProvider: MainAPI() {
                 }
             }
 
-            return newTvSeriesLoadResponse("${json.en_title ?: json.title}", url,if(type) TvType.Anime else TvType.TvSeries, episodes) {
+            return newTvSeriesLoadResponse("${json.en_title ?: json.title}", url,if(isAnime) TvType.Anime else TvType.TvSeries, episodes) {
                 this.posterUrl = getPosterUrl(json.poster, "poster")
                 this.backgroundPosterUrl = getPosterUrl(json.fanart, "fanart") ?: getPosterUrl(json.poster, "poster")
                 this.plot = json.overview
