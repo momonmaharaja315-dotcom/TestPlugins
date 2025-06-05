@@ -6,6 +6,7 @@ import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import com.lagradost.cloudstream3.LoadResponse.Companion.addSimklId
 import com.lagradost.cloudstream3.LoadResponse.Companion.addAniListId
+import com.lagradost.cloudstream3.CommonActivity.activity
 import com.lagradost.cloudstream3.syncproviders.AccountManager
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.runAllAsync
@@ -221,7 +222,7 @@ class CineSimklProvider: MainAPI() {
                 isBollywood,
                 isAsian
             ).toJson()
-            return newMovieLoadResponse("${json.en_title ?: json.title}", url, TvType.Movie, data) {
+            return newMovieLoadResponse("${json.en_title ?: json.title}", url, if(isAnime) TvType.AnimeMovie  else TvType.Movie, data) {
                 this.posterUrl = getPosterUrl(json.poster, "poster")
                 this.backgroundPosterUrl = getPosterUrl(json.fanart, "fanart") ?: getPosterUrl(json.poster, "poster")
                 this.plot = json.overview
@@ -263,7 +264,7 @@ class CineSimklProvider: MainAPI() {
                 }
             }
 
-            return newTvSeriesLoadResponse("${json.en_title ?: json.title}", url, TvType.TvSeries, episodes) {
+            return newTvSeriesLoadResponse("${json.en_title ?: json.title}", url,if(type) TvType.Anime else TvType.TvSeries, episodes) {
                 this.posterUrl = getPosterUrl(json.poster, "poster")
                 this.backgroundPosterUrl = getPosterUrl(json.fanart, "fanart") ?: getPosterUrl(json.poster, "poster")
                 this.plot = json.overview
