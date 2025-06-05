@@ -43,7 +43,7 @@ class CineSimklProvider: MainAPI() {
         "/anime/trending/?extended=overview,metadata,tmdb,genres,trailer&client_id=$auth&limit=$mediaLimit&page=" to "Trending Anime",
     )
 
-    fun extractSimklId(url: String): String {
+    fun getSimklId(url: String): String {
         val regex = Regex("""simkl\.com\/(?:anime|movies|tv|movie)\/(\d+)""")
         return regex.find(url)?.groupValues?.get(1) ?: ""
     }
@@ -127,6 +127,7 @@ class CineSimklProvider: MainAPI() {
                 this.tags = genres
                 this.rating = json.ratings?.simkl?.rating.toString().toRatingInt()
                 this.year = json.year
+                this.contentRating = json.certification
                 this.addSimklId(simklId.toInt())
                 this.addAniListId(json.ids?.anilist?.toIntOrNull())
             }
@@ -134,27 +135,25 @@ class CineSimklProvider: MainAPI() {
             val epsJson = app.get("$apiUrl/tv/episodes/$simklId?client_id=$auth").text
             val eps = parseJson<Array<Episodes>>(epsJson)
             val episodes = eps.map {
-                if(it.season != null && it.season != 0) {
-                    newEpisode(
-                        LoadLinksData(
-                            json.title,
-                            json.en_title,
-                            tvType,
-                            simklId?.toIntOrNull(),
-                            json.ids?.imdb,
-                            json.ids?.tmdb?.toIntOrNull(),
-                            json.year,
-                            json.ids?.anilist?.toIntOrNull(),
-                            json.ids?.mal?.toIntOrNull(),
-                            json.season?.toIntOrNull() ?: it.season,
-                            it.episode,
-                        ).toJson()
-                    ) {
-                        this.season = it.season
-                        this.episode = it.episode
-                        this.posterUrl = "https://simkl.in/episodes/${it.img}_c.webp"
-                        addDate(it.date)
-                    }
+                newEpisode(
+                    LoadLinksData(
+                        json.title,
+                        json.en_title,
+                        tvType,
+                        simklId?.toIntOrNull(),
+                        json.ids?.imdb,
+                        json.ids?.tmdb?.toIntOrNull(),
+                        json.year,
+                        json.ids?.anilist?.toIntOrNull(),
+                        json.ids?.mal?.toIntOrNull(),
+                        json.season?.toIntOrNull() ?: it.season,
+                        it.episode,
+                    ).toJson()
+                ) {
+                    this.season = it.season
+                    this.episode = it.episode
+                    this.posterUrl = "https://simkl.in/episodes/${it.img}_c.webp"
+                    addDate(it.date)
                 }
             }
 
@@ -165,6 +164,7 @@ class CineSimklProvider: MainAPI() {
                 this.tags = genres
                 this.rating = json.ratings?.simkl?.rating.toString().toRatingInt()
                 this.year = json.year
+                this.contentRating = json.certification
                 this.addSimklId(simklId.toInt())
                 this.addAniListId(json.ids?.anilist?.toIntOrNull())
             }
