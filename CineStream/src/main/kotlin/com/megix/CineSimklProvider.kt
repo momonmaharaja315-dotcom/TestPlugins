@@ -115,9 +115,9 @@ class CineSimklProvider: MainAPI() {
 
         suspend fun fetchResults(type: String): List<SearchResponse> {
             val result = runCatching {
-                val json = app.get("$apiUrl/search/$type?q=$query?client_id=$auth", headers = headers).text
+                val json = app.get("$apiUrl/search/$type?q=$query&client_id=$auth", headers = headers).text
                 parseJson<Array<SimklResponse>>(json).map {
-                    newMovieSearchResponse("${it.title}", "$mainUrl/tv/${it.ids?.simkl_id}") {
+                    newMovieSearchResponse("${it.title}", "$mainUrl/${it.ids?.simkl_id}") {
                         posterUrl = getPosterUrl(it.poster, "poster")
                     }
                 }
@@ -127,7 +127,7 @@ class CineSimklProvider: MainAPI() {
             return emptyList()
         }
 
-        val types = listOf( "movie", "tv", "anime")
+        val types = listOf("movie", "tv", "anime")
         val resultsLists = types.map {
             async { fetchResults(it) }
         }.awaitAll()
@@ -147,7 +147,7 @@ class CineSimklProvider: MainAPI() {
         val jsonString = app.get(apiUrl + request.data + page, headers = headers).text
         val json = parseJson<Array<SimklResponse>>(jsonString)
         val data = json.map {
-            newMovieSearchResponse("${it.title}", "$mainUrl/tv/${it.ids?.simkl_id}") {
+            newMovieSearchResponse("${it.title}", "$mainUrl/${it.ids?.simkl_id}") {
                 this.posterUrl = getPosterUrl(it.poster, "poster")
             }
         }
