@@ -74,7 +74,7 @@ class CineSimklProvider: MainAPI() {
     override val hasMainPage = true
     override val hasQuickSearch = false
     private val apiUrl = "https://api.simkl.com"
-    private final val mediaLimit = 20
+    private final val mediaLimit = 10
     private val auth = BuildConfig.SIMKL_API
     private val headers = mapOf("Content-Type" to "application/json")
     private val api = AccountManager.simklApi
@@ -93,30 +93,20 @@ class CineSimklProvider: MainAPI() {
         return regex.find(url)?.groupValues?.get(1) ?: ""
     }
 
-    private fun extractSeasonAndCleanTitle(title: String): Pair<Int?, String> {
-        val regex = Regex("""(?i)\bseason\s+(\d+)\b""")
-        val match = regex.find(title)
-
-        val seasonNumber = match?.groupValues?.get(1)?.toIntOrNull()
-
-        val cleanedTitle = match?.range?.first?.let { title.substring(0, it).trim() } ?: title.trim()
-
-        return Pair(seasonNumber, cleanedTitle)
-    }
-
     private fun getPosterUrl(
         url: String? = null,
         type: String,
      ): String? {
+        val baseUrl = "https://simkl.in"
         if(url == null) {
             return null
         } else if(type == "episode") {
-            return "https://simkl.in/episodes/${url}_c.webp"
+            return "$baseUrl/episodes/${url}_c.webp"
         } else if(type == "poster") {
-            return "https://simkl.in/posters/${url}_m.webp"
+            return "$baseUrl/posters/${url}_m.webp"
         }
         else {
-            return "https://simkl.in/fanart/${url}_medium.webp"
+            return "$baseUrl/fanart/${url}_medium.webp"
         }
     }
 
@@ -124,9 +114,9 @@ class CineSimklProvider: MainAPI() {
 
         suspend fun fetchResults(type: String): List<SearchResponse> {
             val result = runCatching {
-                val json = app.get("$apiUrl/search/$type?q=$query&client_id=$auth", headers = headers).text
+                val json = app.get("$apiUrl/search/$type?q=$query&page=1&limit=$mediaLimit&extended=full&client_id=$auth", headers = headers).text
                 parseJson<Array<SimklResponse>>(json).map {
-                    newMovieSearchResponse("${it.title}", "$mainUrl/${it.endpoint_type}/${it.ids?.simkl_id}/${it.ids?.slug}") {
+                    newMovieSearchResponse("${it.title_en ?: it.title}", "$mainUrl${it.url}") {
                         posterUrl = getPosterUrl(it.poster, "poster")
                     }
                 }
@@ -199,10 +189,7 @@ class CineSimklProvider: MainAPI() {
         val isAnime = if(tvType == "anime") true else false
         val isBollywood = if(country == "IN") true else false
         val isAsian = if(!isAnime && (country == "JP" || country == "KR" || country == "CN")) true else false
-
-        val (imdbSeason, en_title) = if(isAnime) {
-            extractSeasonAndCleanTitle(json.en_title ?: json.title ?: "")
-        } else Pair(null, json.en_title ?: json.title)
+        val en_title = json.en_title ?: json.title
 
         if (tvType == "movie" || (tvType == "anime" && json.anime_type?.equals("movie") == true)) {
             val data = LoadLinksData(
@@ -222,7 +209,7 @@ class CineSimklProvider: MainAPI() {
                 isBollywood,
                 isAsian
             ).toJson()
-            return newMovieLoadResponse("${json.en_title ?: json.title}", url, if(isAnime) TvType.AnimeMovie  else TvType.Movie, data) {
+            return newMovieLoadResponse("${en_title}", url, if(isAnime) TvType.AnimeMovie  else TvType.Movie, data) {
                 this.posterUrl = getPosterUrl(json.poster, "poster")
                 this.backgroundPosterUrl = getPosterUrl(json.fanart, "fanart") ?: getPosterUrl(json.poster, "poster")
                 this.plot = json.overview
@@ -237,7 +224,7 @@ class CineSimklProvider: MainAPI() {
         } else {
             val epsJson = app.get("$apiUrl/tv/episodes/$simklId", headers = headers).text
             val eps = parseJson<Array<Episodes>>(epsJson)
-            val episodes = eps.filter { it.season != 0 }.map {
+            val episodes = eps.filter { it.type != "special" }.map {
                 newEpisode(
                     LoadLinksData(
                         json.title,
@@ -249,7 +236,7 @@ class CineSimklProvider: MainAPI() {
                         json.year,
                         json.ids?.anilist?.toIntOrNull(),
                         json.ids?.mal?.toIntOrNull(),
-                        json.season?.toIntOrNull() ?: imdbSeason ?: it.season,
+                        it.season,
                         it.episode,
                         it.date.toString().substringBefore("-").toIntOrNull(),
                         isAnime,
@@ -264,7 +251,7 @@ class CineSimklProvider: MainAPI() {
                 }
             }
 
-            return newTvSeriesLoadResponse("${json.en_title ?: json.title}", url,if(isAnime) TvType.Anime else TvType.TvSeries, episodes) {
+            return newTvSeriesLoadResponse("${en_title}", url,if(isAnime) TvType.Anime else TvType.TvSeries, episodes) {
                 this.posterUrl = getPosterUrl(json.poster, "poster")
                 this.backgroundPosterUrl = getPosterUrl(json.fanart, "fanart") ?: getPosterUrl(json.poster, "poster")
                 this.plot = json.overview
@@ -286,6 +273,14 @@ class CineSimklProvider: MainAPI() {
             callback: (ExtractorLink) -> Unit
     ): Boolean {
         val res = parseJson<LoadLinksData>(data)
+
+        callback.invoke(
+            newExtractorLink(
+               "json",
+               "json",
+               res.toString(),
+            )
+        )
 
         runAllAsync(
             { if(res.isAnime) invokeAnimes(res.malId, res.anilistId, res.episode, res.year, "kitsu", subtitleCallback, callback) },

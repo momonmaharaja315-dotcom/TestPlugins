@@ -1415,8 +1415,12 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         val document = app.get("$fourkhdhubAPI/?s=$title").document
-        val link = document.selectFirst("div.card-grid > a:has(div.movie-card-content:contains(${year ?: ""}))")
-            ?.attr("href") ?: return
+        val link = document.select("div.card-grid > a").firstOrNull { element ->
+            val content = element.selectFirst("div.movie-card-content")?.text()?.lowercase()
+            content?.contains((year ?: "").lowercase()) == true &&
+            title?.lowercase()?.let { content.contains(it) } == true
+        }?.attr("href") ?: return
+
         val doc = app.get("$fourkhdhubAPI$link").document
         if(season == null) {
             doc.select("div.download-item a").amap {
