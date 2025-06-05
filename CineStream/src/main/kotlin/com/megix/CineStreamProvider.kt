@@ -697,7 +697,7 @@ open class CineStreamProvider : MainAPI() {
             { invokeProtonmovies(res.id, res.season, res.episode, subtitleCallback, callback) },
             { invokeAllmovieland(res.id, res.season, res.episode, callback) },
             { if(res.season == null) invokeMostraguarda(res.id, subtitleCallback, callback) },
-            { if (!isBollywood || !isAnime) invokeMoviesflix("Moviesflix", res.id, res.season, res.episode, subtitleCallback, callback) },
+            { if (!isBollywood && !isAnime) invokeMoviesflix("Moviesflix", res.id, res.season, res.episode, subtitleCallback, callback) },
             { if (isBollywood) invokeMoviesflix("Hdmoviesflix", res.id, res.season, res.episode, subtitleCallback, callback) },
             { if (!isBollywood) invokeUhdmovies(res.title, year, res.season, res.episode, callback, subtitleCallback) },
             { if (!isBollywood) invoke4khdhub(res.title, year, res.season, res.episode, subtitleCallback, callback) }

@@ -74,10 +74,12 @@ class CineSimklProvider: MainAPI() {
     override val hasMainPage = true
     override val hasQuickSearch = false
     private val apiUrl = "https://api.simkl.com"
-    private final val mediaLimit = 10
+    private final val mediaLimit = 20
     private val auth = BuildConfig.SIMKL_API
     private val headers = mapOf("Content-Type" to "application/json")
     private val api = AccountManager.simklApi
+    private val kitsuAPI = "https://anime-kitsu.strem.fun"
+    private val cinemetaAPI = "https://v3-cinemeta.strem.io"
 
     override val mainPage = mainPageOf(
         "Personal" to "Personal",
@@ -91,6 +93,24 @@ class CineSimklProvider: MainAPI() {
     private fun getSimklId(url: String): String {
         val regex = Regex("""simkl\.com\/(?:anime|movies|tv|movie|shows|show)\/(\d+)""")
         return regex.find(url)?.groupValues?.get(1) ?: ""
+    }
+
+    private fun extractImdbId(kitsuId: String? = null): String? {
+        val jsonString = app.get("$kitsuAPI/meta/series/kitsu:$kitsuId.json").text
+        val rootObject = JSONObject(jsonString)
+        val metaObject = rootObject.optJSONObject("meta")
+        return metaObject?.optString("imdb_id")?.takeIf { it.isNotBlank() }
+    }
+
+    private fun extractNameAndTMDBId(imdbId: String? = null): Pair<String?, Int?> {
+        val jsonString = app.get("$cinemetaAPI/meta/series/$imdbId.json").text
+        val rootObject = JSONObject(jsonString)
+        val metaObject = rootObject.optJSONObject("meta")
+
+        val name = metaObject?.optString("name")?.takeIf { it.isNotBlank() }
+        val moviedbId = metaObject?.optInt("moviedb_id", -1)?.takeIf { it != -1 }
+
+        return Pair(name, moviedbId)
     }
 
     private fun getPosterUrl(
@@ -202,6 +222,7 @@ class CineSimklProvider: MainAPI() {
                 json.year,
                 json.ids?.anilist?.toIntOrNull(),
                 json.ids?.mal?.toIntOrNull(),
+                json.ids?.kitsu?.toIntOrNull(),
                 null,
                 null,
                 null,
@@ -236,7 +257,8 @@ class CineSimklProvider: MainAPI() {
                         json.year,
                         json.ids?.anilist?.toIntOrNull(),
                         json.ids?.mal?.toIntOrNull(),
-                        it.season,
+                        json.ids?.kitsu?.toIntOrNull(),
+                        json.season?.toIntOrNull() ?: it.season,
                         it.episode,
                         it.date.toString().substringBefore("-").toIntOrNull(),
                         isAnime,
@@ -244,6 +266,7 @@ class CineSimklProvider: MainAPI() {
                         isAsian
                     ).toJson()
                 ) {
+                    this.name = it.title
                     this.season = it.season
                     this.episode = it.episode
                     this.posterUrl = getPosterUrl(it.img, "episode")
@@ -282,40 +305,43 @@ class CineSimklProvider: MainAPI() {
             )
         )
 
+        if(res.isAnime) runAnimeInvokers(res, subtitleCallback, callback)
+        else runGeneralInvokers(res, subtitleCallback, callback)
+
+        return true
+    }
+
+    private suspend fun runGeneralInvokers(
+        res: LoadLinksData,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
         runAllAsync(
-            { if(res.isAnime) invokeAnimes(res.malId, res.anilistId, res.episode, res.year, "kitsu", subtitleCallback, callback) },
-            { if(res.isAnime) invokeSudatchi(res.anilistId, res.episode, subtitleCallback, callback) },
-            { if(res.isAnime) invokeGojo(res.anilistId, res.episode, callback) },
-            { if(res.isAnime) invokeAnimeparadise(res.title, res.malId, res.episode, subtitleCallback, callback) },
-            { if(res.isAnime) invokeAllanime(res.title, res.year, res.episode, subtitleCallback, callback) },
-            { if(res.isAnime) invokeAnizone(res.title, res.episode, subtitleCallback, callback) },
-            { if(res.isAnime) invokeTokyoInsider(res.title, res.episode, subtitleCallback, callback) },
             { invokeTorrentio(res.imdbId, res.season, res.episode, callback) },
-            { if (!res.isBollywood) invokeVegamovies("VegaMovies", res.imdbId, res.season, res.episode, subtitleCallback, callback) },
-            { if (res.isBollywood) invokeVegamovies("RogMovies", res.imdbId, res.season, res.episode, subtitleCallback, callback) },
-            { invokeNetflix(res.en_title, res.year, res.season, res.episode, subtitleCallback, callback) },
-            { invokePrimeVideo(res.en_title, res.year, res.season, res.episode, subtitleCallback, callback) },
-            { if (res.season == null) invokeStreamify(res.imdbId, callback) },
-            { invokeMultimovies(res.en_title, res.season, res.episode, subtitleCallback, callback) },
-            { if (res.isBollywood) invokeTopMovies(res.title, res.year, res.season, res.episode, subtitleCallback, callback) },
-            { if (!res.isBollywood) invokeMoviesmod(res.imdbId, res.season, res.episode, subtitleCallback, callback) },
-            { if (res.isAsian && res.season != null) invokeStreamAsia(res.title, "kdhd", res.season, res.episode, subtitleCallback, callback) },
-            { invokeMoviesdrive(res.en_title, res.imdbId ,res.season, res.episode, subtitleCallback, callback) },
+            { if(!res.isBollywood) invokeVegamovies("VegaMovies", res.imdbId, res.season, res.episode, subtitleCallback, callback) },
+            { if(res.isBollywood) invokeVegamovies("RogMovies", res.imdbId, res.season, res.episode, subtitleCallback, callback) },
+            { invokeNetflix(res.title, res.year, res.season, res.episode, subtitleCallback, callback) },
+            { invokePrimeVideo(res.title, res.year, res.season, res.episode, subtitleCallback, callback) },
+            { if(res.season == null) invokeStreamify(res.imdbId, callback) },
+            { invokeMultimovies(res.title, res.season, res.episode, subtitleCallback, callback) },
+            { if(res.isBollywood) invokeTopMovies(res.title, res.year, res.season, res.episode, subtitleCallback, callback) },
+            { if(!res.isBollywood) invokeMoviesmod(res.imdbId, res.season, res.episode, subtitleCallback, callback) },
+            { if(res.isAsian && res.season != null) invokeStreamAsia(res.title, "kdhd", res.season, res.episode, subtitleCallback, callback) },
+            { invokeMoviesdrive(res.title, res.imdbId ,res.season, res.episode, subtitleCallback, callback) },
             { if(!res.isAnime) invokeAsiaflix(res.title, res.season, res.episode, res.airedYear, subtitleCallback, callback) },
-            { invokeCinemaluxe(res.en_title, res.year, res.season, res.episode, callback, subtitleCallback) },
-            { if (!res.isAnime) invokeSkymovies(res.title, res.airedYear, res.episode, subtitleCallback, callback) },
-            { if (!res.isAnime) invokeHdmovie2(res.title, res.airedYear, res.episode, subtitleCallback, callback) },
-            { if (!res.isAnime) invokeFlixhq(res.title, res.season, res.episode, subtitleCallback, callback) },
+            { invokeCinemaluxe(res.title, res.year, res.season, res.episode, callback, subtitleCallback) },
+            { invokeSkymovies(res.title, res.airedYear, res.episode, subtitleCallback, callback) },
+            { invokeHdmovie2(res.title, res.airedYear, res.episode, subtitleCallback, callback) },
+            { invokeFlixhq(res.title, res.season, res.episode, subtitleCallback, callback) },
             { invokeBollyflix(res.imdbId, res.season, res.episode, subtitleCallback, callback) },
             { invokeMovies4u(res.imdbId, res.en_title, res.year, res.season, res.episode, subtitleCallback, callback) },
-            { invokeTorrentio(res.imdbId, res.season, res.episode, callback) },
-            { if (!res.isBollywood) invokeHindmoviez("HindMoviez", res.imdbId, res.season, res.episode, callback) },
+            { if(!res.isBollywood) invokeHindmoviez("HindMoviez", res.imdbId, res.season, res.episode, callback) },
             // { if (res.isBollywood) invokeHindmoviez("JaduMovies", res.imdbId, res.season, res.episode, callback) },
             { invokeW4U(res.en_title, res.year, res.imdbId, res.season, res.episode, subtitleCallback, callback) },
             { invokeWYZIESubs(res.imdbId, res.season, res.episode, subtitleCallback) },
             { invokePrimebox(res.en_title, res.year, res.season, res.episode, subtitleCallback, callback) },
             { invokePrimeWire(res.imdbId, res.season, res.episode, subtitleCallback, callback) },
-            { if (!res.isAnime) invoke2embed(res.imdbId, res.season, res.episode, callback) },
+            { invoke2embed(res.imdbId, res.season, res.episode, callback) },
             { invokeSoaper(res.imdbId, res.tmdbId, res.en_title, res.season, res.episode, subtitleCallback, callback) },
             { invokePhoenix(res.en_title, res.imdbId, res.tmdbId, res.year, res.season, res.episode, callback) },
             { invokeTom(res.tmdbId, res.season, res.episode, callback, subtitleCallback) },
@@ -326,12 +352,51 @@ class CineSimklProvider: MainAPI() {
             { invokeProtonmovies(res.imdbId, res.season, res.episode, subtitleCallback, callback) },
             { invokeAllmovieland(res.imdbId, res.season, res.episode, callback) },
             { if(res.season == null) invokeMostraguarda(res.imdbId, subtitleCallback, callback) },
-            { if (!res.isBollywood || !res.isAnime) invokeMoviesflix("Moviesflix", res.imdbId, res.season, res.episode, subtitleCallback, callback) },
-            { if (res.isBollywood) invokeMoviesflix("Hdmoviesflix", res.imdbId, res.season, res.episode, subtitleCallback, callback) },
-            { if (!res.isBollywood) invokeUhdmovies(res.en_title, res.year, res.season, res.episode, callback, subtitleCallback) },
-            { if (!res.isBollywood) invoke4khdhub(res.en_title, res.year, res.season, res.episode, subtitleCallback, callback) }
+            { if(!res.isBollywood ) invokeMoviesflix("Moviesflix", res.imdbId, res.season, res.episode, subtitleCallback, callback) },
+            { if(res.isBollywood) invokeMoviesflix("Hdmoviesflix", res.imdbId, res.season, res.episode, subtitleCallback, callback) },
+            { if(!res.isBollywood) invokeUhdmovies(res.en_title, res.year, res.season, res.episode, callback, subtitleCallback) },
+            { if(!res.isBollywood) invoke4khdhub(res.en_title, res.year, res.season, res.episode, subtitleCallback, callback) }
         )
-        return true
+    }
+
+    private suspend fun runAnimeInvokers(
+        res: LoadLinksData,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val imdbId = if(res.imdbId == null) extractImdbId(res.kitsuId) else res.imdbId
+        val (imdbTitle, tmdbId) = if(res.imdbId == null) extractNameAndTMDBId(imdbId) else Pair(res.en_title, res.tmdbId)
+
+        runAllAsync(
+            { invokeAnimes(res.malId, res.anilistId, res.episode, res.year, "kitsu", subtitleCallback, callback) },
+            { invokeSudatchi(res.anilistId, res.episode, subtitleCallback, callback) },
+            { invokeGojo(res.anilistId, res.episode, callback) },
+            { invokeAnimeparadise(res.title, res.malId, res.episode, subtitleCallback, callback) },
+            { invokeAllanime(res.title, res.year, res.episode, subtitleCallback, callback) },
+            { invokeAnizone(res.title, res.episode, subtitleCallback, callback) },
+            { invokeTokyoInsider(res.title, res.episode, subtitleCallback, callback) },
+            { invokeTorrentio(imdbId, res.season, res.episode, callback) },
+            { invokeVegamovies("VegaMovies", imdbId, res.season, res.episode, subtitleCallback, callback) },
+            { invokeNetflix(imdbTitle, res.year, res.season, res.episode, subtitleCallback, callback) },
+            { invokePrimeVideo(imdbTitle, res.year, res.season, res.episode, subtitleCallback, callback) },
+            { invokeMultimovies(imdbTitle, res.season, res.episode, subtitleCallback, callback) },
+            { invokeMoviesmod(imdbId, res.season, res.episode, subtitleCallback, callback) },
+            { invokeBollyflix(imdbId, res.season, res.episode, subtitleCallback, callback) },
+            { invokeMovies4u(imdbId, imdbTitle, res.year, res.season, res.episode, subtitleCallback, callback) },
+            { invokeWYZIESubs(imdbId, res.season, res.episode, subtitleCallback) },
+            { invokePrimebox(imdbTitle, res.year, res.season, res.episode, subtitleCallback, callback) },
+            { invokePrimeWire(imdbId, res.season, res.episode, subtitleCallback, callback) },
+            { invokeSoaper(imdbId, tmdbId, imdbTitle, res.season, res.episode, subtitleCallback, callback) },
+            { invokePhoenix(imdbTitle, imdbId, tmdbId, res.year, res.season, res.episode, callback) },
+            { invokeTom(tmdbId, res.season, res.episode, callback, subtitleCallback) },
+            { invokePrimenet(tmdbId, res.season, res.episode, callback) },
+            { invokePlayer4U(imdbTitle, res.season, res.episode, res.airedYear, callback) },
+            { invokeThepiratebay(imdbId, res.season, res.episode, callback) },
+            { invokeProtonmovies(imdbId, res.season, res.episode, subtitleCallback, callback) },
+            { invokeAllmovieland(imdbId, res.season, res.episode, callback) },
+            { invokeUhdmovies(imdbTitle, res.year, res.season, res.episode, callback, subtitleCallback) },
+            { invoke4khdhub(imdbTitle, res.year, res.season, res.episode, subtitleCallback, callback) }
+        )
     }
 
     data class SimklResponse (
@@ -389,9 +454,11 @@ class CineSimklProvider: MainAPI() {
     )
 
     data class Episodes (
+        var title   : String?  = null,
         var season  : Int?     = null,
         var episode : Int?     = null,
         var type    : String?  = null,
+        var description : String? = null,
         var aired   : Boolean? = null,
         var img     : String?  = null,
         var date    : String?  = null,
@@ -406,6 +473,7 @@ class CineSimklProvider: MainAPI() {
         val year: Int? = null,
         val anilistId: Int? = null,
         val malId: Int? = null,
+        val kitsuId: Int? = null,
         val season: Int? = null,
         val episode: Int? = null,
         val airedYear: Int? = null,
