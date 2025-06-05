@@ -337,6 +337,7 @@ class CineSimklProvider: MainAPI() {
     data class SimklResponse (
         var title          : String?  = null,
         var en_title       : String?  = null,
+        var title_en       : String?  = null,
         var year           : Int?     = null,
         var type           : String?  = null,
         var url            : String?  = null,
