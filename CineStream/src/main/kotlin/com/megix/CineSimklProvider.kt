@@ -84,11 +84,6 @@ class CineSimklProvider: MainAPI() {
         "/anime/trending?extended=overview&limit=$mediaLimit&page=" to "Trending Anime",
     )
 
-    private fun getSimklId(url: String): String {
-        val regex = Regex("""simkl\.com\/(?:anime|movies|tv|movie)\/(\d+)""")
-        return regex.find(url)?.groupValues?.get(1) ?: ""
-    }
-
     private fun extractSeasonAndCleanTitle(title: String): Pair<Int?, String> {
         val regex = Regex("""(?i)\bseason\s+(\d+)\b""")
         val match = regex.find(title)
@@ -120,9 +115,9 @@ class CineSimklProvider: MainAPI() {
 
         suspend fun fetchResults(type: String): List<SearchResponse> {
             val result = runCatching {
-                val json = app.get("$apiUrl/search/$type?q=$query", headers = headers).text
+                val json = app.get("$apiUrl/search/$type?q=$query?client_id=$auth", headers = headers).text
                 parseJson<Array<SimklResponse>>(json).map {
-                    newMovieSearchResponse("${it.title}", "$mainUrl/${it.endpoint_type}/${it.ids?.simkl_id}/${it.ids?.slug}") {
+                    newMovieSearchResponse("${it.title}", "$mainUrl/tv/${it.ids?.simkl_id}") {
                         posterUrl = getPosterUrl(it.poster, "poster")
                     }
                 }
@@ -152,7 +147,7 @@ class CineSimklProvider: MainAPI() {
         val jsonString = app.get(apiUrl + request.data + page, headers = headers).text
         val json = parseJson<Array<SimklResponse>>(jsonString)
         val data = json.map {
-            newMovieSearchResponse("${it.title}", "$mainUrl${it.url}") {
+            newMovieSearchResponse("${it.title}", "$mainUrl/tv/${it.ids?.simkl_id}") {
                 this.posterUrl = getPosterUrl(it.poster, "poster")
             }
         }
@@ -167,7 +162,7 @@ class CineSimklProvider: MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse {
-        val simklId = getSimklId(url)
+        val simklId = url.substringAfterLast("/")
         val jsonString = app.get("$apiUrl/tv/$simklId?extended=full", headers = headers).text
         val json = parseJson<SimklResponse>(jsonString)
         val genres = json.genres?.map { it.toString() }
@@ -226,7 +221,7 @@ class CineSimklProvider: MainAPI() {
                         json.year,
                         json.ids?.anilist?.toIntOrNull(),
                         json.ids?.mal?.toIntOrNull(),
-                        imdbSeason ?: it.season,
+                        json.season ?: imdbSeason ?: it.season,
                         it.episode,
                         it.date.toString().substringBefore("-").toIntOrNull(),
                         isAnime,
