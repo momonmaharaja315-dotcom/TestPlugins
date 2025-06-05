@@ -6,6 +6,7 @@ import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
 import com.lagradost.cloudstream3.LoadResponse.Companion.addSimklId
 import com.lagradost.cloudstream3.LoadResponse.Companion.addAniListId
+import com.lagradost.cloudstream3.syncproviders.AccountManager
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import com.lagradost.cloudstream3.runAllAsync
 import kotlinx.coroutines.async
@@ -77,12 +78,18 @@ class CineSimklProvider: MainAPI() {
     private val headers = mapOf("Content-Type" to "application/json")
 
     override val mainPage = mainPageOf(
+        "Personal" to "Personal",
         "/movies/trending/today?extended=overview&limit=$mediaLimit&page=" to "Trending Movies Today",
         "/tv/trending/today?type=series&extended=overview&limit=$mediaLimit&page=" to "Trending TV Shows Today",
         "/movies/trending/month?extended=overview&limit=$mediaLimit&page=" to "Trending Movies",
         "/tv/trending/month?type=series&extended=overview&limit=$mediaLimit&page=" to "Trending TV Shows",
         "/anime/trending?extended=overview&limit=$mediaLimit&page=" to "Trending Anime",
     )
+
+    private fun getSimklId(url: String): String {
+        val regex = Regex("""simkl\.com\/(?:anime|movies|tv|movie|shows|show)\/(\d+)""")
+        return regex.find(url)?.groupValues?.get(1) ?: ""
+    }
 
     private fun extractSeasonAndCleanTitle(title: String): Pair<Int?, String> {
         val regex = Regex("""(?i)\bseason\s+(\d+)\b""")
@@ -117,7 +124,7 @@ class CineSimklProvider: MainAPI() {
             val result = runCatching {
                 val json = app.get("$apiUrl/search/$type?q=$query&client_id=$auth", headers = headers).text
                 parseJson<Array<SimklResponse>>(json).map {
-                    newMovieSearchResponse("${it.title}", "$mainUrl/${it.ids?.simkl_id}") {
+                    newMovieSearchResponse("${it.title}", "$mainUrl/${it.endpoint_type}/${it.ids?.simkl_id}/${it.ids?.slug}") {
                         posterUrl = getPosterUrl(it.poster, "poster")
                     }
                 }
@@ -144,25 +151,44 @@ class CineSimklProvider: MainAPI() {
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse? {
-        val jsonString = app.get(apiUrl + request.data + page, headers = headers).text
-        val json = parseJson<Array<SimklResponse>>(jsonString)
-        val data = json.map {
-            newMovieSearchResponse("${it.title}", "$mainUrl/${it.ids?.simkl_id}") {
-                this.posterUrl = getPosterUrl(it.poster, "poster")
+        if (request.name.contains("Personal")) {
+            // Reading and manipulating personal library
+            api.loginInfo()
+                    ?: return newHomePageResponse(
+                            "Login required for personal content.",
+                            emptyList<SearchResponse>(),
+                            false
+                    )
+            var homePageList =
+                    api.getPersonalLibrary()?.allLibraryLists?.mapNotNull {
+                        if (it.items.isEmpty()) return@mapNotNull null
+                        val libraryName =
+                                it.name.asString(plugin.activity ?: return@mapNotNull null)
+                        HomePageList("${request.name}: $libraryName", it.items)
+                    }
+                            ?: return null
+            return newHomePageResponse(homePageList, false)
+        } else {
+            val jsonString = app.get(apiUrl + request.data + page, headers = headers).text
+            val json = parseJson<Array<SimklResponse>>(jsonString)
+            val data = json.map {
+                newMovieSearchResponse("${it.title}", "$mainUrl${it.url}") {
+                    this.posterUrl = getPosterUrl(it.poster, "poster")
+                }
             }
-        }
 
-        return newHomePageResponse(
-            list = HomePageList(
-                name = request.name,
-                list = data,
-            ),
-            hasNext = true
-        )
+            return newHomePageResponse(
+                list = HomePageList(
+                    name = request.name,
+                    list = data,
+                ),
+                hasNext = true
+            )
+        }
     }
 
     override suspend fun load(url: String): LoadResponse {
-        val simklId = url.substringAfterLast("/")
+        val simklId = getSimklId(url)
         val jsonString = app.get("$apiUrl/tv/$simklId?extended=full", headers = headers).text
         val json = parseJson<SimklResponse>(jsonString)
         val genres = json.genres?.map { it.toString() }
