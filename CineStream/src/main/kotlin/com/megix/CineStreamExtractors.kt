@@ -507,12 +507,12 @@ object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun invokeHindmoviez(
         source: String,
-        api: String,
         id: String? = null,
         season: Int? = null,
         episode: Int? = null,
         callback: (ExtractorLink) -> Unit
     ) {
+        val api = if(source == "HindMoviez") hindMoviezAPI else jaduMoviesAPI
         app.get("$api/?s=$id", timeout = 50L).document.select("h2.entry-title > a").amap {
             val doc = app.get(it.attr("href"), timeout = 50L).document
             if(episode == null) {
@@ -617,7 +617,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val headers = mapOf("X-Requested-With" to "XMLHttpRequest")
         val url = "$netflixAPI/mobile/pv/search.php?s=$title&t=${APIHolder.unixTime}"
         val data = app.get(url, headers = headers, cookies = cookies).parsedSafe<NfSearchData>()
-        val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals("${title.trim()}", ignoreCase = true) }?.id
+        val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals("${title?.trim()}", ignoreCase = true) }?.id
 
         val (nfTitle, id) = app.get(
             "$netflixAPI/mobile/pv/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
@@ -692,7 +692,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val headers = mapOf("X-Requested-With" to "XMLHttpRequest")
         val url = "$netflixAPI/mobile/search.php?s=$title&t=${APIHolder.unixTime}"
         val data = app.get(url, headers = headers, cookies = cookies).parsedSafe<NfSearchData>()
-        val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals("${title.trim()}", ignoreCase = true) }?.id
+        val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals("${title?.trim()}", ignoreCase = true) }?.id
 
         val (nfTitle, id) = app.get(
             "$netflixAPI/mobile/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
@@ -917,13 +917,14 @@ object CineStreamExtractors : CineStreamProvider() {
 
     suspend fun invokeMoviesflix(
         sourceName: String,
-        api: String,
         id: String? = null,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
+        val api = if(sourceName == "Moviesflix") moviesflixAPI else hdmoviesflixAPI
+
         app.get("$api/?s=$id").document.select("a.post-image").amap {
             val doc = app.get(it.attr("href")).document
             if(episode == null) {
@@ -1175,7 +1176,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeStreamify(
-        id: String,
+        id: String? = null,
         callback: (ExtractorLink) -> Unit
     ) {
         val url = "$stremifyAPI/movie/$id.json"
@@ -1193,7 +1194,6 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeMultimovies(
-        apiUrl: String,
         title: String? = null,
         season: Int? = null,
         episode: Int? = null,
@@ -1202,9 +1202,9 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val fixTitle = title.createSlug()
         val url = if (season == null) {
-            "$apiUrl/movies/$fixTitle"
+            "$multimoviesAPI/movies/$fixTitle"
         } else {
-            "$apiUrl/episodes/$fixTitle-${season}x${episode}"
+            "$multimoviesAPI/episodes/$fixTitle-${season}x${episode}"
         }
         val req = app.get(url).document
         req.select("ul#playeroptionsul li").map {
@@ -1469,13 +1469,12 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeWYZIESubs(
-        api: String,
         id: String? = null,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
     ) {
-        val url = if(season != null) "$api/search?id=$id&season=$season&episode=$episode" else "$api/search?id=$id"
+        val url = if(season != null) "$WYZIESubsAPI/search?id=$id&season=$season&episode=$episode" else "$api/search?id=$id"
         val json = app.get(url).text
         val data = parseJson<ArrayList<WYZIESubtitle>>(json)
 
@@ -1492,7 +1491,7 @@ object CineStreamExtractors : CineStreamProvider() {
     suspend fun invokeW4U(
         title: String? = null,
         year: Int? = null,
-        id: String,
+        id: String? = null,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
@@ -1503,7 +1502,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val link = document.selectFirst("div.post-thumb > a")?.attr("href")
         val doc = app.get(link ?: return).document
         val imdbId = doc.selectFirst("div.imdb_left > a")?.attr("href")?.substringAfter("title/")?.substringBefore("/") ?: ""
-        if(id == imdbId) {
+        if("$id" == imdbId) {
             if(season != null && episode != null) {
                 doc.select("a.my-button").mapNotNull {
                     val title = it.parent()?.parent()?.previousElementSibling()?.text()?: ""
