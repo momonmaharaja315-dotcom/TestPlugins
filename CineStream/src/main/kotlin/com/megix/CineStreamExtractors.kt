@@ -537,14 +537,14 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeStreamAsia(
-        title: String,
+        title: String? = null,
         provider: String,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
-        val titleSlug = title.replace(" ", "-")
+        val titleSlug = title?.replace(" ", "-")
         val s = if(season != 1) "-season-$season" else ""
         val url = "$StreamAsiaAPI/stream/series/$provider-${titleSlug}${s}::$titleSlug${s}-ep-$episode.json"
         val json = app.get(url).text
@@ -571,14 +571,14 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeTokyoInsider(
-        title: String,
+        title: String? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit,
     ) {
         val tvtype = if(episode == null) "_(Movie)" else "_(TV)"
-        val firstChar = getFirstCharacterOrZero(title).uppercase()
-        val newTitle = title.replace(" ","_")
+        val firstChar = getFirstCharacterOrZero("$title").uppercase()
+        val newTitle = title?.replace(" ","_")
         val doc = app.get("$tokyoInsiderAPI/anime/$firstChar/$newTitle$tvtype", timeout = 500L).document
         val selector = if(episode != null) "a.download-link:matches((?i)(episode $episode\\b))" else "a.download-link"
         val aTag = doc.selectFirst(selector)
@@ -600,7 +600,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokePrimeVideo(
-        title: String,
+        title: String? = null,
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
@@ -617,7 +617,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val headers = mapOf("X-Requested-With" to "XMLHttpRequest")
         val url = "$netflixAPI/mobile/pv/search.php?s=$title&t=${APIHolder.unixTime}"
         val data = app.get(url, headers = headers, cookies = cookies).parsedSafe<NfSearchData>()
-        val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals(title.trim(), ignoreCase = true) }?.id
+        val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals("${title.trim()}", ignoreCase = true) }?.id
 
         val (nfTitle, id) = app.get(
             "$netflixAPI/mobile/pv/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
@@ -674,7 +674,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeNetflix(
-        title: String,
+        title: String? = null,
         year: Int? = null,
         season: Int? = null,
         episode: Int? = null,
@@ -692,7 +692,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val headers = mapOf("X-Requested-With" to "XMLHttpRequest")
         val url = "$netflixAPI/mobile/search.php?s=$title&t=${APIHolder.unixTime}"
         val data = app.get(url, headers = headers, cookies = cookies).parsedSafe<NfSearchData>()
-        val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals(title.trim(), ignoreCase = true) }?.id
+        val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals("${title.trim()}", ignoreCase = true) }?.id
 
         val (nfTitle, id) = app.get(
             "$netflixAPI/mobile/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
@@ -1490,7 +1490,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeW4U(
-        title: String,
+        title: String? = null,
         year: Int? = null,
         id: String,
         season: Int? = null,
@@ -1882,7 +1882,7 @@ object CineStreamExtractors : CineStreamProvider() {
     }
 
     suspend fun invokeFlixhq(
-        title: String,
+        title: String? = null,
         season: Int? = null,
         episode: Int? = null,
         subtitleCallback: (SubtitleFile) -> Unit,
@@ -1892,7 +1892,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val searchJson = app.get("$CONSUMET_API/movies/flixhq/$title").text
         val searchData = tryParseJson<ConsumetSearch>(searchJson) ?: return
         val id = searchData.results.firstOrNull {
-            it.title == title && it.type == type
+            it.title == "$title" && it.type == type
         }?.id ?: return
         val infoJson = app.get("$CONSUMET_API/movies/flixhq/info?id=$id").text
         val infoData = tryParseJson<ConsumetInfo>(infoJson) ?: return

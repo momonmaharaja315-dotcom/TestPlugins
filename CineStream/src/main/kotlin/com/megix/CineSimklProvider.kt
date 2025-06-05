@@ -157,11 +157,10 @@ class CineSimklProvider: MainAPI() {
         val jsonString = app.get("$apiUrl/tv/$simklId?extended=full&client_id=$auth").text
         val json = parseJson<SimklResponse>(jsonString)
         val genres = json.genres?.map { it.toString() }
-        val country = json.country
         val tvType = json.type ?: ""
         val en_title = json.en_title ?: json.title
         val country = json.country ?: ""
-        val isAnime = if(tvtype == "anime") true else false
+        val isAnime = if(tvType == "anime") true else false
         val isBollywood = if(country == "IN") true else false
         val isAsian = if(!isAnime && (country == "JP" || country == "KR" || country == "CN")) true else false
 
@@ -220,13 +219,13 @@ class CineSimklProvider: MainAPI() {
                 ) {
                     this.season = it.season
                     this.episode = it.episode
-                    this.posterUrl = getPosterUrl(it.poster, "episode")
+                    this.posterUrl = getPosterUrl(it.img, "episode")
                     addDate(it.date)
                 }
             }
 
             return newTvSeriesLoadResponse("${json.en_title ?: json.title}", url, TvType.TvSeries, episodes) {
-                this.posterUrl = getPosterUrl(json.poster)
+                this.posterUrl = getPosterUrl(json.poster, "poster")
                 this.backgroundPosterUrl = getPosterUrl(json.fanart, "fanart") ?: getPosterUrl(json.poster, "poster")
                 this.plot = json.overview
                 this.tags = genres
@@ -261,7 +260,7 @@ class CineSimklProvider: MainAPI() {
             { if (res.isBollywood) invokeVegamovies("RogMovies", res.imdbId, res.season, res.episode, subtitleCallback, callback) },
             { invokeNetflix(res.en_title, res.year, res.season, res.episode, subtitleCallback, callback) },
             { invokePrimeVideo(res.en_title, res.year, res.season, res.episode, subtitleCallback, callback) },
-            { if (res.season == null) invokeStreamify(res.id, callback) },
+            { if (res.season == null) invokeStreamify(res.imdbId, callback) },
             //{ invokeMultimovies(multimoviesAPI, res.title, res.season, res.episode, subtitleCallback, callback) },
             { if (res.isBollywood) invokeTopMovies(res.title, res.year, res.season, res.episode, subtitleCallback, callback) },
             { if (!res.isBollywood) invokeMoviesmod(res.imdbId, res.season, res.episode, subtitleCallback, callback) },
@@ -277,13 +276,13 @@ class CineSimklProvider: MainAPI() {
             { invokeTorrentio(res.imdbId, res.season, res.episode, callback) },
             //{ if (!res.isBollywood) invokeHindmoviez("HindMoviez", hindMoviezAPI, res.id, res.season, res.episode, callback) },
             // { if (res.isBollywood) invokeHindmoviez("JaduMovies", jaduMoviesAPI, res.id, res.season, res.episode, callback) },
-            { invokeW4U(res.en_title, res.year, res.id, res.season, res.episode, subtitleCallback, callback) },
+            { invokeW4U(res.en_title, res.year, res.imdbId, res.season, res.episode, subtitleCallback, callback) },
             // { invokeWYZIESubs(WYZIESubsAPI, res.imdbId, res.season, res.episode, subtitleCallback) },
             { invokePrimebox(res.en_title, res.year, res.season, res.episode, subtitleCallback, callback) },
             { invokePrimeWire(res.imdbId, res.season, res.episode, subtitleCallback, callback) },
             { if (!res.isAnime) invoke2embed(res.imdbId, res.season, res.episode, callback) },
             { invokeSoaper(res.imdbId, res.tmdbId, res.en_title, res.season, res.episode, subtitleCallback, callback) },
-            { invokePhoenix(res.en_title, res.id, res.tmdbId, res.year, res.season, res.episode, callback) },
+            { invokePhoenix(res.en_title, res.imdbId, res.tmdbId, res.year, res.season, res.episode, callback) },
             { invokeTom(res.tmdbId, res.season, res.episode, callback, subtitleCallback) },
             { invokePrimenet(res.tmdbId, res.season, res.episode, callback) },
             { invokePlayer4U(res.en_title, res.season, res.episode, res.airedYear, callback) },
