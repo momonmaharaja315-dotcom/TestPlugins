@@ -1417,9 +1417,9 @@ object CineStreamExtractors : CineStreamProvider() {
         val document = app.get("$fourkhdhubAPI/?s=$title").document
         val link = document.select("div.card-grid > a").firstOrNull { element ->
             val content = element.selectFirst("div.movie-card-content")?.text()?.lowercase() ?: return@firstOrNull false
-            val hasYear = year?.lowercase()?.let { content.contains(it) } ?: false
-            val hasTitle = title?.lowercase()?.let { content.contains(it) } ?: false
-            hasYear && hasTitle
+            val matchTitle = title?.lowercase()?.let { it in content } ?: true
+            val matchYear = year?.toString()?.lowercase()?.let { it in content } ?: true
+            matchTitle && matchYear
         }?.attr("href") ?: return
 
         val doc = app.get("$fourkhdhubAPI$link").document
