@@ -13,6 +13,7 @@ import com.lagradost.cloudstream3.runAllAsync
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import org.json.JSONObject
 import com.megix.CineStreamExtractors.invokeVegamovies
 import com.megix.CineStreamExtractors.invokeMoviesmod
 import com.megix.CineStreamExtractors.invokeTopMovies
@@ -95,14 +96,14 @@ class CineSimklProvider: MainAPI() {
         return regex.find(url)?.groupValues?.get(1) ?: ""
     }
 
-    private fun extractImdbId(kitsuId: String? = null): String? {
+    private suspend fun extractImdbId(kitsuId: Int? = null): String? {
         val jsonString = app.get("$kitsuAPI/meta/series/kitsu:$kitsuId.json").text
         val rootObject = JSONObject(jsonString)
         val metaObject = rootObject.optJSONObject("meta")
         return metaObject?.optString("imdb_id")?.takeIf { it.isNotBlank() }
     }
 
-    private fun extractNameAndTMDBId(imdbId: String? = null): Pair<String?, Int?> {
+    private suspend fun extractNameAndTMDBId(imdbId: String? = null): Pair<String?, Int?> {
         val jsonString = app.get("$cinemetaAPI/meta/series/$imdbId.json").text
         val rootObject = JSONObject(jsonString)
         val metaObject = rootObject.optJSONObject("meta")
