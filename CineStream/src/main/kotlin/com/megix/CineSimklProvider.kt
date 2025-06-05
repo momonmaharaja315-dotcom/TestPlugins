@@ -21,7 +21,7 @@ import com.megix.CineStreamExtractors.invokeTorrentio
 import com.megix.CineStreamExtractors.invokeAllanime
 
 class CineSimklProvider: MainAPI() {
-    override var name = "CineStream Simkl"
+    override var name = "CineSimkl"
     override var mainUrl = "https://simkl.com"
     override var supportedTypes = setOf(
         TvType.Movie,
@@ -43,13 +43,18 @@ class CineSimklProvider: MainAPI() {
         "/anime/trending/?extended=overview,metadata,tmdb,genres,trailer&client_id=$auth&limit=$mediaLimit&page=" to "Trending Anime",
     )
 
+    fun extractSimklId(url: String): String {
+        val regex = Regex("""simkl\.com\/(?:anime|movies|tv|movie)\/(\d+)""")
+        return regex.find(url)?.groupValues?.get(1) ?: ""
+    }
+
     override suspend fun search(query: String): List<SearchResponse> = coroutineScope {
 
         suspend fun fetchResults(type: String): List<SearchResponse> {
             val result = runCatching {
                 val json = app.get("$apiUrl/search/$type?q=$query&client_id=$auth").text
                 parseJson<Array<SimklResponse>>(json).map {
-                    newMovieSearchResponse("${it.title}", "$mainUrl/${it.ids?.simkl_id}") {
+                    newMovieSearchResponse("${it.title}", "$mainUrl${it.url}") {
                         posterUrl = getPosterUrl(it.poster.toString())
                     }
                 }
@@ -79,7 +84,7 @@ class CineSimklProvider: MainAPI() {
         val jsonString = app.get(apiUrl + request.data + page).text
         val json = parseJson<Array<SimklResponse>>(jsonString)
         val data = json.map {
-            newMovieSearchResponse("${it.title}", "$mainUrl/${it.ids?.simkl_id}") {
+            newMovieSearchResponse("${it.title}", "$mainUrl${it.url}") {
                 this.posterUrl = getPosterUrl(it.poster.toString())
             }
         }
@@ -94,7 +99,7 @@ class CineSimklProvider: MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse {
-        val simklId = url.substringAfterLast("/")
+        val simklId = getSimklId(url)
         val jsonString = app.get("$apiUrl/tv/$simklId?extended=full&client_id=$auth").text
         val json = parseJson<SimklResponse>(jsonString)
         val genres = json.genres?.map { it.toString() }
@@ -114,7 +119,6 @@ class CineSimklProvider: MainAPI() {
                 json.ids?.mal?.toIntOrNull(),
                 null,
                 null,
-                null,
             ).toJson()
             return newMovieLoadResponse("${json.en_title ?: json.title}", url, TvType.Movie, data) {
                 this.posterUrl = getPosterUrl(json.poster.toString())
@@ -130,26 +134,27 @@ class CineSimklProvider: MainAPI() {
             val epsJson = app.get("$apiUrl/tv/episodes/$simklId?client_id=$auth").text
             val eps = parseJson<Array<Episodes>>(epsJson)
             val episodes = eps.map {
-                newEpisode(
-                    LoadLinksData(
-                        json.title,
-                        json.en_title,
-                        tvType,
-                        simklId?.toIntOrNull(),
-                        json.ids?.imdb,
-                        json.ids?.tmdb?.toIntOrNull(),
-                        json.year,
-                        json.ids?.anilist?.toIntOrNull(),
-                        json.ids?.mal?.toIntOrNull(),
-                        it.season,
-                        it.episode,
-                        json.season?.toIntOrNull(),
-                    ).toJson()
-                ) {
-                    this.season = it.season
-                    this.episode = it.episode
-                    this.posterUrl = "https://simkl.in/episodes/${it.img}_c.webp"
-                    addDate(it.date)
+                if(it.season != null && it.season != 0) {
+                    newEpisode(
+                        LoadLinksData(
+                            json.title,
+                            json.en_title,
+                            tvType,
+                            simklId?.toIntOrNull(),
+                            json.ids?.imdb,
+                            json.ids?.tmdb?.toIntOrNull(),
+                            json.year,
+                            json.ids?.anilist?.toIntOrNull(),
+                            json.ids?.mal?.toIntOrNull(),
+                            json.season?.toIntOrNull() ?: it.season,
+                            it.episode,
+                        ).toJson()
+                    ) {
+                        this.season = it.season
+                        this.episode = it.episode
+                        this.posterUrl = "https://simkl.in/episodes/${it.img}_c.webp"
+                        addDate(it.date)
+                    }
                 }
             }
 
@@ -174,7 +179,6 @@ class CineSimklProvider: MainAPI() {
     ): Boolean {
         val res = parseJson<LoadLinksData>(data)
         if(res.tvtype?.equals("anime") == true) {
-            val imdbSeason = if(res.episode != null && res.imdbSeason == null) 1 else res.imdbSeason
             runAllAsync(
                 { invokeAnimes(res.malId, res.anilistId, res.episode, res.year, "kitsu", subtitleCallback, callback) },
                 { invokeSudatchi(res.anilistId, res.episode, subtitleCallback, callback) },
@@ -182,7 +186,7 @@ class CineSimklProvider: MainAPI() {
                 { invokeAnimeparadise(res.title, res.malId, res.episode, subtitleCallback, callback) },
                 { invokeAllanime(res.title, res.year, res.episode, subtitleCallback, callback) },
                 { invokeAnizone(res.title, res.episode, subtitleCallback, callback) },
-                { invokeTorrentio(res.imdbId, res.imdbSeason, res.episode, callback) },
+                { invokeTorrentio(res.imdbId, res.season, res.episode, callback) },
             )
         }
         return true
@@ -260,6 +264,5 @@ class CineSimklProvider: MainAPI() {
         val malId: Int? = null,
         val season: Int? = null,
         val episode: Int? = null,
-        val imdbSeason: Int? = null,
     )
 }
