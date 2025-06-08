@@ -138,8 +138,12 @@ open class CineStreamProvider : MainAPI() {
         val jaduMoviesAPI: String get() = apiConfig.optString("jadumovies")
         val netflixAPI: String get() = apiConfig.optString("nfmirror")
         val MovieDrive_API: String get() = apiConfig.optString("moviesdrive")
-        val gojoAPI: String get() = apiConfig.optString("gojo")
         val gojoBaseAPI: String get() = apiConfig.optString("gojo_base")
+        val vegamoviesAPI: String get() = apiConfig.optString("vegamovies")
+        val rogmoviesAPI: String get() = apiConfig.optString("rogmovies")
+        val uhdmoviesAPI: String get() = apiConfig.optString("uhdmovies")
+        val MoviesmodAPI: String get() = apiConfig.optString("moviesmod")
+        val topmoviesAPI: String get() = apiConfig.optString("topmovies")
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
     override val supportedTypes = setOf(
