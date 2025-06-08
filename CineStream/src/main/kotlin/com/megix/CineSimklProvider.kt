@@ -215,7 +215,7 @@ class CineSimklProvider: MainAPI() {
         val isAsian = if(!isAnime && (country == "JP" || country == "KR" || country == "CN")) true else false
         val en_title = json.en_title ?: json.title
         val recommendations = json.users_recommendations?.map {
-            newMovieSearchResponse("${it.title}", "$mainUrl/$type/${it.ids?.simkl_id}/${it.ids?.slug}") {
+            newMovieSearchResponse("${it.title}", "$mainUrl/${it.type}/${it.ids?.simkl_id}/${it.ids?.slug}") {
                 this.posterUrl = getPosterUrl(it.poster, "poster")
             }
         }

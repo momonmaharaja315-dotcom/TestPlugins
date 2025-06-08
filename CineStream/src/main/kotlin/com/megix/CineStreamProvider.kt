@@ -101,8 +101,6 @@ open class CineStreamProvider : MainAPI() {
         const val Primewire = "https://www.primewire.tf"
         const val ThePirateBayApi = "https://thepiratebay-plus.strem.fun"
         //const val VidJoyApi = "https://vidjoy.pro"
-        const val modflixAPI = "https://modflix.xyz"
-        const val Vglist = "https://vglist.nl"
         const val soaperAPI = "https://soaper.cc"
         const val asiaflixAPI = "https://asiaflix.net"
         const val twoembedAPI = "https://2embed.cc"
