@@ -2,14 +2,15 @@ package com.megix
 
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
-import com.lagradost.cloudstream3.utils.AppUtils.parseJson
-import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
-import com.lagradost.cloudstream3.LoadResponse.Companion.addSimklId
-import com.lagradost.cloudstream3.LoadResponse.Companion.addAniListId
-import com.lagradost.cloudstream3.CommonActivity.activity
-import com.lagradost.cloudstream3.syncproviders.AccountManager
-import com.lagradost.cloudstream3.utils.AppUtils.toJson
-import com.lagradost.cloudstream3.runAllAsync
+// import com.lagradost.cloudstream3.utils.AppUtils.parseJson
+// import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
+// import com.lagradost.cloudstream3.LoadResponse.Companion.addSimklId
+// import com.lagradost.cloudstream3.LoadResponse.Companion.addAniListId
+// import com.lagradost.cloudstream3.CommonActivity.activity
+// import com.lagradost.cloudstream3.syncproviders.AccountManager
+// import com.lagradost.cloudstream3.utils.AppUtils.toJson
+// import com.lagradost.cloudstream3.runAllAsync
+// import com.lagradost.cloudstream3.syncproviders.SyncIdName
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -74,6 +75,7 @@ class CineSimklProvider: MainAPI() {
     override var lang = "en"
     override val hasMainPage = true
     override val hasQuickSearch = false
+    override val supportedSyncNames = setOf(SyncIdName.Simkl, SyncIdName.Anilist)
     private val apiUrl = "https://api.simkl.com"
     private final val mediaLimit = 20
     private val auth = BuildConfig.SIMKL_API
