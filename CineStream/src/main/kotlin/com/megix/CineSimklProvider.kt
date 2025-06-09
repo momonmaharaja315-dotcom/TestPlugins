@@ -241,7 +241,7 @@ class CineSimklProvider: MainAPI() {
             ).toJson()
             return newMovieLoadResponse("${en_title}", url, if(isAnime) TvType.AnimeMovie  else TvType.Movie, data) {
                 this.posterUrl = getPosterUrl(json.poster, "poster")
-                this.backgroundPosterUrl = getPosterUrl(json.fanart, "fanart") ?: getPosterUrl(json.poster, "poster")
+                this.backgroundPosterUrl = getPosterUrl(json.fanart, "fanart")
                 this.plot = json.overview
                 this.tags = genres
                 this.duration = json.runtime?.toIntOrNull()
@@ -287,7 +287,7 @@ class CineSimklProvider: MainAPI() {
 
             return newTvSeriesLoadResponse("${en_title}", url,if(isAnime) TvType.Anime else TvType.TvSeries, episodes) {
                 this.posterUrl = getPosterUrl(json.poster, "poster")
-                this.backgroundPosterUrl = getPosterUrl(json.fanart, "fanart") ?: getPosterUrl(json.poster, "poster")
+                this.backgroundPosterUrl = getPosterUrl(json.fanart, "fanart")
                 this.plot = json.overview
                 this.tags = genres
                 this.duration = json.runtime?.toIntOrNull()
