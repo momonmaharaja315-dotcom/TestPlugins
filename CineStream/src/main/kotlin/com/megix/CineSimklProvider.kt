@@ -2,15 +2,15 @@ package com.megix
 
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
-// import com.lagradost.cloudstream3.utils.AppUtils.parseJson
-// import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
-// import com.lagradost.cloudstream3.LoadResponse.Companion.addSimklId
-// import com.lagradost.cloudstream3.LoadResponse.Companion.addAniListId
-// import com.lagradost.cloudstream3.CommonActivity.activity
-// import com.lagradost.cloudstream3.syncproviders.AccountManager
-// import com.lagradost.cloudstream3.utils.AppUtils.toJson
-// import com.lagradost.cloudstream3.runAllAsync
-// import com.lagradost.cloudstream3.syncproviders.SyncIdName
+import com.lagradost.cloudstream3.utils.AppUtils.parseJson
+import com.lagradost.cloudstream3.utils.AppUtils.tryParseJson
+import com.lagradost.cloudstream3.LoadResponse.Companion.addSimklId
+import com.lagradost.cloudstream3.LoadResponse.Companion.addAniListId
+import com.lagradost.cloudstream3.CommonActivity.activity
+import com.lagradost.cloudstream3.syncproviders.AccountManager
+import com.lagradost.cloudstream3.utils.AppUtils.toJson
+import com.lagradost.cloudstream3.runAllAsync
+import com.lagradost.cloudstream3.syncproviders.SyncIdName
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
