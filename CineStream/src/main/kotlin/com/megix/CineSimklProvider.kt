@@ -279,6 +279,7 @@ class CineSimklProvider: MainAPI() {
                     this.name = it.title
                     this.season = it.season
                     this.episode = it.episode
+                    this.description = it.description
                     this.posterUrl = getPosterUrl(it.img, "episode") ?: "https://wsrv.nl/?url=https://simkl.in/update_m_alert.jpg"
                     addDate(it.date)
                 }
@@ -403,28 +404,28 @@ class CineSimklProvider: MainAPI() {
     }
 
     data class SimklResponse (
-        var title          : String?  = null,
-        var en_title       : String?  = null,
-        var title_en       : String?  = null,
-        var year           : Int?     = null,
-        var type           : String?  = null,
-        var url            : String?  = null,
-        var poster         : String?  = null,
-        var fanart         : String?  = null,
-        var ids            : Ids?     = Ids(),
-        var release_date   : String?  = null,
-        var ratings        : Ratings = Ratings(),
-        var country        : String?  = null,
-        var certification  : String?  = null,
-        var runtime        : String?  = null,
-        var status         : String?  = null,
-        var total_episodes : Int?     = null,
-        var network        : String?  = null,
-        var overview       : String?  = null,
-        var anime_type     : String?  = null,
-        var season         : String?  = null,
-        var endpoint_type  : String?  = null,
-        var genres         : ArrayList<String> = arrayListOf(),
+        var title                 : String?                         = null,
+        var en_title              : String?                         = null,
+        var title_en              : String?                         = null,
+        var year                  : Int?                            = null,
+        var type                  : String?                         = null,
+        var url                   : String?                         = null,
+        var poster                : String?                         = null,
+        var fanart                : String?                         = null,
+        var ids                   : Ids?                            = Ids(),
+        var release_date          : String?                         = null,
+        var ratings               : Ratings                         = Ratings(),
+        var country               : String?                         = null,
+        var certification         : String?                         = null,
+        var runtime               : String?                         = null,
+        var status                : String?                         = null,
+        var total_episodes        : Int?                            = null,
+        var network               : String?                         = null,
+        var overview              : String?                         = null,
+        var anime_type            : String?                         = null,
+        var season                : String?                         = null,
+        var endpoint_type         : String?                         = null,
+        var genres                : ArrayList<String>               = arrayListOf(),
         var users_recommendations : ArrayList<UsersRecommendations> = arrayListOf()
     )
 
@@ -437,7 +438,7 @@ class CineSimklProvider: MainAPI() {
         var anilist  : String? = null,
         var kitsu    : String? = null,
         var anidb    : String? = null,
-        var simkl    : Int? = null
+        var simkl    : Int?    = null
     )
 
     data class Ratings (
@@ -454,35 +455,35 @@ class CineSimklProvider: MainAPI() {
         var year   : Int?    = null,
         var poster : String? = null,
         var type   : String? = null,
-        var ids    : Ids   = Ids()
+        var ids    : Ids     = Ids()
     )
 
     data class Episodes (
-        var title   : String?  = null,
-        var season  : Int?     = null,
-        var episode : Int?     = null,
-        var type    : String?  = null,
-        var description : String? = null,
-        var aired   : Boolean? = null,
-        var img     : String?  = null,
-        var date    : String?  = null,
+        var title       : String?  = null,
+        var season      : Int?     = null,
+        var episode     : Int?     = null,
+        var type        : String?  = null,
+        var description : String?  = null,
+        var aired       : Boolean? = null,
+        var img         : String?  = null,
+        var date        : String?  = null,
     )
     data class LoadLinksData(
-        val title: String? = null,
-        val en_title : String? = null,
-        val tvtype: String? = null,
-        val simklId: Int? = null,
-        val imdbId: String? = null,
-        val tmdbId: Int? = null,
-        val year: Int? = null,
-        val anilistId: Int? = null,
-        val malId: Int? = null,
-        val kitsuId: Int? = null,
-        val season: Int? = null,
-        val episode: Int? = null,
-        val airedYear: Int? = null,
-        val isAnime: Boolean = false,
-        val isBollywood: Boolean = false,
-        val isAsian: Boolean = false
+        val title       : String? = null,
+        val en_title    : String? = null,
+        val tvtype      : String? = null,
+        val simklId     : Int?    = null,
+        val imdbId      : String? = null,
+        val tmdbId      : Int?    = null,
+        val year        : Int?    = null,
+        val anilistId   : Int?    = null,
+        val malId       : Int?    = null,
+        val kitsuId     : Int?    = null,
+        val season      : Int?    = null,
+        val episode     : Int?    = null,
+        val airedYear   : Int?    = null,
+        val isAnime     : Boolean = false,
+        val isBollywood : Boolean = false,
+        val isAsian     : Boolean = false
     )
 }
