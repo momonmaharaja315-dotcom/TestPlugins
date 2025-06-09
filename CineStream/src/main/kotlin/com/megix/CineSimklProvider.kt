@@ -83,15 +83,15 @@ class CineSimklProvider: MainAPI() {
     private val cinemetaAPI = "https://v3-cinemeta.strem.io"
 
     override val mainPage = mainPageOf(
-        "Personal" to "Personal",
         "/movies/trending/today?extended=overview&limit=$mediaLimit&page=" to "Trending Movies Today",
         "/tv/trending/today?type=series&extended=overview&limit=$mediaLimit&page=" to "Trending TV Shows Today",
         "/tv/genres/all/all-types/all-countries/netflix/all-years/popular-today?extended=overview&limit=$mediaLimit&page=" to "Trending Netflix Shows",
         "/tv/genres/all/all-types/all-countries/disney/all-years/popular-today?extended=overview&limit=$mediaLimit&page=" to "Trending Disney Shows",
         "/tv/genres/all/all-types/all-countries/hbo/all-years/popular-today?extended=overview&limit=$mediaLimit&page=" to "Trending HBO Shows",
-        "/anime/airing?date?sort=time&page=" to "Airing Anime",
+        "/anime/airing?date?sort=time" to "Today Airing Anime",
         "/anime/trending?extended=overview&limit=$mediaLimit&page=" to "Trending Anime",
         "/tv/genres/all/all-types/kr/all-networks/all-years/popular-today?limit=$mediaLimit&page=" to "Trending Korean Shows",
+        "Personal" to "Personal",
     )
 
     private fun getSimklId(url: String): String {
@@ -198,7 +198,7 @@ class CineSimklProvider: MainAPI() {
                     name = request.name,
                     list = data,
                 ),
-                hasNext = true
+                hasNext = if(request.data.contains("page=")) true else false
             )
         }
     }
@@ -215,7 +215,7 @@ class CineSimklProvider: MainAPI() {
         val isAsian = if(!isAnime && (country == "JP" || country == "KR" || country == "CN")) true else false
         val en_title = json.en_title ?: json.title
         val recommendations = json.users_recommendations?.map {
-            newMovieSearchResponse("${it.title}", "$mainUrl/${it.type}/${it.ids?.simkl_id}/${it.ids?.slug}") {
+            newMovieSearchResponse("${it.title}", "$mainUrl/${it.type}/${it.ids?.simkl}/${it.ids?.slug}") {
                 this.posterUrl = getPosterUrl(it.poster, "poster")
             }
         }
@@ -253,7 +253,7 @@ class CineSimklProvider: MainAPI() {
                 this.addAniListId(json.ids?.anilist?.toIntOrNull())
             }
         } else {
-            val epsJson = app.get("$apiUrl/tv/episodes/$simklId", headers = headers).text
+            val epsJson = app.get("$apiUrl/tv/episodes/$simklId?extended=full", headers = headers).text
             val eps = parseJson<Array<Episodes>>(epsJson)
             val episodes = eps.filter { it.type != "special" }.map {
                 newEpisode(
@@ -436,7 +436,8 @@ class CineSimklProvider: MainAPI() {
         var mal      : String? = null,
         var anilist  : String? = null,
         var kitsu    : String? = null,
-        var anidb    : String? = null
+        var anidb    : String? = null,
+        var simkl    : Int? = null
     )
 
     data class Ratings (
