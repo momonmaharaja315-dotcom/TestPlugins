@@ -393,9 +393,6 @@ class CineSimklProvider: MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val imdbId = if(res.imdbId == null) extractImdbId(res.kitsuId) else res.imdbId
-        val (imdbTitle, tmdbId) = if(res.imdbId == null) extractNameAndTMDBId(imdbId) else Pair(res.en_title, res.tmdbId)
-
         val imdbId = try {
             res.imdbId ?: extractImdbId(res.kitsuId)
         } catch (e: Exception) {
