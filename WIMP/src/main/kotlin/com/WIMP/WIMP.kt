@@ -5,6 +5,7 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.extractors.StreamWishExtractor
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
+import com.lagradost.cloudstream3.utils.AppUtils.toJson
 
 class WIMP : MainAPI() {
     override var mainUrl              = "https://whereismyporn.com"
@@ -39,7 +40,7 @@ class WIMP : MainAPI() {
         val href      = this.select("a").attr("href")
         val posterUrl = this.select("img").attr("src")
 
-        return newMovieSearchResponse(title, PassData(href, posterUrl), TvType.Movie) {
+        return newMovieSearchResponse(title, PassData(href, posterUrl).toJson(), TvType.Movie) {
             this.posterUrl = posterUrl
         }
     }
