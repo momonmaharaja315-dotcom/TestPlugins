@@ -239,6 +239,8 @@ class CineSimklProvider: MainAPI() {
         val isBollywood = if(country == "IN") true else false
         val isAsian = if(!isAnime && (country == "JP" || country == "KR" || country == "CN")) true else false
         val en_title = json.en_title ?: json.title
+        val allratings = json.ratings
+        val rating = allratings?.mal?.rating ?: allratings?.imdb?.rating
         val recommendations = json.users_recommendations?.map {
             newMovieSearchResponse("${it.title}", "$mainUrl/${it.type}/${it.ids?.simkl}/${it.ids?.slug}") {
                 this.posterUrl = getPosterUrl(it.poster, "poster")
@@ -270,7 +272,7 @@ class CineSimklProvider: MainAPI() {
                 this.plot = json.overview
                 this.tags = genres
                 this.duration = json.runtime?.toIntOrNull()
-                this.rating = json.ratings?.simkl?.rating.toString().toRatingInt()
+                this.rating = rating.toString().toRatingInt()
                 this.year = json.year
                 this.recommendations = recommendations
                 this.contentRating = json.certification
@@ -316,7 +318,7 @@ class CineSimklProvider: MainAPI() {
                 this.plot = json.overview
                 this.tags = genres
                 this.duration = json.runtime?.toIntOrNull()
-                this.rating = json.ratings?.simkl?.rating.toString().toRatingInt()
+                this.rating = rating.toString().toRatingInt()
                 this.year = json.year
                 this.recommendations = recommendations
                 this.contentRating = json.certification
@@ -477,9 +479,21 @@ class CineSimklProvider: MainAPI() {
 
     data class Ratings (
         var simkl : Simkl? = Simkl(),
+        var imdb  : Imdb?  = Imdb(),
+        var mal   : Mal?   = Mal()
     )
 
     data class Simkl (
+        var rating : Double? = null,
+        var votes  : Int?    = null
+    )
+
+    data class Imdb (
+        var rating : Double? = null,
+        var votes  : Int?    = null
+    )
+
+    data class Mal (
         var rating : Double? = null,
         var votes  : Int?    = null
     )
