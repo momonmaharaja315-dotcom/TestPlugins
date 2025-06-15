@@ -436,9 +436,13 @@ class CineSimklProvider: MainAPI() {
         callback: (ExtractorLink) -> Unit
     ) {
         val (imdbId, imdbSeason, imdbEpisode) = try {
-            res.imdbId ?: extractImdbInfo(res.kitsuId, res.episode ,res.episode)
+            if (res.imdbId != null) {
+                Triple(res.imdbId, res.season, res.episode)
+            } else {
+                extractImdbInfo(res.kitsuId, res.season, res.episode) ?: Triple(null, null, null)
+            }
         } catch (e: Exception) {
-            null
+            Triple(null, null, null)
         }
 
         val (imdbTitle, tmdbId) = try {
