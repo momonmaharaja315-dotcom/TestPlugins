@@ -252,7 +252,11 @@ class CineSimklProvider: MainAPI() {
         val isAnime = if(tvType == "anime") true else false
         val isBollywood = if(country == "IN") true else false
         val isAsian = if(!isAnime && (country == "JP" || country == "KR" || country == "CN")) true else false
-        var en_title = if(isAnime) normalizeSeasonString(json.en_title) else json.title
+        val en_title = if (isAnime) {
+            normalizeSeasonString(json.en_title ?: json.title)
+        } else {
+            json.en_title ?: json.title
+        }
         val allratings = json.ratings
         val rating = allratings?.mal?.rating ?: allratings?.imdb?.rating
         val recommendations = json.users_recommendations?.map {
