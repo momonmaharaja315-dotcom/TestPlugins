@@ -84,11 +84,11 @@ class CineSimklProvider: MainAPI() {
     private val cinemetaAPI = "https://v3-cinemeta.strem.io"
 
     override val mainPage = mainPageOf(
-        "/movies/genres/all/all-types/all-countries/this-year/popular-this-week?limit=$mediaLimit&page=" to "Trending Movies This Week",
-        "/tv/genres/all/all-types/all-countries/this-year/popular-today?limit=$mediaLimit&page=" to "Trending Shows Today",
+        "/movies/genres/all/all-types/all-countries/all-years/popular-this-week?limit=$mediaLimit&page=" to "Trending Movies This Week",
+        "/tv/genres/all/all-types/all-countries/all-years/popular-today?limit=$mediaLimit&page=" to "Trending Shows Today",
         "/anime/airing?date?sort=popularity" to "Airing Anime Today",
-        "/anime/genres/all/this-year/popular-today?limit=$mediaLimit&page=" to "Trending Anime Today",
-        "/tv/genres/all/all-types/kr/all-networks/this-year/popular-this-week?limit=$mediaLimit&page=" to "Trending Korean Shows This Week",
+        "/anime/genres/all/all-years/popular-today?limit=$mediaLimit&page=" to "Trending Anime Today",
+        "/tv/genres/all/all-types/kr/all-networks/all-years/popular-this-week?limit=$mediaLimit&page=" to "Trending Korean Shows This Week",
         "/tv/genres/all/all-types/all-countries/netflix/all-years/popular-today?limit=$mediaLimit&page=" to "Trending Netflix Shows",
         "/tv/genres/all/all-types/all-countries/disney/all-years/popular-today?limit=$mediaLimit&page=" to "Trending Disney Shows",
         "/tv/genres/all/all-types/all-countries/hbo/all-years/popular-today?limit=$mediaLimit&page=" to "Trending HBO Shows",
@@ -102,7 +102,11 @@ class CineSimklProvider: MainAPI() {
             .firstOrNull() ?: "" // Take the first numeric ID found
     }
 
-    private suspend fun extractImdbId(kitsuId: Int? = null): String? {
+   private suspend fun extractImdbInfo(
+        kitsuId: Int? = null,
+        season: Int? = null,
+        episode: Int? = null
+    ): Triple<String?, Int?, Int?>? {
         return try {
             if (kitsuId == null) return null
 
@@ -113,8 +117,26 @@ class CineSimklProvider: MainAPI() {
 
             val jsonString = response.text
             val rootObject = JSONObject(jsonString)
-            val metaObject = rootObject.optJSONObject("meta")
-            metaObject?.optString("imdb_id")?.takeIf { it.isNotBlank() }
+            val metaObject = rootObject.optJSONObject("meta") ?: return null
+
+            val imdbId = metaObject.optString("imdb_id").takeIf { it.isNotBlank() }
+
+            if (episode == null) {
+                return Triple(imdbId, null, null)
+            }
+
+            val videosArray = metaObject.optJSONArray("videos") ?: return Triple(imdbId, null, null)
+
+            for (i in 0 until videosArray.length()) {
+                val videoObject = videosArray.optJSONObject(i) ?: continue
+                if (videoObject.optInt("episode") == episode) {
+                    val imdbSeason = videoObject.optInt("imdbSeason").takeIf { it > 0 }
+                    val imdbEpisode = videoObject.optInt("imdbEpisode").takeIf { it > 0 }
+                    return Triple(imdbId, imdbSeason, imdbEpisode)
+                }
+            }
+
+            Triple(imdbId, season, episode)
         } catch (e: Exception) {
             null
         }
@@ -413,8 +435,8 @@ class CineSimklProvider: MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val imdbId = try {
-            res.imdbId ?: extractImdbId(res.kitsuId)
+        val (imdbId, imdbSeason, imdbEpisode) = try {
+            res.imdbId ?: extractImdbInfo(res.kitsuId, res.episode ,res.episode)
         } catch (e: Exception) {
             null
         }
@@ -433,27 +455,27 @@ class CineSimklProvider: MainAPI() {
             { invokeAllanime(res.title, res.year, res.episode, subtitleCallback, callback) },
             { invokeAnizone(res.title, res.episode, subtitleCallback, callback) },
             { invokeTokyoInsider(res.title, res.episode, subtitleCallback, callback) },
-            { invokeTorrentio(imdbId, res.season, res.episode, callback) },
-            { invokeVegamovies("VegaMovies", imdbId, res.season, res.episode, subtitleCallback, callback) },
-            { invokeNetflix(imdbTitle, res.year, res.season, res.episode, subtitleCallback, callback) },
-            { invokePrimeVideo(imdbTitle, res.year, res.season, res.episode, subtitleCallback, callback) },
-            { invokeMultimovies(imdbTitle, res.season, res.episode, subtitleCallback, callback) },
-            { invokeMoviesmod(imdbId, res.season, res.episode, subtitleCallback, callback) },
-            { invokeBollyflix(imdbId, res.season, res.episode, subtitleCallback, callback) },
-            { invokeMovies4u(imdbId, imdbTitle, res.year, res.season, res.episode, subtitleCallback, callback) },
-            { invokeWYZIESubs(imdbId, res.season, res.episode, subtitleCallback) },
-            { invokePrimebox(imdbTitle, res.year, res.season, res.episode, subtitleCallback, callback) },
-            { invokePrimeWire(imdbId, res.season, res.episode, subtitleCallback, callback) },
-            { invokeSoaper(imdbId, tmdbId, imdbTitle, res.season, res.episode, subtitleCallback, callback) },
-            { invokePhoenix(imdbTitle, imdbId, tmdbId, res.year, res.season, res.episode, callback) },
-            { invokeTom(tmdbId, res.season, res.episode, callback, subtitleCallback) },
-            { invokePrimenet(tmdbId, res.season, res.episode, callback) },
-            { invokePlayer4U(imdbTitle, res.season, res.episode, res.airedYear, callback) },
-            { invokeThepiratebay(imdbId, res.season, res.episode, callback) },
-            { invokeProtonmovies(imdbId, res.season, res.episode, subtitleCallback, callback) },
-            { invokeAllmovieland(imdbId, res.season, res.episode, callback) },
-            { invokeUhdmovies(imdbTitle, res.year, res.season, res.episode, callback, subtitleCallback) },
-            { invoke4khdhub(imdbTitle, res.year, res.season, res.episode, subtitleCallback, callback) }
+            { invokeTorrentio(imdbId, imdbSeason, imdbEpisode, callback) },
+            { invokeVegamovies("VegaMovies", imdbId, imdbSeason, imdbEpisode, subtitleCallback, callback) },
+            { invokeNetflix(imdbTitle, res.year, imdbSeason, imdbEpisode, subtitleCallback, callback) },
+            { invokePrimeVideo(imdbTitle, imdbSeason, imdbEpisode, res.episode, subtitleCallback, callback) },
+            { invokeMultimovies(imdbTitle, imdbSeason, imdbEpisode, subtitleCallback, callback) },
+            { invokeMoviesmod(imdbId, imdbSeason, imdbEpisode, subtitleCallback, callback) },
+            { invokeBollyflix(imdbId, imdbSeason, imdbEpisode, subtitleCallback, callback) },
+            { invokeMovies4u(imdbId, imdbTitle, res.year, imdbSeason, imdbEpisode, subtitleCallback, callback) },
+            { invokeWYZIESubs(imdbId, imdbSeason, imdbEpisode, subtitleCallback) },
+            { invokePrimebox(imdbTitle, res.year, imdbSeason, imdbEpisode, subtitleCallback, callback) },
+            { invokePrimeWire(imdbId, imdbSeason, imdbEpisode, subtitleCallback, callback) },
+            { invokeSoaper(imdbId, tmdbId, imdbTitle, imdbSeason, imdbEpisode, subtitleCallback, callback) },
+            { invokePhoenix(imdbTitle, imdbId, tmdbId, res.year, imdbSeason, imdbEpisode, callback) },
+            { invokeTom(tmdbId, imdbSeason, imdbEpisode, callback, subtitleCallback) },
+            { invokePrimenet(tmdbId, imdbSeason, imdbEpisode, callback) },
+            { invokePlayer4U(imdbTitle, imdbSeason, imdbEpisode, res.airedYear, callback) },
+            { invokeThepiratebay(imdbId, imdbSeason, imdbEpisode, callback) },
+            { invokeProtonmovies(imdbId, imdbSeason, imdbEpisode, subtitleCallback, callback) },
+            { invokeAllmovieland(imdbId, imdbSeason, imdbEpisode, callback) },
+            { invokeUhdmovies(imdbTitle, res.year, imdbSeason, imdbEpisode, callback, subtitleCallback) },
+            { invoke4khdhub(imdbTitle, res.year, imdbSeason, imdbEpisode, subtitleCallback, callback) }
         )
     }
 
