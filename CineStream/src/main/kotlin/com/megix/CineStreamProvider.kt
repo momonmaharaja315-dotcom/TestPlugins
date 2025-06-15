@@ -219,12 +219,12 @@ open class CineStreamProvider : MainAPI() {
     override suspend fun search(query: String): List<SearchResponse> = coroutineScope {
         val normalizedQuery = query.trim()
 
-        suspend fun fetchResults(urls: String, tvType: TvType): List<SearchResponse> {
+        suspend fun fetchResults(url: String): List<SearchResponse> {
             val result = runCatching {
                 val json = app.get(url).text
                 tryParseJson<SearchResult>(json)?.metas?.map {
                     val title = it.aliases?.firstOrNull() ?: it.name ?: it.description ?: "Empty"
-                    newMovieSearchResponse(title, PassData(it.id, it.type).toJson(), tvType).apply {
+                    newMovieSearchResponse(title, PassData(it.id, it.type).toJson()).apply {
                         posterUrl = it.poster.toString()
                     }
                 } ?: emptyList()
@@ -235,21 +235,13 @@ open class CineStreamProvider : MainAPI() {
         }
 
         val endpoints = listOf(
-            listOf(
-                "$cinemeta_url/catalog/movie/top/search=$normalizedQuery.json"
-            ) to TvType.Movie,
-
-            listOf(
-                "$cinemeta_url/catalog/series/top/search=$normalizedQuery.json"
-            ) to TvType.TvSeries,
-
-            listOf(
-                "$kitsu_url/catalog/anime/kitsu-anime-airing/search=$normalizedQuery.json"
-            ) to TvType.Anime
+            "$cinemeta_url/catalog/movie/top/search=$normalizedQuery.json",
+            "$cinemeta_url/catalog/series/top/search=$normalizedQuery.json",
+            "$kitsu_url/catalog/anime/kitsu-anime-airing/search=$normalizedQuery.json"
         )
 
-        val resultsLists = endpoints.map { (urls, type) ->
-            async { fetchResults(urls, type) }
+        val resultsLists = endpoints.map {
+            async { fetchResults(it) }
         }.awaitAll()
 
         val maxSize = resultsLists.maxOfOrNull { it.size } ?: 0
