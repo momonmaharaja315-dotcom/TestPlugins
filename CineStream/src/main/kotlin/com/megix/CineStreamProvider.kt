@@ -76,7 +76,7 @@ open class CineStreamProvider : MainAPI() {
     val kitsu_url = "https://anime-kitsu.strem.fun"
     val haglund_url = "https://arm.haglund.dev/api/v2"
     val streamio_TMDB = "https://94c8cb9f702d-tmdb-addon.baby-beamup.club"
-    val mediaFusion = "https://mediafusion.elfhosted.com"
+    // val mediaFusion = "https://mediafusion.elfhosted.com"
     val animeCatalog = "https://1fe84bc728af-stremio-anime-catalogs.baby-beamup.club"
     companion object {
         const val malsyncAPI = "https://api.malsync.moe"
@@ -154,8 +154,8 @@ open class CineStreamProvider : MainAPI() {
     override val mainPage = mainPageOf(
         "$mainUrl/top/catalog/movie/top/skip=###" to "Top Movies",
         "$mainUrl/top/catalog/series/top/skip=###" to "Top Series",
-        "$mediaFusion/catalog/movie/hindi_hdrip/skip=###" to "Trending Movie in India",
-        "$mediaFusion/catalog/series/hindi_series/skip=###" to "Trending Series in India",
+        // "$mediaFusion/catalog/movie/hindi_hdrip/skip=###" to "Trending Movie in India",
+        // "$mediaFusion/catalog/series/hindi_series/skip=###" to "Trending Series in India",
         "$kitsu_url/catalog/anime/kitsu-anime-airing/skip=###" to "Top Airing Anime",
         // """$animeCatalog/{"anisearch_trending":"on"}/catalog/anime/anisearch_trending/skip=###""" to "Trending Anime",
         "$kitsu_url/catalog/anime/kitsu-anime-trending/skip=###" to "Top Anime",
@@ -263,7 +263,6 @@ open class CineStreamProvider : MainAPI() {
         val meta_url =
             if(id.contains("kitsu")) kitsu_url
             else if(id.contains("tmdb")) streamio_TMDB
-            else if(id.contains("mf")) mediaFusion
             else cinemeta_url
         val isKitsu = if(meta_url == kitsu_url) true else false
         val isTMDB = if(meta_url == streamio_TMDB) true else false
@@ -341,7 +340,7 @@ open class CineStreamProvider : MainAPI() {
                 this.year = year ?.toIntOrNull() ?: releaseInfo?.toIntOrNull() ?: year?.substringBefore("-")?.toIntOrNull()
                 this.backgroundPosterUrl = background
                 this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
-                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else if(meta_url == mediaFusion) "Mediafusion" else "IMDB"
+                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else "IMDB"
                 this.actors = actors
                 addAniListId(anilistId)
                 addMalId(malId)
@@ -391,7 +390,7 @@ open class CineStreamProvider : MainAPI() {
                     this.tags = genre
                     this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
                     this.rating = imdbRating.toRatingInt()
-                    this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else if(meta_url == mediaFusion) "Mediafusion" else "IMDB"
+                    this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else "IMDB"
                     this.actors = actors
                     addAniListId(anilistId)
                     addMalId(malId)
@@ -407,7 +406,7 @@ open class CineStreamProvider : MainAPI() {
                 this.year = year?.substringBefore("–")?.toIntOrNull() ?: releaseInfo?.substringBefore("–")?.toIntOrNull() ?: year?.substringBefore("-")?.toIntOrNull()
                 this.backgroundPosterUrl = background
                 this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
-                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else if(meta_url == mediaFusion) "Mediafusion" else "IMDB"
+                this.contentRating = if(isKitsu) "Kitsu" else if(isTMDB) "TMDB" else "IMDB"
                 this.actors = actors
                 addImdbId(id)
             }
