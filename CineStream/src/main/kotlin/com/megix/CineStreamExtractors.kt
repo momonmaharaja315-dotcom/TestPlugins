@@ -51,16 +51,13 @@ object CineStreamExtractors : CineStreamProvider() {
                 .firstOrNull { it.text().contains("Season $season", ignoreCase = true) }
                 ?.attr("href")
         } ?: return
-        Log.d("*************", "Link: $link")
         val div = app.get(link, headers).document.selectFirst("div.entry-content") ?: return
         val pattern = """<(?:a|iframe)\s[^>]*(?:href|src)="(https:\/\/links\.kmhd\.net\/play\?id=[^"]+)"[^>]*>""".toRegex()
         val match = pattern.find(div.toString())
         val watchUrl = match?.groupValues?.get(1) ?: return
-        Log.d("*************", "watchUrl: $watchUrl")
         val watchDoc = app.get(watchUrl, headers).toString()
         val linksmap = extractKatStreamingLinks(watchDoc, episode)
         linksmap.forEach { (key, value) ->
-            Log.d("*************", "value: $value")
             loadSourceNameExtractor(
                 sourceName,
                 value,
@@ -115,6 +112,30 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
+    fun getEpisodeIds(jsonString: String, episodeNumber: Int): Map<String, String> {
+        val episodeIds = mutableMapOf<String, String>()
+        val jsonArray = JSONArray(jsonString)
+
+        for (i in 0 until jsonArray.length()) {
+            val provider = jsonArray.getJSONObject(i)
+            val providerId = provider.getString("providerId")
+            val episodes = provider.getJSONArray("episodes")
+
+            for (j in 0 until episodes.length()) {
+                val episode = episodes.getJSONObject(j)
+                if (episode.getInt("number") == episodeNumber) {
+                    when (val idValue = episode["id"]) {
+                        is Int -> episodeIds[providerId] = idValue.toString()
+                        is String -> episodeIds[providerId] = idValue
+                    }
+                    break
+                }
+            }
+        }
+
+        return episodeIds
+    }
+
     suspend fun invokeGojo(
         aniId: Int? = null,
         episode: Int? = null,
@@ -125,11 +146,12 @@ object CineStreamExtractors : CineStreamProvider() {
             "Referer" to gojoBaseAPI,
             "Origin" to gojoBaseAPI,
         )
-        val providers = listOf("strix", "pahe", "zaza", "megg")
+        val epDetailsJson = app.get("$gojoAPI/api/anime/episodes/$aniId", headers = headers).text
+        val epDetails = getEpisodeIds(epDetailsJson, episode ?: 1)
         val types = listOf("sub", "dub")
-        providers.forEach { provider ->
+        epDetails.forEach { (provider, watchId) ->
             types.forEach { lang ->
-                val json = app.get("$gojoAPI/api/anime/tiddies?provider=$provider&id=$aniId&num=$episode&subType=$lang&watchId=$episode&dub_id=null", headers = headers).text
+                val json = app.get("$gojoAPI/api/anime/tiddies?provider=$provider&id=$aniId&num=$episode&subType=$lang&watchId=$watchId&dub_id=null", headers = headers).text
                 val jsonObject = JSONObject(json)
                 val sourcesArray = jsonObject.getJSONArray("sources")
 
