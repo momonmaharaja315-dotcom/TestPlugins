@@ -44,12 +44,13 @@ object CineStreamExtractors : CineStreamProvider() {
             "User-Agent" to USER_AGENT
         )
         val doc = app.get(url, headers).document
-        val link = if(season == null) {
-            doc.select("div.post-thumb > a").attr("href")
-        }
-        else {
-            doc.select("div.post-thumb > a").filter { it.text().contains("Season $season") }.attr("href")
-        }
+        val link = if (season == null) {
+            doc.selectFirst("div.post-thumb > a")?.attr("href")
+        } else {
+            doc.select("div.post-thumb > a")
+                .firstOrNull { it.text().contains("Season $season", ignoreCase = true) }
+                ?.attr("href")
+        } ?: return
         val div = app.get(link, headers).document.selectFirst("div.entry-content") ?: return
         val pattern = """<(?:a|iframe)\s[^>]*(?:href|src)="(https:\/\/links\.kmhd\.net\/play\?id=[^"]+)"[^>]*>""".toRegex()
         val match = pattern.find(div.toString())
