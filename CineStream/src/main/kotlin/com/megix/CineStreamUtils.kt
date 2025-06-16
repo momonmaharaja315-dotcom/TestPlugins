@@ -904,6 +904,29 @@ fun extractKatStreamingLinks(html: String, episode: Int? = null): Map<String, St
     return result
 }
 
+fun getGojoEpisodeIds(jsonString: String, episodeNumber: Int): Map<String, String> {
+    val episodeIds = mutableMapOf<String, String>()
+    val jsonArray = JSONArray(jsonString)
+
+    for (i in 0 until jsonArray.length()) {
+        val provider = jsonArray.getJSONObject(i)
+        val providerId = provider.getString("providerId")
+        val episodes = provider.getJSONArray("episodes")
+
+        for (j in 0 until episodes.length()) {
+            val episode = episodes.getJSONObject(j)
+            if (episode.getInt("number") == episodeNumber) {
+                when (val idValue = episode["id"]) {
+                    is Int -> episodeIds[providerId] = idValue.toString()
+                    is String -> episodeIds[providerId] = idValue
+                }
+                break
+            }
+        }
+    }
+    return episodeIds
+}
+
 suspend fun getSoaperLinks(
         soaperAPI: String,
         url: String,
