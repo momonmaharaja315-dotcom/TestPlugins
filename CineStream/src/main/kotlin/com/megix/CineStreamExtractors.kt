@@ -28,6 +28,45 @@ import com.lagradost.cloudstream3.USER_AGENT
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend fun invokeKatMovieHd(
+        sourceName: String,
+        imdbId: String? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val api = if(sourceName == "KatMovieHd") katmoviehdAPI else moviesBabaAPI
+        val url = "$api/?s=$imdbId"
+        val headers = mapOf(
+            "Referer" to api,
+            "Origin" to api,
+            "User-Agent" to USER_AGENT
+        )
+        val doc = app.get(url, headers).document
+        val link = if(season == null) {
+            doc.select("div.post-thumb > a").attr("href")
+        }
+        else {
+            doc.select("div.post-thumb > a").filter { it.text().contains("Season $season") }.attr("href")
+        }
+        val div = app.get(link, headers).document.selectFirst("div.entry-content") ?: return
+        val pattern = """<(?:a|iframe)\s[^>]*(?:href|src)="(https:\/\/links\.kmhd\.net\/play\?id=[^"]+)"[^>]*>""".toRegex()
+        val match = pattern.find(div.toString())
+        val watchUrl = match?.groupValues?.get(1) ?: return
+        val watchDoc = app.get(watchUrl, headers).toString()
+        val linksmap = extractKatStreamingLinks(watchDoc, episode)
+        linksmap.forEach { (key, value) ->
+            loadSourceNameExtractor(
+                sourceName,
+                value,
+                watchUrl,
+                subtitleCallback,
+                callback
+            )
+        }
+    }
+
     suspend fun invokeSudatchi(
         aniId: Int? = null,
         episode: Int? = null,
