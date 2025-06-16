@@ -51,13 +51,16 @@ object CineStreamExtractors : CineStreamProvider() {
                 .firstOrNull { it.text().contains("Season $season", ignoreCase = true) }
                 ?.attr("href")
         } ?: return
+        Log.d("*************", "Link: $link")
         val div = app.get(link, headers).document.selectFirst("div.entry-content") ?: return
         val pattern = """<(?:a|iframe)\s[^>]*(?:href|src)="(https:\/\/links\.kmhd\.net\/play\?id=[^"]+)"[^>]*>""".toRegex()
         val match = pattern.find(div.toString())
         val watchUrl = match?.groupValues?.get(1) ?: return
+        Log.d("*************", "watchUrl: $watchUrl")
         val watchDoc = app.get(watchUrl, headers).toString()
         val linksmap = extractKatStreamingLinks(watchDoc, episode)
         linksmap.forEach { (key, value) ->
+            Log.d("*************", "value: $value")
             loadSourceNameExtractor(
                 sourceName,
                 value,
@@ -122,7 +125,7 @@ object CineStreamExtractors : CineStreamProvider() {
             "Referer" to gojoBaseAPI,
             "Origin" to gojoBaseAPI,
         )
-        val providers = listOf("strix", "pahe")
+        val providers = listOf("strix", "pahe", "zaza", "megg")
         val types = listOf("sub", "dub")
         providers.forEach { provider ->
             types.forEach { lang ->
