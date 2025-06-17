@@ -17,7 +17,6 @@ import okhttp3.Interceptor
 import okhttp3.Response
 import org.jsoup.nodes.Element
 import com.lagradost.cloudstream3.APIHolder.unixTime
-import com.lagradost.cloudstream3.network.CloudflareKiller
 
 class NetflixMirrorProvider : MainAPI() {
     override val supportedTypes = setOf(
@@ -34,7 +33,6 @@ class NetflixMirrorProvider : MainAPI() {
     private val headers = mapOf(
         "X-Requested-With" to "XMLHttpRequest"
     )
-    private val cfInterceptor = CloudflareKiller()
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse? {
         cookie_value = if(cookie_value.isEmpty()) bypass(mainUrl) else cookie_value
@@ -44,9 +42,8 @@ class NetflixMirrorProvider : MainAPI() {
             "hd" to "on"
         )
         val document = app.get(
-            "$mainUrl/mobile/home",
-            cookies = cookies,
-            interceptor = cfInterceptor
+            "$mainUrl/tv/home",
+            cookies = cookies
         ).document
         val items = document.select(".tray-container, #top10").map {
             it.toHomePageList()
@@ -79,12 +76,11 @@ class NetflixMirrorProvider : MainAPI() {
             "t_hash_t" to cookie_value,
             "hd" to "on"
         )
-        val url = "$mainUrl/mobile/search.php?s=$query&t=${APIHolder.unixTime}"
+        val url = "$mainUrl/search.php?s=$query&t=${APIHolder.unixTime}"
         val data = app.get(
             url,
             referer = "$mainUrl/",
-            cookies = cookies,
-            interceptor = cfInterceptor
+            cookies = cookies
         ).parsed<SearchData>()
 
         return data.searchResult.map {
@@ -103,11 +99,10 @@ class NetflixMirrorProvider : MainAPI() {
             "hd" to "on"
         )
         val data = app.get(
-            "$mainUrl/mobile/post.php?id=$id&t=${APIHolder.unixTime}",
+            "$mainUrl/post.php?id=$id&t=${APIHolder.unixTime}",
             headers,
             referer = "$mainUrl/",
-            cookies = cookies,
-            interceptor = cfInterceptor
+            cookies = cookies
         ).parsed<PostData>()
 
         val episodes = arrayListOf<Episode>()
@@ -176,11 +171,10 @@ class NetflixMirrorProvider : MainAPI() {
         var pg = page
         while (true) {
             val data = app.get(
-                "$mainUrl/mobile/episodes.php?s=$sid&series=$eid&t=${APIHolder.unixTime}&page=$pg",
+                "$mainUrl/episodes.php?s=$sid&series=$eid&t=${APIHolder.unixTime}&page=$pg",
                 headers,
                 referer = "$mainUrl/",
-                cookies = cookies,
-                interceptor = cfInterceptor
+                cookies = cookies
             ).parsed<EpisodesData>()
             data.episodes?.mapTo(episodes) {
                 newEpisode(LoadData(title, it.id)) {
@@ -209,11 +203,10 @@ class NetflixMirrorProvider : MainAPI() {
             "hd" to "on"
         )
         val playlist = app.get(
-            "$mainUrl/mobile/playlist.php?id=$id&t=$title&tm=${APIHolder.unixTime}",
+            "$mainUrl/tv/playlist.php?id=$id&t=$title&tm=${APIHolder.unixTime}",
             headers,
             referer = "$mainUrl/",
-            cookies = cookies,
-            interceptor = cfInterceptor
+            cookies = cookies
         ).parsed<PlayList>()
 
         playlist.forEach { item ->
