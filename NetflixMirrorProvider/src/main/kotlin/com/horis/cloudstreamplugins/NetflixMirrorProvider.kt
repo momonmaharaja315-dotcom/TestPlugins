@@ -61,8 +61,8 @@ class NetflixMirrorProvider : MainAPI() {
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
-        val id = attr("src").substringAfterLast("/").substringBefore(".")
-        val posterUrl = attr("src")
+        val id = attr("data-src").substringAfterLast("/").substringBefore(".")
+        val posterUrl = attr("data-src")
 
         return newAnimeSearchResponse("", Id(id).toJson()) {
             this.posterUrl = posterUrl
