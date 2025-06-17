@@ -46,15 +46,15 @@ class PrimeVideoMirrorProvider : MainAPI() {
             cookies = cookies,
             referer = "$mainUrl/tv/home",
         ).document
-        val items = document.select(".tray-container, #top10").map {
+        val items = document.select("div.mb-6").map {
             it.toHomePageList()
         }
         return newHomePageResponse(items, false)
     }
 
     private fun Element.toHomePageList(): HomePageList {
-        val name = select("h2, span").text()
-        val items = select("article, .top10-post").mapNotNull {
+        val name = select("h2").text()
+        val items = select("img").mapNotNull {
             it.toSearchResult()
         }
         return HomePageList(
@@ -65,8 +65,8 @@ class PrimeVideoMirrorProvider : MainAPI() {
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
-        val id = selectFirst("a")?.attr("data-post") ?: attr("data-post") ?: return null
-        val posterUrl = fixUrlNull(selectFirst(".card-img-container img, img.top10-img-1")?.attr("data-src"))
+        val id = attr("src").substringAfterLast("/").substringBefore(".")
+        val posterUrl = attr("src")
 
         return newAnimeSearchResponse("", Id(id).toJson()) {
             this.posterUrl = posterUrl

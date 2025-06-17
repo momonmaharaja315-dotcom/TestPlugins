@@ -42,28 +42,27 @@ class NetflixMirrorProvider : MainAPI() {
             "hd" to "on"
         )
         val document = app.get(
-            "$mainUrl/mobile/home",
+            "$mainUrl/tv/home",
             cookies = cookies,
-            referer = "$mainUrl/",
+            referer = "$mainUrl/tv/home",
         ).document
-        val items = document.select(".tray-container, #top10").map {
+        val items = document.select(".lolomoRow").map {
             it.toHomePageList()
         }
         return newHomePageResponse(items, false)
     }
 
     private fun Element.toHomePageList(): HomePageList {
-        val name = select("h2, span").text()
-        val items = select("article, .top10-post").mapNotNull {
+        val name = select("h2 > span > div").text()
+        val items = select("img").mapNotNull {
             it.toSearchResult()
         }
         return HomePageList(name, items)
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
-        val id = selectFirst("a")?.attr("data-post") ?: attr("data-post") ?: return null
-        val posterUrl =
-            fixUrlNull(selectFirst(".card-img-container img, .top10-img img")?.attr("data-src"))
+        val id = attr("src").substringAfterLast("/").substringBefore(".")
+        val posterUrl = attr("src")
 
         return newAnimeSearchResponse("", Id(id).toJson()) {
             this.posterUrl = posterUrl
