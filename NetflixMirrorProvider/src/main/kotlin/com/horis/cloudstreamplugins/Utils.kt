@@ -14,6 +14,7 @@ import okhttp3.FormBody
 import com.lagradost.nicehttp.NiceResponse
 import kotlinx.coroutines.delay
 import android.content.Context
+import com.lagradost.api.Log
 
 val JSONParser = object : ResponseParser {
     val mapper: ObjectMapper = jacksonObjectMapper().configure(
