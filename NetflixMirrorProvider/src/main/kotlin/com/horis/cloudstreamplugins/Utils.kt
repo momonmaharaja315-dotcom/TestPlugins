@@ -83,7 +83,7 @@ data class VerifyUrl(
 )
 
 suspend fun bypass(mainUrl: String): String {
-    private val cfInterceptor = CloudflareKiller()
+    val cfInterceptor = CloudflareKiller()
     // Check persistent storage first
     val (savedCookie, savedTimestamp) = NetflixMirrorStorage.getCookie()
 
