@@ -66,7 +66,7 @@ class NetflixMirrorProvider : MainAPI() {
 
         return newAnimeSearchResponse("", Id(id).toJson()) {
             this.posterUrl = posterUrl
-            posterHeaders = mapOf("Referer" to "$mainUrl/")
+            posterHeaders = mapOf("Referer" to "$mainUrl/tv/home")
         }
     }
 
@@ -79,7 +79,7 @@ class NetflixMirrorProvider : MainAPI() {
         val url = "$mainUrl/search.php?s=$query&t=${APIHolder.unixTime}"
         val data = app.get(
             url,
-            referer = "$mainUrl/",
+            referer = "$mainUrl/tv/home",
             cookies = cookies
         ).parsed<SearchData>()
 
@@ -101,7 +101,7 @@ class NetflixMirrorProvider : MainAPI() {
         val data = app.get(
             "$mainUrl/post.php?id=$id&t=${APIHolder.unixTime}",
             headers,
-            referer = "$mainUrl/",
+            referer = "$mainUrl/tv/home",
             cookies = cookies
         ).parsed<PostData>()
 
@@ -173,7 +173,7 @@ class NetflixMirrorProvider : MainAPI() {
             val data = app.get(
                 "$mainUrl/episodes.php?s=$sid&series=$eid&t=${APIHolder.unixTime}&page=$pg",
                 headers,
-                referer = "$mainUrl/",
+                referer = "$mainUrl/tv/home",
                 cookies = cookies
             ).parsed<EpisodesData>()
             data.episodes?.mapTo(episodes) {
@@ -205,7 +205,7 @@ class NetflixMirrorProvider : MainAPI() {
         val playlist = app.get(
             "$mainUrl/tv/playlist.php?id=$id&t=$title&tm=${APIHolder.unixTime}",
             headers,
-            referer = "$mainUrl/",
+            referer = "$mainUrl/tv/home",
             cookies = cookies
         ).parsed<PlayList>()
 
@@ -218,7 +218,7 @@ class NetflixMirrorProvider : MainAPI() {
                         fixUrl(it.file),
                         type = ExtractorLinkType.M3U8
                     ) {
-                        this.referer = "$mainUrl/"
+                        this.referer = "$mainUrl/tv/home"
                         this.quality = getQualityFromName(it.file.substringAfter("q=", ""))
                     }
                 )

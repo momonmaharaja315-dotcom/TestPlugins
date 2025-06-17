@@ -93,8 +93,6 @@ suspend fun bypass(mainUrl: String): String {
         do {
             verifyResponse = app.post("$mainUrl/tv/p.php")
             verifyCheck = verifyResponse.text
-            Log.d("verifyCheck", verifyCheck)
-            delay(1000)
         } while (!verifyCheck.contains("\"r\":\"n\""))
         verifyResponse.cookies["t_hash_t"].orEmpty()
     } catch (e: Exception) {
@@ -102,7 +100,6 @@ suspend fun bypass(mainUrl: String): String {
         NetflixMirrorStorage.clearCookie()
         throw e
     }
-    Log.d("newCookie", "its = $newCookie")
 
     // Persist the new cookie
     if (newCookie.isNotEmpty()) {
