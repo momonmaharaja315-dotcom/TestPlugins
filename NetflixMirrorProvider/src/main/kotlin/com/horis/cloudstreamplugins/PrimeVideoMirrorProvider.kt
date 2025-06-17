@@ -41,7 +41,11 @@ class PrimeVideoMirrorProvider : MainAPI() {
             "ott" to "pv",
             "hd" to "on"
         )
-        val document = app.get("$mainUrl/tv/home", cookies = cookies).document
+        val document = app.get(
+            "$mainUrl/tv/home",
+            cookies = cookies,
+            referer = "$mainUrl/tv/home",
+        ).document
         val items = document.select(".tray-container, #top10").map {
             it.toHomePageList()
         }
@@ -217,7 +221,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
                         fixUrl(it.file),
                         type = ExtractorLinkType.M3U8
                     ) {
-                        this.referer = "$mainUrl/"
+                        this.referer = "$mainUrl/tv/home"
                         this.quality = getQualityFromName(it.file.substringAfter("q=", ""))
                     }
                 )

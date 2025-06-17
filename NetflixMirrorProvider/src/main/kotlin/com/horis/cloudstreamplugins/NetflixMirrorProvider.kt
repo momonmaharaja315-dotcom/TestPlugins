@@ -42,8 +42,9 @@ class NetflixMirrorProvider : MainAPI() {
             "hd" to "on"
         )
         val document = app.get(
-            "$mainUrl/tv/home",
-            cookies = cookies
+            "$mainUrl/mobile/home",
+            cookies = cookies,
+            referer = "$mainUrl/",
         ).document
         val items = document.select(".tray-container, #top10").map {
             it.toHomePageList()
@@ -66,7 +67,7 @@ class NetflixMirrorProvider : MainAPI() {
 
         return newAnimeSearchResponse("", Id(id).toJson()) {
             this.posterUrl = posterUrl
-            posterHeaders = mapOf("Referer" to "$mainUrl/tv/home")
+            posterHeaders = mapOf("Referer" to "$mainUrl/")
         }
     }
 
