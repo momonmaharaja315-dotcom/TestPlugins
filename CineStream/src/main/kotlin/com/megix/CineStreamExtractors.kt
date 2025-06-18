@@ -83,11 +83,11 @@ object CineStreamExtractors : CineStreamProvider() {
         val jsonString = app.get("https://raw.githubusercontent.com/kunwarxshashank/rogplay_addons/refs/heads/main/cinema/hindi.json").text
         val serverInfoList = parseMadplayServerInfo(jsonString)
         serverInfoList.forEach { info ->
-            val url = if(season != null && episode != null) {
+            val url = if(season != null) {
                 info.tvurl
                 .replace("\${tmdb}", tmdbId.toString())
-                .replace("\${season}", season)
-                .replace("\${episode}", episode)
+                .replace("\${season}", season.toString())
+                .replace("\${episode}", episode.toString())
             } else {
                 info.movieurl.replace("\${tmdb}", tmdbId.toString())
             }
