@@ -629,7 +629,24 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         if(netflixAPI.isEmpty()) return
+
+        callback.invoke(
+            newExtractorLink(
+                "NetflixAPI",
+                "NetflixAPI",
+                netflixAPI
+            )
+        )
+
         val NfCookie = NFBypass(netflixAPI)
+
+        callback.invoke(
+            newExtractorLink(
+                "NfCookie",
+                "NfCookie",
+                NfCookie
+            )
+        )
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
             "ott" to "pv",
@@ -642,6 +659,14 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = "$netflixAPI/pv/search.php?s=$title&t=${APIHolder.unixTime}"
         val data = app.get(url, headers = headers, cookies = cookies).parsedSafe<NfSearchData>()
         val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals("${title?.trim()}", ignoreCase = true) }?.id
+
+        callback.invoke(
+            newExtractorLink(
+                "netflixId",
+                "netflixId",
+                netflixId.toString()
+            )
+        )
 
         val (nfTitle, id) = app.get(
             "$netflixAPI/pv/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
