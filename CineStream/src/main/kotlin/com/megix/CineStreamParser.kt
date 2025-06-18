@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.gson.annotations.SerializedName
 
 //Madplay
-data class ServerInfo(
+data class MadplayServerInfo(
     val tvurl: String,
     val movieurl: String,
     val server: String
