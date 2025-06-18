@@ -4,6 +4,8 @@ import com.horis.cloudstreamplugins.entities.EpisodesData
 import com.horis.cloudstreamplugins.entities.PlayList
 import com.horis.cloudstreamplugins.entities.PostData
 import com.horis.cloudstreamplugins.entities.SearchData
+import com.horis.cloudstreamplugins.entities.MainPage
+import com.horis.cloudstreamplugins.entities.PostCategory
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import com.lagradost.cloudstream3.utils.AppUtils.toJson
@@ -41,21 +43,23 @@ class PrimeVideoMirrorProvider : MainAPI() {
             "ott" to "pv",
             "hd" to "on"
         )
-        val document = app.get(
-            "$mainUrl/tv/home",
+        val data = app.get(
+            "$mainUrl/tv/pv/homepage.php",
             cookies = cookies,
             referer = "$mainUrl/tv/home",
-        ).document
-        val items = document.select("div.mb-6").map {
+        ).parsed<MainPage>()
+
+        val items = data.post.map {
             it.toHomePageList()
         }
+
         return newHomePageResponse(items, false)
     }
 
-    private fun Element.toHomePageList(): HomePageList {
-        val name = select("h2").text()
-        val items = select("img").mapNotNull {
-            it.toSearchResult()
+    private fun PostCategory.toHomePageList(): HomePageList {
+        val name = cate
+        val items = ids.split(",").mapNotNull {
+            toSearchResult(it)
         }
         return HomePageList(
             name,
@@ -64,13 +68,10 @@ class PrimeVideoMirrorProvider : MainAPI() {
         )
     }
 
-    private fun Element.toSearchResult(): SearchResponse? {
-        val id = attr("data-src").substringAfterLast("/").substringBefore(".")
-        val posterUrl = attr("data-src")
-
+    private fun toSearchResult(id: String): SearchResponse? {
         return newAnimeSearchResponse("", Id(id).toJson()) {
-            this.posterUrl = posterUrl
-            posterHeaders = mapOf("Referer" to "$mainUrl/")
+            this.posterUrl = "https://img.nfmirrorcdn.top/pv/900/$id.jpg"
+            posterHeaders = mapOf("Referer" to "$mainUrl/tv/home")
         }
     }
 
