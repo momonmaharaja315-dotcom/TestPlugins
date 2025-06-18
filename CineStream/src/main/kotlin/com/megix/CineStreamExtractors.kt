@@ -82,6 +82,13 @@ object CineStreamExtractors : CineStreamProvider() {
         )
         val jsonString = app.get("https://raw.githubusercontent.com/kunwarxshashank/rogplay_addons/refs/heads/main/cinema/hindi.json").text
         val serverInfoList = parseMadplayServerInfo(jsonString)
+        callback.invoke(
+            newExtractorLink(
+                "serverInfoList",
+                "serverInfoList",
+                serverInfoList.toString()
+            )
+        )
         serverInfoList.forEach { info ->
             val url = if(season != null) {
                 info.tvurl
@@ -92,8 +99,16 @@ object CineStreamExtractors : CineStreamProvider() {
                 info.movieurl.replace("\${tmdb}", tmdbId.toString())
             }
 
-            val text = app.get(url, headers = headers).text
+            callback.invoke(
+                newExtractorLink(
+                    "url",
+                    "url",
+                    url
+                )
+            )
+
             val fileUrl = try {
+                val text = app.get(url, headers = headers).text
                 JSONArray(text).getJSONObject(0).getString("file")
             } catch (e: Exception) { null }
 
