@@ -160,7 +160,7 @@ suspend fun NFBypass(mainUrl: String): String {
         verifyResponse.cookies["t_hash_t"].orEmpty()
     } catch (e: Exception) {
         // Clear invalid cookie on failure
-        NetflixMirrorStorage.clearCookie()
+        CineStreamStorage.clearCookie()
         throw e
     }
 
