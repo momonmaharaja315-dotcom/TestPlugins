@@ -69,6 +69,53 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
+    suspend fun invokeMadplay(
+        tmdbId: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val headers = mapOf(
+            "Referer" to "https://uembed.site",
+            "Origin" to "https://uembed.site"
+        )
+        val jsonString = app.get("https://raw.githubusercontent.com/kunwarxshashank/rogplay_addons/refs/heads/main/cinema/hindi.json").text
+        val serverInfoList = parseMadplayServerInfo(jsonString)
+        serverInfoList.forEach { info ->
+            val url = if(season != null && episode != null) {
+                info.tvurl
+                .replace("\${tmdb}", tmdbId.toString())
+                .replace("\${season}", season)
+                .replace("\${episode}", episode)
+            } else {
+                info.movieurl.replace("\${tmdb}", tmdbId.toString())
+            }
+
+            val text = app.get(url, headers = headers).text
+            val fileUrl = try {
+                JSONArray(text).getJSONObject(0).getString("file")
+            } catch (e: Exception) { null }
+
+            if(fileUrl != null) {
+                callback.invoke(
+                    newExtractorLink(
+                        info.server,
+                        info.server,
+                        fileUrl
+                    ) {
+                        this.headers = headers
+                    }
+                )
+            }
+        }
+        // val subtitleUrl =  if(season == null ) {
+        //     "https://madplay.site/api/subtitle?id=$tmdbId"
+        // } else {
+        //     "https://madplay.site/api/subtitle?id=$tmdbId&season=$season&episode=$episode"
+        // }
+    }
+
     suspend fun invokeSudatchi(
         aniId: Int? = null,
         episode: Int? = null,
@@ -629,50 +676,22 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit,
     ) {
         if(netflixAPI.isEmpty()) return
-
-        callback.invoke(
-            newExtractorLink(
-                "NetflixAPI",
-                "NetflixAPI",
-                netflixAPI
-            )
-        )
-
         val NfCookie = NFBypass(netflixAPI)
-
-        callback.invoke(
-            newExtractorLink(
-                "NfCookie",
-                "NfCookie",
-                NfCookie
-            )
-        )
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
             "ott" to "pv",
             "hd" to "on"
         )
-        val headers = mapOf(
-            "X-Requested-With" to "XMLHttpRequest",
-            "Referer" to "$netflixAPI/tv/home",
-        )
-        val url = "$netflixAPI/pv/search.php?s=$title&t=${APIHolder.unixTime}"
+        val headers = mapOf("X-Requested-With" to "XMLHttpRequest")
+        val url = "$netflixAPI/mobile/pv/search.php?s=$title&t=${APIHolder.unixTime}"
         val data = app.get(url, headers = headers, cookies = cookies).parsedSafe<NfSearchData>()
         val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals("${title?.trim()}", ignoreCase = true) }?.id
 
-        callback.invoke(
-            newExtractorLink(
-                "netflixId",
-                "netflixId",
-                netflixId.toString()
-            )
-        )
-
         val (nfTitle, id) = app.get(
-            "$netflixAPI/pv/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
+            "$netflixAPI/mobile/pv/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
             headers = headers,
             cookies = cookies,
-            referer = "$netflixAPI/tv/home",
+            referer = "$netflixAPI/",
         ).parsedSafe<NetflixResponse>().let { media ->
             if (season == null && year.toString() == media?.year.toString()) {
                 media?.title to netflixId
@@ -683,10 +702,10 @@ object CineStreamExtractors : CineStreamProvider() {
 
                 while(episodeId == null && page < 10) {
                     val data = app.get(
-                        "$netflixAPI/pv/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}&page=$page",
+                        "$netflixAPI/mobile/pv/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}&page=$page",
                         headers = headers,
                         cookies = cookies,
-                        referer = "$netflixAPI/tv/home",
+                        referer = "$netflixAPI/",
                     ).parsedSafe<NetflixResponse>()
                     episodeId = data?.episodes?.find { it.ep == "E$episode" }?.id
                     if(data?.nextPageShow != 1) { break }
@@ -701,10 +720,10 @@ object CineStreamExtractors : CineStreamProvider() {
         }
 
         app.get(
-            "$netflixAPI/tv/pv/playlist.php?id=${id ?: return}&t=${nfTitle ?: return}&tm=${APIHolder.unixTime}",
+            "$netflixAPI/mobile/pv/playlist.php?id=${id ?: return}&t=${nfTitle ?: return}&tm=${APIHolder.unixTime}",
             headers = headers,
             cookies = cookies,
-            referer = "$netflixAPI/tv/home",
+            referer = "$netflixAPI/",
         ).text.let {
             tryParseJson<ArrayList<NetflixResponse>>(it)
         }?.firstOrNull()?.sources?.map {
@@ -714,7 +733,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     "PrimeVideo",
                     "$netflixAPI/${it.file}",
                 ) {
-                    this.referer = "$netflixAPI/tv/home"
+                    this.referer = "$netflixAPI/"
                     this.quality = getQualityFromName(it.file?.substringAfter("q=")?.substringBefore("&in"))
                     this.headers = mapOf("Cookie" to "hd=on")
                 }
@@ -736,22 +755,18 @@ object CineStreamExtractors : CineStreamProvider() {
 
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
-            "ott" to "nf",
             "hd" to "on"
         )
-        val headers = mapOf(
-            "X-Requested-With" to "XMLHttpRequest",
-            "Referer" to "netflixAPI/tv/home"
-        )
-        val url = "$netflixAPI/search.php?s=$title&t=${APIHolder.unixTime}"
+        val headers = mapOf("X-Requested-With" to "XMLHttpRequest")
+        val url = "$netflixAPI/mobile/search.php?s=$title&t=${APIHolder.unixTime}"
         val data = app.get(url, headers = headers, cookies = cookies).parsedSafe<NfSearchData>()
         val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals("${title?.trim()}", ignoreCase = true) }?.id
 
         val (nfTitle, id) = app.get(
-            "$netflixAPI/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
+            "$netflixAPI/mobile/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
             headers = headers,
             cookies = cookies,
-            referer = "$netflixAPI/tv/home",
+            referer = "$netflixAPI/",
         ).parsedSafe<NetflixResponse>().let { media ->
             if (season == null && year.toString() == media?.year.toString()) {
                 media?.title to netflixId
@@ -761,10 +776,10 @@ object CineStreamExtractors : CineStreamProvider() {
                 var page = 1
                 while(episodeId == null && page < 10) {
                     val data = app.get(
-                        "$netflixAPI/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}&page=$page",
+                        "$netflixAPI/mobile/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}&page=$page",
                         headers = headers,
                         cookies = cookies,
-                        referer = "$netflixAPI/tv/home",
+                        referer = "$netflixAPI/",
                     ).parsedSafe<NetflixResponse>()
                     episodeId = data?.episodes?.find { it.ep == "E$episode" }?.id
                     if(data?.nextPageShow != 1) { break }
@@ -778,10 +793,10 @@ object CineStreamExtractors : CineStreamProvider() {
         }
 
         app.get(
-            "$netflixAPI/tv/playlist.php?id=${id ?: return}&t=${nfTitle ?: return}&tm=${APIHolder.unixTime}",
+            "$netflixAPI/mobile/playlist.php?id=${id ?: return}&t=${nfTitle ?: return}&tm=${APIHolder.unixTime}",
             headers = headers,
             cookies = cookies,
-            referer = "$netflixAPI/tv/home",
+            referer = "$netflixAPI/",
         ).text.let {
             tryParseJson<ArrayList<NetflixResponse>>(it)
         }?.firstOrNull()?.sources?.map {
@@ -791,84 +806,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     "Netflix",
                     "$netflixAPI/${it.file}",
                 ) {
-                    this.referer = "$netflixAPI/tv/home"
-                    this.quality = getQualityFromName(it.file?.substringAfter("q=")?.substringBefore("&in"))
-                    this.headers = mapOf("Cookie" to "hd=on")
-                }
-            )
-        }
-    }
-
-    suspend fun invokeDisney(
-        title: String? = null,
-        year: Int? = null,
-        season: Int? = null,
-        episode: Int? = null,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit,
-    ) {
-        if(netflixAPI.isEmpty()) return
-        val NfCookie = NFBypass(netflixAPI)
-        val cookies = mapOf(
-            "t_hash_t" to NfCookie,
-            "ott" to "dp",
-            "hd" to "on"
-        )
-        val headers = mapOf(
-            "X-Requested-With" to "XMLHttpRequest",
-            "Referer" to "$netflixAPI/tv/home"
-        )
-        val url = "$netflixAPI/mobile/hs/search.php?s=$title&t=${APIHolder.unixTime}"
-        val data = app.get(url, headers = headers, cookies = cookies).parsedSafe<NfSearchData>()
-        val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals("${title?.trim()}", ignoreCase = true) }?.id
-
-        val (nfTitle, id) = app.get(
-            "$netflixAPI/mobile/hs/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
-            headers = headers,
-            cookies = cookies,
-            referer = "$netflixAPI/tv/home",
-        ).parsedSafe<NetflixResponse>().let { media ->
-            if (season == null && year.toString() == media?.year.toString()) {
-                media?.title to netflixId
-            } else if(year.toString() == media?.year.toString()) {
-                val seasonId = media?.season?.find { it.s == "$season" }?.id
-                var episodeId : String? = null
-                var page = 1
-
-                while(episodeId == null && page < 10) {
-                    val data = app.get(
-                        "$netflixAPI/mobile/hs/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}&page=$page",
-                        headers = headers,
-                        cookies = cookies,
-                        referer = "$netflixAPI/tv/home",
-                    ).parsedSafe<NetflixResponse>()
-                    episodeId = data?.episodes?.find { it.ep == "E$episode" }?.id
-                    if(data?.nextPageShow != 1) { break }
-                    page++
-                }
-
-                media?.title to episodeId
-            }
-            else {
-                null to null
-            }
-        }
-
-        app.get(
-            "$netflixAPI/mobile/hs/playlist.php?id=${id ?: return}&t=${nfTitle ?: return}&tm=${APIHolder.unixTime}",
-            headers = headers,
-            cookies = cookies,
-            referer = "$netflixAPI/tv/home",
-        ).text.let {
-            tryParseJson<ArrayList<NetflixResponse>>(it)
-        }?.firstOrNull()?.sources?.map {
-            callback.invoke(
-                newExtractorLink(
-                    "PrimeVideo",
-                    "PrimeVideo",
-                    "$netflixAPI/${it.file}",
-                ) {
-                    this.referer = "$netflixAPI/tv/home"
+                    this.referer = "$netflixAPI/"
                     this.quality = getQualityFromName(it.file?.substringAfter("q=")?.substringBefore("&in"))
                     this.headers = mapOf("Cookie" to "hd=on")
                 }

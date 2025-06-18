@@ -36,7 +36,6 @@ import com.megix.CineStreamExtractors.invokeAllanime
 import com.megix.CineStreamExtractors.invokeStreamAsia
 import com.megix.CineStreamExtractors.invokeNetflix
 import com.megix.CineStreamExtractors.invokePrimeVideo
-import com.megix.CineStreamExtractors.invokeDisney
 import com.megix.CineStreamExtractors.invokeFlixhq
 import com.megix.CineStreamExtractors.invokeSkymovies
 import com.megix.CineStreamExtractors.invokeMoviesflix
@@ -395,7 +394,6 @@ class CineSimklProvider: MainAPI() {
             { if(res.isBollywood) invokeVegamovies("RogMovies", res.imdbId, res.season, res.episode, subtitleCallback, callback) },
             { invokeNetflix(res.title, res.year, res.season, res.episode, subtitleCallback, callback) },
             { invokePrimeVideo(res.title, res.year, res.season, res.episode, subtitleCallback, callback) },
-            { invokeDisney(res.title, res.year, res.season, res.episode, subtitleCallback, callback) },
             { if(res.season == null) invokeStreamify(res.imdbId, callback) },
             { invokeMultimovies(res.title, res.season, res.episode, subtitleCallback, callback) },
             { if(res.isBollywood) invokeTopMovies(res.title, res.year, res.season, res.episode, subtitleCallback, callback) },
@@ -468,7 +466,6 @@ class CineSimklProvider: MainAPI() {
             { invokeVegamovies("VegaMovies", imdbId, imdbSeason, imdbEpisode, subtitleCallback, callback) },
             { invokeNetflix(imdbTitle, res.year, imdbSeason, imdbEpisode, subtitleCallback, callback) },
             { invokePrimeVideo(imdbTitle, imdbSeason, imdbEpisode, res.episode, subtitleCallback, callback) },
-            { invokeDisney(imdbTitle, imdbSeason, imdbEpisode, res.episode, subtitleCallback, callback) },
             { invokeMultimovies(imdbTitle, imdbSeason, imdbEpisode, subtitleCallback, callback) },
             { invokeMoviesmod(imdbId, imdbSeason, imdbEpisode, subtitleCallback, callback) },
             { invokeBollyflix(imdbId, imdbSeason, imdbEpisode, subtitleCallback, callback) },
