@@ -18,7 +18,7 @@ import okhttp3.Response
 import org.jsoup.nodes.Element
 import com.lagradost.cloudstream3.APIHolder.unixTime
 
-class DisneyProvider : MainAPI() {
+class DisneyMirrorProvider : MainAPI() {
     override val supportedTypes = setOf(
         TvType.Movie,
         TvType.TvSeries,
