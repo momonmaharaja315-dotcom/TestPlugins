@@ -737,6 +737,80 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
+    suspend fun invokePrimeVideo(
+        title: String? = null,
+        year: Int? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit,
+    ) {
+        if(netflixAPI.isEmpty()) return
+        val NfCookie = NFBypass(netflixAPI)
+        val cookies = mapOf(
+            "t_hash_t" to NfCookie,
+            "ott" to "pv",
+            "hd" to "on"
+        )
+        val headers = mapOf("X-Requested-With" to "XMLHttpRequest")
+        val url = "$netflixAPI/mobile/pv/search.php?s=$title&t=${APIHolder.unixTime}"
+        val data = app.get(url, headers = headers, cookies = cookies).parsedSafe<NfSearchData>()
+        val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals("${title?.trim()}", ignoreCase = true) }?.id
+
+        val (nfTitle, id) = app.get(
+            "$netflixAPI/mobile/pv/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
+            headers = headers,
+            cookies = cookies,
+            referer = "$netflixAPI/",
+        ).parsedSafe<NetflixResponse>().let { media ->
+            if (season == null && year.toString() == media?.year.toString()) {
+                media?.title to netflixId
+            } else if(year.toString() == media?.year.toString()) {
+                val seasonId = media?.season?.find { it.s == "$season" }?.id
+                var episodeId : String? = null
+                var page = 1
+
+                while(episodeId == null && page < 10) {
+                    val data = app.get(
+                        "$netflixAPI/mobile/pv/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}&page=$page",
+                        headers = headers,
+                        cookies = cookies,
+                        referer = "$netflixAPI/",
+                    ).parsedSafe<NetflixResponse>()
+                    episodeId = data?.episodes?.find { it.ep == "E$episode" }?.id
+                    if(data?.nextPageShow != 1) { break }
+                    page++
+                }
+
+                media?.title to episodeId
+            }
+            else {
+                null to null
+            }
+        }
+
+        app.get(
+            "$netflixAPI/mobile/pv/playlist.php?id=${id ?: return}&t=${nfTitle ?: return}&tm=${APIHolder.unixTime}",
+            headers = headers,
+            cookies = cookies,
+            referer = "$netflixAPI/",
+        ).text.let {
+            tryParseJson<ArrayList<NetflixResponse>>(it)
+        }?.firstOrNull()?.sources?.map {
+            callback.invoke(
+                newExtractorLink(
+                    "PrimeVideo",
+                    "PrimeVideo",
+                    "$netflixAPI/${it.file}",
+                ) {
+                    this.referer = "$netflixAPI/"
+                    this.quality = getQualityFromName(it.file?.substringAfter("q=")?.substringBefore("&in"))
+                    this.headers = mapOf("Cookie" to "hd=on")
+                }
+            )
+        }
+    }
+
     suspend fun invokeNetflix(
         title: String? = null,
         year: Int? = null,
