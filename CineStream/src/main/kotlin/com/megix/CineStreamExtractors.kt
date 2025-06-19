@@ -73,7 +73,6 @@ object CineStreamExtractors : CineStreamProvider() {
         tmdbId: Int? = null,
         season: Int? = null,
         episode: Int? = null,
-        subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
         val headers = mapOf(
@@ -82,13 +81,7 @@ object CineStreamExtractors : CineStreamProvider() {
         )
         val jsonString = app.get("https://raw.githubusercontent.com/kunwarxshashank/rogplay_addons/refs/heads/main/cinema/hindi.json").text
         val serverInfoList = parseMadplayServerInfo(jsonString)
-        callback.invoke(
-            newExtractorLink(
-                "serverInfoList",
-                "serverInfoList",
-                serverInfoList.toString()
-            )
-        )
+
         serverInfoList.forEach { info ->
             val url = if(season != null) {
                 info.tvurl
@@ -98,14 +91,6 @@ object CineStreamExtractors : CineStreamProvider() {
             } else {
                 info.movieurl.replace("\${tmdb}", tmdbId.toString())
             }
-
-            callback.invoke(
-                newExtractorLink(
-                    "url",
-                    "url",
-                    url
-                )
-            )
 
             val fileUrl = try {
                 val text = app.get(url, headers = headers).text
@@ -118,18 +103,13 @@ object CineStreamExtractors : CineStreamProvider() {
                         "Madplay [${info.server}]",
                         "Madplay [${info.server}]",
                         fileUrl,
-                        type = if(fileUrl.contains("hls") || fileUrl.contains("hls")) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
+                        type = if(fileUrl.contains("mp4")) ExtractorLinkType.VIDEO else ExtractorLinkType.M3U8
                     ) {
                         this.headers = headers
                     }
                 )
             }
         }
-        // val subtitleUrl =  if(season == null ) {
-        //     "https://madplay.site/api/subtitle?id=$tmdbId"
-        // } else {
-        //     "https://madplay.site/api/subtitle?id=$tmdbId&season=$season&episode=$episode"
-        // }
     }
 
     suspend fun invokeSudatchi(
@@ -683,7 +663,7 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
-    suspend fun invokePrimeVideo(
+    suspend fun invokeDisney(
         title: String? = null,
         year: Int? = null,
         season: Int? = null,
@@ -695,16 +675,16 @@ object CineStreamExtractors : CineStreamProvider() {
         val NfCookie = NFBypass(netflixAPI)
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
-            "ott" to "pv",
+            "ott" to "dp",
             "hd" to "on"
         )
         val headers = mapOf("X-Requested-With" to "XMLHttpRequest")
-        val url = "$netflixAPI/mobile/pv/search.php?s=$title&t=${APIHolder.unixTime}"
+        val url = "$netflixAPI/mobile/hs/search.php?s=$title&t=${APIHolder.unixTime}"
         val data = app.get(url, headers = headers, cookies = cookies).parsedSafe<NfSearchData>()
         val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals("${title?.trim()}", ignoreCase = true) }?.id
 
         val (nfTitle, id) = app.get(
-            "$netflixAPI/mobile/pv/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
+            "$netflixAPI/mobile/hs/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
             headers = headers,
             cookies = cookies,
             referer = "$netflixAPI/",
@@ -718,7 +698,7 @@ object CineStreamExtractors : CineStreamProvider() {
 
                 while(episodeId == null && page < 10) {
                     val data = app.get(
-                        "$netflixAPI/mobile/pv/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}&page=$page",
+                        "$netflixAPI/mobile/hs/episodes.php?s=${seasonId}&series=$netflixId&t=${APIHolder.unixTime}&page=$page",
                         headers = headers,
                         cookies = cookies,
                         referer = "$netflixAPI/",
@@ -736,7 +716,7 @@ object CineStreamExtractors : CineStreamProvider() {
         }
 
         app.get(
-            "$netflixAPI/mobile/pv/playlist.php?id=${id ?: return}&t=${nfTitle ?: return}&tm=${APIHolder.unixTime}",
+            "$netflixAPI/mobile/hs/playlist.php?id=${id ?: return}&t=${nfTitle ?: return}&tm=${APIHolder.unixTime}",
             headers = headers,
             cookies = cookies,
             referer = "$netflixAPI/",
