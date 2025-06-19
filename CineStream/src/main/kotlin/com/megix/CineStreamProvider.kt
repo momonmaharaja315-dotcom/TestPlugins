@@ -669,7 +669,7 @@ open class CineStreamProvider : MainAPI() {
             { invokeSoaper(res.id, res.tmdbId, res.title, res.season, res.episode, subtitleCallback, callback) },
             { invokePhoenix(res.title, res.id, res.tmdbId, year, res.season, res.episode, callback) },
             { invokeTom(res.tmdbId, res.season, res.episode, callback, subtitleCallback) },
-            { invokeMadplay(res.tmdbId, res.season, res.episode, callback) },
+            { if(!isAnime) invokeMadplay(res.tmdbId, res.season, res.episode, callback) },
             { invokePrimenet(res.tmdbId, res.season, res.episode, callback) },
             { invokePlayer4U(res.title, res.season, res.episode, seasonYear, callback) },
             { invokeThepiratebay(res.id, res.season, res.episode, callback) },

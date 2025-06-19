@@ -77,7 +77,8 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val headers = mapOf(
             "Referer" to "https://uembed.site",
-            "Origin" to "https://uembed.site"
+            "Origin" to "https://uembed.site",
+            "User-Agent" to USER_AGENT
         )
         val jsonString = app.get("https://raw.githubusercontent.com/kunwarxshashank/rogplay_addons/refs/heads/main/cinema/hindi.json").text
         val serverInfoList = parseMadplayServerInfo(jsonString)
@@ -725,8 +726,8 @@ object CineStreamExtractors : CineStreamProvider() {
         }?.firstOrNull()?.sources?.map {
             callback.invoke(
                 newExtractorLink(
-                    "PrimeVideo",
-                    "PrimeVideo",
+                    "Disney",
+                    "Disney",
                     "$netflixAPI/${it.file}",
                 ) {
                     this.referer = "$netflixAPI/"
