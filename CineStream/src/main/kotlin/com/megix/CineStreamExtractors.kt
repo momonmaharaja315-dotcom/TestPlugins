@@ -25,8 +25,62 @@ import com.lagradost.cloudstream3.utils.AppUtils.toJson
 import java.net.URI
 import com.lagradost.cloudstream3.utils.JsUnpacker
 import com.lagradost.cloudstream3.USER_AGENT
+import com.google.gson.Gson
 
+//AIO
+//https://3b4bbf5252c4-aio-streaming.baby-beamup.club/stremio/languages=english,hindi,spanish,arabic,mandarin,bengali,portuguese,russian,japanese,lahnda,thai,turkish,french,german,korean,telugu,marathi,tamil,urdu,italian/subtitles/movie/tt2911666.json
+//https://3b4bbf5252c4-aio-streaming.baby-beamup.club/stremio/languages=english,hindi,spanish,arabic,mandarin,bengali,portuguese,russian,japanese,lahnda,thai,turkish,french,german,korean,telugu,marathi,tamil,urdu,italian/subtitles/series/tt29650530:1:1.json
+
+//Subsource
+//https://subsource.strem.bar/ZW5nbGlzaCxoaW5kaSxzcGFuaXNoLGFyYWJpYyxtYW5kYXJpbixiZW5nYWxpLHBvcnR1Z3Vlc2UscnVzc2lhbixqYXBhbmVzZSxsYWhuZGEsdGhhaSx0dXJraXNoLGZyZW5jaCxnZXJtYW4sa29yZWFuLHRlbHVndSxtYXJhdGhpLHRhbWlsLHVyZHUsaXRhbGlhbi9oaUluY2x1ZGUv/subtitles/movie/tt2911666.json
+//https://subsource.strem.bar/ZW5nbGlzaCxoaW5kaSxzcGFuaXNoLGFyYWJpYyxtYW5kYXJpbixiZW5nYWxpLHBvcnR1Z3Vlc2UscnVzc2lhbixqYXBhbmVzZSxsYWhuZGEsdGhhaSx0dXJraXNoLGZyZW5jaCxnZXJtYW4sa29yZWFuLHRlbHVndSxtYXJhdGhpLHRhbWlsLHVyZHUsaXRhbGlhbi9oaUluY2x1ZGUv/subtitles/series/tt29650530:1:1.json
+
+//opensubtitles
+//https://opensubtitles.stremio.homes/en|hi|de|ar|tr|es|ta|te|ru|ko/ai-translated=true|from=all|auto-adjustment=true/subtitles/movie/tt2911666.json
+//https://opensubtitles.stremio.homes/en%7Chi%7Cde%7Car%7Ctr%7Ces%7Cta%7Cte%7Cru%7Cko/ai-translated=true%7Cfrom=all%7Cauto-adjustment=true/subtitles/series/tt29650530:1:1.json
 object CineStreamExtractors : CineStreamProvider() {
+
+    suspend fun invokeStremioSubtitles(
+        imdbId: String? = null,
+        season: Int? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+    ) {
+        val gson = Gson()
+        val subsUrls = listOf(
+            "https://3b4bbf5252c4-aio-streaming.baby-beamup.club/stremio/languages=english,hindi,spanish,arabic,mandarin,bengali,portuguese,russian,japanese,lahnda,thai,turkish,french,german,korean,telugu,marathi,tamil,urdu,italian",
+            "https://subsource.strem.bar/ZW5nbGlzaCxoaW5kaSxzcGFuaXNoLGFyYWJpYyxtYW5kYXJpbixiZW5nYWxpLHBvcnR1Z3Vlc2UscnVzc2lhbixqYXBhbmVzZSxsYWhuZGEsdGhhaSx0dXJraXNoLGZyZW5jaCxnZXJtYW4sa29yZWFuLHRlbHVndSxtYXJhdGhpLHRhbWlsLHVyZHUsaXRhbGlhbi9oaUluY2x1ZGUv",
+            "https://opensubtitles.stremio.homes/en|hi|de|ar|tr|es|ta|te|ru|ko/ai-translated=true|from=all|auto-adjustment=true"
+        )
+
+        subsUrls.amap { subUrl ->
+            try {
+                val url = if(season != null) {
+                    subUrl + "/subtitles/series/$imdbId:$season:$episode.json"
+                } else {
+                    subUrl + "/subtitles/movie/$imdbId.json"
+                }
+
+                val json = app.get(url).text
+                val subtitleResponse = gson.fromJson(json, StremioSubtitleResponse::class.java)
+
+                subtitleResponse.subtitles.forEach {
+                    val lang = it.lang_code ?: it.lang
+                    val fileUrl = it.url
+                    if(lang != null && fileUrl != null) {
+                        subtitleCallback.invoke(
+                            Subtitle(
+                                lang,
+                                fileUrl,
+                            )
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                println("Error fetching/parsing subtitle from: $url - ${e.message}")
+            }
+        }
+    }
 
     suspend fun invokeKatMovieHd(
         sourceName: String,
