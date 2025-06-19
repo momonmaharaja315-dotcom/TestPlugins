@@ -69,7 +69,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     val fileUrl = it.url
                     if(lang != null && fileUrl != null) {
                         subtitleCallback.invoke(
-                            Subtitle(
+                            SubtitleFile(
                                 lang,
                                 fileUrl,
                             )
@@ -77,7 +77,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     }
                 }
             } catch (e: Exception) {
-                println("Error fetching/parsing subtitle from: $url - ${e.message}")
+                println("Error fetching/parsing subtitle from: $subUrl - ${e.message}")
             }
         }
     }
