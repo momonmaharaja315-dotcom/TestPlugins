@@ -115,9 +115,10 @@ object CineStreamExtractors : CineStreamProvider() {
             if(fileUrl != null) {
                 callback.invoke(
                     newExtractorLink(
-                        info.server,
-                        info.server,
-                        fileUrl
+                        "Madplay [${info.server}]",
+                        "Madplay [${info.server}]",
+                        fileUrl,
+                        type = if(fileUrl.contains("hls") || fileUrl.contains("hls")) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
                     ) {
                         this.headers = headers
                     }
