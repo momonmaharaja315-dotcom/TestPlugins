@@ -50,7 +50,7 @@ class Longvideos : MainAPI() {
         val searchResponse = mutableListOf<SearchResponse>()
 
         for (i in 1..7) {
-            val document = app.get("$mainUrl/search/$page/?q=$query").document
+            val document = app.get("$mainUrl/search/$i/?q=$query").document
             val results = document.select("div.item").mapNotNull { it.toSearchResult() }
 
             if (!searchResponse.containsAll(results)) {
