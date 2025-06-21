@@ -63,6 +63,7 @@ import com.megix.CineStreamExtractors.invokePhoenix
 import com.megix.CineStreamExtractors.invokeKatMovieHd
 import com.megix.CineStreamExtractors.invokeMadplay
 import com.megix.CineStreamExtractors.invokeStremioSubtitles
+import com.megix.CineStreamExtractors.invokeToonstream
 
 class CineSimklProvider: MainAPI() {
     override var name = "CineSimkl"
@@ -275,6 +276,7 @@ class CineSimklProvider: MainAPI() {
         val country = json.country ?: ""
         val isAnime = if(tvType == "anime") true else false
         val isBollywood = if(country == "IN") true else false
+        val isCartoon = genres?.contains("Animation") ?: false
         val isAsian = if(!isAnime && (country == "JP" || country == "KR" || country == "CN")) true else false
         val en_title = if (isAnime) {
             normalizeSeasonString(json.en_title ?: json.title)
@@ -284,10 +286,8 @@ class CineSimklProvider: MainAPI() {
         val allratings = json.ratings
         val rating = allratings?.mal?.rating ?: allratings?.imdb?.rating
         val kitsuId = json.ids?.kitsu?.toIntOrNull()
-        var backgroundPosterUrl = getPosterUrl(json.fanart, "fanart")
-        if(backgroundPosterUrl == null && isAnime && kitsuId != null) {
-            backgroundPosterUrl = "https://media.kitsu.app/anime/cover_images/$kitsuId/original.jpg"
-        }
+        val backgroundPosterUrl = getPosterUrl(json.fanart, "fanart")
+
         val users_recommendations = json.users_recommendations?.map {
             newMovieSearchResponse("${it.en_title ?: it.title}", "$mainUrl/${it.type}/${it.ids?.simkl}/${it.ids?.slug}") {
                 this.posterUrl = getPosterUrl(it.poster, "poster")
@@ -295,13 +295,12 @@ class CineSimklProvider: MainAPI() {
         } ?: emptyList()
 
         val relations = json.relations?.map {
-            newMovieSearchResponse("${it.en_title ?: it.title} (${it.relation_type})", "$mainUrl/${it.anime_type}/${it.ids?.simkl}/${it.ids?.slug}") {
+            newMovieSearchResponse("(${it.relation_type?.replaceFirstChar { it.uppercase() }})${it.en_title ?: it.title}", "$mainUrl/${it.anime_type}/${it.ids?.simkl}/${it.ids?.slug}") {
                 this.posterUrl = getPosterUrl(it.poster, "poster")
             }
         } ?: emptyList()
 
-        val recommendations = users_recommendations + relations
-
+        val recommendations = relations + users_recommendations
 
         if (tvType == "movie" || (tvType == "anime" && json.anime_type?.equals("movie") == true)) {
             val data = LoadLinksData(
@@ -320,7 +319,8 @@ class CineSimklProvider: MainAPI() {
                 null,
                 isAnime,
                 isBollywood,
-                isAsian
+                isAsian,
+                isCartoon
             ).toJson()
             return newMovieLoadResponse("${en_title}", url, if(isAnime) TvType.AnimeMovie  else TvType.Movie, data) {
                 this.posterUrl = getPosterUrl(json.poster, "poster")
@@ -356,7 +356,8 @@ class CineSimklProvider: MainAPI() {
                         it.date.toString().substringBefore("-").toIntOrNull(),
                         isAnime,
                         isBollywood,
-                        isAsian
+                        isAsian,
+                        isCartoon
                     ).toJson()
                 ) {
                     this.name = it.title
@@ -412,6 +413,7 @@ class CineSimklProvider: MainAPI() {
             { invokeDisney(res.title, res.year, res.season, res.episode, subtitleCallback, callback) },
             { if(res.season == null) invokeStreamify(res.imdbId, callback) },
             { invokeMultimovies(res.title, res.season, res.episode, subtitleCallback, callback) },
+            { if(res.isCartoon) invokeToonstream(res.title, res.season, res.episode, subtitleCallback, callback) },
             { if(res.isBollywood) invokeTopMovies(res.title, res.year, res.season, res.episode, subtitleCallback, callback) },
             { if(!res.isBollywood) invokeMoviesmod(res.imdbId, res.season, res.episode, subtitleCallback, callback) },
             { if(res.isAsian && res.season != null) invokeStreamAsia(res.title, "kdhd", res.season, res.episode, subtitleCallback, callback) },
@@ -485,6 +487,7 @@ class CineSimklProvider: MainAPI() {
             { invokeNetflix(imdbTitle, res.year, imdbSeason, imdbEpisode, subtitleCallback, callback) },
             { invokePrimeVideo(imdbTitle, imdbSeason, imdbEpisode, res.episode, subtitleCallback, callback) },
             { invokeMultimovies(imdbTitle, imdbSeason, imdbEpisode, subtitleCallback, callback) },
+            { invokeToonstream(imdbTitle, imdbSeason, imdbEpisode, subtitleCallback, callback) },
             { invokeMoviesmod(imdbId, imdbSeason, imdbEpisode, subtitleCallback, callback) },
             { invokeBollyflix(imdbId, imdbSeason, imdbEpisode, subtitleCallback, callback) },
             { invokeMovies4u(imdbId, imdbTitle, res.year, imdbSeason, imdbEpisode, subtitleCallback, callback) },

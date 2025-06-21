@@ -29,6 +29,33 @@ import com.google.gson.Gson
 
 object CineStreamExtractors : CineStreamProvider() {
 
+    suspend fun invokeToonstream(
+        title: String? = null,
+        season: Int? = null,
+        episode: Int?  = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val url = if(season == null) {
+            "$toonStreamAPI/movies/${title.createSlug()}/"
+        } else {
+            "$toonStreamAPI/series/${title.createSlug()}-${season}x${episode}/"
+        }
+
+        app.get(url).document.select("#aa-options > div > iframe").amap {
+            val doc = app.get(it.attr("data-src")).document
+            doc.select("div.Video > iframe").amap { iframe ->
+                loadSourceNameExtractor(
+                    "ToonStream",
+                    iframe.attr("src"),
+                    "",
+                    subtitleCallback,
+                    callback
+                )
+            }
+        }
+    }
+
     suspend fun invokeAnimez(
         title: String? = null,
         episode: Int?  = null,
@@ -41,20 +68,21 @@ object CineStreamExtractors : CineStreamProvider() {
 
             if(!titles.contains("$title")) return@amap
 
-            doc.select("li.wp-manga-chapter > a:contains(${episode ?: 1})").amap {
-                val type = if(it.text().contains("Dub")) "DUB" else "SUB"
-                val epDoc = app.get(animezAPI + it.attr("href")).document
-                val source = epDoc.select("iframe").attr("src")
-                callback.invoke(
-                    newExtractorLink(
-                        "Animez [$type]",
-                        "Animez [$type]",
-                        source.replace("/embed/", "/anime/"),
-                    ) {
-                        this.referer = source
-                    }
-                )
-            }
+            val ep = episode ?: 1
+            val links  = doc.select("li.wp-manga-chapter > a")
+            val link = if (links.size >= ep) links[links.size - ep] else return@amap
+            val type = if(link.text().contains("Dub")) "DUB" else "SUB"
+            val epDoc = app.get(animezAPI + link.attr("href")).document
+            val source = epDoc.select("iframe").attr("src")
+            callback.invoke(
+                newExtractorLink(
+                    "Animez [$type]",
+                    "Animez [$type]",
+                    source.replace("/embed/", "/anime/"),
+                ) {
+                    this.referer = source
+                }
+            )
         }
     }
 
@@ -88,7 +116,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     if(lang != null && fileUrl != null) {
                         subtitleCallback.invoke(
                             SubtitleFile(
-                                "stremio $lang",
+                                lang,
                                 fileUrl,
                             )
                         )
