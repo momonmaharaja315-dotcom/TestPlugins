@@ -61,29 +61,32 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
         return newHomePageResponse(request.name, home)
     }
 
+    data class PostResponse (
+        var token    : String?  = null,
+        var id       : Int?     = null,
+        var time     : Int?     = null,
+        var post     : String?  = null,
+        var redirect : String?  = null,
+        var cacha    : String?  = null,
+        var new      : Boolean? = null,
+        var link     : String?  = null
+    )
+
     private suspend fun makePostRequest(jsonString: String, url: String, action: String): String {
         val gson = Gson()
-        val item = gson.fromJson(itemJsonString, JsonObject::class.java)
-
-        val token = item["token"].asString
-        val id = item["id"].asInt
-        val time = item["time"].asLong
-        val post = item["post"].asString
-        val redirect = item["redirect"].asString
-        val cacha = item["cacha"].asString
-        val isNew = item["new"].asBoolean
-        val link = item["link"].asString
+        val item = gson.fromJson(jsonString, PostResponse::class.java)
 
         val requestBody = FormBody.Builder()
-            .addEncoded("token", token)
-            .addEncoded("id", id.toString())
-            .addEncoded("time", time.toString())
-            .addEncoded("post", post)
-            .addEncoded("redirect", redirect)
-            .addEncoded("cacha", cacha)
-            .addEncoded("new", isNew.toString())
-            .addEncoded("link", link)
+            .addEncoded("token", item.token.toString())
+            .addEncoded("id", item.id.toString())
+            .addEncoded("time", item.time.toString())
+            .addEncoded("post", item.post)
+            .addEncoded("redirect", item.redirect)
+            .addEncoded("cacha", item.cacha)
+            .addEncoded("new", item.new.toString())
+            .addEncoded("link", item.link ?: "")
             .addEncoded("action", action)
+            .build()
 
         val headers = mapOf(
             "Content-Type" to "application/x-www-form-urlencoded",
