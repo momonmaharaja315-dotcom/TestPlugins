@@ -612,6 +612,7 @@ class CineSimklProvider: MainAPI() {
         val airedYear   : Int?    = null,
         val isAnime     : Boolean = false,
         val isBollywood : Boolean = false,
-        val isAsian     : Boolean = false
+        val isAsian     : Boolean = false,
+        val isCartoon   : Boolean = false
     )
 }
