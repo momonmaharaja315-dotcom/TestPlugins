@@ -42,26 +42,26 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
 
 
     override val mainPage = mainPageOf(
-        "/page/" to "Home",
-        "/genre/hollywood/page/" to "Hollywood Movies",
-        "/genre/south-indian-movies/page/" to "South Indian Movies",
-        "/genre/hollywood-tv-show/page/" to "Hollywood TV Shows",
-        "/genre/bollywood-tv-show/page/" to "Bollywood TV Shows",
-        "/genre/anime-tv-show/page/" to "Anime TV Shows",
+        "page/" to "Home",
+        "genre/hollywood/page/" to "Hollywood Movies",
+        "genre/south-indian-movies/page/" to "South Indian Movies",
+        "genre/hollywood-tv-show/page/" to "Hollywood TV Shows",
+        "genre/bollywood-tv-show/page/" to "Bollywood TV Shows",
+        "genre/anime-tv-show/page/" to "Anime TV Shows",
     )
 
     override suspend fun getMainPage(
         page: Int,
         request: MainPageRequest
     ): HomePageResponse {
-        val document = app.get("${basemainUrl ?: mainUrl}${request.data}${page}").document
+        val document = app.get("${basemainUrl ?: mainUrl}/${request.data}${page}").document
         val home = document.select("article.item").mapNotNull {
             it.toSearchResult()
         }
         return newHomePageResponse(request.name, home)
     }
 
-    private makePostRequest(jsonString: String, url: String, action: String): String {
+    private suspend fun makePostRequest(jsonString: String, url: String, action: String): String {
         val gson = Gson()
         val item = gson.fromJson(itemJsonString, JsonObject::class.java)
 
@@ -106,7 +106,7 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
         val ajaxUrlRegex = """\"soralink_ajaxurl\"\s*:\s*\"(https?:\\\/\\\/[^\"]+)\"""".toRegex()
         val soralinkZRegex = """\"soralink_z\"\s*:\s*\"([^\"]+)\"""".toRegex()
         val matchResult = regex.find(text)
-        val ajaxUrlMatch = ajaxUrlRegex.find(html)
+        val ajaxUrlMatch = ajaxUrlRegex.find(text)
         val soralinkZMatch = soralinkZRegex.find(text)
         if(matchResult != null && ajaxUrlMatch != null && soralinkZMatch != null) {
             val escapedUrl = ajaxUrlMatch.groupValues[1]
