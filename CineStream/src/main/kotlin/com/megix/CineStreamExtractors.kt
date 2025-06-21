@@ -55,7 +55,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 callback.invoke(
                     newExtractorLink(
                         "ToonStream[${iframe.attr("src")}]",
-                        "ToonStream[${frame.attr("src")}]",
+                        "ToonStream[${iframe.attr("src")}]",
                         iframe.attr("src"),
                     )
                 )
