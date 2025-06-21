@@ -39,10 +39,10 @@ object CineStreamExtractors : CineStreamProvider() {
         val url = if(season == null) {
             "$toonStreamAPI/movies/${title.createSlug()}/"
         } else {
-            "$toonStreamAPI/series/${title.createSlug()}-${season}x${episode}/"
+            "$toonStreamAPI/episode/${title.createSlug()}-${season}x${episode}/"
         }
 
-        app.get(url).document.select("#aa-options > div > iframe").amap {
+        app.get(url, referer = toonStreamAPI).document.select("#aa-options > div > iframe").amap {
             callback.invoke(
                 newExtractorLink(
                     "ToonStream[${it.attr("data-src")}]",
@@ -96,6 +96,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     ExtractorLinkType.M3U8
                 ) {
                     this.referer = "$animezAPI/"
+                    this.quality = 1080
                 }
             )
         }

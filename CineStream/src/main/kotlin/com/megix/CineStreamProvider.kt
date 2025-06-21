@@ -152,6 +152,7 @@ open class CineStreamProvider : MainAPI() {
         val moviesBabaAPI: String get() = apiConfig.optString("moviesbaba")
     }
     val wpRedisInterceptor by lazy { CloudflareKiller() }
+
     override val supportedTypes = setOf(
         TvType.Movie,
         TvType.TvSeries,
