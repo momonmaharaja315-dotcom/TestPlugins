@@ -43,8 +43,22 @@ object CineStreamExtractors : CineStreamProvider() {
         }
 
         app.get(url).document.select("#aa-options > div > iframe").amap {
+            callback.invoke(
+                newExtractorLink(
+                    "ToonStream[${it.attr("data-src")}]",
+                    "ToonStream[${it.attr("data-src")}]",
+                    it.attr("data-src"),
+                )
+            )
             val doc = app.get(it.attr("data-src")).document
             doc.select("div.Video > iframe").amap { iframe ->
+                callback.invoke(
+                    newExtractorLink(
+                        "ToonStream[${iframe.attr("src")}]",
+                        "ToonStream[${frame.attr("src")}]",
+                        iframe.attr("src"),
+                    )
+                )
                 loadSourceNameExtractor(
                     "ToonStream",
                     iframe.attr("src"),
@@ -79,8 +93,9 @@ object CineStreamExtractors : CineStreamProvider() {
                     "Animez [$type]",
                     "Animez [$type]",
                     source.replace("/embed/", "/anime/"),
+                    ExtractorLinkType.M3U8
                 ) {
-                    this.referer = source
+                    this.referer = "$animezAPI/"
                 }
             )
         }
