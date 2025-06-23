@@ -236,8 +236,14 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
     ): Boolean {
         val sources = parseJson<ArrayList<EpisodeLink>>(data)
         sources.amap {
-            val source = it.source
-            loadExtractor(source, subtitleCallback, callback)
+            callback.invoke(
+                newExtractorLink(
+                    "url",
+                    "url",
+                    it.source,
+                )
+            )
+            loadExtractor(it.source, subtitleCallback, callback)
         }
         return true   
     }
