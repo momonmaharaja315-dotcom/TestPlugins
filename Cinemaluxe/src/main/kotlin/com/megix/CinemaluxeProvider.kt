@@ -95,7 +95,7 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
           item.new
         }&link=${
           URLEncoder.encode(item.link, "UTF-8")
-        }&action=$soraLink".toRequestBody("application/x-www-form-urlencoded".toMediaType())
+        }&action=$action".toRequestBody("application/x-www-form-urlencoded".toMediaType())
 
         val response = app.post(url, requestBody = requestBody, allowRedirects = false).headers["Location"] ?: ""
         return response
@@ -113,7 +113,7 @@ class CinemaluxeProvider : MainAPI() { // all providers must be an instance of M
           """var\s+item\s*=\s*(\{.*?\});""".toRegex(RegexOption.DOT_MATCHES_ALL)
             .find(text)?.groupValues?.get(1)
         val soraLink =
-          """\"soralink_z"\s*:\s*"([^"]+)\"""".toRegex().find(jsCode)?.groupValues?.get(1)
+          """\"soralink_z"\s*:\s*"([^"]+)\"""".toRegex().find(text)?.groupValues?.get(1)
 
         if(postUrl != null && jsonData != null && soraLink != null) {
             return makePostRequest(jsonData, postUrl, soraLink)
