@@ -6,6 +6,8 @@ import org.json.JSONObject
 import okhttp3.FormBody
 import okhttp3.*
 import java.net.*
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import com.lagradost.api.Log
@@ -120,8 +122,9 @@ class LinkstoreDrive : ExtractorApi() {
                 text,
             )
         )
-
-        val redirectUrl = app.get(url, headers = headers).document
+        val document: Document = Jsoup.parse(text)
+        val redirectUrl =
+            document
             .select("meta[http-equiv=refresh]")
             .attr("content")
             .substringAfter("url=")
