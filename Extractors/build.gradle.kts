@@ -1,10 +1,10 @@
-version = 34
+version = 61
 
 cloudstream {
-    language = "hi"
+    //language = "hi"
     // All of these properties are optional, you can safely remove them
 
-    description = "Movies and Series upto 4K"
+    description = "Must Install(For other extensions to work properly)"
      authors = listOf("megix")
 
     /**
@@ -18,7 +18,9 @@ cloudstream {
     tvTypes = listOf(
         "TvSeries",
         "Movie",
+        "AsianDrama",
+        "Anime"
     )
 
-    iconUrl = "https://github.com/SaurabhKaperwan/CSX/raw/refs/heads/master/Cinemaluxe/icon.png"
+    iconUrl = "https://github.com/SaurabhKaperwan/CSX/raw/refs/heads/master/Extractors/icon.png"
 }
