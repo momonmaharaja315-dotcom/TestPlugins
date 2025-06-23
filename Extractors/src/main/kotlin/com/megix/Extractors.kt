@@ -6,8 +6,6 @@ import org.json.JSONObject
 import okhttp3.FormBody
 import okhttp3.*
 import java.net.*
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
 import com.lagradost.api.Log
@@ -97,46 +95,7 @@ class LinkstoreDrive : ExtractorApi() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
-        val client = OkHttpClient()
-
-        val headers = Headers.Builder()
-            .add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8")
-            .add("Accept-Encoding", "gzip, deflate, br, zstd")
-            .add("Accept-Language", "en-GB,en;q=0.5")
-            .add("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36")
-            .build()
-
-        val request = Request.Builder()
-            .url(url)
-            .headers(headers)
-            .build()
-
-        val response: Response = client.newCall(request).execute()
-
-        val text = response.body?.string() ?: ""
-
-        callback.invoke(
-            newExtractorLink(
-                "text",
-                "text",
-                text,
-            )
-        )
-        val document: Document = Jsoup.parse(text)
-        val redirectUrl =
-            document
-            .select("meta[http-equiv=refresh]")
-            .attr("content")
-            .substringAfter("url=")
-
-        callback.invoke(
-            newExtractorLink(
-                "redirectUrl",
-                "redirectUrl",
-                redirectUrl,
-            )
-        )
-
+        val redirectUrl = url.replace("https://drive.linkstore.rest", "https://new3.luxedrive.space")
         loadExtractor(redirectUrl, "", subtitleCallback, callback)
     }
 }
