@@ -101,10 +101,36 @@ class LinkstoreDrive : ExtractorApi() {
             "Accept-Language" to "en-GB,en;q=0.5",
             "User-Agent" to "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
         )
+        callback.invoke(
+            newExtractorLink(
+                "url",
+                "url",
+                url,
+            )
+        )
+        val text = app.get(url, headers = headers).text
+
+        callback.invoke(
+            newExtractorLink(
+                "text",
+                "text",
+                text,
+            )
+        )
+
         val redirectUrl = app.get(url, headers = headers).document
             .select("meta[http-equiv=refresh]")
             .attr("content")
             .substringAfter("url=")
+
+        callback.invoke(
+            newExtractorLink(
+                "redirectUrl",
+                "redirectUrl",
+                redirectUrl,
+            )
+        )
+
         loadExtractor(redirectUrl, "", subtitleCallback, callback)
     }
 }
