@@ -179,7 +179,7 @@ class CineSimklProvider: MainAPI() {
         } else if(type == "poster") {
             return "$baseUrl/posters/${url}_m.webp"
         } else if(type == "youtube") {
-            "https://img.youtube.com/vi/${url}/maxresdefault.jpg"
+            return "https://img.youtube.com/vi/${url}/maxresdefault.jpg"
         } else {
             return "$baseUrl/fanart/${url}_medium.webp"
         }
