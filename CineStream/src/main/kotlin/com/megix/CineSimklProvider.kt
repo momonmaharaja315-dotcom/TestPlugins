@@ -171,7 +171,7 @@ class CineSimklProvider: MainAPI() {
         url: String? = null,
         type: String,
      ): String? {
-        val baseUrl = "https://wsrv.nl/?url=https://simkl.in"
+        val baseUrl = "https://simkl.in"
         if(url == null) {
             return null
         } else if(type == "episode") {
