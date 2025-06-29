@@ -732,11 +732,27 @@ object CineStreamExtractors : CineStreamProvider() {
             )
         }?.id ?: return
 
+        callback.invoke(
+            newExtractorLink(
+                "id",
+                "id",
+                id
+            )
+        )
+
         val epJson = app.get("$StreamAsiaAPI/meta/$type/$id.json").text
         val epData = tryParseJson<StreamAsiaInfo>(epJson) ?: return
         val epId = epData.meta.videos.firstOrNull { video ->
             video.episode == episode ?: 1
         }?.id ?: return
+
+        callback.invoke(
+            newExtractorLink(
+                "epId",
+                "epId",
+                epId
+            )
+        )
 
         val streamJson = app.get("$StreamAsiaAPI/stream/$type/$id%3A%3A$epId.json").text
         val streamData = tryParseJson<StreamAsiaStreams>(streamJson)
@@ -1515,6 +1531,50 @@ object CineStreamExtractors : CineStreamProvider() {
         }
     }
 
+    suspend fun invokeAniXL(
+        url: String? = null,
+        episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        val document = app.get(url ?: return).document
+        val baseUrl = getBaseUrl(url)
+        val epLink = document.select("div.flex-wrap > a.btn")
+            .firstOrNull { it.text().trim() == "${episode ?: 1}" }
+            ?.attr("href")) ?: return
+        val epText = app.get(baseUrl + epLink).text
+        val types = listOf("dub", "sub", "raw")
+
+        types.forEach {
+            val Regex = """\"${it}","([^"]+)\"""".toRegex()
+            val epUrl = Regex.find(epText)?.groupValues?.get(1) ?: return@forEach
+            val isDub = if(it == "dub") "[DUB]" else "[SUB]"
+
+            callback.invoke(
+                newExtractorLink(
+                    "AniXL $isDub",
+                    "AniXL $isDub",
+                    epUrl,
+                    ExtractorLinkType.M3U8
+                ) {
+                    this.quality = 1080
+                }
+            )
+        }
+
+        val subtitleRegex = """\"([^"]+)","[^"]*","(https?://[^"]+\.vtt)\"""".toRegex()
+        val subtitles = subtitleRegex.findAll(epText)
+        .map { match ->
+            val (language, url) = match.destructured
+            subtitleCallback.invoke(
+                SubtitleFile(
+                    language,
+                    url
+                )
+            )
+        }
+    }
+
     suspend fun invokeAnimes(
         malId: Int? = null,
         aniId: Int? = null,
@@ -1530,6 +1590,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val zorotitle = malsync?.zoro?.firstNotNullOf { it.value["title"] }?.replace(":"," ")
         val animepahe = malsync?.animepahe?.firstNotNullOf { it.value["url"] }
         val animepahetitle = malsync?.animepahe?.firstNotNullOf { it.value["title"] }
+        val aniXL = malsync?.AniXL?.values?.firstNotNullOf { it["url"] }
 
         runAllAsync(
             {
@@ -1538,8 +1599,11 @@ object CineStreamExtractors : CineStreamProvider() {
             },
             {
                 val animepahe = malsync?.animepahe?.firstNotNullOfOrNull { it.value["url"] }
-                if (animepahe!=null)
+                if (animepahe != null)
                     invokeAnimepahe(animepahe, episode, subtitleCallback, callback)
+            },
+            {
+                invokeAniXL(aniXL, episode, subtitleCallback, callback)
             },
             {
                 invokeAnimez(zorotitle, episode, callback)
