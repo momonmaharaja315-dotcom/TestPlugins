@@ -1548,7 +1548,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val types = listOf("dub", "sub", "raw")
 
         types.forEach {
-            val Regex = """\"${it}","([^"]+)\"""".toRegex()
+            val Regex = """\"${it}\",\"([^\"]+)\"""".toRegex()
             val epUrl = Regex.find(epText)?.groupValues?.get(1) ?: return@forEach
             val isDub = if(it == "dub") "[DUB]" else "[SUB]"
 
@@ -1564,7 +1564,7 @@ object CineStreamExtractors : CineStreamProvider() {
             )
         }
 
-        val subtitleRegex = """\"([^"]+)","[^"]*","(https?:\/\/[^"]+\.vtt)\"""".toRegex()
+        val subtitleRegex = """\"([^\"]+)\",\"[^\"]*\",\"(https?:\/\/[^\"]+\.vtt)\"""".toRegex()
         val subtitles = subtitleRegex.findAll(epText)
         .map { match ->
             val (language, url) = match.destructured
