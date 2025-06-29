@@ -782,7 +782,7 @@ object CineStreamExtractors : CineStreamProvider() {
             subtitleData.subtitles.forEach {
                 subtitleCallback.invoke(
                     SubtitleFile(
-                        it.lang ?: "Unknown",
+                        "kisskh ${it.lang}",
                         it.url ?: return@forEach,
                     )
                 )
@@ -1564,7 +1564,7 @@ object CineStreamExtractors : CineStreamProvider() {
             )
         }
 
-        val subtitleRegex = """\"([^"]+)","[^"]*","(https?://[^"]+\.vtt)\"""".toRegex()
+        val subtitleRegex = """\"([^"]+)","[^"]*","(https?:\/\/[^"]+\.vtt)\"""".toRegex()
         val subtitles = subtitleRegex.findAll(epText)
         .map { match ->
             val (language, url) = match.destructured
