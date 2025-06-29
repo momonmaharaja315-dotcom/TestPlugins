@@ -1540,8 +1540,10 @@ object CineStreamExtractors : CineStreamProvider() {
         val document = app.get(url ?: return).document
         val baseUrl = getBaseUrl(url)
         val epLink = document.select("div.flex-wrap > a.btn")
-            .firstOrNull { it.text().trim() == "${episode ?: 1}" }
-            ?.attr("href")) ?: return
+            .firstOrNull { it?.text()?.trim() == "${episode ?: 1}" }
+            ?.attr("href")
+            ?.takeIf { it.isNotBlank() }
+            ?: return
         val epText = app.get(baseUrl + epLink).text
         val types = listOf("dub", "sub", "raw")
 
