@@ -754,7 +754,7 @@ object CineStreamExtractors : CineStreamProvider() {
             )
         )
 
-        val streamJson = app.get("$StreamAsiaAPI/stream/$type/$id%3A%3A$epId.json").text
+        val streamJson = app.get("$StreamAsiaAPI/stream/$type/$epId.json").text
         val streamData = tryParseJson<StreamAsiaStreams>(streamJson)
 
         if(streamData != null) {
@@ -775,7 +775,7 @@ object CineStreamExtractors : CineStreamProvider() {
             }
         }
 
-        val subtitleJson = app.get("$StreamAsiaAPI/subtitles/$type/$id%3A%3A$epId.json").text
+        val subtitleJson = app.get("$StreamAsiaAPI/subtitles/$type/$epId.json").text
         val subtitleData = tryParseJson<StreamAsiaSubtitles>(subtitleJson)
 
         if(subtitleData != null) {
@@ -1570,7 +1570,7 @@ object CineStreamExtractors : CineStreamProvider() {
             val (language, url) = match.destructured
             subtitleCallback.invoke(
                 SubtitleFile(
-                    language,
+                    "anixl $language",
                     url
                 )
             )
