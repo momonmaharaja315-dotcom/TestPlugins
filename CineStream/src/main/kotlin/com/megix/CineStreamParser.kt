@@ -9,20 +9,20 @@ data class HianimeResponses(
     @JsonProperty("link") val link: String? = null,
 )
 
-data class HianimeStreamResponse (
-  @JsonProperty("streams"  ) var streams  : ArrayList<HianimeStreams> = arrayListOf(),
-  @JsonProperty("tracks"   ) var tracks   : ArrayList<HianimeTracks>  = arrayListOf(),
+data class HianimeStreamResponse(
+    val streams: List<HianimeStream>,
+    val tracks: List<HianimeTrack>,
 )
 
-data class HianimeStreams (
-  @JsonProperty("url"  ) var url  : String? = null,
-  @JsonProperty("type" ) var type : String? = null
+data class HianimeStream(
+    val url: String,
+    val type: String,
 )
 
-data class HianimeTracks (
-  @JsonProperty("file"    ) var file    : String,
-  @JsonProperty("label"   ) var label   : String,
-  @JsonProperty("kind"    ) var kind    : String
+data class HianimeTrack(
+    val file: String,
+    val label: String?,
+    val kind: String,
 )
 
 //Cinemaluxe
