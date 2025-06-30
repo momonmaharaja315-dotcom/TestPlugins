@@ -2267,7 +2267,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val types = listOf("sub", "dub")
 
         types.forEach { t ->
-            val epData = app.get("$miruroAPI/api/sources?episodeId=$epId&provider=zoro&fetchType=embed&category=$t").parsedSafe<HianimeStreamResponses>() ?: return@forEach
+            val epData = app.get("$miruroAPI/api/sources?episodeId=$epId&provider=zoro&fetchType=embed&category=$t").parsedSafe<HianimeStreamResponse>() ?: return@forEach
             val streamUrl = epData.streams.firstOrNull()?.url
             if(streamUrl != null) {
                 M3u8Helper.generateM3u8(
