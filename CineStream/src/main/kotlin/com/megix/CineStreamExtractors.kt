@@ -2250,6 +2250,15 @@ object CineStreamExtractors : CineStreamProvider() {
     ) {
         val headers = mapOf("X-Requested-With" to "XMLHttpRequest")
         val id = url?.substringAfterLast("/") ?: return
+
+        callback.invoke(
+            newExtractorLink(
+                "id",
+                "id",
+                id,
+            )
+        )
+
         val epId = app.get(
             "$hianimeAPI/ajax/v2/episode/list/$id",
             headers = headers
@@ -2258,6 +2267,14 @@ object CineStreamExtractors : CineStreamProvider() {
         }?.select("div.ss-list a")
             ?.find { it.attr("data-number") == "${episode ?: 1}" }
             ?.attr("data-id") ?: return
+
+        callback.invoke(
+            newExtractorLink(
+                "epId",
+                "epId",
+                epId,
+            )
+        )
 
         val videoHeaders = mapOf(
             "Referer" to "https://megacloud.blog/",
