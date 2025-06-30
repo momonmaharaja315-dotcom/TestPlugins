@@ -415,12 +415,6 @@ data class MALSyncSites(
     @JsonProperty("animepahe") val animepahe: HashMap<String?, HashMap<String, String?>>? = hashMapOf(),
 )
 
-data class HianimeResponses(
-    @JsonProperty("html") val html: String? = null,
-    @JsonProperty("link") val link: String? = null,
-)
-
-
 data class MALSyncResponses(
     @JsonProperty("Sites") val sites: MALSyncSites? = null,
 )
