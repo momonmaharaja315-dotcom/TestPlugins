@@ -3,6 +3,28 @@ package com.megix
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.google.gson.annotations.SerializedName
 
+//Hianime
+data class HianimeResponses(
+    @JsonProperty("html") val html: String? = null,
+    @JsonProperty("link") val link: String? = null,
+)
+
+data class HianimeStreamResponse (
+  @JsonProperty("streams"  ) var streams  : ArrayList<HianimeStreams> = arrayListOf(),
+  @JsonProperty("tracks"   ) var tracks   : ArrayList<HianimeTracks>  = arrayListOf(),
+)
+
+data class HianimeStreams (
+  @JsonProperty("url"  ) var url  : String? = null,
+  @JsonProperty("type" ) var type : String? = null
+)
+
+data class HianimeTracks (
+  @JsonProperty("file"    ) var file    : String,
+  @JsonProperty("label"   ) var label   : String,
+  @JsonProperty("kind"    ) var kind    : String
+)
+
 //Cinemaluxe
 data class CinemaluxeItem(
     val token: String,
@@ -306,31 +328,6 @@ data class AnimiaResponse(
     val server1embedLink: String? = null,
     val server2embedLink: String? = null,
     val server3embedLink: String? = null,
-)
-
-data class HiAnime(
-    val subOrDub: String,
-    val episodes: List<HiAnimeEpisode>
-)
-
-data class HiAnimeEpisode(
-    val id: String,
-    val number: Int,
-    val isDubbed: Boolean,
-)
-data class HiAnimeMedia(
-    val sources: List<HiAnimeSource>,
-    val subtitles: List<HiAnimeSubtitle>
-)
-data class HiAnimeSource(
-    val url: String,
-    val isM3U8: Boolean,
-    val type: String,
-)
-
-data class HiAnimeSubtitle(
-    val url: String,
-    val lang: String
 )
 
 data class TorrentioResponse(val streams: List<TorrentioStream>)
