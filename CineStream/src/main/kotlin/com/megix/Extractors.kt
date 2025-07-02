@@ -118,7 +118,7 @@ class Kwik : ExtractorApi() {
             newExtractorLink(
                 name,
                 name,
-                m3u8,
+                "https://paheproxy.aniplaynow.live/fetch?url=$m3u8&ref=$mainUrl/",
                 type = ExtractorLinkType.M3U8
             )
         )
