@@ -49,18 +49,18 @@ object CineStreamExtractors : CineStreamProvider() {
 
             seasonLink.amap {
                 val doc = app.get(it).document
-                val epUrl = doc.select("div.series_btn > a")
+                var sourceUrl= doc.select("div.series_btn > a")
                     .getOrNull(episode-1)?.attr("href")
                     ?: return@amap
-                val sourceUrl = if("unblockedgames" in epUrl) bypassHrefli(epUrl) else epUrl
+                sourceUrl = if("unblockedgames" in sourceUrl) bypassHrefli(sourceUrl) ?: return@amap
                 loadSourceNameExtractor("Dramadrip", sourceUrl, "", subtitleCallback, callback)
             }
         } else {
             document.select("div.file-spoiler a").amap {
                 val doc = app.get(it.attr("href")).document
                 doc.select("a.wp-element-button").amap { source ->
-                    val epUrl = source.attr("href")
-                    val sourceUrl = if("unblockedgames" in epUrl) bypassHrefli(epUrl) else epUrl
+                    var sourceUrl = source.attr("href")
+                    sourceUrl = if("unblockedgames" in sourceUrl) bypassHrefli(sourceUrl) ?: return@amap
                     loadSourceNameExtractor(
                         "Dramadrip",
                         sourceUrl,
