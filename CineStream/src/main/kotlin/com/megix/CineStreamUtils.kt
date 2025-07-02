@@ -966,7 +966,7 @@ fun getGojoServers(jsonString: String): List<Pair<String, Boolean>> {
 }
 
 
-fun getGojoStreams(
+suspend fun getGojoStreams(
     json: String,
     lang: String,
     provider: String,
