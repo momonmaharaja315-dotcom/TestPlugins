@@ -309,7 +309,7 @@ object CineStreamExtractors : CineStreamProvider() {
         if (aniId == null) return
 
         val episodeNumber = episode ?: 1
-        val gojoAPI = gojoBaseAPI.replace("https://", "https://backend/")
+        val gojoAPI = gojoBaseAPI.replace("https://", "https://backend.")
         val headers = mapOf(
             "Referer" to gojoBaseAPI,
             "Origin" to gojoBaseAPI
