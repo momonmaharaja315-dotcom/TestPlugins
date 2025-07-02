@@ -324,6 +324,14 @@ object CineStreamExtractors : CineStreamProvider() {
             return
         }
 
+        callback.invoke(
+            newExtractorLink(
+                "epDetailsJson",
+                "epDetailsJson",
+                epDetailsJson
+            )
+        )
+
         val servers = try {
             getGojoServers(epDetailsJson)
         } catch (e: Exception) {
@@ -342,6 +350,13 @@ object CineStreamExtractors : CineStreamProvider() {
                             "$gojoAPI/api/anime/tiddies?server=$provider&id=$aniId&num=$episodeNumber&subType=sub",
                             headers = headers
                         ).text
+                        callback.invoke(
+                            newExtractorLink(
+                                "json",
+                                "json",
+                                json
+                            )
+                        )
                         getGojoStreams(json, "sub", provider, gojoBaseAPI, callback)
                     } catch (e: Exception) {
                         println("Error fetching sub stream for $provider: ${e.message}")
@@ -354,6 +369,13 @@ object CineStreamExtractors : CineStreamProvider() {
                                 "$gojoAPI/api/anime/tiddies?server=$provider&id=$aniId&num=$episodeNumber&subType=dub",
                                 headers = headers
                             ).text
+                            callback.invoke(
+                                newExtractorLink(
+                                    "json",
+                                    "json",
+                                    json
+                                )
+                            )
                             getGojoStreams(json, "dub", provider, gojoBaseAPI, callback)
                         } catch (e: Exception) {
                             println("Error fetching dub stream for $provider: ${e.message}")
