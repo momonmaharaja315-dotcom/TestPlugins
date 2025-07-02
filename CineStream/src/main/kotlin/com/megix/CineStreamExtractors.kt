@@ -60,7 +60,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 val doc = app.get(it.attr("href")).document
                 doc.select("a.wp-element-button").amap { source ->
                     val epUrl = source.attr("href")
-                    val sourceUrl = if(epUrl.contains("unblockedgames")) bypassHrefli(epUrl ) else epUrl
+                    val sourceUrl = if(epUrl.contains("unblockedgames")) bypassHrefli(epUrl) else epUrl
                     loadSourceNameExtractor(
                         "Dramadrip",
                         sourceUrl,
