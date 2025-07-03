@@ -172,7 +172,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     if(lang != null && fileUrl != null) {
                         subtitleCallback.invoke(
                             SubtitleFile(
-                                lang,
+                                "stremio $lang",
                                 fileUrl,
                             )
                         )
@@ -306,7 +306,7 @@ object CineStreamExtractors : CineStreamProvider() {
             val label = sub.getJSONObject("SubtitlesName").getString("name")
             subtitleCallback.invoke(
                 SubtitleFile(
-                    label,
+                    "Sudatchi $label",
                     file
                 )
             )
@@ -316,6 +316,7 @@ object CineStreamExtractors : CineStreamProvider() {
     suspend fun invokeGojo(
         aniId: Int? = null,
         episode: Int? = null,
+        subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
         if (aniId == null) return
@@ -354,7 +355,7 @@ object CineStreamExtractors : CineStreamProvider() {
                             "$gojoAPI/api/anime/tiddies?server=$provider&id=$aniId&num=$episodeNumber&subType=sub",
                             headers = headers
                         ).text
-                        getGojoStreams(json, "sub", provider, gojoBaseAPI, callback)
+                        getGojoStreams(json, "sub", provider, gojoBaseAPI, subtitleCallback ,callback)
                     } catch (e: Exception) {
                         println("Error fetching sub stream for $provider: ${e.message}")
                     }
@@ -366,7 +367,7 @@ object CineStreamExtractors : CineStreamProvider() {
                                 "$gojoAPI/api/anime/tiddies?server=$provider&id=$aniId&num=$episodeNumber&subType=dub",
                                 headers = headers
                             ).text
-                            getGojoStreams(json, "dub", provider, gojoBaseAPI, callback)
+                            getGojoStreams(json, "dub", provider, gojoBaseAPI, subtitleCallback ,callback)
                         } catch (e: Exception) {
                             println("Error fetching dub stream for $provider: ${e.message}")
                         }
@@ -439,7 +440,7 @@ object CineStreamExtractors : CineStreamProvider() {
                         }
                         subtitleCallback.invoke(
                             SubtitleFile(
-                                label,
+                                "Animeparadise $label",
                                 subUrl
                             )
                         )
@@ -572,7 +573,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 if (!file.isNullOrBlank() && !label.isNullOrBlank()) {
                     subtitleCallback.invoke(
                         SubtitleFile(
-                            label,
+                            "Primebox $label",
                             file
                         )
                     )
@@ -1236,7 +1237,7 @@ object CineStreamExtractors : CineStreamProvider() {
         data.subtitles.map {
             subtitleCallback.invoke(
                 SubtitleFile(
-                    it.label,
+                    "Tom ${it.label}",
                     it.file,
                 )
             )
@@ -1652,7 +1653,7 @@ object CineStreamExtractors : CineStreamProvider() {
             val (language, subUrl) = match.destructured
             subtitleCallback.invoke(
                 SubtitleFile(
-                    language,
+                    "Anixl $language",
                     subUrl
                 )
             )
@@ -2270,7 +2271,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val subtitles = document.select("track").map {
             subtitleCallback.invoke(
                 SubtitleFile(
-                    it.attr("label"),
+                    "Anizone ${it.attr("label")}",
                     it.attr("src")
                 )
             )

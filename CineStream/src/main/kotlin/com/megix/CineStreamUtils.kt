@@ -971,6 +971,7 @@ suspend fun getGojoStreams(
     lang: String,
     provider: String,
     gojoBaseAPI: String,
+    subtitleCallback: (ExtractorLink) -> Unit,
     callback: (ExtractorLink) -> Unit
 ) {
     try {
@@ -998,6 +999,19 @@ suspend fun getGojoStreams(
                     this.quality = quality ?: Qualities.P1080.value
                     this.referer = gojoBaseAPI
                 }
+            )
+        }
+
+        val subtitles = jsonObject.optJSONArray("subtitles") ?: return
+        subtitles.forEach {
+            val url = it.optString("url", null) ?: return@forEach
+            val lang = it.optString("lang", null) ?: return@forEach
+
+            subtitleCallback.invoke(
+                SubtitleFile(
+                    "Gojo $lang",
+                    url
+                )
             )
         }
     } catch (e: Exception) {
@@ -1055,7 +1069,7 @@ suspend fun getSoaperLinks(
         val subUrl = soaperAPI + path
         subtitleCallback.invoke(
             SubtitleFile(
-                name,
+                "Soaper $name",
                 subUrl
             )
         )
