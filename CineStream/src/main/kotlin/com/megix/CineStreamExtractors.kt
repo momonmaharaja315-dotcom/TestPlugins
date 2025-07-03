@@ -1722,6 +1722,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 if(origin == "imdb") invokeGojo(
                     aniId,
                     episode,
+                    subtitleCallback,
                     callback
                 )
             },

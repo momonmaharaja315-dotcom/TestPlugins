@@ -971,7 +971,7 @@ suspend fun getGojoStreams(
     lang: String,
     provider: String,
     gojoBaseAPI: String,
-    subtitleCallback: (ExtractorLink) -> Unit,
+    subtitleCallback: (SubtitleFile) -> Unit,
     callback: (ExtractorLink) -> Unit
 ) {
     try {
