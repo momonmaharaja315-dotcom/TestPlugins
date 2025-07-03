@@ -1003,10 +1003,11 @@ suspend fun getGojoStreams(
         }
 
         val subtitles = jsonObject.optJSONArray("subtitles") ?: return
-        subtitles.forEach {
-            val url = it.optString("url", null) ?: return@forEach
-            val lang = it.optString("lang", null) ?: return@forEach
 
+        for (i in 0 until subtitles.length()) {
+            val item = subtitles.optJSONObject(i) ?: continue
+            val url = item.optString("url", null) ?: continue
+            val lang = item.optString("lang", null) ?: continue
             subtitleCallback.invoke(
                 SubtitleFile(
                     "Gojo $lang",
