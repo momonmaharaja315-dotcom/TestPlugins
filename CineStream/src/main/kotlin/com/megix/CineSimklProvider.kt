@@ -380,7 +380,8 @@ class CineSimklProvider: MainAPI() {
             }
 
             if(isAnime) {
-                return newAnimeLoadResponse("${en_title}", url, TvType.Anime, episodes) {
+                return newAnimeLoadResponse("${en_title}", url, TvType.Anime) {
+                    addEpisodes(DubStatus.Subbed, episodes)
                     this.posterUrl = getPosterUrl(json.poster, "poster")
                     this.backgroundPosterUrl = backgroundPosterUrl
                     this.plot = json.overview
