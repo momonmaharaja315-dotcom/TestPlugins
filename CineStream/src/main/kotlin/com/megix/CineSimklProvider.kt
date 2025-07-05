@@ -106,13 +106,6 @@ class CineSimklProvider: MainAPI() {
             .firstOrNull() ?: "" // Take the first numeric ID found
     }
 
-    private fun getType(url: String): String = when {
-        "movie" in url || "movies" in url -> "movies"
-        "anime" in url -> "anime"
-        else -> "tv"
-    }
-
-
    private suspend fun extractImdbInfo(
         kitsuId: Int? = null,
         season: Int? = null,
@@ -278,11 +271,10 @@ class CineSimklProvider: MainAPI() {
 
     override suspend fun load(url: String): LoadResponse {
         val simklId = getSimklId(url)
-        var tvType = getType(url)
-        val jsonString = app.get("$apiUrl/$tvType/$simklId?extended=full", headers = headers).text
+        val jsonString = app.get("$apiUrl/tv/$simklId?extended=full", headers = headers).text
         val json = parseJson<SimklResponse>(jsonString)
         val genres = json.genres?.map { it.toString() }
-        tvType = json.type ?: tvType
+        val tvType = json.type ?: ""
         val country = json.country ?: ""
         val isAnime = if(tvType == "anime") true else false
         val isBollywood = if(country == "IN") true else false
@@ -313,7 +305,7 @@ class CineSimklProvider: MainAPI() {
 
         val recommendations = relations + users_recommendations
 
-        if (tvType == "movies" || (tvType == "anime" && json.anime_type?.equals("movie") == true)) {
+        if (tvType == "movie" || (tvType == "anime" && json.anime_type?.equals("movie") == true)) {
             val data = LoadLinksData(
                 json.title,
                 en_title,
@@ -347,7 +339,7 @@ class CineSimklProvider: MainAPI() {
                 this.addAniListId(json.ids?.anilist?.toIntOrNull())
             }
         } else {
-            val epsJson = app.get("$apiUrl/$tvType/episodes/$simklId?extended=full", headers = headers).text
+            val epsJson = app.get("$apiUrl/tv/episodes/$simklId?extended=full", headers = headers).text
             val eps = parseJson<Array<Episodes>>(epsJson)
             val episodes = eps.filter { it.type != "special" }.map {
                 newEpisode(
@@ -380,35 +372,19 @@ class CineSimklProvider: MainAPI() {
                 }
             }
 
-            if(isAnime) {
-                return newAnimeLoadResponse("${en_title}", url, TvType.Anime) {
-                    addEpisodes(DubStatus.Subbed, episodes)
-                    this.posterUrl = getPosterUrl(json.poster, "poster")
-                    this.backgroundPosterUrl = backgroundPosterUrl
-                    this.plot = json.overview
-                    this.tags = genres
-                    this.duration = json.runtime?.toIntOrNull()
-                    this.rating = rating.toString().toRatingInt()
-                    this.year = json.year
-                    this.recommendations = recommendations
-                    this.contentRating = json.certification
-                    this.addSimklId(simklId.toInt())
-                    this.addAniListId(json.ids?.anilist?.toIntOrNull())
-                }
-            } else {
-                return newTvSeriesLoadResponse("${en_title}", url, TvType.TvSeries, episodes) {
-                    this.posterUrl = getPosterUrl(json.poster, "poster")
-                    this.backgroundPosterUrl = backgroundPosterUrl
-                    this.plot = json.overview
-                    this.tags = genres
-                    this.duration = json.runtime?.toIntOrNull()
-                    this.rating = rating.toString().toRatingInt()
-                    this.year = json.year
-                    this.recommendations = recommendations
-                    this.contentRating = json.certification
-                    this.addSimklId(simklId.toInt())
-                    this.addAniListId(json.ids?.anilist?.toIntOrNull())
-                }
+            return newAnimeLoadResponse("${en_title}", url, if(tvType == "anime") TvType.Anime else TvType.TvSeries) {
+                addEpisodes(DubStatus.Subbed, episodes)
+                this.posterUrl = getPosterUrl(json.poster, "poster")
+                this.backgroundPosterUrl = backgroundPosterUrl
+                this.plot = json.overview
+                this.tags = genres
+                this.duration = json.runtime?.toIntOrNull()
+                this.rating = rating.toString().toRatingInt()
+                this.year = json.year
+                this.recommendations = recommendations
+                this.contentRating = json.certification
+                this.addSimklId(simklId.toInt())
+                this.addAniListId(json.ids?.anilist?.toIntOrNull())
             }
         }
     }
@@ -502,6 +478,22 @@ class CineSimklProvider: MainAPI() {
         } catch (e: Exception) {
             Pair(res.en_title, res.tmdbId)
         }
+
+        callback.invoke(
+            newExtractorLink(
+                "res",
+                "res",
+                res.toString(),
+            )
+        )
+
+        callback.invoke(
+            newExtractorLink(
+                "imdb",
+                "imdb",
+                "imdb: $imdbId  tmdb: $tmdbId  season: $imdbSeason  episode: $imdbEpisode  title: $imdbTitle",
+            )
+        )
 
         runAllAsync(
             { invokeAnimes(res.malId, res.anilistId, res.episode, res.year, "kitsu", subtitleCallback, callback) },
