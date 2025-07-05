@@ -167,12 +167,12 @@ object CineStreamExtractors : CineStreamProvider() {
                 val subtitleResponse = gson.fromJson(json, StremioSubtitleResponse::class.java)
 
                 subtitleResponse.subtitles.forEach {
-                    val lang = it.lang_code ?: it.lang
+                    val lang = it.lang ?: it.lang_code
                     val fileUrl = it.url
                     if(lang != null && fileUrl != null) {
                         subtitleCallback.invoke(
                             SubtitleFile(
-                                "stremio $lang",
+                                lang,
                                 fileUrl,
                             )
                         )
@@ -306,7 +306,7 @@ object CineStreamExtractors : CineStreamProvider() {
             val label = sub.getJSONObject("SubtitlesName").getString("name")
             subtitleCallback.invoke(
                 SubtitleFile(
-                    "Sudatchi $label",
+                    label,
                     file
                 )
             )
@@ -440,7 +440,7 @@ object CineStreamExtractors : CineStreamProvider() {
                         }
                         subtitleCallback.invoke(
                             SubtitleFile(
-                                "Animeparadise $label",
+                                label,
                                 subUrl
                             )
                         )
@@ -573,7 +573,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 if (!file.isNullOrBlank() && !label.isNullOrBlank()) {
                     subtitleCallback.invoke(
                         SubtitleFile(
-                            "Primebox $label",
+                            label,
                             file
                         )
                     )
@@ -863,9 +863,10 @@ object CineStreamExtractors : CineStreamProvider() {
 
         if(subtitleData != null) {
             subtitleData.subtitles.forEach {
+                val lang = it.lang ?: "und"
                 subtitleCallback.invoke(
                     SubtitleFile(
-                        it.lang ?: "und",
+                        lang.replace("(OpenSubs) ", ""),
                         it.url ?: return@forEach,
                     )
                 )
@@ -1237,7 +1238,7 @@ object CineStreamExtractors : CineStreamProvider() {
         data.subtitles.map {
             subtitleCallback.invoke(
                 SubtitleFile(
-                    "Tom ${it.label}",
+                    it.label,
                     it.file,
                 )
             )
@@ -1653,7 +1654,7 @@ object CineStreamExtractors : CineStreamProvider() {
             val (language, subUrl) = match.destructured
             subtitleCallback.invoke(
                 SubtitleFile(
-                    "Anixl $language",
+                    language,
                     subUrl
                 )
             )
@@ -2272,7 +2273,7 @@ object CineStreamExtractors : CineStreamProvider() {
         val subtitles = document.select("track").map {
             subtitleCallback.invoke(
                 SubtitleFile(
-                    "Anizone ${it.attr("label")}",
+                    it.attr("label"),
                     it.attr("src")
                 )
             )

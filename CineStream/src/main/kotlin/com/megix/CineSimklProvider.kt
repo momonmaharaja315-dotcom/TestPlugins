@@ -106,6 +106,13 @@ class CineSimklProvider: MainAPI() {
             .firstOrNull() ?: "" // Take the first numeric ID found
     }
 
+    private fun getType(url: String): String = when {
+        "movie" in url || "movies" in url -> "movies"
+        "anime" in url -> "anime"
+        else -> "tv"
+    }
+
+
    private suspend fun extractImdbInfo(
         kitsuId: Int? = null,
         season: Int? = null,
@@ -176,7 +183,7 @@ class CineSimklProvider: MainAPI() {
         if(url == null) {
             return null
         } else if(type == "episode") {
-            return "$baseUrl/episodes/${url}_c.webp"
+            return "$baseUrl/episodes/${url}_w.webp"
         } else if(type == "poster") {
             return "$baseUrl/posters/${url}_m.webp"
         } else if(type == "youtube") {
@@ -271,10 +278,10 @@ class CineSimklProvider: MainAPI() {
 
     override suspend fun load(url: String): LoadResponse {
         val simklId = getSimklId(url)
-        val jsonString = app.get("$apiUrl/tv/$simklId?extended=full", headers = headers).text
+        val tvType = getType(url)
+        val jsonString = app.get("$apiUrl/$tvType/$simklId?extended=full", headers = headers).text
         val json = parseJson<SimklResponse>(jsonString)
         val genres = json.genres?.map { it.toString() }
-        val tvType = json.type ?: ""
         val country = json.country ?: ""
         val isAnime = if(tvType == "anime") true else false
         val isBollywood = if(country == "IN") true else false
@@ -339,7 +346,7 @@ class CineSimklProvider: MainAPI() {
                 this.addAniListId(json.ids?.anilist?.toIntOrNull())
             }
         } else {
-            val epsJson = app.get("$apiUrl/tv/episodes/$simklId?extended=full", headers = headers).text
+            val epsJson = app.get("$apiUrl/$tvType/episodes/$simklId?extended=full", headers = headers).text
             val eps = parseJson<Array<Episodes>>(epsJson)
             val episodes = eps.filter { it.type != "special" }.map {
                 newEpisode(
@@ -367,23 +374,39 @@ class CineSimklProvider: MainAPI() {
                     this.season = it.season
                     this.episode = it.episode
                     this.description = it.description
-                    this.posterUrl = getPosterUrl(it.img, "episode") ?: "https://wsrv.nl/?url=https://simkl.in/update_m_alert.jpg"
+                    this.posterUrl = getPosterUrl(it.img, "episode") ?: "https://simkl.in/update_m_alert.jpg"
                     addDate(it.date)
                 }
             }
 
-            return newTvSeriesLoadResponse("${en_title}", url,if(isAnime) TvType.Anime else TvType.TvSeries, episodes) {
-                this.posterUrl = getPosterUrl(json.poster, "poster")
-                this.backgroundPosterUrl = backgroundPosterUrl
-                this.plot = json.overview
-                this.tags = genres
-                this.duration = json.runtime?.toIntOrNull()
-                this.rating = rating.toString().toRatingInt()
-                this.year = json.year
-                this.recommendations = recommendations
-                this.contentRating = json.certification
-                this.addSimklId(simklId.toInt())
-                this.addAniListId(json.ids?.anilist?.toIntOrNull())
+            if(isAnime) {
+                return newAnimeLoadResponse("${en_title}", url, TvType.Anime, episodes) {
+                    this.posterUrl = getPosterUrl(json.poster, "poster")
+                    this.backgroundPosterUrl = backgroundPosterUrl
+                    this.plot = json.overview
+                    this.tags = genres
+                    this.duration = json.runtime?.toIntOrNull()
+                    this.rating = rating.toString().toRatingInt()
+                    this.year = json.year
+                    this.recommendations = recommendations
+                    this.contentRating = json.certification
+                    this.addSimklId(simklId.toInt())
+                    this.addAniListId(json.ids?.anilist?.toIntOrNull())
+                }
+            } else {
+                return newTvSeriesLoadResponse("${en_title}", url, TvType.TvSeries, episodes) {
+                    this.posterUrl = getPosterUrl(json.poster, "poster")
+                    this.backgroundPosterUrl = backgroundPosterUrl
+                    this.plot = json.overview
+                    this.tags = genres
+                    this.duration = json.runtime?.toIntOrNull()
+                    this.rating = rating.toString().toRatingInt()
+                    this.year = json.year
+                    this.recommendations = recommendations
+                    this.contentRating = json.certification
+                    this.addSimklId(simklId.toInt())
+                    this.addAniListId(json.ids?.anilist?.toIntOrNull())
+                }
             }
         }
     }

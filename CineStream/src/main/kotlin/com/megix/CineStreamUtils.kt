@@ -1010,7 +1010,7 @@ suspend fun getGojoStreams(
             val lang = item.optString("lang", null) ?: continue
             subtitleCallback.invoke(
                 SubtitleFile(
-                    "Gojo $lang",
+                    lang,
                     url
                 )
             )
@@ -1070,7 +1070,7 @@ suspend fun getSoaperLinks(
         val subUrl = soaperAPI + path
         subtitleCallback.invoke(
             SubtitleFile(
-                "Soaper $name",
+                name,
                 subUrl
             )
         )
