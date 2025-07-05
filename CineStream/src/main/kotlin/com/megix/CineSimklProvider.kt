@@ -278,10 +278,11 @@ class CineSimklProvider: MainAPI() {
 
     override suspend fun load(url: String): LoadResponse {
         val simklId = getSimklId(url)
-        val tvType = getType(url)
+        var tvType = getType(url)
         val jsonString = app.get("$apiUrl/$tvType/$simklId?extended=full", headers = headers).text
         val json = parseJson<SimklResponse>(jsonString)
         val genres = json.genres?.map { it.toString() }
+        tvType = json.type ?: tvType
         val country = json.country ?: ""
         val isAnime = if(tvType == "anime") true else false
         val isBollywood = if(country == "IN") true else false
