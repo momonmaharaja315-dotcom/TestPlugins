@@ -289,22 +289,23 @@ open class CineStreamProvider : MainAPI() {
         id = if(!isKitsu) movieData?.meta?.imdb_id.toString() else id
         var description = movieData?.meta?.description
 
-        val actors =cmovieData?.meta?.cast?.mapNotNull { name ->
+        val actors = movieData?.meta?.cast?.mapNotNull { name ->
             ActorData(
                 actor = Actor(name, null),
                 roleString = null
             )
         } ?: emptyList()
 
+        val country = movieData?.meta?.country ?: ""
         val genre = movieData?.meta?.genre ?: movieData?.meta?.genres
         val background = movieData?.meta?.background
         val isCartoon = genre.any { it.contains("Animation", true) }
-        var isAnime = (movieData?.meta?.country?.contains("Japan", true) ||
-            movieData?.meta?.country?.contains("China", true)) && isCartoon
+        var isAnime = (country.contains("Japan", true) ||
+            country.contains("China", true)) && isCartoon
         isAnime = if(isKitsu) true else isAnime
-        val isBollywood = movieData?.meta?.country.toString().contains("India", true)
-        val isAsian = (movieData?.meta?.country?.contains("Korea", true) ||
-                movieData?.meta?.country?.contains("China", true)) && !isAnime
+        val isBollywood = country.contains("India", true)
+        val isAsian = (country.contains("Korea", true) ||
+                country.contains("China", true)) && !isAnime
 
         if(tvtype == "movie") {
             val data = LoadLinksData(
