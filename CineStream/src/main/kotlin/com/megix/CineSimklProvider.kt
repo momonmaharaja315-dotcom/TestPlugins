@@ -312,7 +312,7 @@ class CineSimklProvider: MainAPI() {
 
         val recommendations = relations + users_recommendations
 
-        if (tvType == "movie" || (tvType == "anime" && json.anime_type?.equals("movie") == true)) {
+        if (tvType == "movies" || (tvType == "anime" && json.anime_type?.equals("movie") == true)) {
             val data = LoadLinksData(
                 json.title,
                 en_title,
