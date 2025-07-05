@@ -297,7 +297,7 @@ open class CineStreamProvider : MainAPI() {
         } ?: emptyList()
 
         val country = movieData?.meta?.country ?: ""
-        val genre = movieData?.meta?.genre ?: movieData?.meta?.genres
+        val genre = movieData?.meta?.genre ?: movieData?.meta?.genres ?: emptyList()
         val background = movieData?.meta?.background
         val isCartoon = genre.any { it.contains("Animation", true) }
         var isAnime = (country.contains("Japan", true) ||
