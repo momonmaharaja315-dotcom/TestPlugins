@@ -1673,10 +1673,9 @@ object CineStreamExtractors : CineStreamProvider() {
         val malsync = app.get("$malsyncAPI/mal/anime/${malId ?: return}")
             .parsedSafe<MALSyncResponses>()?.sites
 
-        val zoro = malsync?.zoro
-        val zoroIds = zoro?.keys?.toList().orEmpty()
-        val zorotitle = zoro?.values?.firstNotNullOfOrNull { it["title"] }?.replace(":", " ")
-        val hianimeurl = zoroIds?.firstNotNullOf { it.value["url"] }
+        // val zoroIds = malsync?.zoro?.keys?.map { it }
+        val zorotitle = malsync?.zoro?.firstNotNullOf { it.value["title"] }?.replace(":"," ")
+        val hianimeurl = malsync?.zoro?.firstNotNullOf { it.value["url"] }
         callback.invoke(
             newExtractorLink(
                 "hianimeurl",
