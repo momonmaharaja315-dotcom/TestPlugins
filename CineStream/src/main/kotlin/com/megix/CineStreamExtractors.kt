@@ -1678,6 +1678,14 @@ object CineStreamExtractors : CineStreamProvider() {
         val animepahetitle = malsync?.animepahe?.firstNotNullOf { it.value["title"] }
         val aniXL = malsync?.AniXL?.values?.firstNotNullOf { it["url"] }
 
+        callback.invoke(
+            newExtractorLink(
+                "MAL",
+                "MAL",
+                malsync.toString(),
+            )
+        )
+
         runAllAsync(
             {
                 val hianimeurl=malsync?.zoro?.firstNotNullOf { it.value["url"] }
@@ -2512,7 +2520,8 @@ object CineStreamExtractors : CineStreamProvider() {
         year: Int? = null,
         callback: (ExtractorLink) -> Unit
     ) {
-        val fixTitle = title?.createPlayerSlug().orEmpty()
+        if (title.isNullOrBlank()) return
+        val fixTitle = title.createPlayerSlug().orEmpty()
         val fixQuery = (season?.let { "$fixTitle S${"%02d".format(it)}E${"%02d".format(episode)}" } ?: "$fixTitle $year").replace(" ","+") // It is necessary for query with year otherwise it will give wrong movie
         val allLinks = HashSet<Player4uLinkData>()
 
