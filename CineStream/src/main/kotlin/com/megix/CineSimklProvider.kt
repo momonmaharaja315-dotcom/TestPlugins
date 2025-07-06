@@ -488,6 +488,14 @@ class CineSimklProvider: MainAPI() {
             imdbEpisode = res.episode
         }
 
+        callback.invoke(
+            newExtractorLink(
+                "check",
+                "check",
+                "resImdbId = ${res.imdbId} resSeason = ${res.season} resEpisode = ${res.episode} imdbId: $imdbId imdbSeason: $imdbSeason imdbEpisode: $imdbEpisode",
+            )
+        )
+
         val (imdbTitle, tmdbId) = try {
             extractNameAndTMDBId(imdbId) ?: Pair(res.en_title, res.tmdbId)
         } catch (e: Exception) {
