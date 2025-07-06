@@ -1670,14 +1670,15 @@ object CineStreamExtractors : CineStreamProvider() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ) {
+        callback.invoke(
+            newExtractorLink(
+                "malId",
+                "malId",
+                malId.toString(),
+            )
+        )
         val malsync = app.get("$malsyncAPI/mal/anime/${malId ?: return}")
             .parsedSafe<MALSyncResponses>()?.sites
-        val zoroIds = malsync?.zoro?.keys?.map { it }
-        val zorotitle = malsync?.zoro?.firstNotNullOf { it.value["title"] }?.replace(":"," ")
-        val animepahe = malsync?.animepahe?.firstNotNullOf { it.value["url"] }
-        val animepahetitle = malsync?.animepahe?.firstNotNullOf { it.value["title"] }
-        val aniXL = malsync?.AniXL?.values?.firstNotNullOf { it["url"] }
-
         callback.invoke(
             newExtractorLink(
                 "MAL",
@@ -1685,6 +1686,11 @@ object CineStreamExtractors : CineStreamProvider() {
                 malsync.toString(),
             )
         )
+        val zoroIds = malsync?.zoro?.keys?.map { it }
+        val zorotitle = malsync?.zoro?.firstNotNullOf { it.value["title"] }?.replace(":"," ")
+        val animepahe = malsync?.animepahe?.firstNotNullOf { it.value["url"] }
+        val animepahetitle = malsync?.animepahe?.firstNotNullOf { it.value["title"] }
+        val aniXL = malsync?.AniXL?.values?.firstNotNullOf { it["url"] }
 
         runAllAsync(
             {
