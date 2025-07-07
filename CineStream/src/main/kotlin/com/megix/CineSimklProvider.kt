@@ -71,10 +71,7 @@ class CineSimklProvider: MainAPI() {
     override var mainUrl = "https://simkl.com"
     override var supportedTypes = setOf(
         TvType.Movie,
-        TvType.TvSeries,
-        TvType.Anime,
-        TvType.AsianDrama,
-        TvType.Torrent
+        TvType.TvSeries
     )
     override var lang = "en"
     override val hasMainPage = true
