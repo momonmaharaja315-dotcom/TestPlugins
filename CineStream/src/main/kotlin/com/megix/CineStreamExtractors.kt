@@ -2531,16 +2531,16 @@ object CineStreamExtractors : CineStreamProvider() {
                     }
                 )
 
-                if(page == 0 && season == null && allLinks.size == 0)
-                {
-                    document = app.get("$Player4uApi/embed?key=${fixTitle.replace(" ","+")}", timeout = 20).document
-                    allLinks.addAll(
-                        document.select(".playbtnx").map {
-                            Player4uLinkData(name = it.text(), url = it.attr("onclick"))
-                        }
-                    )
-                    break
-                }
+                // if(page == 0 && season == null && allLinks.size == 0)
+                // {
+                //     document = app.get("$Player4uApi/embed?key=${fixTitle.replace(" ","+")}", timeout = 20).document
+                //     allLinks.addAll(
+                //         document.select(".playbtnx").map {
+                //             Player4uLinkData(name = it.text(), url = it.attr("onclick"))
+                //         }
+                //     )
+                //     break
+                // }
 
                 nextPageExists = document.select("div a").any { it.text().contains("Next", true) }
             } catch (e: Exception) {}
