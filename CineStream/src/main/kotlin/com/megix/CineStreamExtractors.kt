@@ -2571,7 +2571,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     callback
                 )
 
-            } catch (_: Exception) { continue }
+            } catch (_: Exception) { }
         }
     }
 
