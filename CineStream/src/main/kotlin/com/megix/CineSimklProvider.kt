@@ -451,7 +451,7 @@ class CineSimklProvider: MainAPI() {
             { invokePhoenix(res.title, res.imdbId, res.tmdbId, res.year, res.season, res.episode, callback) },
             { invokeTom(res.tmdbId, res.season, res.episode, callback, subtitleCallback) },
             { invokePrimenet(res.tmdbId, res.season, res.episode, callback) },
-            { invokePlayer4U(res.title, res.season, res.episode, res.airedYear, callback) },
+            { invokePlayer4U(res.title, res.season, res.episode, res.year, callback) },
             { invokeThepiratebay(res.imdbId, res.season, res.episode, callback) },
             // { if (!res.isAnime) invokeVidJoy(res.tmdbId, res.season, res.episode, callback) },
             { invokeProtonmovies(res.imdbId, res.season, res.episode, subtitleCallback, callback) },
@@ -485,14 +485,6 @@ class CineSimklProvider: MainAPI() {
             imdbEpisode = res.episode
         }
 
-        callback.invoke(
-            newExtractorLink(
-                "check",
-                "check",
-                "resImdbId = ${res.imdbId} resSeason = ${res.season} resEpisode = ${res.episode} imdbId: $imdbId imdbSeason: $imdbSeason imdbEpisode: $imdbEpisode",
-            )
-        )
-
         val (imdbTitle, tmdbId) = try {
             extractNameAndTMDBId(imdbId) ?: Pair(res.en_title, res.tmdbId)
         } catch (e: Exception) {
@@ -524,7 +516,7 @@ class CineSimklProvider: MainAPI() {
             { invokePhoenix(imdbTitle, imdbId, tmdbId, res.year, imdbSeason, imdbEpisode, callback) },
             { invokeTom(tmdbId, imdbSeason, imdbEpisode, callback, subtitleCallback) },
             { invokePrimenet(tmdbId, imdbSeason, imdbEpisode, callback) },
-            { invokePlayer4U(imdbTitle, imdbSeason, imdbEpisode, res.airedYear, callback) },
+            { invokePlayer4U(imdbTitle, imdbSeason, imdbEpisode, res.year, callback) },
             { invokeThepiratebay(imdbId, imdbSeason, imdbEpisode, callback) },
             { invokeProtonmovies(imdbId, imdbSeason, imdbEpisode, subtitleCallback, callback) },
             { invokeAllmovieland(imdbId, imdbSeason, imdbEpisode, callback) },
