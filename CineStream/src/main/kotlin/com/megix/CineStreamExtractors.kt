@@ -2512,7 +2512,7 @@ object CineStreamExtractors : CineStreamProvider() {
         callback: (ExtractorLink) -> Unit
     ) {
         if (title.isNullOrBlank()) return
-        if(season = null && year == null) return
+        if(season == null && year == null) return
 
         val fixTitle = title.createPlayerSlug().orEmpty()
         val fixQuery = (season?.let { "$fixTitle S${"%02d".format(it)}E${"%02d".format(episode)}" } ?: "$fixTitle $year").replace(" ","+") // It is necessary for query with year otherwise it will give wrong movie
