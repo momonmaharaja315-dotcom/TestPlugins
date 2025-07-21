@@ -124,6 +124,13 @@ class PrimeVideoMirrorProvider : MainAPI() {
         val rating = data.match?.replace("IMDb ", "")?.toRatingInt()
         val runTime = convertRuntimeToMinutes(data.runtime.toString())
 
+        val suggest = data.suggest?.map {
+            newAnimeSearchResponse("", Id(it.id).toJson()) {
+                this.posterUrl = "https://img.nfmirrorcdn.top/pv/900/$id.jpg"
+                posterHeaders = mapOf("Referer" to "$mainUrl/tv/home")
+            }
+        }
+
         if (data.episodes.first() == null) {
             episodes.add(newEpisode(LoadData(title, id)) {
                 name = data.title
@@ -160,6 +167,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
             this.rating = rating
             this.duration = runTime
             this.contentRating = data.ua
+            this.recommendations = suggest
         }
     }
 
