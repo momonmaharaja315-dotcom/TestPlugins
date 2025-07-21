@@ -38,7 +38,7 @@ class DisneyMirrorProvider : MainAPI() {
         cookie_value = if(cookie_value.isEmpty()) bypass(mainUrl) else cookie_value
         val cookies = mapOf(
             "t_hash_t" to cookie_value,
-            "ott" to "dp",
+            "ott" to "hs",
             "hd" to "on"
         )
         val document = app.get(
@@ -76,7 +76,7 @@ class DisneyMirrorProvider : MainAPI() {
         val cookies = mapOf(
             "t_hash_t" to cookie_value,
             "hd" to "on",
-            "ott" to "dp"
+            "ott" to "hs"
         )
         val url = "$mainUrl/mobile/hs/search.php?s=$query&t=${APIHolder.unixTime}"
         val data = app.get(url, referer = "$mainUrl/tv/home", cookies = cookies).parsed<SearchData>()
@@ -95,7 +95,7 @@ class DisneyMirrorProvider : MainAPI() {
         val cookies = mapOf(
             "t_hash_t" to cookie_value,
             "hd" to "on",
-            "ott" to "dp"
+            "ott" to "hs"
         )
         val data = app.get(
             "$mainUrl/mobile/hs/post.php?id=$id&t=${APIHolder.unixTime}",
@@ -167,7 +167,7 @@ class DisneyMirrorProvider : MainAPI() {
         val cookies = mapOf(
             "t_hash_t" to cookie_value,
             "hd" to "on",
-            "ott" to "dp"
+            "ott" to "hs"
         )
         var pg = page
         while (true) {
@@ -202,7 +202,7 @@ class DisneyMirrorProvider : MainAPI() {
         val cookies = mapOf(
             "t_hash_t" to cookie_value,
             "hd" to "on",
-            "ott" to "dp"
+            "ott" to "hs"
         )
         val playlist = app.get(
             "$mainUrl/mobile/hs/playlist.php?id=$id&t=$title&tm=${APIHolder.unixTime}",
