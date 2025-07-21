@@ -64,7 +64,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
         return HomePageList(
             name,
             items,
-            isHorizontalImages = true
+            isHorizontalImages = false
         )
     }
 
