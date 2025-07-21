@@ -70,7 +70,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
 
     private fun toSearchResult(id: String): SearchResponse? {
         return newAnimeSearchResponse("", Id(id).toJson()) {
-            this.posterUrl = "https://imgcdn.media/pv/341/$id.jpg"
+            this.posterUrl = "https://imgcdn.media/pv/v/$id.jpg"
             posterHeaders = mapOf("Referer" to "$mainUrl/tv/home")
         }
     }
@@ -87,7 +87,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
 
         return data.searchResult.map {
             newAnimeSearchResponse(it.t, Id(it.id).toJson()) {
-                posterUrl = "https://imgcdn.media/pv/341/$id.jpg"
+                posterUrl = "https://imgcdn.media/pv/v/$id.jpg"
                 posterHeaders = mapOf("Referer" to "$mainUrl/tv/home")
             }
         }
@@ -126,7 +126,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
 
         val suggest = data.suggest?.map {
             newAnimeSearchResponse("", Id(it.id).toJson()) {
-                this.posterUrl = "https://imgcdn.media/pv/341/$id.jpg"
+                this.posterUrl = "https://imgcdn.media/pv/v/${it.id}.jpg"
                 posterHeaders = mapOf("Referer" to "$mainUrl/tv/home")
             }
         }
@@ -158,7 +158,7 @@ class PrimeVideoMirrorProvider : MainAPI() {
         val type = if (data.episodes.first() == null) TvType.Movie else TvType.TvSeries
 
         return newTvSeriesLoadResponse(title, url, type, episodes) {
-            posterUrl = "https://imgcdn.media/pv/341/$id.jpg"
+            posterUrl = "https://imgcdn.media/pv/v/$id.jpg"
             backgroundPosterUrl = "https://imgcdn.media/pv/c/$id.jpg"
             posterHeaders = mapOf("Referer" to "$mainUrl/tv/home")
             plot = data.desc

@@ -66,7 +66,7 @@ class DisneyMirrorProvider : MainAPI() {
         //     fixUrlNull(selectFirst(".card-img-container img, .top10-img img")?.attr("data-src"))
 
         return newAnimeSearchResponse("", Id(id).toJson()) {
-            this.posterUrl = "https://imgcdn.media/hs/341/$id.jpg"
+            this.posterUrl = "https://imgcdn.media/hs/v/$id.jpg"
             posterHeaders = mapOf("Referer" to "$mainUrl/tv/home")
         }
     }
@@ -83,7 +83,7 @@ class DisneyMirrorProvider : MainAPI() {
 
         return data.searchResult.map {
             newAnimeSearchResponse(it.t, Id(it.id).toJson()) {
-                posterUrl = "https://imgcdn.media/hs/341/${it.id}.jpg"
+                posterUrl = "https://imgcdn.media/hs/v/${it.id}.jpg"
                 posterHeaders = mapOf("Referer" to "$mainUrl/tv/home")
             }
         }
@@ -122,7 +122,7 @@ class DisneyMirrorProvider : MainAPI() {
 
         val suggest = data.suggest?.map {
             newAnimeSearchResponse("", Id(it.id).toJson()) {
-                this.posterUrl = "https://imgcdn.media/hs/341/${it.id}.jpg"
+                this.posterUrl = "https://imgcdn.media/hs/v/${it.id}.jpg"
                 posterHeaders = mapOf("Referer" to "$mainUrl/tv/home")
             }
         }
@@ -154,7 +154,7 @@ class DisneyMirrorProvider : MainAPI() {
         val type = if (data.episodes.first() == null) TvType.Movie else TvType.TvSeries
 
         return newTvSeriesLoadResponse(title, url, type, episodes) {
-            posterUrl = "https://imgcdn.media/hs/341/$id.jpg"
+            posterUrl = "https://imgcdn.media/hs/v/$id.jpg"
             backgroundPosterUrl = "https://imgcdn.media/hs/h/$id.jpg"
             posterHeaders = mapOf("Referer" to "$mainUrl/tv/home")
             plot = data.desc
