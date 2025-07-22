@@ -454,7 +454,7 @@ open class HubCloud : ExtractorApi() {
             doc.selectFirst("div.vd > center > a") ?. attr("href") ?: ""
         }
 
-        if(link.startsWith("https://")) {
+        if(!link.startsWith("https://")) {
             link = newBaseUrl + link
         }
 

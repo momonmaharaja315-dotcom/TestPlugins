@@ -219,7 +219,7 @@ class CineSimklProvider: MainAPI() {
                     val score = allratings?.mal?.rating ?: allratings?.imdb?.rating
                     newMovieSearchResponse("${it.title_en ?: it.title}", "$mainUrl${it.url}") {
                         posterUrl = getPosterUrl(it.poster, "poster")
-                        this.score = score
+                        this.score = Score.from10(score)
                     }
                 }
             }.getOrDefault(emptyList())
@@ -270,7 +270,7 @@ class CineSimklProvider: MainAPI() {
                 val score = allratings?.mal?.rating ?: allratings?.imdb?.rating
                 newMovieSearchResponse("${it.title}", "$mainUrl${it.url}") {
                     this.posterUrl = getPosterUrl(it.poster, "poster")
-                    this.score = score
+                    this.score = Score.from10(score)
                 }
             }
 
