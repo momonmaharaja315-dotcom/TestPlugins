@@ -211,9 +211,10 @@ open class CineStreamProvider : MainAPI() {
                 if(movie.type == "movie") TvType.Movie
                 else TvType.TvSeries
             val title = movie.aliases?.firstOrNull() ?: movie.name ?: movie.description ?: ""
-
+            val score = movie.imdbRating.toRatingInt()
             newMovieSearchResponse(title, PassData(movie.id, movie.type).toJson(), type) {
-                this.posterUrl = movie.poster.toString()
+                this.posterUrl = movie.poster
+                this.score = Score.from10(score)
             }
         }
         return newHomePageResponse(
@@ -232,9 +233,11 @@ open class CineStreamProvider : MainAPI() {
             val result = runCatching {
                 val json = app.get(url).text
                 tryParseJson<SearchResult>(json)?.metas?.map {
-                    val title = it.aliases?.firstOrNull() ?: it.name ?: it.description ?: "Empty"
+                    val title = it.aliases?.firstOrNull() ?: it.name ?: it.description ?: ""
+                    val score = it.imdbRating.toRatingInt()
                     newMovieSearchResponse(title, PassData(it.id, it.type).toJson()).apply {
-                        posterUrl = it.poster.toString()
+                        posterUrl = it.poster
+                        this.score = Score.from10(score)
                     }
                 } ?: emptyList()
             }.getOrDefault(emptyList())
@@ -281,7 +284,7 @@ open class CineStreamProvider : MainAPI() {
         val movieData = tryParseJson<ResponseData>(json)
         val title = movieData?.meta?.name.toString()
         val engTitle = movieData?.meta?.aliases?.firstOrNull() ?: title
-        val posterUrl = movieData ?.meta?.poster.toString()
+        val posterUrl = movieData ?.meta?.poster
         val imdbRating = movieData?.meta?.imdbRating
         val year = movieData?.meta?.year
         val releaseInfo = movieData?.meta?.releaseInfo
@@ -332,7 +335,7 @@ open class CineStreamProvider : MainAPI() {
                 this.posterUrl = posterUrl
                 this.plot = description
                 this.tags = genre
-                this.rating = imdbRating.toRatingInt()
+                this.score = Score.from10(imdbRating.toRatingInt())
                 this.year = year ?.toIntOrNull() ?: releaseInfo?.toIntOrNull() ?: year?.substringBefore("-")?.toIntOrNull()
                 this.backgroundPosterUrl = background
                 this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
@@ -384,8 +387,8 @@ open class CineStreamProvider : MainAPI() {
                 this.plot = description
                 this.tags = genre
                 this.duration = movieData?.meta?.runtime?.replace(" min", "")?.toIntOrNull()
-                this.rating = imdbRating.toRatingInt()
-                 this.contentRating = if(isKitsu) "Kitsu" else "IMDB"
+                this.score = Score.from10(imdbRating.toRatingInt())
+                this.contentRating = if(isKitsu) "Kitsu" else "IMDB"
                 this.actors = actors
                 addAniListId(anilistId)
                 addMalId(malId)
@@ -488,6 +491,7 @@ open class CineStreamProvider : MainAPI() {
         val name: String?,
         val poster: String?,
         val description: String?,
+        val imdbRating: String?,
         val aliases: ArrayList<String>?,
     )
 

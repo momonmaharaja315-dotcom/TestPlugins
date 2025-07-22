@@ -215,8 +215,11 @@ class CineSimklProvider: MainAPI() {
             val result = runCatching {
                 val json = app.get("$apiUrl/search/$type?q=$query&page=1&limit=$mediaLimit&extended=full&client_id=$auth", headers = headers).text
                 parseJson<Array<SimklResponse>>(json).map {
+                    val allratings = it.ratings
+                    val score = allratings?.mal?.rating ?: allratings?.imdb?.rating
                     newMovieSearchResponse("${it.title_en ?: it.title}", "$mainUrl${it.url}") {
                         posterUrl = getPosterUrl(it.poster, "poster")
+                        this.score = score
                     }
                 }
             }.getOrDefault(emptyList())
@@ -263,8 +266,11 @@ class CineSimklProvider: MainAPI() {
             val jsonString = app.get(apiUrl + request.data + page, headers = headers).text
             val json = parseJson<Array<SimklResponse>>(jsonString)
             val data = json.map {
+                val allratings = it.ratings
+                val score = allratings?.mal?.rating ?: allratings?.imdb?.rating
                 newMovieSearchResponse("${it.title}", "$mainUrl${it.url}") {
                     this.posterUrl = getPosterUrl(it.poster, "poster")
+                    this.score = score
                 }
             }
 
