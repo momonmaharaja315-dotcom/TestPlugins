@@ -1096,7 +1096,7 @@ object CineStreamExtractors : CineStreamProvider() {
             newExtractorLink(
                 "netflixId",
                 "netflixId",
-                netflixId
+                netflixId.toString()
             )
         )
         val (nfTitle, id) = app.get(
