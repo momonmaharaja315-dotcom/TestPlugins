@@ -345,24 +345,23 @@ suspend fun loadSourceNameExtractor(
     val scope = CoroutineScope(Dispatchers.Default + Job())
 
     loadExtractor(url, referer, subtitleCallback) { link ->
-        if (!link.source.contains("Download")) {
-            scope.launch {
-                val extracted = extractSpecs(link.name)
-                val extractedSpecs = buildExtractedTitle(extracted)
-                val combined = if(source.contains("(Combined)")) " (Combined)" else ""
-                val newLink = newExtractorLink(
-                    "${link.source}$combined",
-                    "$source[${link.source}] $extractedSpecs",
-                    link.url,
-                    type = link.type
-                ) {
-                    this.referer = link.referer
-                    this.quality = quality ?: link.quality
-                    this.headers = link.headers
-                    this.extractorData = link.extractorData
-                }
-                callback.invoke(newLink)
+        scope.launch {
+            val extracted = extractSpecs(link.name)
+            val extractedSpecs = buildExtractedTitle(extracted)
+            val isDownload = if(link.source.contains("Download")) true else false
+            val combined = if(source.contains("(Combined)")) " (Combined)" else ""
+            val newLink = newExtractorLink(
+                if(isDownload) "Download${combined}" else "${link.source}$combined",
+                "$source[${link.source}] $extractedSpecs",
+                link.url,
+                type = link.type
+            ) {
+                this.referer = link.referer
+                this.quality = quality ?: link.quality
+                this.headers = link.headers
+                this.extractorData = link.extractorData
             }
+            callback.invoke(newLink)
         }
     }
 }
