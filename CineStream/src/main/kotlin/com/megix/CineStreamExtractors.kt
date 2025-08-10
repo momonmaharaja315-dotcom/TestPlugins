@@ -97,8 +97,23 @@ object CineStreamExtractors : CineStreamProvider() {
         }
 
         app.get(url, referer = toonStreamAPI).document.select("div.video > iframe").amap {
-            val doc = app.get(it.attr("data-src")).document
+            val source = it.attr("data-src")
+            callback.invoke(
+                newExtractorLink(
+                    "ToonStream[source]",
+                    "ToonStream[source]",
+                    source,
+                )
+            )
+            val doc = app.get(source).document
             doc.select("div.Video > iframe").amap { iframe ->
+                callback.invoke(
+                    newExtractorLink(
+                        "ToonStream[iframe]",
+                        "ToonStream[iframe]",
+                        iframe.attr("src"),
+                    )
+                )
                 loadSourceNameExtractor(
                     "ToonStream",
                     iframe.attr("src"),
@@ -1015,10 +1030,8 @@ object CineStreamExtractors : CineStreamProvider() {
                     if(data?.nextPageShow != 1) { break }
                     page++
                 }
-
                 media?.title to episodeId
-            }
-            else {
+            } else {
                 null to null
             }
         }
@@ -1062,15 +1075,30 @@ object CineStreamExtractors : CineStreamProvider() {
 
         val NfCookie = NFBypass(netflixAPI)
 
+        callback.invoke(
+            newExtractorLink(
+                "NfCookie",
+                "NfCookie",
+                NfCookie
+            )
+        )
+
         val cookies = mapOf(
             "t_hash_t" to NfCookie,
-            "hd" to "on"
+            "hd" to "on",
+            "ott" to "nf"
         )
         val headers = mapOf("X-Requested-With" to "XMLHttpRequest")
         val url = "$netflixAPI/search.php?s=$title&t=${APIHolder.unixTime}"
         val data = app.get(url, headers = headers, cookies = cookies).parsedSafe<NfSearchData>()
         val netflixId = data ?.searchResult ?.firstOrNull { it.t.equals("${title?.trim()}", ignoreCase = true) }?.id
-
+        callback.invoke(
+            newExtractorLink(
+                "netflixId",
+                "netflixId",
+                netflixId
+            )
+        )
         val (nfTitle, id) = app.get(
             "$netflixAPI/post.php?id=${netflixId ?: return}&t=${APIHolder.unixTime}",
             headers = headers,
@@ -1100,6 +1128,14 @@ object CineStreamExtractors : CineStreamProvider() {
                 null to null
             }
         }
+
+        callback.invoke(
+            newExtractorLink(
+                "id",
+                "id",
+                id.toString()
+            )
+        )
 
         app.get(
             "$netflixAPI/tv/playlist.php?id=${id ?: return}&t=${nfTitle ?: return}&tm=${APIHolder.unixTime}",
