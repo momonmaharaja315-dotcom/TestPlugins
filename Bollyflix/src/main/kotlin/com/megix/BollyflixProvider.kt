@@ -13,7 +13,7 @@ import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.supervisorScope
 
 class BollyflixProvider : MainAPI() {
     override var mainUrl = "https://bollyflix.promo"
@@ -80,7 +80,7 @@ class BollyflixProvider : MainAPI() {
         val url = "https://web.sidexfee.com/?id=$id"
         val document = app.get(url).text
         val encodeUrl = Regex("""link":"([^"]+)""").find(document) ?. groupValues ?. get(1) ?: ""
-        return base64Decode(encodeUrl)
+        return base64Decode(encodeUrl.replace("\\/", "/"))
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
@@ -158,26 +158,29 @@ class BollyflixProvider : MainAPI() {
             val episodesMap: MutableMap<Pair<Int, Int>, MutableList<String>> = mutableMapOf()
             val buttons = document.select("a.maxbutton-download-links, a.dl")
 
-            coroutineScope {
+            supervisorScope {
                 buttons.map { button ->
                     async {
-                        val id = button.attr("href").substringAfterLast("id=")
-                        val seasonText = button.parent()?.previousElementSibling()?.text().orEmpty()
-                        val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
-                        val realSeason = realSeasonRegex.find(seasonText)?.groupValues?.get(1)?.toIntOrNull() ?: 0
+                        runCatching {
+                            val id = button.attr("href").substringAfterLast("id=")
+                            val seasonText = button.parent()?.previousElementSibling()?.text().orEmpty()
+                            val realSeasonRegex = Regex("""(?:Season |S)(\d+)""")
+                            val realSeason = realSeasonRegex.find(seasonText)
+                                ?.groupValues?.getOrNull(1)?.toIntOrNull() ?: 0
 
-                        val decodeUrl = bypass(id)
-                        val seasonDoc = app.get(decodeUrl).document
-                        val epLinks = seasonDoc.select("h3 > a")
-                            .filter { !it.text().contains("Zip", ignoreCase = true) }
+                            val decodeUrl = bypass(id)
+                            val seasonDoc = app.get(decodeUrl).document
+                            val epLinks = seasonDoc.select("h3 > a")
+                                .filter { !it.text().contains("Zip", ignoreCase = true) }
 
-                        synchronized(episodesMap) {
-                            var e = 1
-                            for (epLink in epLinks) {
-                                val epUrl = epLink.attr("href")
-                                val key = Pair(realSeason, e)
-                                episodesMap.getOrPut(key) { mutableListOf() }.add(epUrl)
-                                e++
+                            synchronized(episodesMap) {
+                                var e = 1
+                                for (epLink in epLinks) {
+                                    val epUrl = epLink.attr("href")
+                                    val key = realSeason to e
+                                    episodesMap.getOrPut(key) { mutableListOf() }.add(epUrl)
+                                    e++
+                                }
                             }
                         }
                     }
