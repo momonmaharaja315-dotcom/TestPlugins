@@ -14,6 +14,7 @@ import org.json.JSONObject
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.supervisorScope
+import kotlinx.coroutines.coroutineScope
 
 class BollyflixProvider : MainAPI() {
     override var mainUrl = "https://bollyflix.promo"
