@@ -55,7 +55,7 @@ object CineStreamExtractors : CineStreamProvider() {
                 sourceUrl = if ("unblockedgames" in sourceUrl) {
                     bypassHrefli(sourceUrl) ?: return@amap
                 } else if("safelink=" in sourceUrl) {
-                    cinematickitBypass(sourceUrl)
+                    cinematickitBypass(sourceUrl) ?: return@amap
                 } else {
                     sourceUrl
                 }
@@ -70,7 +70,7 @@ object CineStreamExtractors : CineStreamProvider() {
                     sourceUrl = if ("unblockedgames" in sourceUrl) {
                         bypassHrefli(sourceUrl) ?: return@amap
                     } else if("safelink=" in sourceUrl) {
-                        cinematickitBypass(sourceUrl)
+                        cinematickitBypass(sourceUrl) ?: return@amap
                     } else {
                         sourceUrl
                     }
